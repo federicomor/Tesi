@@ -1,2 +1,2 @@
-# progetto-tesi
+# Tesi
 Materials for my tesi
