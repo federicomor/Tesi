@@ -1,0 +1,5 @@
+seminario sulle full conditional del modello
+e varie scelte per le g del modello riguardo alle possibilità di come inserire le covariate in base a spazio e tempo, se il tempo è sempre presente (cov meteo, traffico, ecc) o magari fisso (cov altezza, tipo di stazione).
+scritte in inglese, esponibili a scelta
+max 1h
+verso fine mese magari
