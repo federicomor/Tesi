@@ -821,7 +821,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 			for(k = 0; k < nclus_iter[t]; k++){
 				/////////////////////////////////////////
 				//									   //
-				// udate muh  						   //
+				// update muh  						   //
 				//									   //
 				/////////////////////////////////////////
 	
