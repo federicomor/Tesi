@@ -42,7 +42,7 @@
 * s2 = nsubject x 1 vector containing spatial coordinate two
 *
 * M = double indicating value of M associated with cohesion (scale parameter of DP).
-* alpha = double - prior probability of being pegged, starting value only if update_alpha is TRUE
+* alpha = double - prior probability of being pegged(ie fixed, with gamma=1), starting value only if update_alpha is TRUE
 * priorvals = vector containing values for prior distributions as follows
 *
 * time_specific_alpha = integer - logical indicating wether to make alpha time-specific or one global alpha.
@@ -292,11 +292,11 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 		for(t = 0; t < *ntime; t++){
 			//////////////////////////////////////////////////////////////////////////////
 			// 
-			// begin by updating gamma (pegged) parameters
+			// begin by updating gamma (pegged(ie fixed, with gamma=1)) parameters
 			//
 			//////////////////////////////////////////////////////////////////////////////
 			for(j = 0; j < *nsubject; j++){
-				// at time period one, all gammas are zero (none are ``pegged'')
+				// at time period one, all gammas are zero (none are ``pegged(ie fixed, with gamma=1)'')
 				if(t == 0){
 					gamma_iter[j*(ntime1) + t] = 0;
 				} else {
@@ -329,7 +329,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 					n_red_1 = Rindx1 + 1;
 					relabel(Si_tmp, *nsubject, Si_red, reorder, oldLab);			
 					relabel(Si_tmp2, *nsubject, Si_red_1, reorder, oldLab);			
-					// I need to keep the relabeled cluster label for the pegged
+					// I need to keep the relabeled cluster label for the pegged(ie fixed, with gamma=1)
 					// individual so that I know what lgweight to keep in the 
 					// full conditional.
 					cit_1 = Si_red_1[Rindx1];
@@ -381,7 +381,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 					}
 						
 					
-					// What if pegged subject creates a singleton in the reduced partition?
+					// What if pegged(ie fixed, with gamma=1) subject creates a singleton in the reduced partition?
 					lCn_1=0.0;
 					if(*sPPM==1){
 						if((*space_1==1 & t == 0) | (*space_1==0)){
@@ -493,7 +493,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 			// out Algorithm 8 from previous code to keep track of empty clusters
 			// etc.  
 			for(j = 0; j < *nsubject; j++){
-				// Only need to update partition relative to units that are not pegged
+				// Only need to update partition relative to units that are not pegged(ie fixed, with gamma=1)
 				if(gamma_iter[j*(ntime1) + t] == 0){
 					if(nh[(Si_iter[j*(ntime1) + t]-1)*(ntime1) + t] > 1){
 				
