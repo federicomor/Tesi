@@ -1,0 +1,224 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+# load drpm
+```{r}
+devtools::load_all("../../drpm/")
+```
+
+
+# create data
+```{r}
+# Load necessary library
+library(ggplot2)
+
+# Create the sites data frame
+sites <- data.frame(
+  longitude = c(0,1,0,1),# + runif(4,-0.2,0),
+  latitude = c(1,1,0,0)  #+ runif(4,-0.2,0)
+)
+sites
+sites = (sites-sapply(sites,mean)) / sapply(sites,sd) 
+sites
+
+YM = 100
+# Generate yt data frame with three clusters for t1
+yt = data.frame(
+	t1 = c(rnorm(1,YM),rnorm(3,1)),
+	t2 = c(rnorm(2,YM),rnorm(2,1)),
+	t3 = c(rnorm(3,YM),rnorm(1))
+)
+yt
+clusters_t1 <- cut(yt$t1, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+clusters_t2 <- cut(yt$t2, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+clusters_t3 <- cut(yt$t3, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl 3"))
+
+yt = (yt-sapply(yt,mean)) / sapply(yt,sd)
+yt
+
+
+plot(sites,col=clusters_t1,pch=19,cex=1.4,main="t=1 - real data")
+plot(sites,col=clusters_t2,pch=19,cex=1.4,main="t=2 - real data")
+plot(sites,col=clusters_t3,pch=19,cex=1.4,main="t=3 - real data")
+
+yred=yt
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+
+
+# fit
+```{r}
+niter=42000; nburn=40000; nthin=10
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+
+seed_choice = round(runif(1,0,1000))
+set.seed(seed_choice)
+```
+
+```{r}
+cat(paste0("seed ",seed_choice,"\n==========================\n",date(),"\n\n"))
+tempo_inizio <- Sys.time()
+drpm1 <- drpm_fit(y=yt, 
+		 s_coords = sites,
+         M=1,
+         initial_partition = NULL,
+         starting_alpha = 0.5,
+         unit_specific_alpha = FALSE,
+         time_specific_alpha = TRUE,
+         alpha_0=FALSE, # modello temporale, questa deve sempre essere falsa
+		
+		# parameters from the drpm models comparison:
+		# case E0P1A1
+         eta1_0=FALSE,
+         phi1_0=TRUE,
+         # modelPriors=c(0,100^2,1,1,1,1), # original default one
+         modelPriors=c(0,100,10,5,5,2,2,1), # author suggestion/used one
+
+		 # così con 1,1 è una uniforme
+         alphaPriors=rbind(c(1,1)), # if time_specific_alpha == TRUE
+         # alphaPriors=matrix(rep(c(1,1),105),105,2), # if unit_specific_alpha == TRUE
+         # alphaPriors=matrix(rep(c(1,1),105),105,2), # if both the above are TRUE
+
+         simpleModel = 0,
+         theta_tau2 = c(0, 2), # only used if simpleModel=1
+
+         # SpatialCohesion=3, # auxiliary similarity
+         SpatialCohesion=4, # double dipper similarity, default one
+
+         # cParms=c(0, 1, 2, 1), # default one
+         cParms=c(0, 1, 5, 1), # author suggestion/used one (with 5)
+		
+         # mh=c(0.5,1,0.1, 0.1, 0.1), # default one
+		 mh=c(0.1,0.1,0.7, 0.1, 0.1), # with a bit of author suggestion/used one
+
+         verbose=TRUE,
+
+         # draws=1100,burn=100,thin=1) # quick one
+         # draws=31000,burn=1000,thin=1) # for trace plot analysis
+         # draws=8000,burn=3000,thin=5) # a bit more serious seriou one
+         # draws=10000,burn=2000,thin=8) # more serious one
+         draws=niter,burn=nburn,thin=nthin) # adaptable one
+
+tempo_fine <- Sys.time()
+differenza_tempo <- tempo_fine - tempo_inizio
+cat(crayon::cyan("Fit took:\n"))
+print(round(differenza_tempo,digits = 4))
+
+cat(crayon::blue("That was for fitting",max(time_span),"time steps.\nSo for fitting all 53 weeks the expected time with these parameters will be:\n"))
+print(round(differenza_tempo/max(time_span)*53,digits=4))
+
+cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
+```
+# diagnostics
+```{r}
+for (loc in c(1,2,3,4)){
+for (time in c(1,2,3)){
+	plot(drpm1$mu[time,loc,],type="l",
+		 main=bquote("Trace plot of " * mu * " at week " * .(time) * " - location " * .(loc)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+}
+```
+
+
+
+# plot
+```{r}
+model_name = "simple_test"
+loss = "VI"
+maxNClusters = 4
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in c(1,2,3)){
+
+	salso_out <- salso(t(drpm1$Si[time-(min(time_span)-1),,]),
+					   # loss=binder(a=1),
+					   # loss=loss,
+					   loss="VI.lb",
+					   maxNClusters = maxNClusters
+					   )
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	# n_clusters = max(clusters_now)
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	# for (cl in n_clusters){
+		# cat("Cluster",cl,"- size",length(ycurrent[which(clusters_now==cl)]),
+			# "- mean",mean(ycurrent[which(clusters_now==cl)]),"\n")
+	# }
+}
+
+library(mclust)
+##########################
+FIT = drpm1 # your fit
+LEN = 3
+##########################
+
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
+						  # loss=binder(a=1),
+						  # loss=loss,
+						  loss="VI.lb",
+						  maxNClusters = maxNClusters
+						  ) # adjust with your fit $Si dimension
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+if (min(ARImats)<0){
+	cols_ARI = colora(ncols_ari,79,0)
+	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+} else {
+	cols_ARI = colora(ncols_ari,56,0)
+	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	brks = seq(0,1,length.out=ncols_ari+1)
+}
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - model ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+
+cols = as.numeric(df_cluster[df_cluster$Time==1,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=1 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==2,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=2 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==3,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=3 - from drpm model")
+
+```
+
+

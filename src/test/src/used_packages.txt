@@ -1,0 +1,70 @@
+# Installazione delle librerie se non presenti
+install_if_missing <- function(package_name) {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    install.packages(package_name, dependencies = TRUE)
+  }
+}
+
+# Lista delle librerie da installare
+libraries_to_install <- c(
+  "animation",
+  "assert",
+  "av",
+  "CARBayesST",
+  "coda",
+  "corrplot",
+  "crayon",
+  "dplyr",
+  "drpm",
+  "fields",
+  "gganimate",
+  "ggplot2",
+  "ggpubr",
+  "ggrepel",
+  "gifski",
+  "glmnet",
+  "grDevices",
+  "grid",
+  "gridBase",
+  "gridExtra",
+  "gstat",
+  "hash",
+  "horseshoe",
+  "igraph",
+  "jpeg",
+  "lubridate",
+  "magick",
+  "maps",
+  "MASS",
+  "mclust",
+  "MCMCpack",
+  "monomvn",
+  "naniar",
+  "patchwork",
+  "plotrix",
+  "png",
+  "ppmSuite",
+  "proxy",
+  "RColorBrewer",
+  "rjags",
+  "rlist",
+  "roahd",
+  "salso",
+  "sf",
+  "sns",
+  "sp",
+  "sp",
+  "spdep",
+  "stats",
+  "svglite",
+  "tidyverse",
+  "UpSetR",
+  "visdat",
+  "xtable",
+  "zoo"
+)
+
+# Installazione delle librerie
+invisible(sapply(libraries_to_install, install_if_missing))
+
+

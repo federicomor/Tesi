@@ -1,0 +1,117 @@
+---
+title: "ppmSuite: sppm method"
+output: html_notebook
+---
+
+```{r}
+library(ppmSuite)
+library(tidyverse)
+library(salso)
+```
+
+
+
+
+```{r}
+source("include.R")
+```
+
+
+```{r}
+df = df_weekly %>% 
+	select(IDStations, Latitude, Longitude, AQ_pm10, week) %>%
+	spread(week, AQ_pm10)
+
+
+# glimpse(df)
+head(df)
+```
+
+From selection analysis of sppm we choose cohesion function C4 with M = 0.1
+
+
+# Fitting
+```{r}
+s_coords <- data.matrix(df[,2:3]) #lat and long
+
+# standardize spatial coordinates
+smn <- apply(s_coords,2,mean)
+ssd <- apply(s_coords,2,sd)
+s_std <- t((t(s_coords) - smn)/ssd)
+```
+
+
+```{r}
+seed = 123
+
+# MCMC parameters'
+niter <- 20000
+nburn <- 10000
+nthin <- 10
+nout <- (niter - nburn)/nthin
+
+
+
+# sppm hyperparameters
+cohesion_number = 4
+M = 0.1
+
+params_model = c(0, 100^2, 10, 10)# as in the paper 
+# obs: in the paper observations are standardaized, but here AQ_pm10 has mean near 3.3 and the std near .4
+#	so not a big problem (I think)
+params_cohesion = c(1, 1.5, 0, 1, 2, 1)
+```
+
+```{r message=FALSE, warning=FALSE}
+set.seed(seed)
+
+sppm_list = list()
+for (week in 1:53){#max weeks 53
+	Y <- df %>% pull(as.character(week))
+	out <- sppm(y = Y, s = s_std,
+				s.pred = NULL,
+				cohesion=cohesion_number,
+				M=M, 
+				modelPriors = params_model,
+				cParms = params_cohesion,
+				mh = c(0.5, 0.5),
+				draws=niter, burn=nburn, thin=nthin)
+	
+	
+	sppm_list <- c(sppm_list, list(out))
+}
+
+
+
+save(sppm_list,file="sppm_2018_C4_M01.RData")
+```
+
+
+
+Traceplots
+```{r}
+idx_st = c(45,50,60)
+
+for (out in sppm_list[1:1]){
+	matplot(out$mu[, idx_st], type = "l")
+	plot(out$sig20,type="l")
+}
+```
+
+
+```{r}
+# ### Salso plots
+
+for (w in seq(1,53,10)){
+	Si <- sppm_list[[w]]$Si
+	clus <- salso(Si, binder(a=NULL), nRuns=4, nCores=1, maxNClusters = 0)
+	summ <- summary(clus)
+	
+	
+	# plot(summ,type="heatmap")
+	# plot(summ,type="mds")
+	plot(summ,type="pairs",data=s_coords)
+	# plot(summ,type="dendrogram")
+}
+```
+

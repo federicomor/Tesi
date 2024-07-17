@@ -1,0 +1,668 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+```{r,warning = FALSE}
+source("include.R") 
+source("plot functions/plotter.R")
+
+source("include_clusters_functions.R")
+library(patchwork)
+```
+
+
+```{r}
+# need these for the plotting functions
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+
+stations = unique(df_wsc$IDStations)
+y=data.frame()
+
+for(st in stations){
+  y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+  y=rbind(y,y_we_pm10)
+}
+
+rownames(y) = NULL
+colnames(y)<- c("id",paste0("w", 1:53))
+
+
+load("salso_out_lists.Rdata")
+# usage: clusters are given by
+#    salso_out_lists[["model name"]][week]
+# where model name in
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+
+# and this for mode clusters
+load("salso_out_mode_cl.Rdata")
+salso_out_mode_cl
+```
+
+
+```{r}
+# if around we need df_cluster_cut for the graph plot, here is how it is defined
+# df_cluster_cut = data.frame(
+# 	Longitude = sites$longitude,
+# 	Latitude = sites$latitude,
+# 	clusters = CLUSTERS, # change with something from salso_out_lists
+# 	Time = WEEK # change with the current week
+# )
+build_df_cluster_cut = function(time,clusters){
+	df_cluster_cut = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out_mode_cl$DRPM, # change with something from salso_out_lists
+		Time = time # change with the current week
+	)
+	return(df_cluster_cut)
+}
+```
+
+```{r}
+interest_variables <- c("EM_nh3_livestock_mm",
+"LA_hvi",
+"LA_lvi",
+"Altitude",
+"EM_nox_sum",
+"WE_wind_speed_100m_max",
+"WE_tot_precipitation"
+)
+```
+
+
+```{r}
+other_vars <- c("IDStations","Latitude","Longitude","week")
+df_interst <- df_weekly[,c(interest_variables,"AQ_pm10",other_vars)]
+head(df_interst)
+df_interst$logAltitude = log(df_interst$Altitude)
+interest_variables <- c(interest_variables,"logAltitude")
+# small modification to not change functions
+colnames(df_interst)[which(colnames(df_interst)=="week") ] = "Time"
+```
+#  Map expanding radius
+
+```{r,warning=FALSE}
+initial_date = "2018-01-01"
+final_date = "2019-01-01"
+every = "year"
+
+# if you change the file_name from None it will create a mp4 video
+file_name = "None"
+
+chosen_var_name = "AQ_pm10" 
+
+circles_plot <- circlesPlot(initial_date,final_date,every,file_name,chosen_var_name)
+```
+
+
+
+
+# XY PLOT function
+```{r}
+cols = colora(6,970,show=F)
+xyPlot_weekly <- function(file_name,var1_name,var2_name,size_name){
+
+	data_from_to = df_interst
+	len_time = 12 # number of weeks
+	
+	
+	var1 = data_from_to[,var1_name][[1]]
+	var2 = data_from_to[,var2_name][[1]]
+	if(class(size_name)!="numeric"){
+		size = data_from_to[,size_name][[1]]
+	}else{
+		size = size_name
+	}
+	colors_factor = factor(data_from_to$color_clusters)
+	
+	if(class(size_name)!="numeric"){
+		p <- ggplot(
+			data_from_to, 
+			aes(x = var1, y = var2, size = size, colour = colors_factor)) +
+			geom_point(alpha = 1) +
+			#scale_color_manual(values = cols) +
+			scale_color_viridis_d() +
+			scale_size(range = c(2, 12)) +
+			labs(x = var1, y = var2)+
+			guides(size = guide_legend(title = size_name), color = "none")+
+			theme_bw()
+	}else{
+		p <- ggplot(
+			data_from_to, 
+			aes(x = var1, y = var2, size = size, colour = colors_factor)) +
+			geom_point(alpha = 1,size=size,show.legend = FALSE) +
+			scale_color_viridis_d() +
+			scale_size(range = c(2, 12)) +
+			labs(x = var1_name, y =var2_name)+
+			theme_bw()
+	}
+	
+	return(animator(file_name,p,data_from_to,len_time,1080,1080,TRUE))
+	
+}
+```
+
+
+# xy color+size in time
+```{r,warning=FALSE}
+var2_name = "AQ_pm10" # y
+size_name = 3
+#size_name = "Altitude"
+#file_name= "None"
+for(j in 1:4){
+	colors_clusters = salso_out_mode_cl[[j]]
+	ii = 1
+	
+	for(st in unique(df_interst$IDStations)){
+		df_interst$color_clusters[df_interst$IDStations==st] = colors_clusters[ii]
+		ii = ii + 1	
+	}
+	
+
+	for(vars in interest_variables){
+		file_name= paste0(names(salso_out_mode_cl)[j],"xy_plot_pm10-",vars)
+		# you can change size to refer to a particular variable
+	
+		
+		xyplot <- xyPlot_weekly(file_name,vars,var2_name,size_name)
+		xyplot
+	}
+}
+```
+
+```{r}
+hist(rnorm(100))
+abline(v=0,col="red")
+```
+
+
+cat("originale", 29.2*0.4 + 28*0.6, "- update", 29.2*0.4 + 27*0.6,"\n")
+cat("originale", 23.6*0.4 + 28*0.6, "- update", 23.6*0.4 + 27*0.6)
+
+```{r}
+# voto originale vs update
+round(29.2*0.4 + 28*0.6) == round(29.2*0.4 + 27*0.6) # Mor
+round(23.6*0.4 + 28*0.6) == round(23.6*0.4 + 27*0.6) # Morales
+```
+```{r}
+# voto originale vs update
+cat("    Mor: 29.2*0.4 + 28*0.6 =",crayon::red(29.2*0.4 + 28*0.6), "- update 29.2*0.4 + 27*0.6 =",crayon::red(29.2*0.4 + 27*0.6),"-> round 28\n")
+cat("Morales: 23.6*0.4 + 28*0.6 =",crayon::red(23.6*0.4 + 28*0.6), "- update 23.6*0.4 + 27*0.6 =",crayon::red(23.6*0.4 + 27*0.6),"-> round 26\n")
+```
+
+# casino wash shuffling model?
+```{r}
+n=20
+xcoords = rnorm(n)
+ycoords = rnorm(n)
+dist=xcoords^2+ycoords^2
+ord_norm = order(dist,decreasing = F)
+print(ord_norm)
+
+plot(xcoords,ycoords,pch=19)
+text(xcoords[ord_norm]+0.1,ycoords[ord_norm],paste(ord_norm),cex=0.7)
+abline(h=0,col="gray",lty=2)
+abline(v=0,col="gray",lty=2)
+```
+
+```{r}
+# oppure: valutare gli scontri tra le carte quando vengono accostate, quindi una carta può vincere e finire sopra o perdere e finire sotto?
+scontri = rbinom(52,51,1/2)
+ord_binom = order(scontri)
+
+print(ord_norm)
+print(ord_binom)
+```
+
+
+## plots separeted
+```{r}
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+mode_clusters_vect = rep(0,105)
+
+
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+
+df_temp = data.frame(
+	Longitude = sites$longitude,
+	Latitude = sites$latitude,
+	clusters = colors_clusters
+)
+
+
+# clusters log
+clusters_now = df_temp$clusters
+# n_clusters = max(clusters_now)
+n_clusters = unique(clusters_now)
+
+stations = unique(df_wsc$IDStations)
+y=data.frame()
+
+for(st in stations){
+  y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+  y=rbind(y,y_we_pm10)
+}
+
+# time = 2
+# cols = color_correct_clusters(df_temp,idea=2,verbose=0,nint=13)
+p = get_graph_plot(df_temp,titolo="Mode Clusters")
+p
+map = gridMap("2016-01-01","2016-01-01","","None","Altitude")
+map
+```
+# media settimanale
+```{r}
+# Carica la libreria dplyr
+library(dplyr)
+data_agc_lomb_weekly = data_agc_lomb[,c("EM_nh3_livestock_mm",
+										"LA_hvi"   ,              
+										"LA_lvi"    ,            
+										"Altitude" ,             
+										"EM_nox_sum"         ,    
+										"WE_wind_speed_100m_max", 
+										"WE_tot_precipitation" 
+										,"Latitude","Longitude","Time")]
+
+# Converti la variabile Time in formato Date
+data_agc_lomb_weekly$Time <- as.Date(data_agc_lomb_weekly$Time)
+
+
+data_agc_lomb_weekly_2018 = data_agc_lomb_weekly[lubridate::year(data_agc_lomb_weekly$Time)=="2018",]
+# Aggiungi una nuova colonna che rappresenta la settimana dell'anno
+data_agc_lomb_weekly_2018$Week <- lubridate::week(data_agc_lomb_weekly_2018$Time)
+
+data_agc_lomb_weekly_2018$LA_hvi = as.numeric(data_agc_lomb_weekly_2018$LA_hvi)
+data_agc_lomb_weekly_2018$LA_lvi = as.numeric(data_agc_lomb_weekly_2018$LA_lvi)
+data_agc_lomb_weekly_2018$WE_tot_precipitation = as.numeric(data_agc_lomb_weekly_2018$WE_tot_precipitation)
+
+
+
+# Calcola la media settimanale per tutte le variabili numeriche
+data_agc_lomb_weekly_2018_mean <- data_agc_lomb_weekly_2018 %>%
+  group_by(Latitude,Longitude,Week) %>%
+  summarise_all(funs(mean(., na.rm = TRUE)))
+```
+
+# settings
+```{r}
+data_from_to = data_agc_lomb_weekly_2018_mean
+len_time = 53
+
+```
+
+
+# plot composition with changing graphs
+
+```{r}
+united_plot <- function(time_step,chosen_variable_name,df_cluster_cut,cols,lims_input,modello){
+	
+	data_from_to = data_agc_lomb_weekly_2018_mean[
+		data_agc_lomb_weekly_2018_mean$Week==time_step,]
+
+	chosen_variable = as.numeric(data_from_to[[chosen_variable_name]])
+	
+	### this to set lims looking at values of all weeks, ie are fixed for all t of the loop
+	lims = lims_input
+	# cat(lims,"\n")
+	# cat(chosen_variable_name,"\n")
+	### this to set lims in a time dependent way
+	# lims = extrema(chosen_variable)
+		
+	### this to approximate them to int
+	# lims = c(floor(lims[1]),ceiling(lims[2]))
+	
+	edges_list = assemble_edges_list(df_ccut$clusters)
+
+	p =
+	ggplot() +
+	geom_tile(data = data_from_to, aes(x = Longitude, y = Latitude, fill = chosen_variable), 
+			  colour = "grey50",alpha = 0.9,linewidth=0) +
+	scale_fill_gradient(low = color_low, high = color_high,na.value = "gray",
+						# breaks = seq(as.integer(floor(lims[1])),
+						# 			 as.integer(ceiling(lims[2])),
+						# 			 length.out = 10),
+						# labels=c(as.character(as.integer(floor(lims[1]))),
+						# 		 rep("",8),
+						# 		 as.character(as.integer(ceiling(lims[1]))))
+						limits = lims
+						) +
+	labs(title = paste0(chosen_variable_name,"\n",modello," model (week ",time,")" ), 
+		 fill = chosen_variable_name)+
+	# theme(legend.position = "right",legend.justification = "bottom")
+	theme(legend.position = "bottom")+
+	theme_bw()
+
+	
+	q = p +	
+		geom_point(data = df_cluster_cut, aes(x = Longitude, y = Latitude,
+										  color =  cols[as.numeric(clusters)]), size = 2)+
+		scale_color_identity(guide = 'none')
+
+	actual_clusters = c()
+	for(cl in 1:len(edges_list)){
+		edges_to_plot = edges_list[[cl]]
+		if(!is.null(edges_to_plot)){
+			actual_clusters = c(actual_clusters,cl)
+			if(verbose==1){
+				cat("procesing cluster",cl,"\n")
+				print(actual_clusters)
+			}
+			q = q + 
+				geom_segment(aes(x = x, y = y, xend = xend, yend = yend,
+									 color = cols[as.numeric(cluster)]),
+								  linewidth=1.2, data = edges_to_plot, show.legend = FALSE)
+		}
+
+	}
+	q = q + scale_color_identity(guide = 'none')
+	qf = q +
+		geom_sf(data = altre_regioni, fill = color_empty ,
+				color = color_fill, linewidth = 0.3,alpha=0.01, show.legend = FALSE) +
+		geom_sf(data = lombardia_2, fill = color_empty, color = "gold", 
+				linewidth = 0.3,alpha=0.07, show.legend = FALSE) +
+		coord_sf(xlim = range(sites$longitude) + padding,
+				 ylim = range(sites$latitude) + padding, 
+				 expand = FALSE)+
+		theme_bw()
+	
+	return(qf)
+}
+```
+
+
+```{r}
+library(magick)
+library(animation)
+library(gifski)
+library(av)
+
+color_low =  "white"
+color_high = "black" 
+verbose = 0
+
+interest_variables_animated_grid = c("EM_nh3_livestock_mm",
+"LA_hvi",
+"LA_lvi",
+"EM_nox_sum",
+"WE_wind_speed_100m_max",
+"WE_tot_precipitation")
+
+build_df_cluster_cut = function(time=1,clusters){
+df_cluster_cut = data.frame(
+	Longitude = sites$longitude,
+	Latitude = sites$latitude,
+	clusters = clusters, # change with something from salso_out_lists
+	Time=time
+	)
+return(df_cluster_cut)
+}
+
+```
+#====
+## fede tests
+
+```{r}
+### small tests
+var = interest_variables_animated_grid[5]
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+modello = mods[1]
+
+for(time in 10:20){ # lascia time come nome, serve
+	
+	curr_clusters = salso_out_lists[[modello]][time][[1]][1:105]
+	df_ccut = build_df_cluster_cut(time,curr_clusters)
+	cols = color_correct_clusters(df_ccut,idea=2,verbose=0,nint=15)
+
+	lims = extrema(na.omit(data_agc_lomb_weekly_2018_mean[,var]))
+	plt = united_plot(time,var,df_ccut,cols,lims,modello)
+	plt = plt+theme(legend.title=element_blank())
+	
+	print(plt) # cambia con le varie ggsave
+	
+} # time
+```
+
+this for the intense plot generation
+```{r}
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+
+for (var in interest_variables_animated_grid){
+for (modello in mods){
+cat("Processing model",modello,"\n")
+
+for(time in 1:2){ # lascia time come nome, serve
+	
+	curr_clusters = salso_out_lists[[modello]][time][[1]][1:105]
+	df_ccut = build_df_cluster_cut(time,curr_clusters)
+	cols = color_correct_clusters(df_ccut,idea=2,verbose=0,nint=15)
+
+	plt = united_plot(time,var,df_ccut,cols)
+	
+	print(plt) # cambia con le varie ggsave ora
+	
+} # time
+} # modello
+} # var
+```
+
+#====
+
+## build gif and images
+## non mode
+```{r,warning=FALSE}
+frammeratte = 2
+for(mod in mods[2:4]){
+	cat(crayon::red("proccesing model",mod,"=============\n"))
+	for( var in interest_variables_animated_grid){
+		cat(crayon::red("proccesing variable",var,"###############\n"))
+
+		chosen_variable_name = var
+		titolo = chosen_variable_name
+		name_rdata = paste0("./plot functions/gifs_fede_update/",
+								  mod,"-",chosen_variable_name)
+								 # Crea la nuova cartella
+		dir.create(name_rdata)
+
+		for (time in seq(1,53,by = 1)){
+			cat(time," ")
+
+			curr_clusters = salso_out_lists[[mod]][time][[1]][1:105]
+			
+			df_ccut = build_df_cluster_cut(time,curr_clusters)
+
+			cols = color_correct_clusters(df_ccut,idea=2,verbose=0,nint=15)
+			lims = extrema(na.omit(data_agc_lomb_weekly_2018_mean[,var]))
+			current_plot = united_plot(time,var,df_ccut,cols,lims,mod)
+			current_plot = current_plot+theme(legend.title=element_blank())
+			
+			cur_num = sprintf("%02d", time) # tempo con due cifre necessario per le gif su latex
+			
+			ggsave(file=paste0(name_rdata,"/",mod,"-",chosen_variable_name,"-",cur_num,".png"),
+			   plot = current_plot,
+			   units="px", width=1500, height=1200) # maybe try to change them
+
+		}
+		cat("\n")
+		
+		#### create mp4 ####
+		imgs <- list.files(path = name_rdata, pattern = ".png", full.names = TRUE)
+		img_list <- lapply(imgs, image_read)
+		## join the images together
+		img_joined <- image_join(img_list)
+		## animate at 1 frames per second. 1 to freely control the fps/framerate later
+		img_animated <- image_animate(img_joined, fps = 1)
+		image_write_video(image = img_animated, 
+						  path = paste0(name_rdata,".mp4"),framerate=frammeratte)
+
+	}
+	
+}
+```
+
+## mode
+```{r}
+frammeratte = 2
+for(mod in mods){
+	cat(crayon::red("proccesing model",mod,"=============\n"))
+	for( var in interest_variables_animated_grid){
+		cat(crayon::red("proccesing variable",var,"###############\n"))
+		chosen_variable_name = var
+		titolo = chosen_variable_name
+		name_rdata = paste0("./plot functions/gifs_fede_update/MODE-",
+								  mod,"-",chosen_variable_name)
+								 # Crea la nuova cartella
+		dir.create(name_rdata)
+
+		
+			#curr_clusters = salso_out_lists[[mod]][time][[1]][1:105]
+			# mode clusters
+			curr_clusters = salso_out_mode_cl[[mod]]
+			
+			df_ccut = build_df_cluster_cut(1,curr_clusters)
+			lims = extrema(na.omit(data_agc_lomb_weekly_2018_mean[,var]))
+
+			################### colori #############################			
+			non_null_clregions_indexes = length(unique(curr_clusters))
+			medie = rep(100,length(unique(curr_clusters)))
+			for (i in 1:length(unique(curr_clusters))){
+					medie[i] = mean(apply(y[which(curr_clusters==i),2:54],2,mean))
+			}
+			medie = medie[1:non_null_clregions_indexes]
+			ord = order(medie,decreasing = T)
+			
+			cols = colora(non_null_clregions_indexes,111,1)
+			cols_new = cols
+			for (i in 1:non_null_clregions_indexes){
+				cols_new[ord[i]] = cols[i]
+			}
+			cols = cols_new
+			cols_gr = cols[1:length(unique(curr_clusters))]
+			################################################			
+			
+			
+		for (time in seq(1,53,by = 1)){
+			cat(time," ")
+
+			current_plot = united_plot(time,var,df_ccut,cols,lims,mod)
+			current_plot = current_plot+theme(legend.title=element_blank())
+			
+			cur_num = sprintf("%02d", time) # tempo con due cifre necessario per le gif su latex
+			
+			
+			ggsave(file=paste0(name_rdata,"/",mod,"-",chosen_variable_name,"-",cur_num,".png"),
+			   plot = current_plot,
+			   units="px", width=2000, height=1200) # maybe try to change them
+
+		}
+		cat("\n")
+		
+		#### create mp4 ####
+		imgs <- list.files(path = name_rdata, pattern = ".png", full.names = TRUE)
+		img_list <- lapply(imgs, image_read)
+		## join the images together
+		img_joined <- image_join(img_list)
+		## animate at 1 frames per second. 1 to freely control the fps/framerate later
+		img_animated <- image_animate(img_joined, fps = 2)
+		image_write_video(image = img_animated, path = paste0(name_rdata,".mp4"),framerate=frammeratte)
+
+	}
+	
+}
+```
+
+
+
+# animate
+```{r}
+file_name = paste0("2grid+graph-",chosen_variable_name)
+animated_plot = animator(file_name,qf,data_from_to,len_time,1920,1080)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## wind-doesn't work
+
+```{r}
+color_background_map = "forestgreen"
+
+
+data_from_to <- data_from_to[order(data_from_to$Latitude), ]
+data_from_to <- data_from_to[order(data_from_to$Longitude), ]
+
+wind_arrows <- data.frame(
+	longitude = data_from_to$Longitude,
+	latitude = data_from_to$Latitude,
+	direction = cardinal_to_degree(data_from_to$WE_mode_wind_direction_10m),
+	intensity = as.numeric(data_from_to$WE_wind_speed_10m_mean)
+)
+
+# Calcola le coordinate di fine delle frecce in base alla direzione 
+# l'intensità verra colorata invece di cambiare in lunghezza
+wind_arrows$end_longitude =( wind_arrows$longitude + sin(wind_arrows$direction)/10)
+wind_arrows$end_latitude = ( wind_arrows$latitude + cos(wind_arrows$direction)/10)
+# put a 0 in the NA
+wind_arrows[is.na(wind_arrows)] <- 0
+
+time_vect = c()
+for(i in 1:1053) {
+	time_vect <- c(time_vect,seq(1,len_time))
+}
+wind_arrows$Time = time_vect
+
+
+mappa_wind <- ggplot() +
+	
+	geom_sf(data = shp_map, fill = color_background_map , color = "black", linewidth = 0.5,alpha=0.6)+
+	coord_sf(xlim = range(na.omit(wind_arrows$longitude))+padding,
+			 ylim = range(na.omit(wind_arrows$latitude))+padding, expand = FALSE)+
+	
+	geom_segment(data = wind_arrows,
+				 aes(x = longitude, y = latitude, xend = end_longitude, yend = end_latitude,
+				 	color = intensity),
+				 arrow = arrow(type = "closed", length = unit(0.08, "inches"), ends = "last"),
+				 lineend = "round", size = 0.3,alpha=0.9 )+
+
+	labs(title="Wind map")
+
+p = mappa_wind
+```
+
