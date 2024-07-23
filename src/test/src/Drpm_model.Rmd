@@ -91,6 +91,9 @@ trendYearStation_week <- function(file_name){
 }
 trendYearStation_week("None")
 ```
+```{r}
+size(y)
+```
 
 
 
