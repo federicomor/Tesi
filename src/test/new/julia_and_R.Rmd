@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+# JuliaConnectoR
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+```
+
+```{r}
+# Importing a module without a package
+getwd()
+testModule = normalizePath("../../JDRPM/src/JDRPM.jl")
+cat(testModule)
+# take a look at the file
+writeLines(readLines(testModule))
+# load in Julia
+juliaCall("include", testModule)
+# import in R via relative module path
+TestModule1 <- juliaImport(".JDRPM")
+x = TestModule1$my_example(30)
+
+# Importing a local module is also possible in one line,
+# by directly using the module object returned by "include".
+TestModule1 <- juliaImport(juliaCall("include", testModule))
+x = TestModule1$my_example(30)
+x
+```
+
+
+
+
+# JuliaCall
+```{r}
+library(JuliaCall)
+julia_setup(verbose = TRUE)
+julia_command('function test() println("1") end')
+julia_call("test")
+```
+
+```{r}
+julia_source("../../drpm_julia/julia_on_R_test.jl")
+
+julia_call("my_sum",4,10,
+		   need_return = "R",
+		   show_value = TRUE)
+```
+
+
+
+
+
+
+
+
