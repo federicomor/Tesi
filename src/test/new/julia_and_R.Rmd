@@ -27,7 +27,22 @@ x = TestModule1$my_example(30)
 TestModule1 <- juliaImport(juliaCall("include", testModule))
 x = TestModule1$my_example(30)
 x
+
+n = 10
+T = 15
+p = 3
+# nxT matrix of normally distributed random numbers
+Y <- matrix(rnorm(n * T), nrow = n, ncol = T)
+# nx3xT array of normally distributed random numbers
+X_covariates <- array(rnorm(n * p * T), dim = c(n, p, T))
+# nx2 matrix of uniformly distributed random numbers between 0 and 1
+sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
+
+
+TestModule1$MCMC_fit(Y,sp_coords,X_covariates)
+
 ```
+
 
 
 
