@@ -356,7 +356,11 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //			RprintVecAsMat("alpha_iter", alpha_iter, 1, *ntime);
 
 		}
+
 					// debug_info(i,j,t);
+				    // RprintVecAsMat("theta_iter", theta_iter, 1, *ntime);
+				    // RprintVecAsMat("tau2_iter", tau2_iter, 1, *ntime);
+
 			// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
 			// RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
 
@@ -392,23 +396,23 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 				// at time period one, all gammas are zero (none are ``pegged'')
 				if(t == 0){
 					gamma_iter[j*(ntime1) + t] = 0;
-					if (verbose==1){
-					debug_info(i,j,t);
-				Rprintf("gamma_iter[j*(ntime1) + t] = %d\n", gamma_iter[j*(ntime1) + t]);
-				Rprintf("nclus_red = %d\n", nclus_red);
-				Rprintf("n_red = %d\n", n_red);
+					// if (verbose==1){
+					// debug_info(i,j,t);
+				// Rprintf("gamma_iter[j*(ntime1) + t] = %d\n", gamma_iter[j*(ntime1) + t]);
+				// Rprintf("nclus_red = %d\n", nclus_red);
+				// Rprintf("n_red = %d\n", n_red);
 				// RprintIVecAsMat("nh_red = ", nh_red, 1, *nsubject);
-				RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
-				Rprintf("###############\n");
-			}
+				// RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
+				// Rprintf("###############\n");
+				// }
 
 				} else {
-					if (verbose==1){
+					// if (verbose==1){
 						debug_info(i,j,t);
 
-					RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
-					RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
-}
+					// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
+					// RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
+					// }
 
 					//////////////////////////////////////////////////////////////////////
 					// find the reduced partition information 
@@ -441,6 +445,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					comptm1[Rindx1] = Si_iter[j*ntime1 + (t-1)];
 
 					n_red = Rindx1;
+					Rprintf("Rindx1 = %d\n",Rindx1);
 					n_red_1 = Rindx1 + 1;
 
 					// Rprintf("n_red = %d\n", n_red);
@@ -453,8 +458,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// debug_info(i,j,t);
 					// RprintIVecAsMat("Si_tmp",Si_tmp, 1, Rindx1);
 					// RprintIVecAsMat("Si_tmp2",Si_tmp2, 1, Rindx1+1);
-					// RprintIVecAsMat("Si_red",Si_red, 1, Rindx1);
-					// RprintIVecAsMat("Si_red_1",Si_red_1, 1, Rindx1+1);
+					RprintIVecAsMat("Si_red",Si_red, 1, Rindx1);
+					RprintIVecAsMat("Si_red_1",Si_red_1, 1, Rindx1+1);
 //					RprintIVecAsMat("comptm1",comptm1, 1, Rindx1+1);
 // }
 //					RprintVecAsMat("s1_red",s1_red, 1, Rindx1);
@@ -465,7 +470,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// full conditional.
 					cit_1 = Si_red_1[Rindx1];
 					
-					if (verbose==1) Rprintf("cit_1 = %d\n", cit_1);
+					// Rprintf("cit_1 = %d\n", cit_1);
 					
 
 					for(jj = 0; jj < n_red_1; jj++){
@@ -487,8 +492,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 					//if(Si_red_1[n_red] > nclus_red) nclus_red_1 = Si_red_1[n_red]; 
 
-//					Rprintf("nclus_red = %d\n", nclus_red);
-//					Rprintf("nclus_red_1 = %d\n", nclus_red_1);
+					Rprintf("nclus_red = %d\n", nclus_red);
+					// Rprintf("nclus_red_1 = %d\n", nclus_red_1);
 
 					// RprintIVecAsMat("nh_red",nh_red, 1, nclus_red);
 					// RprintIVecAsMat("nh_red_1",nh_red_1, 1, nclus_red+1);
@@ -855,8 +860,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// Rprintf("nclus_iter[t] = %d\n", nclus_iter[t]);
 
 
-							Rprintf("before the loop on k\n");
-							RprintIVecAsMat("nh ", nh,  *nsubject, ntime1);
+							// Rprintf("before the loop on k\n");
+							// RprintIVecAsMat("nh ", nh,  *nsubject, ntime1);
 					for(k = 0; k < nclus_iter[t]; k++){
 //						Rprintf("k ======================= %d\n\n", k);
 
@@ -925,9 +930,9 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 								
 							}
 					
-							Rprintf("now inside the else with k=%d\n",k);
-							RprintIVecAsMat("nh_tmp", nh_tmp, 1, nclus_tmp);
-							Rprintf("nclus_tmp = %d\n", nclus_tmp);
+							// Rprintf("now inside the else with k=%d\n",k);
+							// RprintIVecAsMat("nh_tmp", nh_tmp, 1, nclus_tmp);
+							// Rprintf("nclus_tmp = %d\n", nclus_tmp);
 							
 							lpp = 0.0;
 							for(kk = 0; kk < nclus_tmp; kk++){

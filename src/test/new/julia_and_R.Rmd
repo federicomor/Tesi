@@ -14,10 +14,12 @@ juliaEval("Pkg.activate(\"../../JDRPM\")")
 juliaEval("using Pkg; Pkg.status()")
 
 # examples
-juliaEval("using Random; Random.seed!(5);")
-juliaEval("using Statistics")
-juliaEval("using Distributions")
-juliaEval("rand(Beta(10,10))")
+# which we dont need if we activate the project
+# juliaEval("using Random; Random.seed!(5);")
+# juliaEval("using Statistics")
+# juliaEval("using Logging")
+# juliaEval("using Distributions")
+# juliaEval("rand(Beta(10,10))")
 ```
 
 ```{r}
@@ -38,44 +40,57 @@ TestModule1 <- juliaImport(juliaCall("include", testModule))
 x = TestModule1$my_example(30)
 x
 
-n = 10
-bigT = 5
-p = 3
+n = 3
+bigT = 2
+p = 2
 # nxbigT matrix of normally distributed random numbers
 Y <- matrix(rnorm(n * bigT), nrow = n, ncol = bigT)
 # nx3xbigT array of normally distributed random numbers
 X_covariates <- array(rnorm(n * p * bigT), dim = c(n, p, bigT))
 # nx2 matrix of uniformly distributed random numbers between 0 and 1
 sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
-
-
-params = TestModule1$Params(Y,sp_coords,X_covariates)
-print(params)
-R_params = juliaGet(params)
-
-TestModule1$MCMC_fit(params)
-TestModule1$MCMC_fit(Y,sp_coords,X_covariates,keyword_var=3)
 ```
 
-
-
-
-
-# JuliaCall
-```{r}
-library(JuliaCall)
-julia_setup(verbose = TRUE)
-julia_command('function test() println("1") end')
-julia_call("test")
-```
 
 ```{r}
-julia_source("../../drpm_julia/julia_on_R_test.jl")
+seed_choice = round(runif(1,0,1000))
+set.seed(seed_choice)
 
-julia_call("my_sum",4,10,
-		   need_return = "R",
-		   show_value = TRUE)
+TestModule1 <- juliaImport(juliaCall("include", testModule))
+TestModule1$MCMC_fit(
+	Y=Y,              
+	sp_coords = sp_coords,             
+	X_covariates = X_covariates,
+	M_dp = 1,                     
+	# initial_partition = NA,     
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,                   
+	include_eta1 = FALSE,                    
+	include_phi1 = FALSE,
+	sigma2h_priors = c(1,2),
+	eta_priors = c(1,2),
+	beta_priors = c(rep(1,p),2),
+	tau2_priors = c(1,2),
+	phi0_priors = c(1,2),
+	phi1_priors = c(1,2),
+	lambda2_priors = c(1,2),
+	alpha_priors = rbind(c(1,1)),   
+	spatial_cohesion = 1,
+	# sp_params = NA,             
+	# covariate_similarity = NA,  
+	mh = c(0.1,0.1,0.7, 0.1, 0.1),             
+	draws = 1000,                    
+	burnin = 100,                   
+	thin = 10,                     
+	verbose = TRUE,
+	seed = seed_choice
+)
+
 ```
+
+
 
 
 

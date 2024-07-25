@@ -2,6 +2,48 @@
 ##   RELABEL    ##
 ##################
 
+# dont overwrite Si - ignore corollary variables
+function relabel(Si::Vector{Int}, n::Int)
+	Sirelab = zeros(Int,n)
+	shuffle = n
+	loc = 1
+	lab = 1 # new label index
+
+	while shuffle > 0
+		for j in 1:n
+			if Si[j] == Si[loc]
+				Sirelab[j] = lab
+				shuffle -= 1
+			end
+		end
+		lab += 1
+		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
+	end
+	return Sirelab
+end
+
+# overwrite Si - ignore the corollary variables
+function relabel!(Si::Vector{Int}, n::Int)
+	Sirelab = zeros(Int,n)
+	shuffle = n
+	loc = 1
+	lab = 1 # new label index
+
+	while shuffle > 0
+		for j in 1:n
+			if Si[j] == Si[loc]
+				Sirelab[j] = lab
+				shuffle -= 1
+			end
+		end
+		lab += 1
+		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
+	end
+    for j in 1:n
+        Si[j] = Sirelab[j]
+    end
+end
+
 # dont overwrite Si - deal with the corollary variables
 function relabel_full(Si::Vector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
@@ -24,26 +66,6 @@ function relabel_full(Si::Vector{Int}, n::Int)
 		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
 	end
 	return Sirelab, nhrelab, oldLab
-end
-
-# dont overwrite Si - ignore corollary variables
-function relabel(Si::Vector{Int}, n::Int)
-	Sirelab = zeros(Int,n)
-	shuffle = n
-	loc = 1
-	lab = 1 # new label index
-
-	while shuffle > 0
-		for j in 1:n
-			if Si[j] == Si[loc]
-				Sirelab[j] = lab
-				shuffle -= 1
-			end
-		end
-		lab += 1
-		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
-	end
-	return Sirelab
 end
 
 # dont overwrite Si - deal with the corollary variables
@@ -69,39 +91,19 @@ function relabel_full!(Si::Vector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::V
 	end
 end
 
-# overwrite Si - ignore the corollary variables
-function relabel!(Si::Vector{Int}, n::Int)
-	Sirelab = zeros(Int,n)
-	shuffle = n
-	loc = 1
-	lab = 1 # new label index
 
-	while shuffle > 0
-		for j in 1:n
-			if Si[j] == Si[loc]
-				Sirelab[j] = lab
-				shuffle -= 1
-			end
-		end
-		lab += 1
-		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
-	end
-	Si = Sirelab
-end
-
-
-n = 10
-Si = rand((1:5),n)
-Sirelab = zeros(Int, n)
-nhrelab = zeros(Int, n)
-oldLab = zeros(Int, n)
-@timev relabel!(Si, n, Sirelab, nhrelab, oldLab)
-println("""
-		 Si = $Si
-	Sirelab = $Sirelab
-	nhrelab = $nhrelab
-	 oldLab = $oldLab
-	""")
+# n = 10
+# Si = rand((1:5),n)
+# Sirelab = zeros(Int, n)
+# nhrelab = zeros(Int, n)
+# oldLab = zeros(Int, n)
+# @timev relabel!(Si, n, Sirelab, nhrelab, oldLab)
+# println("""
+# 		 Si = $Si
+# 	Sirelab = $Sirelab
+# 	nhrelab = $nhrelab
+# 	 oldLab = $oldLab
+# 	""")
 
 
 
@@ -123,11 +125,11 @@ function compatibility(rho1::Vector{Int}, rho2::Vector{Int})
 	return 1
 end
 
-rho1 = [1, 2, 1, 3, 2]
-rho2 = [1, 1, 2, 3, 2]
-rho3 = [3, 1, 3, 2, 1]
-println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho2))
-println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho3))
+# rho1 = [1, 2, 1, 3, 2]
+# rho2 = [1, 1, 2, 3, 2]
+# rho3 = [3, 1, 3, 2, 1]
+# println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho2))
+# println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho3))
 
 
 

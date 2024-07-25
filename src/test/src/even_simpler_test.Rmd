@@ -59,7 +59,8 @@ for(i in 1:size(yred)[1]){
 
 # fit
 ```{r}
-niter=42000; nburn=40000; nthin=10
+# niter=42000; nburn=40000; nthin=10
+niter=4; nburn=1; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 

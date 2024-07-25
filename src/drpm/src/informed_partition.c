@@ -364,10 +364,11 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 	  Rprintf("mcmc iter = %d =========================================== \n", i+1);
 	  Rprintf("%s", ctime(&now));
 
-//	  RprintVecAsMat("alpha_iter", alpha_iter, 1, *ntime);
+	  // RprintVecAsMat("alpha_iter", alpha_iter, 1, *ntime);
 
 	}
 	
+    // RprintVecAsMat("theta_iter", theta_iter, 1, *ntime);
 	
 
 //	Rprintf("*ntime = %d\n", *ntime);

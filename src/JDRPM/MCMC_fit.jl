@@ -1,136 +1,192 @@
-struct Params{T<:Real} # T to allow to choose Float32 or Float64
-# actually JuliaConnector translates all to Float64 so it's not really useful
-# struct Params{T::Float64}
-	# Data fields
-	Y::Matrix{T}                        # n*T, observed values
-	sp_coords::Matrix{T}                # n*2, spatial coordinates
-	X_covariates::Array{T, 3}           # n*p*T, covariates for each unit and all times
+using Distributions
+using LinearAlgebra
+using Random
+using Logging
 
-	# # Model parameters
-	# M_dp::Int64                         # Dirichlet mass parameter
-	# initial_partition::Vector{Int64}    # Initial partition (if provided)
-	# starting_alpha::T                   # Starting value for alpha
-	# unit_specific_alpha::Vector{T}      # Unit-specific alpha values
-	# time_specific_alpha::Vector{T}      # Time-specific alpha values
-	# alpha_0::Bool                       # Do we want to update alpha?
-	# eta1_0::Bool                        # Do we want to update eta1?
-	# phi1_0::Bool                        # Do we want to update phi1?
-	# model_priors::Vector{T}             # Prior distributions for the model parameters
-	# alpha_priors::Vector{T}             # Prior distributions for alpha parameters
+include("utils.jl")
 
-	# # Function mappings for spatial and covariate cohesion
-	# spatial_cohesion::Dict{String, Function}
-	# sp_params::Vector{T}                # Parameters for spatial cohesion functions
-	# covariate_similarity::Dict{String, Function}
+function MCMC_fit(;
+	Y::Matrix{Float64},               # n*T, observed values
+	sp_coords = missing,              # n*2, spatial coordinates
+	X_covariates = missing,           # n*p*T, covariates for each unit and all times
+	M_dp::Float64,                    # Dirichlet mass parameter
+	initial_partition = missing,      # Initial partition (if provided)
+	starting_alpha::Float64,          # Starting value for alpha
+	unit_specific_alpha::Bool,        # Unit-specific alpha values
+	time_specific_alpha::Bool,        # Time-specific alpha values
+	update_alpha::Bool,               # Update alpha?
+	include_eta1::Bool,               # Include the autoregressive part of eta1?
+	include_phi1::Bool,               # Include the autoregressive part of phi1?
+	sigma2h_priors::Vector{Float64},  # Prior parameters for sigma2h
+	eta_priors::Vector{Float64},      # Prior parameters for eta
+	beta_priors::Vector{Float64},     # Prior parameters for beta
+	tau2_priors::Vector{Float64},     # Prior parameters for tau2
+	phi0_priors::Vector{Float64},     # Prior parameters for phi0
+	phi1_priors::Vector{Float64},     # Prior parameters for phi1
+	lambda2_priors::Vector{Float64},  # Prior parameters for lambda2
+	alpha_priors::Matrix{Float64},    # Prior parameters for alpha
+	spatial_cohesion = missing,       # cohesion choice
+	sp_params = missing,              # Parameters for spatial cohesion functions
+	covariate_similarity = missing,   # similarity choice
+	mh::Vector{Float64},              # Metropolis-Hastings 
+	draws::Float64,                   # Number of MCMC draws
+	burnin::Float64,                  # Number of burn-in sa
+	thin::Float64,                    # Thinning interval
+	verbose::Bool,                    # Verbosity flag	
+	seed::Float64
+	)
 
-	# # MCMC control parameters
-	# mh::Vector{T}                       # Metropolis-Hastings parameters
-	# draws::Int64                        # Number of MCMC draws
-	# burnin::Int64                       # Number of burn-in samples
-	# thin::Int64                         # Thinning interval
-	# verbose::Bool                       # Verbosity flag
-end
-
-
-import Base: show
-function show(io::IO, params::Params)
-    println(io, "Params{", typeof(params.Y[1,1]), "} struct:")
-    println(io, "### Data fields:")
-    println(io, "    Y: $(size(params.Y)) Matrix")
-    println(io, "    sp_coords: $(size(params.sp_coords)) Matrix")
-    println(io, "    X_covariates: $(size(params.X_covariates)) Array")
-    # println(io, "### Model parameters:")
-    # println(io, "    M_dp: $(params.M_dp)")
-    # println(io, "    initial_partition: Vector of length $(length(params.initial_partition))")
-    # println(io, "    starting_alpha: ", params.starting_alpha)
-    # println(io, "    unit_specific_alpha: Vector of length $(length(params.unit_specific_alpha))")
-    # println(io, "    time_specific_alpha: Vector of length $(length(params.time_specific_alpha))")
-    # println(io, "    alpha_0: $(params.alpha_0)")
-    # println(io, "    eta1_0: $(params.eta1_0)")
-    # println(io, "    phi1_0: $(params.phi1_0)")
-    # println(io, "    model_priors: Vector of length $(length(params.model_priors))")
-    # println(io, "    alpha_priors: Vector of length $(length(params.alpha_priors))")
-    # println(io, "### Function mappings:")
-    # println(io, "    spatial_cohesion: Dict with $(length(params.spatial_cohesion)) entries")
-    # println(io, "    sp_params: Vector of length $(length(params.sp_params))")
-    # println(io, "    covariate_similarity: Dict with $(length(params.covariate_similarity)) entries")
-    # println(io, "### MCMC control parameters:")
-    # println(io, "    mh: Vector of length $(length(params.mh))")
-    # println(io, "    draws: $(params.draws)")
-    # println(io, "    burnin: $(params.burnin)")
-    # println(io, "    thin: $(params.thin)")
-    # println(io, "    verbose: $(params.verbose)")
-end
-
-# Example usage
-# params = Params{Float64}(
-#     randn(100, 50),
-#     rand(100, 2),
-#     randn(100, 3, 50),
-#     1,
-#     collect(1:100),
-#     0.5,
-#     rand(100),
-#     rand(50),
-#     true,
-#     true,
-#     false,
-#     [1.0, 2.0, 3.0],
-#     [1.0, 2.0],
-#     Dict("gaussian" => (x, y) -> exp(-norm(x - y)^2)),
-#     [1.0, 0.5],
-#     Dict("linear" => (x, y) -> dot(x, y)),
-#     [0.1, 0.2, 0.3],
-#     1000,
-#     200,
-#     2,
-#     true
-# )
-# println(params)
+	io = open("log.txt", "w+")
+	logger = SimpleLogger(io)
+	global_logger(logger)
 
 
-# function MCMC_fit(params::Params)
-# 	println(size(params.Y))
-# 	println(size(params.sp_coords))
-# 	println(size(params.X_covariates))
-# 	# for i in 1:params.draws
-# 	# 	for t in 1:params.T
-# 	# 	end
-# 	# end
-# end
-
-
-function MCMC_fit(params)
-	println(size(params.Y))
-	println(size(params.sp_coords))
-
-	if ismissing(params.X_covariates)
-		println("fitting without covariates")
-	else
-		println(size(params.X_covariates))	
+	############# define auxiliary variables #############
+	sPPM = !ismissing(sp_coords)
+	xPPM = !ismissing(X_covariates)
+	n, T = size(Y)
+	T_star = T+1
+	p = xPPM ? size(X_covariates)[2] : 0
+	nout = Int64((draws - burnin)/(thin))
+	if sPPM
+		sp1 = sp_coords[:,1]
+		sp2 = sp_coords[:,2]
 	end
 
-	# for i in 1:params.draws
-	# 	for t in 1:params.T
-	# 	end
-	# end
-end
+	############# send feedback #############
+	println("fitting $draws iterates ($nout actual iterates)")
+	println("on n=$n subjects\nfor T=$T time instants")
+	println("with space? $sPPM\nwith covariates? $xPPM")
+	println()
 
-function MCMC_fit(Y,sp_coords,X_covariates; keyword_var=1)
-	println(size(Y))
-	println(size(sp_coords))
-
-	if ismissing(X_covariates)
-		println("fitting without covariates")
-	else
-		println(size(X_covariates))	
+	############# allocate output variables #############
+	Si_out = zeros(Int64,nout,n,T)
+	gamma_out = zeros(nout,n,T)
+	alpha_out = zeros(nout,T) 
+	sigma2h_out = zeros(nout,n,T) 
+	muh_out = zeros(nout,n,T) 
+	eta1_out = zeros(nout,n) 
+	if xPPM
+		beta_out = zeros(nout,p,T) # or betareg as name?
 	end
+	theta_out = zeros(nout,T) 
+	tau2_out = zeros(nout,T) 
+	phi0_out = zeros(nout) 
+	phi1_out = zeros(nout) 
+	lambda2_out = zeros(nout) 
+	fitted = zeros(nout,T,n)
+	llike = zeros(nout,T,n)
+	lpml = 0
+	waic = 0
 
-	println(keyword_var)
+	############# allocate working variables #############
+	Si_iter = ones(Int64,n,T_star)
+	Si_iter[:,end] .= 0
+	gamma_iter = zeros(n,T_star)
+	alpha_iter = ones(n,T_star)*starting_alpha
+	sigma2h = ones(n,T_star)
+	muh = zeros(n,T_star)
+	eta1_iter = zeros(n)
+	if xPPM
+		beta_iter = rand(MvNormal(beta_priors[1:end-1],beta_priors[end]*Matrix(I, p, p))) # or betareg as name?
+	end
+	theta_iter = rand(Normal(),T_star)
+	tau2_iter = rand(InverseGamma(tau2_priors...),T_star)
+	phi0_iter = (T==2) ? mean(Normal(phi0_priors...)) : rand(Normal(phi0_priors...))
+	phi1_iter = rand(Uniform(-1,1))*include_phi1
+	lambda2_iter = (T==2) ? mean(InverseGamma(lambda2_priors...)) : rand(InverseGamma(lambda2_priors...))
+	
+	nh = zeros(n,T_star)
+	nh[1,:] .= n
+	nclus_iter = ones(T_star)
+
+
+	############# auxiliary working variables #############
+
+
+	############# testing on random values #############
+	Si_iter = rand(collect(1:5),n,T_star)
+	gamma_iter = rand((0,1),n,T_star)
+	
 
 	
-	# for i in 1:params.draws
-	# 	for t in 1:params.T
-	# 	end
-	# end
+	println("setting seed $seed")
+	Random.seed!(round(Int64,seed))
+	############# start MCMC algorithm #############
+	for i in 1:draws
+		print("iteration $i\r")
+		for t in 1:T
+			@info "############### iteration $i, time $t ###############" _file=""
+			############# update gamma #############
+			for j in 1:n
+				if t==1 
+					gamma_iter[:,t] .= 0
+				else
+					# we want to find ρ_t^{R_t(-j)} ...
+					indexes = findall(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
+					Si_red = Si_iter[indexes, t]
+					Si_red1 = copy(Si_red)
+					push!(Si_red1,Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
+
+					if sPPM
+						sp1_red = sp1[indexes]
+						sp2_red = sp2[indexes]
+					end
+
+					n_red = length(Si_red)
+					n_red1 = length(Si_red1)
+					relabel!(Si_red,n_red)
+					relabel!(Si_red1,n_red1)
+					@info "Si_red = $Si_red", "Si_red1 = $Si_red1" _file=""
+					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red)
+					nclus_red1 = maximum(Si_red1)
+
+					j_label = Si_red1[end]
+
+					nh_red = zeros(Int64,n); nh_red1 = zeros(Int64,n)
+					for jj in 1:n_red
+						nh_red[Si_red[jj]] += 1
+						nh_red1[Si_red1[jj]] += 1
+					end
+					nh_red1[Si_red1[end]] += 1 # account for the last unit j
+
+					# this one is less efficient (it's a double loop)
+					# for k in nclus_red1
+					# 	nh_red[k] = sum(Si_red .== k)
+					# 	nh_red1[k] = sum(Si_red1 .== k)
+					# end
+
+					lCo = 0.0; lCn = 0.0
+				end
+			end
+
+			############# update rho #############
+			
+			############# update muh #############
+			
+			############# update sigma2h #############
+			
+			############# update theta #############
+			
+			############# update tau2 #############
+
+		end
+		
+		############# update eta1 #############
+		
+		############# update alpha #############
+		
+		############# update phi0 #############
+		
+		############# update phi1 #############
+		
+		############# update lambda2 #############
+	
+		############# save MCMC iterates #############
+
+	end
+	
+close(io)
+global_logger(ConsoleLogger())	
 end
+

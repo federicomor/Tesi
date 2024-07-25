@@ -8,6 +8,10 @@ output: html_document
 devtools::load_all("../../drpm/")
 ```
 
+```{r}
+source("../src/include.R") # colora
+```
+
 
 # create data
 ```{r}
@@ -63,7 +67,7 @@ for(i in 1:size(yred)[1]){
 
 # fit
 ```{r}
-niter=3; nburn=1; nthin=1
+niter=4; nburn=1; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -73,7 +77,6 @@ set.seed(seed_choice)
 
 ```{r}
 cat(paste0("seed ",seed_choice,"\n==========================\n",date(),"\n\n"))
-tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(y=yt, 
 		 s_coords = sites,
          M=1,
@@ -124,16 +127,15 @@ drpm1 <- drpm_fit(y=yt,
          # draws=10000,burn=2000,thin=8) # more serious one
          draws=niter,burn=nburn,thin=nthin) # adaptable one
 
-tempo_fine <- Sys.time()
-differenza_tempo <- tempo_fine - tempo_inizio
-cat(crayon::cyan("Fit took:\n"))
-print(round(differenza_tempo,digits = 4))
-
-cat(crayon::blue("That was for fitting",max(time_span),"time steps.\nSo for fitting all 53 weeks the expected time with these parameters will be:\n"))
-print(round(differenza_tempo/max(time_span)*53,digits=4))
 
 cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 ```
+```{r}
+cat(size(drpm1$lpml),"\n")
+		 drpm1$lpml
+```
+
+
 # diagnostics
 ```{r}
 for (loc in c(1,2,9)){
