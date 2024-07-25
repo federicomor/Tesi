@@ -1,4 +1,6 @@
-struct Params{T<:Real}                  # T to allow to choose Float32 or Float64
+struct Params{T<:Real} # T to allow to choose Float32 or Float64
+# actually JuliaConnector translates all to Float64 so it's not really useful
+# struct Params{T::Float64}
 	# Data fields
 	Y::Matrix{T}                        # n*T, observed values
 	sp_coords::Matrix{T}                # n*2, spatial coordinates
@@ -97,10 +99,36 @@ end
 # 	# end
 # end
 
-function MCMC_fit(Y,sp_coords,X_covariates)
+
+function MCMC_fit(params)
+	println(size(params.Y))
+	println(size(params.sp_coords))
+
+	if ismissing(params.X_covariates)
+		println("fitting without covariates")
+	else
+		println(size(params.X_covariates))	
+	end
+
+	# for i in 1:params.draws
+	# 	for t in 1:params.T
+	# 	end
+	# end
+end
+
+function MCMC_fit(Y,sp_coords,X_covariates; keyword_var=1)
 	println(size(Y))
 	println(size(sp_coords))
-	println(size(X_covariates))
+
+	if ismissing(X_covariates)
+		println("fitting without covariates")
+	else
+		println(size(X_covariates))	
+	end
+
+	println(keyword_var)
+
+	
 	# for i in 1:params.draws
 	# 	for t in 1:params.T
 	# 	end

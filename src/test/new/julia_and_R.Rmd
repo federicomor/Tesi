@@ -3,10 +3,21 @@ title: "R Notebook"
 output: html_document
 ---
 
-# JuliaConnectoR
+# JuliaConnectoR (better)
 ```{r}
 library(JuliaConnectoR)
 juliaSetupOk()
+
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("using Pkg; Pkg.status()")
+
+# examples
+juliaEval("using Random; Random.seed!(5);")
+juliaEval("using Statistics")
+juliaEval("using Distributions")
+juliaEval("rand(Beta(10,10))")
 ```
 
 ```{r}
@@ -15,12 +26,11 @@ getwd()
 testModule = normalizePath("../../JDRPM/src/JDRPM.jl")
 cat(testModule)
 # take a look at the file
-writeLines(readLines(testModule))
+# writeLines(readLines(testModule))
 # load in Julia
-juliaCall("include", testModule)
+# juliaCall("include", testModule)
 # import in R via relative module path
-TestModule1 <- juliaImport(".JDRPM")
-x = TestModule1$my_example(30)
+# TestModule1 <- juliaImport(".JDRPM")
 
 # Importing a local module is also possible in one line,
 # by directly using the module object returned by "include".
@@ -29,18 +39,22 @@ x = TestModule1$my_example(30)
 x
 
 n = 10
-T = 15
+bigT = 5
 p = 3
-# nxT matrix of normally distributed random numbers
-Y <- matrix(rnorm(n * T), nrow = n, ncol = T)
-# nx3xT array of normally distributed random numbers
-X_covariates <- array(rnorm(n * p * T), dim = c(n, p, T))
+# nxbigT matrix of normally distributed random numbers
+Y <- matrix(rnorm(n * bigT), nrow = n, ncol = bigT)
+# nx3xbigT array of normally distributed random numbers
+X_covariates <- array(rnorm(n * p * bigT), dim = c(n, p, bigT))
 # nx2 matrix of uniformly distributed random numbers between 0 and 1
 sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
 
 
-TestModule1$MCMC_fit(Y,sp_coords,X_covariates)
+params = TestModule1$Params(Y,sp_coords,X_covariates)
+print(params)
+R_params = juliaGet(params)
 
+TestModule1$MCMC_fit(params)
+TestModule1$MCMC_fit(Y,sp_coords,X_covariates,keyword_var=3)
 ```
 
 
