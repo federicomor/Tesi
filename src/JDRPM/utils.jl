@@ -1,3 +1,6 @@
+using SpecialFunctions
+using LinearAlgebra
+
 ##################
 ##   RELABEL    ##
 ##################
@@ -39,9 +42,9 @@ function relabel!(Si::Vector{Int}, n::Int)
 		lab += 1
 		loc = findfirst(x -> Sirelab[x] == 0, 1:n) # find the next unprocessed label
 	end
-    for j in 1:n
-        Si[j] = Sirelab[j]
-    end
+	for j in 1:n
+		Si[j] = Sirelab[j]
+	end
 end
 
 # dont overwrite Si - deal with the corollary variables
@@ -137,6 +140,199 @@ end
 ##   COHESION FUNCTIONS (space)    ##
 #####################################
 
+
+function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real, lg::Bool, M::Real=1.0)
+	dim = length(s1)
+	if dim==1 
+		return lg ? log(M) : M
+	end
+	out = log(M) + lgamma(dim)
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances (the D_h in the paper)
+	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:dim)
+
+	# decide what to return
+	if sum_dist >= 1
+		out -= lgamma(alpha*sum_dist) # minus since we are at the denominator
+	elseif sum_dist != 0
+		out -= log(sum_dist) # minus since we are at the denominator
+	else
+		out = log(1)
+	end
+	return lg ? out : exp(out)
+end
+
+
+function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real, lg::Bool, M::Real=1.0)
+	dim = length(s1)
+	out = log(M) + lgamma(dim)
+	# @show M, dim, log(M), lgamma(dim)
+	# @show out
+	for i in 1:dim
+		for j in 1:dim
+			dist = sqrt((s1[i] - s1[j])^2 + (s2[i] - s2[j])^2)
+			if dist > a
+				# println("danger")
+				return lg ? log(0.0) : 0.0 # in this case the rest vanish
+			end
+		end
+	end
+	# @show M, dim, log(M), lgamma(dim)
+	# @show out
+	return lg ? out : exp(out)
+end
+# cohesion2(s1,s2,1.4,false)
+# cohesion2(s1,s2,1.4,true)
+
+function G2a(a::Real, lg::Bool)
+	out = log(π) + lgamma(a) + lgamma(a - 0.5)
+	return lg ? out : exp(out)
+end
+
+function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}, Cohesion::Int, lg::Bool, M::Real=1.0)
+	dim = length(s1)
+	sp = [s1 s2]
+	sbar = vec(mean(sp, dims=1))
+	S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:dim)
+	
+	# compute updated parameters
+	kn = k0+dim
+	vn = v0+dim
+	Psi_n = Psi + S + (k0*dim)/(k0+dim)*(sbar-mu_0)*(sbar-mu_0)'
+	knn = kn+dim
+	vnn = vn+dim
+	mu_n = (k0*mu_0 + dim*sbar)/(k0+dim)
+	Psi_nn = Psi_n + S + (kn*dim)/(kn+dim)*(sbar-mu_n)*(sbar-mu_n)'
+	
+	if Cohesion == 3
+		out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
+	elseif Cohesion == 4
+		out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(det(Psi_n)) - 0.5 * vnn * log(det(Psi_nn)) + log(kn) - log(knn)
+	end
+
+	return lg ? out : exp(out)
+end
+
+
+##################
+# below there is the one "translated" from C, but the above is more readable/efficient/easy
+# but are the same, test them on these if you want
+# (s1, s2, Psi, Psi_vec) = ([0.06541394973925674, 0.1875903839556078, 0.7065742551867602, 0.8223492385591462], [0.6711654699192571, 0.6199278925430733, 0.36880242735326396, 0.9723482028752322], [2.0 1.0; 1.0 3.0], [2.0, 1.0, 1.0, 3.0])
+##################
+# function cohesion3_4_C(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Real}, k0::Real, v0::Real, Psi_vec::Vector{Real}, Cohesion::Int, lg::Bool)
+# 		dim = length(s1)
+# 		# Compute sample means
+# 		sbar1 = mean(s1)
+# 		sbar2 = mean(s2)
+# 		# Compute deviations from the sample mean
+# 		Vs1, Vs2, Vs3, Vs4 = 0.0, 0.0, 0.0, 0.0
+# 		for i in 1:dim
+# 			s_sbar1 = s1[i] - sbar1
+# 			s_sbar2 = s2[i] - sbar2
+# 			Vs1 += s_sbar1 * s_sbar1
+# 			Vs2 += s_sbar1 * s_sbar2
+# 			Vs3 += s_sbar2 * s_sbar1
+# 			Vs4 += s_sbar2 * s_sbar2
+# 		end
+# 		# Updated parameters
+# 		kn = k0 + dim
+# 		vn = v0 + dim
+# 		knn = kn + dim
+# 		vnn = vn + dim
+# 		mun1 = k0 / (k0 + dim) * mu_0[1] + dim / (k0 + dim) * sbar1
+# 		mun2 = k0 / (k0 + dim) * mu_0[2] + dim / (k0 + dim) * sbar2
+# 		sbar_mu_01 = sbar1 - mu_0[1]
+# 		sbar_mu_02 = sbar2 - mu_0[2]
+# 		sbar_mun1 = sbar1 - mun1
+# 		sbar_mun2 = sbar2 - mun2
+# 		Vsbarmu_01 = sbar_mu_01^2
+# 		Vsbarmu_02 = sbar_mu_01 * sbar_mu_02
+# 		Vsbarmu_03 = copy(Vsbarmu_02)
+# 		Vsbarmu_04 = sbar_mu_02^2
+# 		Vsbarmun1 = sbar_mun1^2
+# 		Vsbarmun2 = sbar_mun1 * sbar_mun2
+# 		Vsbarmun3 = copy(Vsbarmun2)
+# 		Vsbarmun4 = sbar_mun2^2
+# 		Ln1 = Psi_vec[1] + Vs1 + k0 * dim / (k0 + dim) * Vsbarmu_01
+# 		Ln2 = Psi_vec[2] + Vs2 + k0 * dim / (k0 + dim) * Vsbarmu_02
+# 		Ln3 = Psi_vec[3] + Vs3 + k0 * dim / (k0 + dim) * Vsbarmu_03
+# 		Ln4 = Psi_vec[4] + Vs4 + k0 * dim / (k0 + dim) * Vsbarmu_04
+# 		Lnn1 = Ln1 + Vs1 + kn * dim / (kn + dim) * Vsbarmun1
+# 		Lnn2 = Ln2 + Vs2 + kn * dim / (kn + dim) * Vsbarmun2
+# 		Lnn3 = Ln3 + Vs3 + kn * dim / (kn + dim) * Vsbarmun3
+# 		Lnn4 = Ln4 + Vs4 + kn * dim / (kn + dim) * Vsbarmun4
+# 		dPsi_vec = Psi_vec[1] * Psi_vec[4] - Psi_vec[2] * Psi_vec[3]
+# 		dLn = Ln1 * Ln4 - Ln2 * Ln3
+# 		dLnn = Lnn1 * Lnn4 - Lnn2 * Lnn3
+# 		if Cohesion == 3
+# 			out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(dPsi_vec) - 0.5 * vn * log(dLn) + log(k0) - log(kn)
+# 		elseif Cohesion == 4
+# 			out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(dLn) - 0.5 * vnn * log(dLnn) + log(kn) - log(knn)
+# 		end
+# 		return lg ? out : exp(out)
+# end
+
+function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real, lg::Bool, M::Real=1.0)
+	dim = length(s1)
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances
+	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:dim)
+		
+	out = -phi*sum_dist
+	return lg ? out : exp(out)
+end
+
+
+function cohesion6(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real, lg::Bool, M::Real=1.0)
+	dim = length(s1)
+	if dim==1
+		return lg ? 0.0 : 1.0
+	end
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances
+	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:dim)
+	
+	out = -phi*log(sum_dist)
+	return lg ? out : exp(out)
+end
+
+
+# s1 = [1,2,3].*1.0
+# s2 = [4,5,6].*1.0
+# alpha = 0.1
+# a = 10
+# mu_0 = [1.,2.]
+# k0 = 0.5
+# v0 = 0.5
+# Psi = [1. 2.; 2 4]
+# phi=0.5
+
+# x1 = cohesion1(s1,s2,alpha,false)
+# x2 = cohesion2(s1,s2,a,false)
+# x3 = cohesion3_4(s1, s2, mu_0, k0, v0, Psi,3,false)
+# x4 = cohesion3_4(s1, s2, mu_0, k0, v0, Psi,4,false)
+# x5 = cohesion5(s1,s2,phi,false)
+# x6 = cohesion6(s1,s2,phi,false)
+# println()
+# y1 = cohesion1(s1,s2,alpha,true)
+# y2 = cohesion2(s1,s2,a,true)
+# y3 = cohesion3_4(s1, s2, mu_0, k0, v0, Psi,3,true)
+# y4 = cohesion3_4(s1, s2, mu_0, k0, v0, Psi,4,true)
+# y5 = cohesion5(s1,s2,phi,true)
+# y6 = cohesion6(s1,s2,phi,true)
+
+# @show y1 - log(x1)
+# @show y2 - log(x2)
+# @show y3 - log(x3)
+# @show y4 - log(x4)
+# @show y5 - log(x5)
+# @show y6 - log(x6)
 
 
 

@@ -1,7 +1,11 @@
 using Distributions
 using LinearAlgebra
 using Random
-using Logging
+
+log_file = open("output.txt", "w")
+function debug(str...)
+	println(log_file,str...)
+end
 
 include("utils.jl")
 
@@ -33,13 +37,9 @@ function MCMC_fit(;
 	burnin::Float64,                  # Number of burn-in sa
 	thin::Float64,                    # Thinning interval
 	verbose::Bool,                    # Verbosity flag	
-	seed::Float64
+	seed::Float64,                    # Random seed for reproducibility
+	io=log_file
 	)
-
-	io = open("log.txt", "w+")
-	logger = SimpleLogger(io)
-	global_logger(logger)
-
 
 	############# define auxiliary variables #############
 	sPPM = !ismissing(sp_coords)
@@ -49,8 +49,8 @@ function MCMC_fit(;
 	p = xPPM ? size(X_covariates)[2] : 0
 	nout = Int64((draws - burnin)/(thin))
 	if sPPM
-		sp1 = sp_coords[:,1]
-		sp2 = sp_coords[:,2]
+		sp1 = vec(sp_coords[:,1])
+		sp2 = vec(sp_coords[:,2])
 	end
 
 	############# send feedback #############
@@ -112,11 +112,14 @@ function MCMC_fit(;
 	
 	println("setting seed $seed")
 	Random.seed!(round(Int64,seed))
+	
 	############# start MCMC algorithm #############
 	for i in 1:draws
 		print("iteration $i\r")
 		for t in 1:T
-			@info "############### iteration $i, time $t ###############" _file=""
+			
+			debug("##### iteration $i - time $t #####")
+			
 			############# update gamma #############
 			for j in 1:n
 				if t==1 
@@ -137,7 +140,8 @@ function MCMC_fit(;
 					n_red1 = length(Si_red1)
 					relabel!(Si_red,n_red)
 					relabel!(Si_red1,n_red1)
-					@info "Si_red = $Si_red", "Si_red1 = $Si_red1" _file=""
+					# @info "Si_red = $Si_red", "Si_red1 = $Si_red1" _file=""
+					debug("Si_red = $Si_red", "\nSi_red1 = $Si_red1")
 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red)
 					nclus_red1 = maximum(Si_red1)
 
@@ -150,13 +154,23 @@ function MCMC_fit(;
 					end
 					nh_red1[Si_red1[end]] += 1 # account for the last unit j
 
-					# this one is less efficient (it's a double loop)
-					# for k in nclus_red1
-					# 	nh_red[k] = sum(Si_red .== k)
-					# 	nh_red1[k] = sum(Si_red1 .== k)
-					# end
 
 					lCo = 0.0; lCn = 0.0
+
+					# unit j can enter an existing cluster
+					for k in 1:nclus_red
+						if sPPM
+							sp_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
+							s1o = sp1[sp_idxs]
+							s2o = sp2[sp_idxs]
+							s1n = push!(copy(sp1),sp1[j])
+							s2n = push!(copy(sp2),sp2[j])
+
+							# lCo = spatial_cohesion(s1o, s2o,)
+							# lCn = spatial_cohesion(s1n, s2n,)
+						end
+					end
+
 				end
 			end
 
@@ -185,8 +199,9 @@ function MCMC_fit(;
 		############# save MCMC iterates #############
 
 	end
+	println("\ndone!")
 	
 close(io)
-global_logger(ConsoleLogger())	
+# global_logger(ConsoleLogger())	
 end
 
