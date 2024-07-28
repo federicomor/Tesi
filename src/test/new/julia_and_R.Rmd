@@ -53,15 +53,15 @@ sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
 
 
 ```{r}
-seed_choice = round(runif(1,0,1000))
-set.seed(seed_choice)
+# seed_choice = round(runif(1,0,1000))
+# set.seed(seed_choice)
 
 TestModule1 <- juliaImport(juliaCall("include", testModule))
 TestModule1$MCMC_fit(
 	Y=Y,              
 	sp_coords = sp_coords,             
 	X_covariates = X_covariates,
-	M_dp = 1,                     
+	M_dp = 19,                     
 	# initial_partition = NA,     
 	starting_alpha = 0.5,         
 	unit_specific_alpha = FALSE,       
@@ -77,17 +77,20 @@ TestModule1$MCMC_fit(
 	phi1_priors = c(1,2),
 	lambda2_priors = c(1,2),
 	alpha_priors = rbind(c(1,1)),   
-	spatial_cohesion = 1,
-	# sp_params = NA,             
-	# covariate_similarity = NA,  
+	
+	spatial_cohesion_idx = 1,
+	sp_params = 0.5,
+	# spatial_cohesion_idx = 3,
+	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
+	
+	# covariate_similarity_idx = NA,  
 	mh = c(0.1,0.1,0.7, 0.1, 0.1),             
-	draws = 1000,                    
-	burnin = 100,                   
+	draws = 100,                    
+	burnin = 10,                   
 	thin = 10,                     
 	verbose = TRUE,
 	seed = seed_choice
 )
-
 ```
 
 

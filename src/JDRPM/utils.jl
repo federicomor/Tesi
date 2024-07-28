@@ -1,5 +1,6 @@
 using SpecialFunctions
 using LinearAlgebra
+using Statistics
 
 ##################
 ##   RELABEL    ##
@@ -140,8 +141,8 @@ end
 ##   COHESION FUNCTIONS (space)    ##
 #####################################
 
-
-function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real, lg::Bool, M::Real=1.0)
+# paper 3 section 3.1
+function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	if dim==1 
 		return lg ? log(M) : M
@@ -164,8 +165,8 @@ function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real, lg::Bo
 	return lg ? out : exp(out)
 end
 
-
-function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real, lg::Bool, M::Real=1.0)
+# paper 3 section 3.1
+function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	out = log(M) + lgamma(dim)
 	# @show M, dim, log(M), lgamma(dim)
@@ -180,18 +181,17 @@ function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real, lg::Bool, 
 		end
 	end
 	# @show M, dim, log(M), lgamma(dim)
-	# @show out
+	# @show out, lg, exp(out)
 	return lg ? out : exp(out)
 end
-# cohesion2(s1,s2,1.4,false)
-# cohesion2(s1,s2,1.4,true)
 
 function G2a(a::Real, lg::Bool)
 	out = log(π) + lgamma(a) + lgamma(a - 0.5)
 	return lg ? out : exp(out)
 end
 
-function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}, Cohesion::Int, lg::Bool, M::Real=1.0)
+# paper 3 section 3.1
+function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	sp = [s1 s2]
 	sbar = vec(mean(sp, dims=1))
@@ -274,7 +274,8 @@ end
 # 		return lg ? out : exp(out)
 # end
 
-function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real, lg::Bool, M::Real=1.0)
+# non trovata su nessun paper
+function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	# compute the centroids
 	cent1 = mean(s1)
@@ -286,8 +287,8 @@ function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real, lg::Bool
 	return lg ? out : exp(out)
 end
 
-
-function cohesion6(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real, lg::Bool, M::Real=1.0)
+# non trovata su nessun paper
+function cohesion6(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	if dim==1
 		return lg ? 0.0 : 1.0
@@ -334,7 +335,14 @@ end
 # @show y5 - log(x5)
 # @show y6 - log(x6)
 
-
+function spatial_cohesion(idx::Real, s1::Vector{Float64}, s2::Vector{Float64}, sp_params; lg::Bool, M::Real)
+	idx==1.0 && return cohesion1(s1,s2,sp_params...,lg=lg,M=M) 
+	idx==2.0 && return cohesion2(s1,s2,sp_params...,lg=lg,M=M) 
+	idx==3.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=3) 
+	idx==4.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=4) 
+	idx==5.0 && return cohesion5(s1,s2,sp_params...,lg=lg,M=M) 
+	idx==6.0 && return cohesion6(s1,s2,sp_params...,lg=lg,M=M) 
+end
 
 ############################################
 ##   SIMILARITY FUNCTIONS (covariates)    ##

@@ -399,7 +399,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// if (verbose==1){
 					// debug_info(i,j,t);
 				// Rprintf("gamma_iter[j*(ntime1) + t] = %d\n", gamma_iter[j*(ntime1) + t]);
-				// Rprintf("nclus_red = %d\n", nclus_red);
+						debug_info(i,j,t);
+				Rprintf("nclus_red = %d\n", nclus_red);
 				// Rprintf("n_red = %d\n", n_red);
 				// RprintIVecAsMat("nh_red = ", nh_red, 1, *nsubject);
 				// RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
@@ -445,7 +446,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					comptm1[Rindx1] = Si_iter[j*ntime1 + (t-1)];
 
 					n_red = Rindx1;
-					Rprintf("Rindx1 = %d\n",Rindx1);
+					// Rprintf("Rindx1 = %d\n",Rindx1);
 					n_red_1 = Rindx1 + 1;
 
 					// Rprintf("n_red = %d\n", n_red);
@@ -458,8 +459,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// debug_info(i,j,t);
 					// RprintIVecAsMat("Si_tmp",Si_tmp, 1, Rindx1);
 					// RprintIVecAsMat("Si_tmp2",Si_tmp2, 1, Rindx1+1);
-					RprintIVecAsMat("Si_red",Si_red, 1, Rindx1);
-					RprintIVecAsMat("Si_red_1",Si_red_1, 1, Rindx1+1);
+					// RprintIVecAsMat("Si_red",Si_red, 1, Rindx1);
+					// RprintIVecAsMat("Si_red_1",Si_red_1, 1, Rindx1+1);
 //					RprintIVecAsMat("comptm1",comptm1, 1, Rindx1+1);
 // }
 //					RprintVecAsMat("s1_red",s1_red, 1, Rindx1);
@@ -484,6 +485,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 						if(Si_red[jj] > nclus_red) nclus_red = Si_red[jj];
 					}
+					Rprintf("nclus_red = %d\n", nclus_red);
+
 					
 					nh_red_1[Si_red_1[n_red]-1]= nh_red_1[Si_red_1[n_red]-1] + 1;			
 					// this may need to be updated depending on if the value of gamma changes
@@ -492,7 +495,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 					//if(Si_red_1[n_red] > nclus_red) nclus_red_1 = Si_red_1[n_red]; 
 
-					Rprintf("nclus_red = %d\n", nclus_red);
+					// Rprintf("nclus_red = %d\n", nclus_red);
 					// Rprintf("nclus_red_1 = %d\n", nclus_red_1);
 
 					// RprintIVecAsMat("nh_red",nh_red, 1, nclus_red);
@@ -588,7 +591,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 // 					if(rho_comp == 0) lgweight[nclus_red] = log(0);
 					// if(rho_comp == 0) Rprintf("non compatible partition occurred at line 568.\n");;
 					
-//					RprintVecAsMat("lgweight", lgweight, 1, nclus_red + 1);
+					RprintVecAsMat("lgweight", lgweight, 1, nclus_red + 1);
 							
 					denph = 0.0;
 					for(k = 0; k < nclus_red + 1; k++){

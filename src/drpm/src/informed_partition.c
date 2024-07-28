@@ -445,6 +445,7 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
         
           if(Si_red[jj] > nclus_red) nclus_red = Si_red[jj];
         }
+        Rprintf("nclus_red = %d\n",nclus_red);
         			
         nh_red_1[Si_red_1[n_red]-1]= nh_red_1[Si_red_1[n_red]-1] + 1;			
         // this may need to be updated depending on if the value of gamma changes

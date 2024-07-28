@@ -131,8 +131,8 @@ drpm1 <- drpm_fit(y=yt,
 cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 ```
 ```{r}
-cat(size(drpm1$lpml),"\n")
-		 drpm1$lpml
+cat(size(drpm1$alpha),"\n")
+		 drpm1$alpha
 ```
 
 
