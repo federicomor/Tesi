@@ -399,8 +399,8 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					// if (verbose==1){
 					// debug_info(i,j,t);
 				// Rprintf("gamma_iter[j*(ntime1) + t] = %d\n", gamma_iter[j*(ntime1) + t]);
-						debug_info(i,j,t);
-				Rprintf("nclus_red = %d\n", nclus_red);
+						// debug_info(i,j,t);
+				// Rprintf("nclus_red = %d\n", nclus_red);
 				// Rprintf("n_red = %d\n", n_red);
 				// RprintIVecAsMat("nh_red = ", nh_red, 1, *nsubject);
 				// RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
@@ -409,7 +409,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 				} else {
 					// if (verbose==1){
-						debug_info(i,j,t);
+						// debug_info(i,j,t);
 
 					// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
 					// RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
@@ -485,7 +485,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 						if(Si_red[jj] > nclus_red) nclus_red = Si_red[jj];
 					}
-					Rprintf("nclus_red = %d\n", nclus_red);
+					// Rprintf("nclus_red = %d\n", nclus_red);
 
 					
 					nh_red_1[Si_red_1[n_red]-1]= nh_red_1[Si_red_1[n_red]-1] + 1;			
@@ -591,7 +591,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 // 					if(rho_comp == 0) lgweight[nclus_red] = log(0);
 					// if(rho_comp == 0) Rprintf("non compatible partition occurred at line 568.\n");;
 					
-					RprintVecAsMat("lgweight", lgweight, 1, nclus_red + 1);
+					// RprintVecAsMat("lgweight", lgweight, 1, nclus_red + 1);
 							
 					denph = 0.0;
 					for(k = 0; k < nclus_red + 1; k++){
@@ -870,6 +870,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 
 						rho_tmp[j] = k+1;
+						// Rprintf("assigning unit j=%d in cluster k=%d\n",j,k+1);
 					
 //						RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
 //						RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
@@ -880,6 +881,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 						Rindx2=0;
 						for(jj = 0; jj < *nsubject; jj++){
 							if(gamma_iter[jj*ntime1 + (t+1)] == 1){
+								// if (jj==j) Rprintf("Unit j=%d entered the comp defintion\n",j) ;
 								comp2t[Rindx2] = rho_tmp[jj];
 								comptp1[Rindx2] = Si_iter[jj*ntime1 + (t+1)];
 								Rindx2 = Rindx2 + 1;
@@ -888,8 +890,9 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 
 //						Rprintf("Rindx2 = %d\n", Rindx2);
-//						RprintIVecAsMat("comp2t", comp2t, 1, *nsubject);
-//						RprintIVecAsMat("comptp1", comptp1, 1, *nsubject);
+						// Rprintf("working on unit j=%d\n",j);
+						// RprintIVecAsMat("comp2t", comp2t, 1, *nsubject);
+						// RprintIVecAsMat("comptp1", comptp1, 1, *nsubject);
 
 						// check for compatibility
 						rho_comp = compatibility(comp2t, comptp1, Rindx2);
@@ -934,7 +937,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 							}
 					
 							// Rprintf("now inside the else with k=%d\n",k);
-							// RprintIVecAsMat("nh_tmp", nh_tmp, 1, nclus_tmp);
+							// RprintIVecAsMat("nh_tmp", nh_tmp, 1, *nsubject);
 							// Rprintf("nclus_tmp = %d\n", nclus_tmp);
 							
 							lpp = 0.0;
@@ -974,7 +977,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 								}
 								// End of spatial part
 
-//								Rprintf("lCn = %f\n", lCn);
+								// Rprintf("lCn = %f\n", lCn);
 //								Rprintf("nh_tmp[kk] = %d\n", nh_tmp[kk]);
 //								Rprintf("lCn = %f\n", lCn);
 //								Rprintf("lgamma(nh_tmp[kk]) = %f\n", lgamma((double) nh_tmp[kk]));
@@ -984,7 +987,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //								lpp = lpp + nh_tmp[kk]*log(Mdp) + lgamma((double) nh_tmp[kk]) + lCn;
 								lpp = lpp + (log(Mdp) + lgamma((double) nh_tmp[kk]) + lCn);
 
-//								Rprintf("lpp = %f\n", lpp);
+								Rprintf("lpp = %f\n", lpp);
 							
 							}
 //							Rprintf("lpp = %f\n", lpp);
@@ -1105,7 +1108,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 						}
 
 //						Rprintf("n_tmp = %d\n", n_tmp);
-//						RprintIVecAsMat("nh_tmp", nh_tmp, 1, *nsubject);
+						// RprintIVecAsMat("nh_tmp", nh_tmp, 1, *nsubject);
 //						RprintIVecAsMat("nh_redtmp", nh_redtmp, 1, *nsubject);
 	
 
@@ -1115,7 +1118,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 								
 						}
 					
-//						Rprintf("nclus_tmp = %d\n", nclus_tmp);
+						// Rprintf("nclus_tmp = %d\n", nclus_tmp);
 
 
 //						RprintIVecAsMat("nh_tmp", nh_tmp, 1, nclus_iter[t]+1);
@@ -1275,7 +1278,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //					RprintIVecAsMat("nh ", nh, *nsubject, ntime1);
 //					RprintIVecAsMat("nclus_iter", nclus_iter, 1, ntime1);
 //					RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
-
+					Rprintf("we entered the if with unit j=%d and we sampled label=%d\n",j,iaux);
 				} // end if(gamma_iter[j*(ntime1) + t] == 0)
 
 				for(jj = 0; jj < *nsubject; jj++){
@@ -1284,19 +1287,22 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					reorder[jj] = 0;
 				}
 
-
 				// I believe that I have to make sure that groups are order so that
 				// EU one is always in the group one, and then the smallest index not
 				// with group 1 anchors group 2 etc.
 			
 				relabel(Si_tmp, *nsubject, Si_tmp2, reorder, oldLab);		
+				debug_info(i,j,t);
+RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
+					// Rprintf("unit j=%d was with gamma_jt=%d (0=movable, 1=fixed)\n",j,gamma_iter[j*(ntime1) + t]);
+					// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
+					// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);	
 						// debug_info(i,j,t);
 						// Rprintf("sampled cluster %d\n",iaux);
 					// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
 					// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);	
 				// if(i > (int)(*draws*0.95) && j==100) {
-					// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
-					// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);
+
 				// }		
 				int valida = 1;
 				for(jj = 0; jj < *nsubject; jj++){
@@ -1304,15 +1310,25 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 						valida=0;
 					}
 				}
-				// if (valida==0){
-					// Rprintf("valida? %d\n",valida);
+				if (gamma_iter[j*(ntime1) + t]==1){
+				// 	Rprintf("for a fixed unit nothing changed? %d\n",valida);
+				// 						RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
+				// 	RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);
+				// 				RprintIVecAsMat("reorder", reorder, 1, *nsubject);
+				// RprintIVecAsMat("oldLab", oldLab, 1, nclus_iter[t]);
+				}				
+				// controllo esatto: nel caso qui fuori dall'if nulla cambia quindi non serve rilabelare
+				// if (gamma_iter[j*(ntime1) + t]==1 && valida==0){
+				// 	Rprintf("for a fixed unit something changed\n");
+				// 					RprintIVecAsMat("reorder", reorder, 1, *nsubject);
+				// RprintIVecAsMat("oldLab", oldLab, 1, nclus_iter[t]);
 				// }
 
 
 //				RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
 //				RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);
-//				RprintIVecAsMat("reorder", reorder, 1, *nsubject);
-//				RprintIVecAsMat("oldLab", oldLab, 1, nclus_iter[t]);
+				// RprintIVecAsMat("reorder", reorder, 1, *nsubject);
+				// RprintIVecAsMat("oldLab", oldLab, 1, nclus_iter[t]);
 
 
 //				RprintIVecAsMat("Si_iter ", Si_iter, *nsubject, ntime1);
@@ -1339,7 +1355,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 				}
 
 
-			}
+			} // end for j
 //			RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
 //			RprintIVecAsMat("Si_iter ", Si_iter, *nsubject, ntime1);
 //			RprintIVecAsMat("nh ", nh, *nsubject, ntime1);

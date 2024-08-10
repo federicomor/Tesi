@@ -46,10 +46,10 @@ void relabel(int *Si, int n, int *Sirelab, int *reorder, int *oldLab){
 }
 
 int main() {
-    int n = 10;
+    int n = 9;
     // int Si[10] = {1,3,3,5,5,4,4,1,2,1};
     // int Si[10] = {1,1,1,1,1,3,1,1,2,3};
-    int Si[10] = {4,2,1,3,1,4,5,0,0,0};
+    int Si[12] = {4,2,1,1,1,3,1,4,5,0,0,0};
   	int Sirelab[10] = {0};
     int reorder[10] = {0};
     int oldLab[10]  = {0};

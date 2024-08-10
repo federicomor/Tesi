@@ -2,6 +2,14 @@ using SpecialFunctions
 using LinearAlgebra
 using Statistics
 
+# function section(title::String)
+# 	total_width = length(title) + 4
+# 	debug("┌" * "─" ^ (total_width - 2) * "┐")
+# 	debug("│" * " " * title * " " * "│")
+# 	debug("└" * "─" ^ (total_width - 2) * "┘")
+# end
+
+
 ##################
 ##   RELABEL    ##
 ##################
@@ -25,6 +33,7 @@ function relabel(Si::Vector{Int}, n::Int)
 	end
 	return Sirelab
 end
+relabel(Si::Vector{Int}) = relabel(Si,length(Si))
 
 # overwrite Si - ignore the corollary variables
 function relabel!(Si::Vector{Int}, n::Int)
@@ -47,6 +56,7 @@ function relabel!(Si::Vector{Int}, n::Int)
 		Si[j] = Sirelab[j]
 	end
 end
+relabel!(Si::Vector{Int}) = relabel!(Si,length(Si))
 
 # dont overwrite Si - deal with the corollary variables
 function relabel_full(Si::Vector{Int}, n::Int)
@@ -71,6 +81,8 @@ function relabel_full(Si::Vector{Int}, n::Int)
 	end
 	return Sirelab, nhrelab, oldLab
 end
+relabel_full(Si::Vector{Int}) = relabel_full(Si,length(Si))
+
 
 # dont overwrite Si - deal with the corollary variables
 function relabel_full!(Si::Vector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
@@ -175,8 +187,7 @@ function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real; lg::Bool, 
 		for j in 1:dim
 			dist = sqrt((s1[i] - s1[j])^2 + (s2[i] - s2[j])^2)
 			if dist > a
-				# println("danger")
-				return lg ? log(0.0) : 0.0 # in this case the rest vanish
+				return lg ? log(0.0) : 0.0 # in this case the rest vanishes
 			end
 		end
 	end
@@ -198,9 +209,11 @@ function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Floa
 	S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:dim)
 	
 	# compute updated parameters
+	# for 3
 	kn = k0+dim
 	vn = v0+dim
 	Psi_n = Psi + S + (k0*dim)/(k0+dim)*(sbar-mu_0)*(sbar-mu_0)'
+	# for 4
 	knn = kn+dim
 	vnn = vn+dim
 	mu_n = (k0*mu_0 + dim*sbar)/(k0+dim)
@@ -274,7 +287,7 @@ end
 # 		return lg ? out : exp(out)
 # end
 
-# non trovata su nessun paper
+# paper 6 pag 4, cluster variance/entropy similarity function
 function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	# compute the centroids
@@ -349,7 +362,6 @@ end
 ############################################
 
 
-
-
-
-
+# farle singole, concentrate su una singola covariata per volta
+# e come sopra con la parte spaziale, in modo cioè sceglibile/flessibile
+# normalizzare le covariate

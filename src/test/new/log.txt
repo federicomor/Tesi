@@ -1,1700 +1,1010 @@
-##### iteration 1.0 - time 1 #####
-##### iteration 1.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
+LOG FILE
+current seed = 101.0
+
+▶ iteration 1.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = Int64[]
+n_red = 0
+nclus_red = 0
+nh_red = Int64[]
+Si_red1 = [1]
+n_red1 = 1
+nclus_red1 = 1
+nh_red1 = [1]
+j_label = 1
+nclus_red = 0
+lg_weights = [5.8888779583328805]
 probh = 0.5
 alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 2.0 - time 1 #####
-##### iteration 2.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 3.0 - time 1 #####
-##### iteration 3.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 4.0 - time 1 #####
-##### iteration 4.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 5.0 - time 1 #####
-##### iteration 5.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 6.0 - time 1 #####
-##### iteration 6.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 7.0 - time 1 #####
-##### iteration 7.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 8.0 - time 1 #####
-##### iteration 8.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 9.0 - time 1 #####
-##### iteration 9.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 10.0 - time 1 #####
-##### iteration 10.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 11.0 - time 1 #####
-##### iteration 11.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 12.0 - time 1 #####
-##### iteration 12.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 13.0 - time 1 #####
-##### iteration 13.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 14.0 - time 1 #####
-##### iteration 14.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 15.0 - time 1 #####
-##### iteration 15.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 16.0 - time 1 #####
-##### iteration 16.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 17.0 - time 1 #####
-##### iteration 17.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 18.0 - time 1 #####
-##### iteration 18.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 19.0 - time 1 #####
-##### iteration 19.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 20.0 - time 1 #####
-##### iteration 20.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 21.0 - time 1 #####
-##### iteration 21.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 22.0 - time 1 #####
-##### iteration 22.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 23.0 - time 1 #####
-##### iteration 23.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 24.0 - time 1 #####
-##### iteration 24.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 25.0 - time 1 #####
-##### iteration 25.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 26.0 - time 1 #####
-##### iteration 26.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 27.0 - time 1 #####
-##### iteration 27.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 28.0 - time 1 #####
-##### iteration 28.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 29.0 - time 1 #####
-##### iteration 29.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 30.0 - time 1 #####
-##### iteration 30.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 31.0 - time 1 #####
-##### iteration 31.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 32.0 - time 1 #####
-##### iteration 32.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 33.0 - time 1 #####
-##### iteration 33.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 34.0 - time 1 #####
-##### iteration 34.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 35.0 - time 1 #####
-##### iteration 35.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 36.0 - time 1 #####
-##### iteration 36.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 37.0 - time 1 #####
-##### iteration 37.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 38.0 - time 1 #####
-##### iteration 38.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 39.0 - time 1 #####
-##### iteration 39.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 40.0 - time 1 #####
-##### iteration 40.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 41.0 - time 1 #####
-##### iteration 41.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 42.0 - time 1 #####
-##### iteration 42.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 43.0 - time 1 #####
-##### iteration 43.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 44.0 - time 1 #####
-##### iteration 44.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 45.0 - time 1 #####
-##### iteration 45.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 46.0 - time 1 #####
-##### iteration 46.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 47.0 - time 1 #####
-##### iteration 47.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 48.0 - time 1 #####
-##### iteration 48.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 49.0 - time 1 #####
-##### iteration 49.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 50.0 - time 1 #####
-##### iteration 50.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 51.0 - time 1 #####
-##### iteration 51.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 52.0 - time 1 #####
-##### iteration 52.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 53.0 - time 1 #####
-##### iteration 53.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 54.0 - time 1 #####
-##### iteration 54.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 55.0 - time 1 #####
-##### iteration 55.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 56.0 - time 1 #####
-##### iteration 56.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 57.0 - time 1 #####
-##### iteration 57.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 58.0 - time 1 #####
-##### iteration 58.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 59.0 - time 1 #####
-##### iteration 59.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 60.0 - time 1 #####
-##### iteration 60.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 61.0 - time 1 #####
-##### iteration 61.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 62.0 - time 1 #####
-##### iteration 62.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 63.0 - time 1 #####
-##### iteration 63.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 64.0 - time 1 #####
-##### iteration 64.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 65.0 - time 1 #####
-##### iteration 65.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 66.0 - time 1 #####
-##### iteration 66.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 67.0 - time 1 #####
-##### iteration 67.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 68.0 - time 1 #####
-##### iteration 68.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 69.0 - time 1 #####
-##### iteration 69.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 70.0 - time 1 #####
-##### iteration 70.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 71.0 - time 1 #####
-##### iteration 71.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 72.0 - time 1 #####
-##### iteration 72.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 73.0 - time 1 #####
-##### iteration 73.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 74.0 - time 1 #####
-##### iteration 74.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 75.0 - time 1 #####
-##### iteration 75.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 76.0 - time 1 #####
-##### iteration 76.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 77.0 - time 1 #####
-##### iteration 77.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 78.0 - time 1 #####
-##### iteration 78.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 79.0 - time 1 #####
-##### iteration 79.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 80.0 - time 1 #####
-##### iteration 80.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 81.0 - time 1 #####
-##### iteration 81.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 82.0 - time 1 #####
-##### iteration 82.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 83.0 - time 1 #####
-##### iteration 83.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 84.0 - time 1 #####
-##### iteration 84.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 85.0 - time 1 #####
-##### iteration 85.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 86.0 - time 1 #####
-##### iteration 86.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 87.0 - time 1 #####
-##### iteration 87.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 88.0 - time 1 #####
-##### iteration 88.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 89.0 - time 1 #####
-##### iteration 89.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 90.0 - time 1 #####
-##### iteration 90.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 91.0 - time 1 #####
-##### iteration 91.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 92.0 - time 1 #####
-##### iteration 92.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 93.0 - time 1 #####
-##### iteration 93.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 94.0 - time 1 #####
-##### iteration 94.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 95.0 - time 1 #####
-##### iteration 95.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 96.0 - time 1 #####
-##### iteration 96.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 97.0 - time 1 #####
-##### iteration 97.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 98.0 - time 1 #####
-##### iteration 98.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 99.0 - time 1 #####
-##### iteration 99.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-##### iteration 100.0 - time 1 #####
-##### iteration 100.0 - time 2 #####
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-lg_weights = [5.8888779583328805, 0.0, 0.0]
-before
-probh = 0.0
-alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.811634500648507, 5.8888779583328805]
+probh = 0.7974303470142381
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.869822985051931, 5.8888779583328805]
+probh = 0.790381673957778
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.749365227008605, 5.8888779583328805]
+probh = 0.80488738220826
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.78042336188745, 5.8888779583328805]
+probh = 0.8011799061084945
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = Int64[]
+n_red = 0
+nclus_red = 0
+nh_red = Int64[]
+Si_red1 = [1]
+n_red1 = 1
+nclus_red1 = 1
+nh_red1 = [1]
+j_label = 1
+nclus_red = 0
+lg_weights = [5.8888779583328805]
+probh = 0.5
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.811634500648507, 5.8888779583328805]
+probh = 0.7974303470142381
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.9367388220922, 5.8888779583328805]
+probh = 0.7821942380278165
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.438273816763107, 5.8888779583328805]
+probh = 0.7198298771194883
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.469331951641952, 5.8888779583328805]
+probh = 0.7160116133046673
+alpha_iter[t] = 0.5
+[update rho]
+
+▶ iteration 2.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.816709320808882, 5.8888779583328805]
+probh = 0.796818534294704
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.878550337688776, 5.8888779583328805]
+probh = 0.7893184752623598
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.9367388220922, 5.8888779583328805]
+probh = 0.7821942380278165
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.438273816763107, 5.8888779583328805]
+probh = 0.7198298771194883
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.847339198927718, 5.8888779583328805]
+probh = 0.7931137433573028
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = [1, 1, 2]
+n_red = 3
+nclus_red = 2
+nh_red = [2, 1]
+Si_red1 = [1, 1, 2, 1]
+n_red1 = 4
+nclus_red1 = 2
+nh_red1 = [3, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.88362515784915, 4.816709320808882, 5.8888779583328805]
+probh = 0.823566937034331
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 2]
+n_red = 3
+nclus_red = 2
+nh_red = [2, 1]
+Si_red1 = [1, 1, 2, 1]
+n_red1 = 4
+nclus_red1 = 2
+nh_red1 = [3, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.878550337688776, 4.811634500648507, 5.8888779583328805]
+probh = 0.8239986497328802
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 2]
+n_red = 3
+nclus_red = 2
+nh_red = [2, 1]
+Si_red1 = [1, 1, 2, 1]
+n_red1 = 4
+nclus_red1 = 2
+nh_red1 = [3, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.9367388220922, 4.869822985051931, 5.8888779583328805]
+probh = 0.8190543276270701
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1, 2]
+n_red = 4
+nclus_red = 2
+nh_red = [3, 1]
+Si_red1 = [1, 1, 1, 2, 2]
+n_red1 = 5
+nclus_red1 = 2
+nh_red1 = [3, 2]
+j_label = 2
+nclus_red = 2
+lg_weights = [5.438273816763107, 4.749365227008605, 5.8888779583328805]
+probh = 0.8594871320537
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1, 2]
+n_red = 4
+nclus_red = 2
+nh_red = [3, 1]
+Si_red1 = [1, 1, 1, 2, 1]
+n_red1 = 5
+nclus_red1 = 2
+nh_red1 = [4, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [5.469331951641952, 4.78042336188745, 5.8888779583328805]
+probh = 0.7514536571657836
+alpha_iter[t] = 0.5
+[update rho]
+
+▶ iteration 3.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.88362515784915, 5.8888779583328805]
+probh = 0.7886995678444995
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.500543090403009, 5.8888779583328805]
+probh = 0.7121907484615284
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.5587315748064325, 5.8888779583328805]
+probh = 0.7051166760911728
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.544706285211848, 5.8888779583328805]
+probh = 0.8286206462900996
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.5757644200906915, 5.8888779583328805]
+probh = 0.8251054485576106
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = [1, 1, 1, 2]
+n_red = 4
+nclus_red = 2
+nh_red = [3, 1]
+Si_red1 = [1, 1, 1, 2, 1]
+n_red1 = 5
+nclus_red1 = 2
+nh_red1 = [4, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [5.505617910563385, 4.816709320808882, 5.8888779583328805]
+probh = 0.7480590011439827
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 1, 2]
+n_red = 4
+nclus_red = 2
+nh_red = [3, 1]
+Si_red1 = [1, 1, 1, 2, 1]
+n_red1 = 5
+nclus_red1 = 2
+nh_red1 = [4, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [5.500543090403009, 4.811634500648507, 5.8888779583328805]
+probh = 0.7485318829514501
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 2]
+n_red = 3
+nclus_red = 2
+nh_red = [2, 1]
+Si_red1 = [1, 1, 2, 1]
+n_red1 = 4
+nclus_red1 = 2
+nh_red1 = [3, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.9367388220922, 4.869822985051931, 5.8888779583328805]
+probh = 0.8190543276270701
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 2]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [1, 2]
+j_label = 2
+nclus_red = 2
+lg_weights = [4.749365227008605, 4.749365227008605, 5.8888779583328805]
+probh = 0.836741228494217
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 1]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [2, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
+probh = 0.8341535190271019
+alpha_iter[t] = 0.5
+[update rho]
+
+▶ iteration 4.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.612050379012124, 5.8888779583328805]
+probh = 0.8209569128191584
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.60697555885175, 5.8888779583328805]
+probh = 0.8215397420858753
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.6651640432551735, 5.8888779583328805]
+probh = 0.8148076420466795
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.544706285211848, 5.8888779583328805]
+probh = 0.8286206462900996
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.5757644200906915, 5.8888779583328805]
+probh = 0.8251054485576106
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 2]
+n_red1 = 2
+nclus_red1 = 2
+nh_red1 = [1, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.816709320808882, 5.8888779583328805]
+probh = 0.5730629102014666
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 2]
+n_red1 = 2
+nclus_red1 = 2
+nh_red1 = [1, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.811634500648507, 5.8888779583328805]
+probh = 0.5727468779925688
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.869822985051931, 5.8888779583328805]
+probh = 0.790381673957778
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 2]
+n_red1 = 2
+nclus_red1 = 2
+nh_red1 = [1, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.749365227008605, 5.8888779583328805]
+probh = 0.568960853394309
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 3]
+n_red1 = 3
+nclus_red1 = 3
+nh_red1 = [1, 1, 1]
+j_label = 3
+nclus_red = 2
+lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
+probh = 0.6240795558997592
+alpha_iter[t] = 0.5
+[update rho]
+
+▶ iteration 5.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.612050379012124, 5.8888779583328805]
+probh = 0.8209569128191584
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.60697555885175, 5.8888779583328805]
+probh = 0.8215397420858753
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.6651640432551735, 5.8888779583328805]
+probh = 0.8148076420466795
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.544706285211848, 5.8888779583328805]
+probh = 0.8286206462900996
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.5757644200906915, 5.8888779583328805]
+probh = 0.8251054485576106
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 2]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [1, 2]
+j_label = 2
+nclus_red = 2
+lg_weights = [4.816709320808882, 4.816709320808882, 5.8888779583328805]
+probh = 0.8311298241398752
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 1]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [2, 1]
+j_label = 1
+nclus_red = 2
+lg_weights = [4.811634500648507, 4.811634500648507, 5.8888779583328805]
+probh = 0.831552665175927
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 1]
+n_red1 = 2
+nclus_red1 = 1
+nh_red1 = [2]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.869822985051931, 5.8888779583328805]
+probh = 0.790381673957778
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1]
+n_red = 1
+nclus_red = 1
+nh_red = [1]
+Si_red1 = [1, 2]
+n_red1 = 2
+nclus_red1 = 2
+nh_red1 = [1, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.749365227008605, 5.8888779583328805]
+probh = 0.568960853394309
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 2]
+n_red = 2
+nclus_red = 2
+nh_red = [1, 1]
+Si_red1 = [1, 2, 3]
+n_red1 = 3
+nclus_red1 = 3
+nh_red1 = [1, 1, 1]
+j_label = 3
+nclus_red = 2
+lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
+probh = 0.6240795558997592
+alpha_iter[t] = 0.5
+[update rho]
+
+▶ iteration 6.0
+► time 1
+[update gamma]
+▸ subject 1
+[update gamma]
+▸ subject 2
+[update gamma]
+▸ subject 3
+[update gamma]
+▸ subject 4
+[update gamma]
+▸ subject 5
+[update rho]
+► time 2
+[update gamma]
+▸ subject 1
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.612050379012124, 5.8888779583328805]
+probh = 0.8209569128191584
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.60697555885175, 5.8888779583328805]
+probh = 0.8215397420858753
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.6651640432551735, 5.8888779583328805]
+probh = 0.8148076420466795
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1, 1]
+n_red = 4
+nclus_red = 1
+nh_red = [4]
+Si_red1 = [1, 1, 1, 1, 1]
+n_red1 = 5
+nclus_red1 = 1
+nh_red1 = [5]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.544706285211848, 5.8888779583328805]
+probh = 0.8286206462900996
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1]
+n_red = 3
+nclus_red = 1
+nh_red = [3]
+Si_red1 = [1, 1, 1, 1]
+n_red1 = 4
+nclus_red1 = 1
+nh_red1 = [4]
+j_label = 1
+nclus_red = 1
+lg_weights = [5.469331951641952, 5.8888779583328805]
+probh = 0.7160116133046673
+alpha_iter[t] = 0.5
+[update rho]
+► time 3
+[update gamma]
+▸ subject 1
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 2]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [2, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.88362515784915, 5.8888779583328805]
+probh = 0.5773371761531428
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 2
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.878550337688776, 5.8888779583328805]
+probh = 0.7893184752623598
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 3
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 1]
+n_red1 = 3
+nclus_red1 = 1
+nh_red1 = [3]
+j_label = 1
+nclus_red = 1
+lg_weights = [4.9367388220922, 5.8888779583328805]
+probh = 0.7821942380278165
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 4
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 2]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [2, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.816281064048874, 5.8888779583328805]
+probh = 0.5730361967959854
+alpha_iter[t] = 0.5
+[update gamma]
+▸ subject 5
+Si_red = [1, 1]
+n_red = 2
+nclus_red = 1
+nh_red = [2]
+Si_red1 = [1, 1, 2]
+n_red1 = 3
+nclus_red1 = 2
+nh_red1 = [2, 1]
+j_label = 2
+nclus_red = 1
+lg_weights = [4.847339198927718, 5.8888779583328805]
+probh = 0.5749945887689849
+alpha_iter[t] = 0.5
+[update rho]

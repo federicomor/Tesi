@@ -40,8 +40,8 @@ TestModule1 <- juliaImport(juliaCall("include", testModule))
 x = TestModule1$my_example(30)
 x
 
-n = 3
-bigT = 2
+n = 5
+bigT = 3
 p = 2
 # nxbigT matrix of normally distributed random numbers
 Y <- matrix(rnorm(n * bigT), nrow = n, ncol = bigT)
@@ -53,9 +53,12 @@ sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
 
 
 ```{r}
-# seed_choice = round(runif(1,0,1000))
-# set.seed(seed_choice)
+seed_choice = round(runif(1,0,1000))
+set.seed(seed_choice)
+```
 
+
+```{r}
 TestModule1 <- juliaImport(juliaCall("include", testModule))
 TestModule1$MCMC_fit(
 	Y=Y,              
@@ -80,14 +83,15 @@ TestModule1$MCMC_fit(
 	
 	spatial_cohesion_idx = 1,
 	sp_params = 0.5,
+	# sp_params = c(0.5,1),
 	# spatial_cohesion_idx = 3,
 	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
 	mh = c(0.1,0.1,0.7, 0.1, 0.1),             
-	draws = 100,                    
-	burnin = 10,                   
-	thin = 10,                     
+	draws = 6,                    
+	burnin = 3,                   
+	thin = 1,                     
 	verbose = TRUE,
 	seed = seed_choice
 )

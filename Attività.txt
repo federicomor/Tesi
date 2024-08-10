@@ -9,3 +9,10 @@ Il piano va bene, per finire di comprendere il modello e il sampling delle parti
 Quando lo implementeremo poi va bene partire con le inverse gamma per le tre varianze.
 E usare una normale N(0,bassa varianza) per phi1, in un'idea simile a eta1.
 E inserire anche dei coefficienti di regressione beta dipendenti dal tempo nella likelihood.
+
+
+
+Slides:
+1. Model review
+2. Our changes and contribution
+3. Test on air pollution data
