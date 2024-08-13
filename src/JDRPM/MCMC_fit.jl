@@ -3,64 +3,61 @@ using Statistics
 using LinearAlgebra
 using Random
 using Logging
+using Dates
 
 ############# for debug #############
 log_file = open("log.txt", "w+")
-title = "\t"^12
-function tostr(obj)
-    io = IOBuffer()
-    show(io, "text/plain", obj)
-    String(take!(io))
-end
-function debug(str)
-	print(log_file,str * (str[end]=='\n' ? "" : "\n"))
-end
-macro showd(exs...)
-	args = []
-	for ex in exs
-		push!(args, sprint(Base.show_unquoted, ex), " = ", esc(ex), '\n')
-	end
-	return :(string($(args...)))
-end
+include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
 	Y::Matrix{Float64},                   # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
 	X_covariates = missing,               # n*p*T matrix, the covariates for each unit and all times
+	# maybe we sould also decide where to use those covariates, or like separate covariates for clustering proces
+	# and covariates to use inside the likelihood
+
 	M_dp::Float64,                        # Dirichlet mass parameter
 	initial_partition = missing,          # Initial partition (if provided)
+	# actually not implemented yet the version with the initial partition (which however i think is useless)
+
 	starting_alpha::Float64,              # Starting value for alpha
 	unit_specific_alpha::Bool,            # Unit-specific alpha values
 	time_specific_alpha::Bool,            # Time-specific alpha values
 	update_alpha::Bool,                   # Update alpha?
-	include_eta1::Bool,                   # Include (and update) the autoregressive part of eta1?
-	include_phi1::Bool,                   # Include (and update) the autoregressive part of phi1?
+	
+	include_eta1::Bool,                   # Include the autoregressive part of eta1?
+	include_phi1::Bool,                   # Include the autoregressive part of phi1?
+	update_eta1::Bool,                    # Update the autoregressive part of eta1?
+	update_phi1::Bool,                    # Update the autoregressive part of phi1?
 
-	sigma2h_priors::Vector{Float64},      # Prior parameters for sigma2h ∼ 
-	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's just the scale parameter b
+	sigma2h_priors::Vector{Float64},      # Prior parameters for sigma2h ∼ invGamma(a_sigma,b_sigma)
+	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
                                           # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
 	beta_priors::Vector{Float64},         # Prior parameters for beta ∼ 
-	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau2, b_tau2)
-	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2), so the mean m0 and the variance s0^2
-	phi1_priors::Vector{Float64},         # Prior parameters for phi1 ∼ U(-1,1)
+	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
+	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2)
+	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
 	                                      # so we just need the variance for the Metropolis update trough N(phi1_old,sigma^2)
-	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda2, b_lambda2)
-	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ 
+	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda)
+	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha)
+										  # but possibly that pair for each unit j, that's why the abstract array
 	
 	spatial_cohesion_idx = missing,       # cohesion choice
 	sp_params = missing,                  # Parameters for spatial cohesion functions
 	covariate_similarity_idx = missing,   # similarity choice
-	mh::Vector{Float64},                  # Metropolis-Hastings 
+
 	draws::Float64,                       # Number of MCMC draws
 	burnin::Float64,                      # Number of burn-in sa
 	thin::Float64,                        # Thinning interval
+
 	verbose::Bool,                        # Verbosity flag	
 	seed::Float64,                        # Random seed for reproducibility
 	io=log_file
 	)
 	println("setting seed $seed")
 	Random.seed!(round(Int64,seed))
+	
 try
 	############# check some stuff #############
 	if spatial_cohesion_idx == 1 && !(sp_params isa Real) 
@@ -99,6 +96,15 @@ try
 		end
 	end
 
+	if update_eta1==true && include_eta1==false 
+		@error "Be coherent! I cant have update eta1 and not including it.\nCheck what you assigned to update_eta1 and include_eta1."
+		return
+	end
+	if update_phi1==true && include_phi1==false
+		@error "Be coherent! I cant have update phi1 and not including it.\nCheck what you assigned to update_phi1 and include_phi1."
+		return
+	end
+
 
 	############# define auxiliary variables #############
 	sPPM = !ismissing(sp_coords)
@@ -114,7 +120,8 @@ try
 
 
 	############# send feedback #############
-	println("fitting $draws iterates \n(for $nout actual iterates)")
+	println("fitting $(Int(draws)) iterates with burnin=$(Int(burnin)) and thinning=$(Int(thin))")
+	println("(thus producing $nout iterates in the end)")
 	println("on n=$n subjects\nfor T=$T time instants")
 	println("with space? $sPPM\nwith covariates? $xPPM")
 	println()
@@ -188,6 +195,8 @@ try
 	# Si_iter = rand(collect(1:n),n,T_star)
 	# gamma_iter = rand((0,1),n,T_star)
 	
+
+	############# some more logging #############
 	function pretty_log(str)
 		if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
 		if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
@@ -200,12 +209,15 @@ try
 		if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
 		if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
 	end
+
+
 	############# start MCMC algorithm #############
+	t_start = now()
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 
 	for i in 1:draws
-		# print("iteration $i\r") # use only this when all finished, for a shorter feedback
-		
+		print("iteration $i\r") # use only this when all finished, for a shorter feedback
+
 		debug("\n▶ iteration $i")
 
 		pretty_log("Si_iter")
@@ -282,7 +294,7 @@ try
 					end
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
 
-					println(log_file,"before exp and normalization:")
+					printlgln("before exp and normalization:")
 					debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
@@ -297,7 +309,7 @@ try
 					end
 					# ... and normalize
 					lg_weights ./= sum_ph
-					println(log_file,"after exp and normalization:")
+					printlgln("after exp and normalization:")
 					debug(@showd lg_weights)
 
 					# compute probh
@@ -317,7 +329,8 @@ try
 					# compatibility check for gamma transition
 					if gamma_iter[j, t] == 0
 						# we want to find ρ_(t-1)^{R_t(+j)} ...
-						indexes = findall(jj -> jj==j || gamma_iter[jj, t]==1, 1:n)
+						indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n)
+						union!(indexes,j)
 						Si_comp1 = Si_iter[indexes, t-1]
 						Si_comp2 = Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
 
@@ -329,7 +342,7 @@ try
 					# sample the new gamma
 					gt = rand(Bernoulli(probh))
 					gamma_iter[j, t] = gt
-					println(log_file,"sampled gamma:")
+					printlgln("sampled gamma:")
 					debug(@showd probh gt gamma_iter[:,t])
 				end
 			end
@@ -342,7 +355,6 @@ try
 		
 			for j in movable_units
 				# remove unit j from the cluster she is currently in
-				println(@showd t j )
 				debug(@showd j t)
 
 				if nh[Si_iter[j,t],t] > 1 # unit j does not belong to a singleton cluster
@@ -373,7 +385,6 @@ try
 						nh[last_label, t] = 1
 
 					end
-					println(@showd last_label)
 					# remove the j-th observation and the last cluster (being j in a singleton)
 					nh[last_label, t] -= 1
 					nclus_iter[t] -= 1
@@ -399,7 +410,7 @@ try
 					Si_comp1 = rho_tmp[indexes]
 					Si_comp2 = Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
 					rho_comp = compatibility(Si_comp1, Si_comp2)
-					println(log_file,"Assigning to cluster k=$k :")
+					printlgln("Assigning to cluster k=$k :")
 					pretty_log("gamma_iter"); pretty_log("Si_iter")
 					debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 					
@@ -453,7 +464,7 @@ try
 				Si_comp1 = rho_tmp[indexes]
 				Si_comp2 = Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
-				println(log_file,"Assigning to NEW SINGLETON cluster (k=$k) :")
+				printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
 				pretty_log("gamma_iter"); pretty_log("Si_iter")
 				debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 
@@ -498,7 +509,7 @@ try
 					nh_tmp[k] -= 1
 				end
 
-				println(log_file,"Before exp and normalization:")
+				printlgln("Before exp and normalization:")
 				debug(@showd ph)
 				# now exponentiate the weights...
 				max_ph = maximum(ph)
@@ -511,7 +522,7 @@ try
 				# ... and normalize them
 				ph ./= sum_ph
 				
-				println(log_file,"After exp and normalization:")
+				printlgln("After exp and normalization:")
 				debug(@showd ph)
 
 				# now sample the new label Si_iter[j,t]
@@ -546,7 +557,6 @@ try
 					# rho_tmp[j] = cl_new
 					muh_iter[cl_new, t] = muh_draw
 					sig2h_iter[cl_new, t] = sig2h_draw
-					println(@showd sig2h_draw)
 				end
 
 				# now we need to relabel after the possible mess created by the sampling
@@ -562,8 +572,6 @@ try
 				# - Si_relab gives the relabelled partition
 				# - nh_reorder gives the numerosities of the relabelled partition, ie "nh_reorder[k] = #(units of new cluster k)"
 				# - old_lab tells "the index in position i (which before was cluster i) is now called cluster old_lab[i]"
-				println(@showd Si_tmp Si_relab nh_reorder old_lab)
-				println(@showd sig2h_iter "before relabeling")
 				# now fix everything (morally permute params)
 				Si_iter[:,t] = Si_relab
 				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
@@ -575,7 +583,6 @@ try
 					sig2h_iter[k,t] = sig2h_iter_copy[old_lab[k],t]
 					nh[k,t] = nh_reorder[k]
 				end
-				println(@showd sig2h_iter nclus_iter[t] "after relabeling")
 				debug(@showd Si_iter[:,t])
 
 			end # for j in movable_units
@@ -754,10 +761,10 @@ try
 		
 
 		############# update phi1 #############
-		phi1_priors[1] = sqrt(phi1_priors[1]) # from variance to std dev
+		phi1_priors = sqrt(phi1_priors) # from variance to std dev
 		if include_phi1
 			phi1_old = phi1_iter
-			phi1_new = rand(Normal(phi1_old, phi1_priors[1])) # proposal value
+			phi1_new = rand(Normal(phi1_old, phi1_priors)) # proposal value
 
 			if (-1 <= phi1_new <= 1)
 				ll_old = 0.0; ll_new = 0.0
@@ -802,6 +809,9 @@ try
 
 	end # for i in 1:draws
 	println("\ndone!")
+	t_end = now()
+	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
+
 catch e
 	println(e)
 	close(log_file)
