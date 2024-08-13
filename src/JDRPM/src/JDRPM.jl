@@ -1,6 +1,6 @@
 module JDRPM
 
-export my_example, MCMC_fit
+export my_example, MCMC_fit, close_log_file
 
 function my_example(iters::Number)
 	result = 0.0

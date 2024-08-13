@@ -1,1010 +1,4906 @@
 LOG FILE
-current seed = 101.0
+current seed = 739.0
 
 ▶ iteration 1.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+muh_iter
+5×4 Matrix{Float64}:
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.5
+ 0.5
+ 0.5
+ 0.5
 ► time 1
-[update gamma]
+												[update gamma]
 ▸ subject 1
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 2
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 3
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 4
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 5
-[update rho]
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+rho_tmp = [2, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 2
+Si_iter[:, t] = [1, 2, 2, 2, 2]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 1, 2, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 2, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 3, 2, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 2, 2, 2]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 2, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 3
+Si_iter[:, t] = [1, 2, 3, 2, 2]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 1, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 3, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 4, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 2
+Si_iter[:, t] = [1, 2, 3, 2, 2]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 2, 4]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 1
+Si_iter[:, t] = [1, 2, 3, 2, 1]
 ► time 2
-[update gamma]
+												[update gamma]
 ▸ subject 1
 Si_red = Int64[]
-n_red = 0
-nclus_red = 0
-nh_red = Int64[]
 Si_red1 = [1]
-n_red1 = 1
-nclus_red1 = 1
-nh_red1 = [1]
 j_label = 1
-nclus_red = 0
+before exp and normalization:
 lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
 probh = 0.5
-alpha_iter[t] = 0.5
-[update gamma]
+sampled gamma:
+probh = 0.5
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 0, 0, 0]
+												[update gamma]
 ▸ subject 2
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
+Si_red = Int64[]
+Si_red1 = [1]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.811634500648507, 5.8888779583328805]
-probh = 0.7974303470142381
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
+probh = 0.5
+sampled gamma:
+probh = 0.5
+gt = true
+gamma_iter[:, t] = Bool[0, 1, 0, 0, 0]
+												[update gamma]
 ▸ subject 3
 Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
 Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.869822985051931, 5.8888779583328805]
-probh = 0.790381673957778
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2658533304076527, 0.7341466695923474]
+probh = 0.7899809369525947
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[0, 1, 0, 0, 0]
+												[update gamma]
 ▸ subject 4
 Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
 Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.749365227008605, 5.8888779583328805]
-probh = 0.80488738220826
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2626031486893714, 0.7373968513106285]
+probh = 0.7920144988059288
+sampled gamma:
+probh = 0.7920144988059288
+gt = true
+gamma_iter[:, t] = Bool[0, 1, 0, 1, 0]
+												[update gamma]
 ▸ subject 5
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.78042336188745, 5.8888779583328805]
-probh = 0.8011799061084945
-alpha_iter[t] = 0.5
-[update rho]
-► time 3
-[update gamma]
-▸ subject 1
-Si_red = Int64[]
-n_red = 0
-nclus_red = 0
-nh_red = Int64[]
-Si_red1 = [1]
-n_red1 = 1
-nclus_red1 = 1
-nh_red1 = [1]
-j_label = 1
-nclus_red = 0
-lg_weights = [5.8888779583328805]
-probh = 0.5
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.811634500648507, 5.8888779583328805]
-probh = 0.7974303470142381
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
 Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
 Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.9367388220922, 5.8888779583328805]
-probh = 0.7821942380278165
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [3.9965031274096807, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.13097392978707556, 0.8690260702129244]
+probh = 0.8841936791489672
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[0, 1, 0, 1, 0]
+												[update rho]
+movable_units = [1, 3, 5]
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 1
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [2, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 3
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  1  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 2
+Si_iter[:, t] = [1, 1, 2, 1, 1]
+j = 5
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 1, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 1, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 1, 2, 1, 2]
+► time 3
+												[update gamma]
+▸ subject 1
+Si_red = Int64[]
+Si_red1 = [1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
+probh = 0.5
+sampled gamma:
+probh = 0.5
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 2
+Si_red = Int64[]
+Si_red1 = [1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
+probh = 0.5
+sampled gamma:
+probh = 0.5
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 3
+Si_red = Int64[]
+Si_red1 = [1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
+probh = 0.5
+sampled gamma:
+probh = 0.5
+gt = true
+gamma_iter[:, t] = Bool[0, 0, 1, 0, 0]
+												[update gamma]
 ▸ subject 4
-Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
-Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
+Si_red = [1]
+Si_red1 = [1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [5.438273816763107, 5.8888779583328805]
-probh = 0.7198298771194883
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2626031486893714, 0.7373968513106285]
+probh = 0.7920144988059288
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 1, 0, 0]
+												[update gamma]
 ▸ subject 5
-Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
-Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
+Si_red = [1]
+Si_red1 = [1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [5.469331951641952, 5.8888779583328805]
-probh = 0.7160116133046673
-alpha_iter[t] = 0.5
-[update rho]
+before exp and normalization:
+lg_weights = [4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.26694609945477304, 0.733053900545227]
+probh = 0.7892995609129286
+sampled gamma:
+probh = 0.7892995609129286
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 1, 0, 0]
+												[update rho]
+movable_units = [1, 2, 4, 5]
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 1
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [2, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 2
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 4
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  1  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 2
+Si_iter[:, t] = [1, 1, 1, 2, 1]
+j = 5
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 2, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [1, 1, 1, 2, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 2, 1]
 
 ▶ iteration 2.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+muh_iter
+5×4 Matrix{Float64}:
+ -0.646822  0.0       0.0       0.0
+ -0.764659  0.45339  -0.183538  0.0
+  1.24477   0.0       0.0       0.0
+  0.0       0.0       0.0       0.0
+  0.0       0.0       0.0       0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 1.24653  1.0      1.0      1.0
+ 1.0      2.59546  1.06598  1.0
+ 2.28117  1.0      1.0      1.0
+ 1.0      1.0      1.0      1.0
+ 1.0      1.0      1.0      1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.037278277757490506
+ 0.3036783216430237
+ 0.06005705794915557
+ 0.5
 ► time 1
-[update gamma]
+												[update gamma]
 ▸ subject 1
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 2
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 3
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 4
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 5
-[update rho]
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 2, 3, 2, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [1, 2, 3, 2, 1]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [2, 2, 3, 2, 1]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [3, 2, 3, 2, 1]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [4, 2, 3, 2, 1]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 4
+Si_iter[:, t] = [1, 2, 3, 2, 4]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 4  2  1  0
+rho_tmp = [1, 1, 3, 2, 4]
+Si_comp1 = [1, 2]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 4  2  1  0
+rho_tmp = [1, 2, 3, 2, 4]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 4  2  1  0
+rho_tmp = [1, 3, 3, 2, 4]
+Si_comp1 = [3, 2]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Assigning to cluster k=4 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 4  2  1  0
+rho_tmp = [1, 4, 3, 2, 4]
+Si_comp1 = [4, 2]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=5) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 3  2  1  0
+ 2  1  2  0
+ 4  2  1  0
+rho_tmp = [1, 5, 3, 2, 4]
+Si_comp1 = [5, 2]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [-Inf, 0.5, -Inf, -Inf, -Inf]
+After exp and normalization:
+ph = [0.0, 1.0, 0.0, 0.0, 0.0]
+new_label = 2
+Si_iter[:, t] = [1, 2, 3, 2, 4]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 4  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 4  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 2, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 4  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 3, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 4  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 4, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 2, 3]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = [2, 1]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 3, 3]
+Si_comp1 = [2, 3]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 4, 3]
+Si_comp1 = [2, 4]
+Si_comp2 = [1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [-Inf, 0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [0.0, 1.0, 0.0, 0.0]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 2, 3]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 2, 2]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 3  2  1  0
+rho_tmp = [1, 2, 1, 2, 3]
+Si_comp1 = [2, 2]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 2, 1]
 ► time 2
-[update gamma]
+												[update gamma]
+▸ subject 1
+Si_red = [1, 2]
+Si_red1 = [1, 2, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.830083897163754, 4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.20479665298432612, 0.20479665298432612, 0.5904066940313477]
+probh = 0.680461827295275
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[0, 1, 0, 1, 0]
+												[update gamma]
+▸ subject 2
+Si_red = [1]
+Si_red1 = [1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.25700961910357195, 0.7429903808964281]
+probh = 0.3698709296960879
+sampled gamma:
+probh = 0.3698709296960879
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 0, 1, 0]
+												[update gamma]
+▸ subject 3
+Si_red = [1]
+Si_red1 = [1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2658533304076527, 0.7341466695923474]
+probh = 0.6212760106460343
+sampled gamma:
+probh = 0.6212760106460343
+gt = true
+gamma_iter[:, t] = Bool[0, 0, 1, 1, 0]
+												[update gamma]
+▸ subject 4
+Si_red = [1]
+Si_red1 = [1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2626031486893714, 0.7373968513106285]
+probh = 0.3716339105643132
+sampled gamma:
+probh = 0.3716339105643132
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 1, 0, 0]
+												[update gamma]
+▸ subject 5
+Si_red = [1]
+Si_red1 = [1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.26694609945477304, 0.733053900545227]
+probh = 0.6203103642306946
+sampled gamma:
+probh = 0.6203103642306946
+gt = false
+gamma_iter[:, t] = Bool[0, 0, 1, 0, 0]
+												[update rho]
+movable_units = [1, 2, 4, 5]
+Si_iter[:, t] = [1, 1, 2, 1, 2]
+j = 1
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [1, 1, 2, 1, 2]
+Si_comp1 = [2]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [2, 1, 2, 1, 2]
+Si_comp1 = [2]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  1  1  0
+ 1  2  1  0
+ 2  1  2  0
+ 1  2  1  0
+rho_tmp = [3, 1, 2, 1, 2]
+Si_comp1 = [2]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+j = 2
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 3, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+j = 4
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+j = 5
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  1  1  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 3]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+► time 3
+												[update gamma]
 ▸ subject 1
 Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
 Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.816709320808882, 5.8888779583328805]
-probh = 0.796818534294704
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2575399786141613, 0.7424600213858388]
+probh = 0.19877890064222592
+sampled gamma:
+probh = 0.19877890064222592
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 0, 0]
+												[update gamma]
 ▸ subject 2
 Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
 Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.878550337688776, 5.8888779583328805]
-probh = 0.7893184752623598
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [3.94510601172436, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.1252340534735866, 0.8747659465264135]
+probh = 0.33783587833843215
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 1, 0, 0]
+												[update gamma]
 ▸ subject 3
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
+Si_red = [1]
+Si_red1 = [1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.9367388220922, 5.8888779583328805]
-probh = 0.7821942380278165
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2658533304076527, 0.7341466695923474]
+probh = 0.19376743596681567
+sampled gamma:
+probh = 0.19376743596681567
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
 ▸ subject 4
-Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
-Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
-j_label = 1
-nclus_red = 1
-lg_weights = [5.438273816763107, 5.8888779583328805]
-probh = 0.7198298771194883
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.847339198927718, 5.8888779583328805]
-probh = 0.7931137433573028
-alpha_iter[t] = 0.5
-[update rho]
-► time 3
-[update gamma]
-▸ subject 1
-Si_red = [1, 1, 2]
-n_red = 3
-nclus_red = 2
-nh_red = [2, 1]
-Si_red1 = [1, 1, 2, 1]
-n_red1 = 4
-nclus_red1 = 2
-nh_red1 = [3, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [4.88362515784915, 4.816709320808882, 5.8888779583328805]
-probh = 0.823566937034331
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 1, 2]
-n_red = 3
-nclus_red = 2
-nh_red = [2, 1]
-Si_red1 = [1, 1, 2, 1]
-n_red1 = 4
-nclus_red1 = 2
-nh_red1 = [3, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [4.878550337688776, 4.811634500648507, 5.8888779583328805]
-probh = 0.8239986497328802
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 2]
-n_red = 3
-nclus_red = 2
-nh_red = [2, 1]
-Si_red1 = [1, 1, 2, 1]
-n_red1 = 4
-nclus_red1 = 2
-nh_red1 = [3, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [4.9367388220922, 4.869822985051931, 5.8888779583328805]
-probh = 0.8190543276270701
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 1, 1, 2]
-n_red = 4
-nclus_red = 2
-nh_red = [3, 1]
-Si_red1 = [1, 1, 1, 2, 2]
-n_red1 = 5
-nclus_red1 = 2
-nh_red1 = [3, 2]
+Si_red = [1]
+Si_red1 = [1, 2]
 j_label = 2
-nclus_red = 2
-lg_weights = [5.438273816763107, 4.749365227008605, 5.8888779583328805]
-probh = 0.8594871320537
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2626031486893714, 0.7373968513106285]
+probh = 0.07973925611422833
+sampled gamma:
+probh = 0.07973925611422833
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
 ▸ subject 5
-Si_red = [1, 1, 1, 2]
-n_red = 4
-nclus_red = 2
-nh_red = [3, 1]
-Si_red1 = [1, 1, 1, 2, 1]
-n_red1 = 5
-nclus_red1 = 2
-nh_red1 = [4, 1]
+Si_red = [1]
+Si_red1 = [1, 1]
 j_label = 1
-nclus_red = 2
-lg_weights = [5.469331951641952, 4.78042336188745, 5.8888779583328805]
-probh = 0.7514536571657836
-alpha_iter[t] = 0.5
-[update rho]
+before exp and normalization:
+lg_weights = [4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.26694609945477304, 0.733053900545227]
+probh = 0.19312742037394648
+sampled gamma:
+probh = 0.19312742037394648
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update rho]
+movable_units = [2, 3, 4, 5]
+Si_iter[:, t] = [1, 1, 1, 2, 1]
+j = 2
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 3, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 2, 1]
+j = 3
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 3, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 1, 2, 2, 1]
+j = 4
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  2  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 3
+Si_iter[:, t] = [1, 1, 2, 3, 1]
+j = 5
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 4]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 1
+Si_iter[:, t] = [1, 1, 2, 3, 1]
 
 ▶ iteration 3.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+muh_iter
+5×4 Matrix{Float64}:
+ -0.303465  0.45339   0.0       0.0
+  0.189315  0.0      -0.183538  0.0
+  0.371685  0.0       0.218824  0.0
+  1.24477   0.0       0.0       0.0
+  0.0       0.0       0.0       0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 0.858654  2.59546  1.0      1.0
+ 1.0       1.0      1.06598  1.0
+ 1.24653   1.0      4.42414  1.0
+ 2.28117   1.0      1.0      1.0
+ 1.0       1.0      1.0      1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.2581599501639105
+ 0.37247309014590313
+ 0.5682409082434575
+ 0.5
 ► time 1
-[update gamma]
+												[update gamma]
 ▸ subject 1
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 2
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 3
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 4
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 5
-[update rho]
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [2, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 2  2  3  0
+ 1  1  1  0
+rho_tmp = [3, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 3
+Si_iter[:, t] = [1, 2, 3, 2, 3]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 3  1  2  0
+ 2  2  3  0
+ 3  1  1  0
+rho_tmp = [1, 1, 3, 2, 3]
+Si_comp1 = [3]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 3  1  2  0
+ 2  2  3  0
+ 3  1  1  0
+rho_tmp = [1, 2, 3, 2, 3]
+Si_comp1 = [3]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 3  1  2  0
+ 2  2  3  0
+ 3  1  1  0
+rho_tmp = [1, 3, 3, 2, 3]
+Si_comp1 = [3]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 3  1  2  0
+ 2  2  3  0
+ 3  1  1  0
+rho_tmp = [1, 4, 3, 2, 3]
+Si_comp1 = [3]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 3
+Si_iter[:, t] = [1, 2, 2, 3, 2]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 2  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 3, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 2  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 2, 3, 2]
+Si_comp1 = [2]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 2  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 3, 3, 2]
+Si_comp1 = [3]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 2  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 4, 3, 2]
+Si_comp1 = [4]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 3, 2]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 2, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 3  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 3, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 2]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  0  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  0  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 2  1  1  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
 ► time 2
-[update gamma]
+												[update gamma]
 ▸ subject 1
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.88362515784915, 5.8888779583328805]
-probh = 0.7886995678444995
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
-Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
-j_label = 1
-nclus_red = 1
-lg_weights = [5.500543090403009, 5.8888779583328805]
-probh = 0.7121907484615284
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
-Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
-j_label = 1
-nclus_red = 1
-lg_weights = [5.5587315748064325, 5.8888779583328805]
-probh = 0.7051166760911728
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.544706285211848, 5.8888779583328805]
-probh = 0.8286206462900996
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.5757644200906915, 5.8888779583328805]
-probh = 0.8251054485576106
-alpha_iter[t] = 0.5
-[update rho]
-► time 3
-[update gamma]
-▸ subject 1
-Si_red = [1, 1, 1, 2]
-n_red = 4
-nclus_red = 2
-nh_red = [3, 1]
-Si_red1 = [1, 1, 1, 2, 1]
-n_red1 = 5
-nclus_red1 = 2
-nh_red1 = [4, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [5.505617910563385, 4.816709320808882, 5.8888779583328805]
-probh = 0.7480590011439827
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 1, 1, 2]
-n_red = 4
-nclus_red = 2
-nh_red = [3, 1]
-Si_red1 = [1, 1, 1, 2, 1]
-n_red1 = 5
-nclus_red1 = 2
-nh_red1 = [4, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [5.500543090403009, 4.811634500648507, 5.8888779583328805]
-probh = 0.7485318829514501
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 2]
-n_red = 3
-nclus_red = 2
-nh_red = [2, 1]
-Si_red1 = [1, 1, 2, 1]
-n_red1 = 4
-nclus_red1 = 2
-nh_red1 = [3, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [4.9367388220922, 4.869822985051931, 5.8888779583328805]
-probh = 0.8190543276270701
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
-Si_red1 = [1, 2, 2]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [1, 2]
+Si_red = [1]
+Si_red1 = [1, 2]
 j_label = 2
-nclus_red = 2
-lg_weights = [4.749365227008605, 4.749365227008605, 5.8888779583328805]
-probh = 0.836741228494217
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2575399786141613, 0.7424600213858388]
+probh = 0.4442735976844967
+sampled gamma:
+probh = 0.4442735976844967
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 0, 0]
+												[update gamma]
+▸ subject 2
 Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
+Si_red1 = [1, 2, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.827308372615883, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2044611395152701, 0.2044611395152701, 0.5910777209694599]
+probh = 0.7437889084020501
+sampled gamma:
+probh = 0.7437889084020501
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 0]
+												[update gamma]
+▸ subject 3
+Si_red = [1, 2]
 Si_red1 = [1, 2, 1]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [2, 1]
 j_label = 1
-nclus_red = 2
-lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
-probh = 0.8341535190271019
-alpha_iter[t] = 0.5
-[update rho]
+before exp and normalization:
+lg_weights = [4.873113894613011, 4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2100190630474052, 0.2100190630474052, 0.5799618739051896]
+probh = 0.7386445029794323
+sampled gamma:
+probh = 0.7386445029794323
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 0]
+												[update gamma]
+▸ subject 4
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.243323591247992, 4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.27884793416545245, 0.18937680317199707, 0.5317752626625505]
+probh = 0.7581190595988572
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 0]
+												[update gamma]
+▸ subject 5
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.265633384782791, 4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2821583386987598, 0.19162503151050037, 0.5262166297907399]
+probh = 0.6777967967139235
+sampled gamma:
+probh = 0.6777967967139235
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 1]
+												[update rho]
+movable_units = [4]
+Si_iter[:, t] = [1, 2, 1, 2, 1]
+j = 4
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  2  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = [1]
+Si_comp2 = [1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+► time 3
+												[update gamma]
+▸ subject 1
+Si_red = Int64[]
+Si_red1 = [1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.8888779583328805]
+after exp and normalization:
+lg_weights = [1.0]
+probh = 0.5682409082434575
+sampled gamma:
+probh = 0.5682409082434575
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 2
+Si_red = [1]
+Si_red1 = [1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.25700961910357195, 0.7429903808964281]
+probh = 0.836623863500127
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 3
+Si_red = [1]
+Si_red1 = [1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2658533304076527, 0.7341466695923474]
+probh = 0.641923879108329
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 4
+Si_red = [1]
+Si_red1 = [1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2626031486893714, 0.7373968513106285]
+probh = 0.6409078742664093
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 0]
+												[update gamma]
+▸ subject 5
+Si_red = [1]
+Si_red1 = [1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.26694609945477304, 0.733053900545227]
+probh = 0.8313725553272894
+sampled gamma:
+probh = 0.8313725553272894
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 1]
+												[update rho]
+movable_units = [2, 3, 4]
+Si_iter[:, t] = [1, 1, 2, 3, 1]
+j = 2
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 1, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 3, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  1  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 4, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 2
+Si_iter[:, t] = [1, 2, 2, 3, 1]
+j = 3
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  2  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 4, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 3
+Si_iter[:, t] = [1, 2, 3, 3, 1]
+j = 4
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 4, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 4
+Si_iter[:, t] = [1, 2, 3, 4, 1]
 
 ▶ iteration 4.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+muh_iter
+5×4 Matrix{Float64}:
+ -0.573803   0.45339   0.0       0.0
+ -0.0343159  0.0      -0.183538  0.0
+  0.913025   0.0       0.218824  0.0
+ -1.49983    0.0       0.183273  0.0
+  0.0        0.0       0.0       0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 3.11284   2.59546  1.0      1.0
+ 0.858654  1.0      1.06598  1.0
+ 1.0       1.0      4.42414  1.0
+ 2.28117   1.0      1.01354  1.0
+ 1.0       1.0      1.0      1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.21863772346457733
+ 0.4524815385554825
+ 0.6599936431104259
+ 0.5
 ► time 1
-[update gamma]
+												[update gamma]
 ▸ subject 1
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 2
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 3
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 4
-[update gamma]
+we are at time t=1 so nothing to do
+												[update gamma]
 ▸ subject 5
-[update rho]
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [2, 2, 1, 1, 1]
+Si_comp1 = [2, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [3, 2, 1, 1, 1]
+Si_comp1 = [3, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [-Inf, 0.5]
+After exp and normalization:
+ph = [0.0, 1.0]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 2, 1, 1]
+Si_comp1 = [1, 2, 2, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 1, 1]
+Si_comp1 = [1, 2, 3, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = [1, 2, 1, 2]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  0  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = [1, 2, 1, 3]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
 ► time 2
-[update gamma]
+												[update gamma]
 ▸ subject 1
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.612050379012124, 5.8888779583328805]
-probh = 0.8209569128191584
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [5.21701179364534, 4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.27494978815737403, 0.186729416052143, 0.538320795790483]
+probh = 0.7503570699468285
+sampled gamma:
+probh = 0.7503570699468285
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 1]
+												[update gamma]
 ▸ subject 2
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.60697555885175, 5.8888779583328805]
-probh = 0.8215397420858753
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.6651640432551735, 5.8888779583328805]
-probh = 0.8148076420466795
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.544706285211848, 5.8888779583328805]
-probh = 0.8286206462900996
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.5757644200906915, 5.8888779583328805]
-probh = 0.8251054485576106
-alpha_iter[t] = 0.5
-[update rho]
-► time 3
-[update gamma]
-▸ subject 1
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 2]
-n_red1 = 2
-nclus_red1 = 2
-nh_red1 = [1, 1]
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 2]
 j_label = 2
-nclus_red = 1
-lg_weights = [4.816709320808882, 5.8888779583328805]
-probh = 0.5730629102014666
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 2]
-n_red1 = 2
-nclus_red1 = 2
-nh_red1 = [1, 1]
-j_label = 2
-nclus_red = 1
-lg_weights = [4.811634500648507, 5.8888779583328805]
-probh = 0.5727468779925688
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [5.21423626909747, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2745390234223615, 0.18645044926472418, 0.5390105273129143]
+probh = 0.8159192010316205
+sampled gamma:
+probh = 0.8159192010316205
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 1, 0, 1]
+												[update gamma]
 ▸ subject 3
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
+Si_red = [1, 1]
+Si_red1 = [1, 1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.869822985051931, 5.8888779583328805]
-probh = 0.790381673957778
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [3.990911533721488, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.1303388081309224, 0.8696611918690775]
+probh = 0.8637708106859715
+sampled gamma:
+probh = 0.8637708106859715
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 0, 1]
+												[update gamma]
 ▸ subject 4
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 2]
-n_red1 = 2
-nclus_red1 = 2
-nh_red1 = [1, 1]
-j_label = 2
-nclus_red = 1
-lg_weights = [4.749365227008605, 5.8888779583328805]
-probh = 0.568960853394309
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
-Si_red1 = [1, 2, 3]
-n_red1 = 3
-nclus_red1 = 3
-nh_red1 = [1, 1, 1]
-j_label = 3
-nclus_red = 2
-lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
-probh = 0.6240795558997592
-alpha_iter[t] = 0.5
-[update rho]
-
-▶ iteration 5.0
-► time 1
-[update gamma]
-▸ subject 1
-[update gamma]
-▸ subject 2
-[update gamma]
-▸ subject 3
-[update gamma]
-▸ subject 4
-[update gamma]
-▸ subject 5
-[update rho]
-► time 2
-[update gamma]
-▸ subject 1
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
 j_label = 1
-nclus_red = 1
-lg_weights = [4.612050379012124, 5.8888779583328805]
-probh = 0.8209569128191584
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.60697555885175, 5.8888779583328805]
-probh = 0.8215397420858753
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.6651640432551735, 5.8888779583328805]
-probh = 0.8148076420466795
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.544706285211848, 5.8888779583328805]
-probh = 0.8286206462900996
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.5757644200906915, 5.8888779583328805]
-probh = 0.8251054485576106
-alpha_iter[t] = 0.5
-[update rho]
-► time 3
-[update gamma]
-▸ subject 1
-Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
-Si_red1 = [1, 2, 2]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [1, 2]
-j_label = 2
-nclus_red = 2
-lg_weights = [4.816709320808882, 4.816709320808882, 5.8888779583328805]
-probh = 0.8311298241398752
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
-Si_red1 = [1, 2, 1]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [2, 1]
-j_label = 1
-nclus_red = 2
-lg_weights = [4.811634500648507, 4.811634500648507, 5.8888779583328805]
-probh = 0.831552665175927
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 1]
-n_red1 = 2
-nclus_red1 = 1
-nh_red1 = [2]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.869822985051931, 5.8888779583328805]
-probh = 0.790381673957778
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1]
-n_red = 1
-nclus_red = 1
-nh_red = [1]
-Si_red1 = [1, 2]
-n_red1 = 2
-nclus_red1 = 2
-nh_red1 = [1, 1]
-j_label = 2
-nclus_red = 1
-lg_weights = [4.749365227008605, 5.8888779583328805]
-probh = 0.568960853394309
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 5
-Si_red = [1, 2]
-n_red = 2
-nclus_red = 2
-nh_red = [1, 1]
-Si_red1 = [1, 2, 3]
-n_red1 = 3
-nclus_red1 = 3
-nh_red1 = [1, 1, 1]
-j_label = 3
-nclus_red = 2
-lg_weights = [4.78042336188745, 4.78042336188745, 5.8888779583328805]
-probh = 0.6240795558997592
-alpha_iter[t] = 0.5
-[update rho]
-
-▶ iteration 6.0
-► time 1
-[update gamma]
-▸ subject 1
-[update gamma]
-▸ subject 2
-[update gamma]
-▸ subject 3
-[update gamma]
-▸ subject 4
-[update gamma]
-▸ subject 5
-[update rho]
-► time 2
-[update gamma]
-▸ subject 1
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.612050379012124, 5.8888779583328805]
-probh = 0.8209569128191584
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 2
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.60697555885175, 5.8888779583328805]
-probh = 0.8215397420858753
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 3
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.6651640432551735, 5.8888779583328805]
-probh = 0.8148076420466795
-alpha_iter[t] = 0.5
-[update gamma]
-▸ subject 4
-Si_red = [1, 1, 1, 1]
-n_red = 4
-nclus_red = 1
-nh_red = [4]
-Si_red1 = [1, 1, 1, 1, 1]
-n_red1 = 5
-nclus_red1 = 1
-nh_red1 = [5]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.544706285211848, 5.8888779583328805]
-probh = 0.8286206462900996
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [5.246076967856642, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3446136464186195, 0.6553863535813805]
+probh = 0.705719018632583
+sampled gamma:
+probh = 0.705719018632583
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
 ▸ subject 5
 Si_red = [1, 1, 1]
-n_red = 3
-nclus_red = 1
-nh_red = [3]
 Si_red1 = [1, 1, 1, 1]
-n_red1 = 4
-nclus_red1 = 1
-nh_red1 = [4]
 j_label = 1
-nclus_red = 1
-lg_weights = [5.469331951641952, 5.8888779583328805]
-probh = 0.7160116133046673
-alpha_iter[t] = 0.5
-[update rho]
+before exp and normalization:
+lg_weights = [5.268386761391443, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.34966974459532024, 0.6503302554046798]
+probh = 0.7026850858219444
+sampled gamma:
+probh = 0.7026850858219444
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update rho]
+movable_units = [2]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  0  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  1  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  3  0
+ 1  1  4  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1]
+Si_comp2 = [1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 1]
 ► time 3
-[update gamma]
+												[update gamma]
 ▸ subject 1
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 2]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [2, 1]
+Si_red = [1]
+Si_red1 = [1, 2]
 j_label = 2
-nclus_red = 1
-lg_weights = [4.88362515784915, 5.8888779583328805]
-probh = 0.5773371761531428
-alpha_iter[t] = 0.5
-[update gamma]
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2575399786141613, 0.7424600213858388]
+probh = 0.7233324120529591
+sampled gamma:
+probh = 0.7233324120529591
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 0, 0, 1]
+												[update gamma]
 ▸ subject 2
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.878550337688776, 5.8888779583328805]
-probh = 0.7893184752623598
-alpha_iter[t] = 0.5
-[update gamma]
+Si_red = [1, 2]
+Si_red1 = [1, 2, 3]
+j_label = 3
+before exp and normalization:
+lg_weights = [4.827308372615883, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2044611395152701, 0.2044611395152701, 0.5910777209694599]
+probh = 0.7665753466560246
+sampled gamma:
+probh = 0.7665753466560246
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 1]
+												[update gamma]
 ▸ subject 3
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 1]
-n_red1 = 3
-nclus_red1 = 1
-nh_red1 = [3]
-j_label = 1
-nclus_red = 1
-lg_weights = [4.9367388220922, 5.8888779583328805]
-probh = 0.7821942380278165
-alpha_iter[t] = 0.5
-[update gamma]
+Si_red = [1, 2, 3]
+Si_red1 = [1, 2, 3, 4]
+j_label = 4
+before exp and normalization:
+lg_weights = [4.873113894613011, 4.873113894613011, 4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.173566739121016, 0.173566739121016, 0.173566739121016, 0.47929978263695194]
+probh = 0.8019767096770724
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 1]
+												[update gamma]
 ▸ subject 4
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 2]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [2, 1]
-j_label = 2
-nclus_red = 1
-lg_weights = [4.816281064048874, 5.8888779583328805]
-probh = 0.5730361967959854
-alpha_iter[t] = 0.5
-[update gamma]
+Si_red = [1, 2, 3]
+Si_red1 = [1, 2, 3, 3]
+j_label = 3
+before exp and normalization:
+lg_weights = [4.856395694766405, 4.856395694766405, 4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.17217549464665055, 0.17217549464665055, 0.17217549464665055, 0.48347351606004846]
+probh = 0.9185275441110826
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 1]
+												[update gamma]
 ▸ subject 5
-Si_red = [1, 1]
-n_red = 2
-nclus_red = 1
-nh_red = [2]
-Si_red1 = [1, 1, 2]
-n_red1 = 3
-nclus_red1 = 2
-nh_red1 = [2, 1]
+Si_red = [1, 2]
+Si_red1 = [1, 2, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.878705488301205, 4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.21070043908707134, 0.21070043908707134, 0.5785991218258574]
+probh = 0.9020827713025636
+sampled gamma:
+probh = 0.9020827713025636
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 0]
+												[update rho]
+movable_units = [3, 4, 5]
+Si_iter[:, t] = [1, 2, 3, 4, 1]
+j = 3
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  4  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  4  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 2, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=3 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  4  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 3, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=4) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  4  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 4, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.25, 0.25, 0.25, 0.25]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 3, 1]
+j = 4
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  3  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 5
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  1  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 2]
+
+▶ iteration 5.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+muh_iter
+5×4 Matrix{Float64}:
+ -0.650043   0.45339    0.0       0.0
+ -1.04707   -0.566445  -0.183538  0.0
+  0.913025   0.0        0.183273  0.0
+ -1.49983    0.0        0.218824  0.0
+  0.0        0.0        0.0       0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 3.11284   2.59546  1.0      1.0
+ 0.347109  2.48121  1.06598  1.0
+ 1.0       1.0      1.01354  1.0
+ 2.28117   1.0      4.42414  1.0
+ 1.0       1.0      1.0      1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.07910724741930888
+ 0.9074501527069466
+ 0.5005415026203509
+ 0.5
+► time 1
+												[update gamma]
+▸ subject 1
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 2
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 3
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 4
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 5
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [2, 2, 1, 1, 1]
+Si_comp1 = [2, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [3, 2, 1, 1, 1]
+Si_comp1 = [3, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 2, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 3, 1, 1]
+Si_comp1 = [1, 3, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 2, 1]
+Si_comp1 = [1, 1, 2, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 3, 1]
+Si_comp1 = [1, 1, 3, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = [1, 1, 1, 2]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = [1, 1, 1, 3]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+► time 2
+												[update gamma]
+▸ subject 1
+Si_red = [1, 2, 2]
+Si_red1 = [1, 2, 2, 2]
 j_label = 2
-nclus_red = 1
-lg_weights = [4.847339198927718, 5.8888779583328805]
-probh = 0.5749945887689849
-alpha_iter[t] = 0.5
-[update rho]
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.1550287221147, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.18986693156052917, 0.2627671533475501, 0.5473659150919207]
+probh = 0.9739001250669262
+sampled gamma:
+probh = 0.9739001250669262
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 2
+Si_red = [1, 2, 1, 1]
+Si_red1 = [1, 2, 1, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.716005388731866, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.38462932056637555, 0.15815618392874206, 0.4572144955048823]
+probh = 0.9841258764109515
+sampled gamma:
+probh = 0.9841258764109515
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.262795167703248, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3483992828794721, 0.6516007171205278]
+probh = 0.9656863991056346
+sampled gamma:
+probh = 0.9656863991056346
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.246076967856642, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3446136464186195, 0.6553863535813805]
+probh = 0.9660465844339182
+sampled gamma:
+probh = 0.9660465844339182
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.268386761391443, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.34966974459532024, 0.6503302554046798]
+probh = 0.9655655808942677
+sampled gamma:
+probh = 0.9655655808942677
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update rho]
+movable_units = [2]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1]
+Si_comp2 = [1, 2]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  0  0
+ 0  1  0  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2]
+Si_comp2 = [1, 2]
+rho_comp = 1
+Before exp and normalization:
+ph = [-Inf, 0.5]
+After exp and normalization:
+ph = [0.0, 1.0]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+► time 3
+												[update gamma]
+▸ subject 1
+Si_red = [1]
+Si_red1 = [1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2575399786141613, 0.7424600213858388]
+probh = 0.7955558672115857
+sampled gamma:
+probh = 0.7955558672115857
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 0]
+												[update gamma]
+▸ subject 2
+Si_red = [1]
+Si_red1 = [1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.25700961910357195, 0.7429903808964281]
+probh = 0.5742562759563816
+sampled gamma:
+probh = 0.5742562759563816
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 0, 0, 0]
+												[update gamma]
+▸ subject 3
+Si_red = [1, 2]
+Si_red1 = [1, 2, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [4.873113894613011, 4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2100190630474052, 0.2100190630474052, 0.5799618739051896]
+probh = 0.8267437367705612
+sampled gamma:
+probh = 0.8267437367705612
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 0, 0]
+												[update gamma]
+▸ subject 4
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.243323591247992, 4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.27884793416545245, 0.18937680317199707, 0.5317752626625505]
+probh = 0.7823228824713715
+sampled gamma:
+probh = 0.7823228824713715
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update gamma]
+▸ subject 5
+Si_red = [1, 2, 1, 1]
+Si_red1 = [1, 2, 1, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.767402504417189, 4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3936461064830139, 0.16186380676357426, 0.44449008675341195]
+probh = 0.8609455893500346
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update rho]
+movable_units = [5]
+Si_iter[:, t] = [1, 2, 1, 1, 2]
+j = 5
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 2]
+
+▶ iteration 6.0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+muh_iter
+5×4 Matrix{Float64}:
+ -0.179832   0.45339    0.0       0.0
+ -0.775529  -0.914342  -0.183538  0.0
+  0.913025   0.0        0.183273  0.0
+ -1.49983    0.0        0.218824  0.0
+  0.0        0.0        0.0       0.0
+sig2h_iter
+5×4 Matrix{Float64}:
+ 3.11284  2.59546   1.0      1.0
+ 1.10126  0.867645  1.06598  1.0
+ 1.0      1.0       1.01354  1.0
+ 2.28117  1.0       4.42414  1.0
+ 1.0      1.0       1.0      1.0
+alpha_iter
+4-element Vector{Float64}:
+ 0.05939673443660186
+ 0.561705912697233
+ 0.6027246161481669
+ 0.5
+► time 1
+												[update gamma]
+▸ subject 1
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 2
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 3
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 4
+we are at time t=1 so nothing to do
+												[update gamma]
+▸ subject 5
+we are at time t=1 so nothing to do
+												[update rho]
+movable_units = [1, 2, 3, 4, 5]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 1
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [2, 2, 1, 1, 1]
+Si_comp1 = [2, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [3, 2, 1, 1, 1]
+Si_comp1 = [3, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 2  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5]
+After exp and normalization:
+ph = [0.5, 0.5]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 3
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 2, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 4
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 2, 1]
+Si_comp1 = [1, 1, 2, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+j = 5
+t = 1
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 2]
+Si_comp1 = [1, 1, 1, 2]
+Si_comp2 = [1, 1, 1, 1]
+rho_comp = 0
+Before exp and normalization:
+ph = [0.5, -Inf]
+After exp and normalization:
+ph = [1.0, 0.0]
+new_label = 1
+Si_iter[:, t] = [1, 1, 1, 1, 1]
+► time 2
+												[update gamma]
+▸ subject 1
+Si_red = [1, 2, 2]
+Si_red1 = [1, 2, 2, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [4.830083897163754, 5.1550287221147, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.18986693156052917, 0.2627671533475501, 0.5473659150919207]
+probh = 0.8298515158329057
+sampled gamma:
+probh = 0.8298515158329057
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 2
+Si_red = [1, 2, 1, 1]
+Si_red1 = [1, 2, 1, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.716005388731866, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.38462932056637555, 0.15815618392874206, 0.4572144955048823]
+probh = 0.8901486650555613
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 3
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.262795167703248, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3483992828794721, 0.6516007171205278]
+probh = 0.7862544873245395
+sampled gamma:
+probh = 0.7862544873245395
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 4
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.246076967856642, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3446136464186195, 0.6553863535813805]
+probh = 0.788084826711516
+sampled gamma:
+probh = 0.788084826711516
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update gamma]
+▸ subject 5
+Si_red = [1, 1, 1]
+Si_red1 = [1, 1, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.268386761391443, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.34966974459532024, 0.6503302554046798]
+probh = 0.7856421283323506
+sampled gamma:
+probh = 0.7856421283323506
+gt = true
+gamma_iter[:, t] = Bool[1, 0, 1, 1, 1]
+												[update rho]
+movable_units = [2]
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+j = 2
+t = 2
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 1, 1, 1, 1]
+Si_comp1 = [1, 1, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 0
+Assigning to NEW SINGLETON cluster (k=2) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = [1, 2, 1, 1]
+Si_comp2 = [1, 2, 1, 1]
+rho_comp = 1
+Before exp and normalization:
+ph = [-Inf, 0.5]
+After exp and normalization:
+ph = [0.0, 1.0]
+new_label = 2
+Si_iter[:, t] = [1, 2, 1, 1, 1]
+► time 3
+												[update gamma]
+▸ subject 1
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.21701179364534, 4.830083897163754, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.27494978815737403, 0.186729416052143, 0.538320795790483]
+probh = 0.8465763686635032
+sampled gamma:
+probh = 0.8465763686635032
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update gamma]
+▸ subject 2
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.21423626909747, 4.827308372615883, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.2745390234223615, 0.18645044926472418, 0.5390105273129143]
+probh = 0.8905547796605912
+sampled gamma:
+probh = 0.8905547796605912
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update gamma]
+▸ subject 3
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.260041791094598, 4.873113894613011, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.28132824279028057, 0.19106128012412388, 0.5276104770855956]
+probh = 0.8435739069569046
+sampled gamma:
+probh = 0.8435739069569046
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update gamma]
+▸ subject 4
+Si_red = [1, 2, 1]
+Si_red1 = [1, 2, 1, 1]
+j_label = 1
+before exp and normalization:
+lg_weights = [5.243323591247992, 4.856395694766405, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.27884793416545245, 0.18937680317199707, 0.5317752626625505]
+probh = 0.8447389020149075
+sampled gamma:
+probh = 0.8447389020149075
+gt = true
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update gamma]
+▸ subject 5
+Si_red = [1, 2, 1, 1]
+Si_red1 = [1, 2, 1, 1, 2]
+j_label = 2
+before exp and normalization:
+lg_weights = [5.767402504417189, 4.878705488301205, 5.8888779583328805]
+after exp and normalization:
+lg_weights = [0.3936461064830139, 0.16186380676357426, 0.44449008675341195]
+probh = 0.9035956544743907
+sampled gamma:
+probh = 0.0
+gt = false
+gamma_iter[:, t] = Bool[1, 1, 1, 1, 0]
+												[update rho]
+movable_units = [5]
+Si_iter[:, t] = [1, 2, 1, 1, 2]
+j = 5
+t = 3
+Assigning to cluster k=1 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 1]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to cluster k=2 :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 2]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Assigning to NEW SINGLETON cluster (k=3) :
+gamma_iter
+5×4 Matrix{Bool}:
+ 0  1  1  0
+ 0  0  1  0
+ 0  1  1  0
+ 0  1  1  0
+ 0  1  0  0
+Si_iter
+5×4 Matrix{Int64}:
+ 1  1  1  0
+ 1  2  2  0
+ 1  1  1  0
+ 1  1  1  0
+ 1  1  2  0
+rho_tmp = [1, 2, 1, 1, 3]
+Si_comp1 = Int64[]
+Si_comp2 = Int64[]
+rho_comp = 1
+Before exp and normalization:
+ph = [0.5, 0.5, 0.5]
+After exp and normalization:
+ph = [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+new_label = 3
+Si_iter[:, t] = [1, 2, 1, 1, 3]

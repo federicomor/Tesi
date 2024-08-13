@@ -6,6 +6,12 @@ using Logging
 
 ############# for debug #############
 log_file = open("log.txt", "w+")
+title = "\t"^12
+function tostr(obj)
+    io = IOBuffer()
+    show(io, "text/plain", obj)
+    String(take!(io))
+end
 function debug(str)
 	print(log_file,str * (str[end]=='\n' ? "" : "\n"))
 end
@@ -16,63 +22,81 @@ macro showd(exs...)
 	end
 	return :(string($(args...)))
 end
-
-
 include("utils.jl")
 
 function MCMC_fit(;
-	Y::Matrix{Float64},               # n*T, observed values
-	sp_coords = missing,              # n*2, spatial coordinates
-	X_covariates = missing,           # n*p*T, covariates for each unit and all times
-	M_dp::Float64,                    # Dirichlet mass parameter
-	initial_partition = missing,      # Initial partition (if provided)
-	starting_alpha::Float64,          # Starting value for alpha
-	unit_specific_alpha::Bool,        # Unit-specific alpha values
-	time_specific_alpha::Bool,        # Time-specific alpha values
-	update_alpha::Bool,               # Update alpha?
-	include_eta1::Bool,               # Include the autoregressive part of eta1?
-	include_phi1::Bool,               # Include the autoregressive part of phi1?
-	sigma2h_priors::Vector{Float64},  # Prior parameters for sigma2h ∼ 
-	eta_priors::Vector{Float64},      # Prior parameters for eta ∼ 
-	beta_priors::Vector{Float64},     # Prior parameters for beta ∼ 
-	tau2_priors::Vector{Float64},     # Prior parameters for tau2 ∼ invGamma(a_tau2, b_tau2)
-	phi0_priors::Vector{Float64},     # Prior parameters for phi0 ∼ N(m0, s0^2)
-	phi1_priors::Vector{Float64},     # Prior parameters for phi1 ∼ 
-	lambda2_priors::Vector{Float64},  # Prior parameters for lambda2 ∼ invGamma(a_lambda2, b_lambda2)
-	alpha_priors::Matrix{Float64},    # Prior parameters for alpha ∼ 
+	Y::Matrix{Float64},                   # n*T matrix, the observed values
+	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
+	X_covariates = missing,               # n*p*T matrix, the covariates for each unit and all times
+	M_dp::Float64,                        # Dirichlet mass parameter
+	initial_partition = missing,          # Initial partition (if provided)
+	starting_alpha::Float64,              # Starting value for alpha
+	unit_specific_alpha::Bool,            # Unit-specific alpha values
+	time_specific_alpha::Bool,            # Time-specific alpha values
+	update_alpha::Bool,                   # Update alpha?
+	include_eta1::Bool,                   # Include (and update) the autoregressive part of eta1?
+	include_phi1::Bool,                   # Include (and update) the autoregressive part of phi1?
+
+	sigma2h_priors::Vector{Float64},      # Prior parameters for sigma2h ∼ 
+	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's just the scale parameter b
+                                          # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
+	beta_priors::Vector{Float64},         # Prior parameters for beta ∼ 
+	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau2, b_tau2)
+	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2), so the mean m0 and the variance s0^2
+	phi1_priors::Vector{Float64},         # Prior parameters for phi1 ∼ U(-1,1)
+	                                      # so we just need the variance for the Metropolis update trough N(phi1_old,sigma^2)
+	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda2, b_lambda2)
+	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ 
+	
 	spatial_cohesion_idx = missing,       # cohesion choice
-	sp_params = missing,              # Parameters for spatial cohesion functions
+	sp_params = missing,                  # Parameters for spatial cohesion functions
 	covariate_similarity_idx = missing,   # similarity choice
-	mh::Vector{Float64},              # Metropolis-Hastings 
-	draws::Float64,                   # Number of MCMC draws
-	burnin::Float64,                  # Number of burn-in sa
-	thin::Float64,                    # Thinning interval
-	verbose::Bool,                    # Verbosity flag	
-	seed::Float64,                    # Random seed for reproducibility
+	mh::Vector{Float64},                  # Metropolis-Hastings 
+	draws::Float64,                       # Number of MCMC draws
+	burnin::Float64,                      # Number of burn-in sa
+	thin::Float64,                        # Thinning interval
+	verbose::Bool,                        # Verbosity flag	
+	seed::Float64,                        # Random seed for reproducibility
 	io=log_file
 	)
 	println("setting seed $seed")
 	Random.seed!(round(Int64,seed))
-
+try
 	############# check some stuff #############
 	if spatial_cohesion_idx == 1 && !(sp_params isa Real) 
-		@error "wrong params for spatial cohesion 1.\nExpected input form: (Real). Received: $(typeof(sp_params))." _file=""
+		@error "Wrong params for spatial cohesion 1.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
 		return
 	elseif spatial_cohesion_idx == 2 && !(sp_params isa Real)
-		@error "wrong params for spatial cohesion 2.\nExpected input form: (Real). Received: $(typeof(sp_params))."
+		@error "Wrong params for spatial cohesion 2.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
 		return
 	elseif spatial_cohesion_idx == 3 && !(sp_params isa Vector && length.(sp_params) == [2,1,1,4])
-		@error "wrong params for spatial cohesion 3.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix). Received: $(typeof(sp_params))."
+		@error "Wrong params for spatial cohesion 3.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix).\nReceived: $(typeof(sp_params))." _file=""
 		return
 	elseif spatial_cohesion_idx == 4 && !(sp_params isa Vector && length.(sp_params) == [2,1,1,4])
-		@error "wrong params for spatial cohesion 4.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix). Received: $(typeof(sp_params))."
+		@error "Wrong params for spatial cohesion 4.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix).\nReceived: $(typeof(sp_params))." _file=""
 		return
 	elseif spatial_cohesion_idx == 5 && !(sp_params isa Real)
-		@error "wrong params for spatial cohesion 5.\nExpected input form: (Real). Received: $(typeof(sp_params))."
+		@error "Wrong params for spatial cohesion 5.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
 		return
 	elseif spatial_cohesion_idx == 6 && !(sp_params isa Real)
-		@error "wrong params for spatial cohesion 6.\nExpected input form: (Real). Received: $(typeof(sp_params))."
+		@error "Wrong params for spatial cohesion 6.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
 		return
+	end
+
+	if (time_specific_alpha==false && unit_specific_alpha==false) || (time_specific_alpha==true && unit_specific_alpha==false)
+		# cases of alpha being a scalar or a vector in time
+		# so we should get as priors the two params of the Beta 
+		if !(typeof(alpha_priors) <: Vector) || size(alpha_priors) != (2,)
+			@error "Wrong params for alpha priors. \nExpected input form: (Vector) of size 2.\nReceived: $(typeof(alpha_priors)) of size $(size(alpha_priors))." _file=""
+			return
+		end
+	elseif (time_specific_alpha==false && unit_specific_alpha==true) || (time_specific_alpha==true && unit_specific_alpha==true)
+		# cases of alpha being a vector in units or a matrix
+		# so we should get as priors the two params of the Beta for each unit
+		if !(typeof(alpha_priors) <: Matrix) || size(alpha_priors) != (2,n)
+			@error "Wrong params for alpha priors. \nExpected input form: (Matrix) of size 2*n.\nReceived: $(typeof(alpha_priors)) of size $(size(alpha_priors))." _file=""
+			return
+		end
 	end
 
 
@@ -98,8 +122,16 @@ function MCMC_fit(;
 
 	############# allocate output variables #############
 	Si_out = zeros(Int64,nout,n,T)
-	gamma_out = zeros(nout,n,T)
-	alpha_out = zeros(nout,T) 
+	gamma_out = zeros(Bool,nout,n,T)
+	if time_specific_alpha==false && unit_specific_alpha==false
+		alpha_iter = zeros(nout) # for each iterate, a scalar
+	elseif time_specific_alpha==true && unit_specific_alpha==false
+		alpha_iter = zeros(nout,T_star) # for each iterate, a vector in time
+	elseif time_specific_alpha==false && unit_specific_alpha==true
+		alpha_iter = zeros(nout,n) # for each iterate, a vector in units
+	elseif time_specific_alpha==true && unit_specific_alpha==true
+		alpha_iter = zeros(nout,n,T_star) # for each iterate, a matrix
+	end
 	sigma2h_out = zeros(nout,n,T) 
 	muh_out = zeros(nout,n,T) 
 	eta1_out = zeros(nout,n) 
@@ -120,8 +152,17 @@ function MCMC_fit(;
 	############# allocate working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
 	Si_iter[:,end] .= 0
-	gamma_iter = zeros(n,T_star)
-	alpha_iter = ones(T_star)*starting_alpha
+	gamma_iter = zeros(Bool,n,T_star)
+	if time_specific_alpha==false && unit_specific_alpha==false
+		alpha_iter = starting_alpha # a scalar
+	elseif time_specific_alpha==true && unit_specific_alpha==false
+		alpha_iter = ones(T_star)*starting_alpha # a vector in time
+	elseif time_specific_alpha==false && unit_specific_alpha==true
+		alpha_iter = ones(n)*starting_alpha # a vector in units
+	elseif time_specific_alpha==true && unit_specific_alpha==true
+		alpha_iter = ones(n,T_star)*starting_alpha # a matrix
+	end
+
 	sig2h_iter = ones(n,T_star)
 	muh_iter = zeros(n,T_star)
 	eta1_iter = zeros(n)
@@ -130,7 +171,7 @@ function MCMC_fit(;
 	end
 	theta_iter = rand(Normal(),T_star)
 	tau2_iter = rand(InverseGamma(tau2_priors...),T_star)
-	phi0_iter = (T==2) ? mean(Normal(phi0_priors...)) : rand(Normal(phi0_priors...))
+	phi0_iter = (T==2) ? mean(Normal(phi0_priors[1], sqrt(phi0_priors[2]))) : rand(Normal(phi0_priors[1], sqrt(phi0_priors[2])))
 	phi1_iter = rand(Uniform(-1,1))*include_phi1
 	lambda2_iter = (T==2) ? mean(InverseGamma(lambda2_priors...)) : rand(InverseGamma(lambda2_priors...))
 	
@@ -147,24 +188,42 @@ function MCMC_fit(;
 	# Si_iter = rand(collect(1:n),n,T_star)
 	# gamma_iter = rand((0,1),n,T_star)
 	
-	
+	function pretty_log(str)
+		if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
+		if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
+		if str=="muh_iter" println(log_file,"muh_iter\n",tostr(muh_iter)); return; end
+		if str=="sig2h_iter" println(log_file,"sig2h_iter\n",tostr(sig2h_iter)); return; end
+		if str=="alpha_iter" println(log_file,"alpha_iter\n",tostr(alpha_iter)); return; end
+		if str=="theta_iter" println(log_file,"theta_iter\n",tostr(theta_iter)); return; end
+		if str=="tau2_iter" println(log_file,"tau2_iter\n",tostr(tau2_iter)); return; end
+		if str=="phi0_iter" println(log_file,"phi0_iter\n",tostr(phi0_iter)); return; end
+		if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
+		if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
+	end
 	############# start MCMC algorithm #############
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 
 	for i in 1:draws
-		debug("\n▶ iteration $i")
-		# println("\n▶ iteration $i")
 		# print("iteration $i\r") # use only this when all finished, for a shorter feedback
+		
+		debug("\n▶ iteration $i")
+
+		pretty_log("Si_iter")
+		pretty_log("gamma_iter")
+		pretty_log("muh_iter")
+		pretty_log("sig2h_iter")
+		pretty_log("alpha_iter")
 
 		for t in 1:T
 			debug("► time $t")
 
 			############# update gamma #############
 			for j in 1:n
-				debug("[update gamma]")
+				debug(title*"[update gamma]")
 				debug("▸ subject $j")
 				if t==1 
 					gamma_iter[j,t] = 0
+					debug("we are at time t=1 so nothing to do")
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall(jj -> gamma_iter[jj, t] == 1, setdiff(1:n,j))
@@ -197,7 +256,7 @@ function MCMC_fit(;
 						nh_red1[Si_red1[jj]] += 1
 					end
 					nh_red1[Si_red1[end]] += 1 # account for the last added unit j
-					debug(@showd Si_red n_red nclus_red nh_red Si_red1 n_red1 nclus_red1 nh_red1 j_label)
+					debug(@showd Si_red Si_red1 j_label)
 
 					# start computing weights
 					lg_weights = zeros(nclus_red+1)
@@ -222,51 +281,69 @@ function MCMC_fit(;
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
 					end
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
-					debug(@showd nclus_red lg_weights)
 
+					println(log_file,"before exp and normalization:")
+					debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
 					max_ph = maximum(lg_weights)
 					sum_ph = 0.0
 
 					# exponentiate...
-					for k in 1:length(lg_weights)
+					for k in eachindex(lg_weights)
 						 # for numerical purposes we subract max_ph
 						lg_weights[k] = exp(lg_weights[k] - max_ph)
 						sum_ph += lg_weights[k]
 					end
 					# ... and normalize
 					lg_weights ./= sum_ph
+					println(log_file,"after exp and normalization:")
+					debug(@showd lg_weights)
+
 					# compute probh
-					probh = alpha_iter[t] / (alpha_iter[t] + (1 - alpha_iter[t]) * lg_weights[j_label])
-					debug(@showd probh alpha_iter[t])
+					probh = 0.0
+					if time_specific_alpha==false && unit_specific_alpha==false
+						probh = alpha_iter / (alpha_iter + (1 - alpha_iter) * lg_weights[j_label])
+					elseif time_specific_alpha==true && unit_specific_alpha==false
+						probh = alpha_iter[t] / (alpha_iter[t] + (1 - alpha_iter[t]) * lg_weights[j_label])
+					elseif time_specific_alpha==false && unit_specific_alpha==true
+						probh = alpha_iter[j] / (alpha_iter[j] + (1 - alpha_iter[j]) * lg_weights[j_label])
+					elseif time_specific_alpha==true && unit_specific_alpha==true
+						probh = alpha_iter[j,t] / (alpha_iter[j,t] + (1 - alpha_iter[j,t]) * lg_weights[j_label])
+					end
+					debug(@showd probh)
 
 
 					# compatibility check for gamma transition
 					if gamma_iter[j, t] == 0
 						# we want to find ρ_(t-1)^{R_t(+j)} ...
-						indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n)
+						indexes = findall(jj -> jj==j || gamma_iter[jj, t]==1, 1:n)
 						Si_comp1 = Si_iter[indexes, t-1]
 						Si_comp2 = Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
 
 						rho_comp = compatibility(Si_comp1, Si_comp2)
 						if rho_comp == 0
-							probh = 0
+							probh = 0.0
 						end
 					end
 					# sample the new gamma
 					gt = rand(Bernoulli(probh))
 					gamma_iter[j, t] = gt
+					println(log_file,"sampled gamma:")
+					debug(@showd probh gt gamma_iter[:,t])
 				end
 			end
 
 			############# update rho #############
-			debug("[update rho]")
+			debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
-	
+			debug(@showd movable_units Si_iter[:,t])
+		
 			for j in movable_units
 				# remove unit j from the cluster she is currently in
+				println(@showd t j )
+				debug(@showd j t)
 
 				if nh[Si_iter[j,t],t] > 1 # unit j does not belong to a singleton cluster
 					nh[Si_iter[j,t],t] -= 1
@@ -294,8 +371,9 @@ function MCMC_fit(;
 						muh_iter[j_label, t], muh_iter[last_label, t] = muh_iter[last_label, t], muh_iter[j_label, t]
 						nh[j_label, t] = nh[last_label, t]
 						nh[last_label, t] = 1
-					end
 
+					end
+					println(@showd last_label)
 					# remove the j-th observation and the last cluster (being j in a singleton)
 					nh[last_label, t] -= 1
 					nclus_iter[t] -= 1
@@ -306,13 +384,13 @@ function MCMC_fit(;
 				rho_tmp = copy(Si_iter[:,t])
 
 				# compute nh_tmp (numerosities for each cluster label)
-				nh_tmp = zeros(Int,nclus_iter[t]+1)
-				for jj in setdiff(1:n,j)
-					nh_tmp[rho_tmp[jj]] += 1
-				end
+				nh_tmp = copy(nh[:,t])
+				# nh_tmp = zeros(Int,nclus_iter[t]+1)
+				# for jj in setdiff(1:n,j)
+					# nh_tmp[rho_tmp[jj]] += 1
+				# end
 				nclus_temp = 0
-
-				println(@showd nclus_iter t)
+					
 				# we now simulate the unit j to be assigned to one of the existing clusters...
 				for k in 1:nclus_iter[t]
 					rho_tmp[j] = k
@@ -321,6 +399,9 @@ function MCMC_fit(;
 					Si_comp1 = rho_tmp[indexes]
 					Si_comp2 = Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
 					rho_comp = compatibility(Si_comp1, Si_comp2)
+					println(log_file,"Assigning to cluster k=$k :")
+					pretty_log("gamma_iter"); pretty_log("Si_iter")
+					debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 					
 					if rho_comp != 1
 						ph[k] = log(0) # assignment to cluster k is not compatible
@@ -360,17 +441,21 @@ function MCMC_fit(;
 						nh_tmp[k] -= 1
 					end
 				end
-
+					
 				# print(@showd ph, "before k+1")
 				# ... plus the case of being assigned to a new (singleton for now) cluster 
 				k = nclus_iter[t]+1
 				rho_tmp[j] = k
 				# declare (for later scope accessibility) the new params here
 				muh_draw = 0.0; sig2h_draw = 0.0
+
 				indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n)
 				Si_comp1 = rho_tmp[indexes]
 				Si_comp2 = Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
+				println(log_file,"Assigning to NEW SINGLETON cluster (k=$k) :")
+				pretty_log("gamma_iter"); pretty_log("Si_iter")
+				debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 
 				if rho_comp != 1
 					ph[k] = log(0) # assignment to a new cluster is not compatible
@@ -409,45 +494,51 @@ function MCMC_fit(;
 					# 		Y[j,t]) + lpp
 					# end
 
-					# # restore params after "rho_jt = k" simulation
-					# nh_tmp[k] -= 1
+					# restore params after "rho_jt = k" simulation
+					nh_tmp[k] -= 1
 				end
 
-
-				println(ph, " (before exp and norm)")
+				println(log_file,"Before exp and normalization:")
+				debug(@showd ph)
 				# now exponentiate the weights...
 				max_ph = maximum(ph)
 				sum_ph = 0.0
-				for k in 1:length(ph)
+				for k in eachindex(ph)
 					# for numerical purposes we subract max_ph
 					ph[k] = exp(ph[k] - max_ph)
 					sum_ph += ph[k]
 				end
 				# ... and normalize them
 				ph ./= sum_ph
-				println(ph, " (after exp and norm)")
+				
+				println(log_file,"After exp and normalization:")
+				debug(@showd ph)
 
 				# now sample the new label Si_iter[j,t]
-				uu = rand(Uniform(0,1))
+				u = rand(Uniform(0,1))
 				cph = cumsum(ph)
 				cph[end] = 1.0 # fix numerical problems of having sums like 0.999999etc
 				new_label = 0
 				for k in 1:length(ph)
-					if uu <= cph[k]
+					if u <= cph[k]
 						new_label = k
 						break
 					end
 				end
+				debug(@showd new_label)
+				
+				if all(isinf.(ph) .|| isnan.(ph))
+					@warn "No valid weight in ph vector when updating for rho.\n"
+					close(log_file); return
+				end
 
 				if new_label <= nclus_iter[t]
 					# we enter an existing cluster
-					println("we enter an existing cluster")
 					Si_iter[j, t] = new_label
 					nh[new_label, t] += 1
 					# rho_tmp[j] = new_label # useless
 				else
 					# we create a new singleton cluster
-					println("we create a new singleton cluster")
 					nclus_iter[t] += 1
 					cl_new = nclus_iter[t]
 					Si_iter[j, t] = cl_new
@@ -455,6 +546,7 @@ function MCMC_fit(;
 					# rho_tmp[j] = cl_new
 					muh_iter[cl_new, t] = muh_draw
 					sig2h_iter[cl_new, t] = sig2h_draw
+					println(@showd sig2h_draw)
 				end
 
 				# now we need to relabel after the possible mess created by the sampling
@@ -470,14 +562,21 @@ function MCMC_fit(;
 				# - Si_relab gives the relabelled partition
 				# - nh_reorder gives the numerosities of the relabelled partition, ie "nh_reorder[k] = #(units of new cluster k)"
 				# - old_lab tells "the index in position i (which before was cluster i) is now called cluster old_lab[i]"
-
+				println(@showd Si_tmp Si_relab nh_reorder old_lab)
+				println(@showd sig2h_iter "before relabeling")
 				# now fix everything (morally permute params)
 				Si_iter[:,t] = Si_relab
 				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
+				muh_iter_copy = copy(muh_iter)
+				sig2h_iter_copy = copy(sig2h_iter)
 				len = findlast(x -> x != 0, nh_reorder)
-				muh_iter[1:len,t] = muh_iter[old_lab[1:len],t]
-				sig2h_iter[1:len,t] = sig2h_iter[old_lab[1:len],t]
-				nh[1:len,t] = nh_reorder[1:len]
+				for k in 1:nclus_iter[t]
+					muh_iter[k,t] = muh_iter_copy[old_lab[k],t]
+					sig2h_iter[k,t] = sig2h_iter_copy[old_lab[k],t]
+					nh[k,t] = nh_reorder[k]
+				end
+				println(@showd sig2h_iter nclus_iter[t] "after relabeling")
+				debug(@showd Si_iter[:,t])
 
 			end # for j in movable_units
 
@@ -493,6 +592,12 @@ function MCMC_fit(;
 					end
 					sig2_post = 1 / (1/tau2_iter[t] + sum(Si_iter[:,t] .== k)/sig2h_iter[k,t])
 					mu_post = sig2_post * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
+
+					# if isnan(mu_post)
+						# println(@showd mu_post theta_iter[t] sig2_post sum_Y/sig2h_iter[k,t] sum_Y sig2h_iter[k,t])
+						# è sig2h_iter il problema del NAN, lei è 0 certe volte
+						# perché?
+					# end
 
 					muh_iter[k] = rand(Normal(mu_post,sqrt(sig2_post)))
 				end
@@ -522,7 +627,10 @@ function MCMC_fit(;
 			############# update theta #############
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
-			sum_mu = sum(muh_iter[1:kt,t])
+			sum_mu=0.0
+			for k in 1:kt
+				sum_mu += muh_iter[k,t]
+			end
 
 			if t==1
 				sig2_post = 1 / (1/lambda2_iter + phi1_iter^2*aux1 + kt/tau2_iter[t])
@@ -545,31 +653,148 @@ function MCMC_fit(;
 			
 			############# update tau2 #############
 			kt = nclus_iter[t]
+			aux1 = 0.0
+			for k in 1:kt
+				aux1 += (muh_iter[k,t] - theta_iter[t])^2 
+			end
 			a_star = tau2_priors[1] + kt
-			b_star = tau2_priors[2] + sum((muh_iter[k,t] - theta_iter[t])^2 for k=1:kt) / 2
-			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
+			b_star = tau2_priors[2] + aux1/2
+			# tau2_iter[t] = rand(InverseGamma(a_star, b_star))
 
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
+		eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
+		if include_eta1
+			for j in 1:n
+				eta1_old = eta1_iter[j]
+				eta1_new = rand(Normal(eta1_old,eta1_priors[2])) # proposal value
+
+				if (-1 <= eta1_new <= 1)
+					ll_old = 0.0; ll_new = 0.0
+					for t in 2:T
+						# likelihood contribution
+						ll_old += loglikelihood(Normal(
+							muh_iter[j,t] + eta1_old*Y[j,t-1],
+							sqrt(sig2h_iter[j,t]*(1-eta1_old^2))
+							), Y[j,t]) 
+						ll_new += loglikelihood(Normal(
+							muh_iter[j,t] + eta1_new*Y[j,t-1],
+							sqrt(sig2h_iter[j,t]*(1-eta1_new^2))
+							), Y[j,t]) 
+					end
+					logit_old = logit(1/2*(eta1_old+1)) 
+					logit_new = logit(1/2*(eta1_new+1)) 
+
+					# prior contribution
+					ll_old += -log(2*eta1_priors[1]) -1/eta1_priors[1]*abs(logit_old)
+					ll_new += -log(2*eta1_priors[1]) -1/eta1_priors[1]*abs(logit_new)
+
+					ll_ratio = min(ll_new-ll_old, 0)
+					u = rand(Uniform(0,1))
+					if (ll_ratio > log(u))
+						eta1_iter[j] = eta1_new # accept the candidate
+					end
+				end
+			end
+		end
 
 		
 		############# update alpha #############
+		if update_alpha
+			if time_specific_alpha==false && unit_specific_alpha==false
+				# a scalar
+				sumg = sum(gamma_iter)
+				a_star = alpha_priors[1] + sumg
+				b_star = alpha_priors[2] + n*T - sumg
+				alpha_iter = rand(Beta(a_star, b_star))
+
+			elseif time_specific_alpha==true && unit_specific_alpha==false
+				# a vector in time
+				for t in 1:T
+					sumg = sum(gamma_iter[:,t])
+					a_star = alpha_priors[1] + sumg
+					b_star = alpha_priors[2] + n - sumg
+					alpha_iter[t] = rand(Beta(a_star, b_star))
+				end
+
+			elseif time_specific_alpha==false && unit_specific_alpha==true
+				# a vector in units
+				for j in 1:n
+					sumg = sum(gamma_iter[j,:])
+					a_star = alpha_priors[1,j] + sumg
+					b_star = alpha_priors[2,j] + T - sumg
+					alpha_iter[j] = rand(Beta(a_star, b_star))
+				end
+			elseif time_specific_alpha==true && unit_specific_alpha==true
+				# a matrix
+				for j in 1:n
+					for t in 1:T
+						sumg = gamma_iter[j,t] # nothing to sum in this case
+						a_star = alpha_priors[1,j] + sumg
+						b_star = alpha_priors[2,j] + 1 - sumg
+						alpha_iter[j,t] = rand(Beta(a_star, b_star))
+					end
+				end
+			end
+		end
 
 		
 		############# update phi0 #############
 		aux1 = 1/lambda2_iter
+		aux2 = 0.0
+		# i found that looping on t rather than using sum(... for t in ...) seems faster
+		for t in 2:T
+			aux2 += theta_iter[t] - phi1_iter*theta_iter[t-1]
+		end
 		sig2_post = 1 / ( 1/phi0_priors[2] + aux1 * (1 + (T-1)*(1-phi1_iter)/(1+phi1_iter)) )
-		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*sum(theta_iter[t] - phi1_iter*theta_iter[t-1] for t=2:T) )
-
+		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*aux2 )
+		phi0_iter = rand(Normal(mu_post, sqrt(sig2_post)))
 		
+
 		############# update phi1 #############
+		phi1_priors[1] = sqrt(phi1_priors[1]) # from variance to std dev
+		if include_phi1
+			phi1_old = phi1_iter
+			phi1_new = rand(Normal(phi1_old, phi1_priors[1])) # proposal value
+
+			if (-1 <= phi1_new <= 1)
+				ll_old = 0.0; ll_new = 0.0
+				for t in 2:T
+					# likelihood contribution
+					ll_old += loglikelihood(Normal(
+						(1-phi1_old)*phi0_iter + phi1_old*theta_iter[t-1],
+						sqrt(lambda2_iter*(1-phi1_old^2))
+						), theta_iter[t]) 
+					ll_new += loglikelihood(Normal(
+						(1-phi1_new)*phi0_iter + phi1_new*theta_iter[t-1],
+						sqrt(lambda2_iter*(1-phi1_new^2))
+						), theta_iter[t]) 
+				end
+
+				# prior contribution
+				ll_old += loglikelihood(Uniform(-1,1), phi1_old)
+				ll_new += loglikelihood(Uniform(-1,1), phi1_new)
+
+				ll_ratio = min(ll_new-ll_old, 0)
+				u = rand(Uniform(0,1))
+				if (ll_ratio > log(u))
+					phi1_iter = phi1_new # accept the candidate
+				end
+			end
+		end
 
 		
 		############# update lambda2 #############
+		aux1 = 0.0
+		# i found that looping on t rather than using sum(... for t in ...) seems faster
+		for t in 2:T
+			aux1 += (theta_iter[t] - (1-phi1_iter)*phi0_iter - phi1_iter*theta_iter[t-1])^2
+		end
 		a_star = lambda2_priors[1] + T/2
-		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + sum((theta_iter[t] - (1-phi1_iter)*phi0_iter - phi1_iter*theta_iter[t-1])^2 for t=2:T) / 2
+		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + aux1/2
+		# lambda2_iter = rand(InverseGamma(a_star,b_star))	
 	
 
 		############# save MCMC iterates #############
@@ -577,8 +802,22 @@ function MCMC_fit(;
 
 	end # for i in 1:draws
 	println("\ndone!")
-	
+catch e
+	println(e)
+	close(log_file)
+end
+
 close(log_file)
 # global_logger(ConsoleLogger())	
 end
 
+#= problematic seeds (during the development phase): 
+- 101
+maybe when all is finished the problems will be solved, as probably are caused by running the alg while not being complete
+- 860
+il vettore ph diventava a volte pieno di -Inf o NaN, senza valori utili, nella parte di aggiornare rho
+=#
+
+function close_log_file()
+	close(log_file)
+end

@@ -64,6 +64,19 @@ for(i in 1:size(yred)[1]){
 ```
 
 
+# julia test data
+```{r}
+n = 5
+bigT = 3
+p = 2
+# nxbigT matrix of normally distributed random numbers
+Y <- matrix(rnorm(n * bigT), nrow = n, ncol = bigT)
+# nx3xbigT array of normally distributed random numbers
+X_covariates <- array(rnorm(n * p * bigT), dim = c(n, p, bigT))
+# nx2 matrix of uniformly distributed random numbers between 0 and 1
+sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
+```
+
 
 # fit
 ```{r}
@@ -76,10 +89,15 @@ set.seed(seed_choice)
 ```
 
 ```{r}
+seed_choice = round(runif(1,0,1000))
 cat(paste0("seed ",seed_choice,"\n==========================\n",date(),"\n\n"))
-drpm1 <- drpm_fit(y=yt, 
-		 s_coords = sites,
-         M=1,
+drpm1 <- drpm_fit(
+		# y=yt, 
+		# s_coords = sites,
+		y=Y,
+		s_coords = sp_coords,
+        
+		 M=1,
          initial_partition = NULL,
          starting_alpha = 0.5,
          unit_specific_alpha = FALSE,

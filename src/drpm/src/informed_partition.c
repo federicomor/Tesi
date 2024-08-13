@@ -642,11 +642,11 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 	  // etc.  
       for(j = 0; j < *nsubject; j++){
 //	    Rprintf("t ======= %d\n", t);	
-//		Rprintf("j ================================= %d\n", j);
+		Rprintf("j ================================= %d\n", j);
 
-//		RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
+		RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
 //		RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
-//		RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
+		RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
 
 		// Only need to update partition relative to units that are not pegged
 		//
@@ -654,7 +654,7 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 		// first entry of Si_iter is never updated and so this part of codes is never executed
 		// for t=0 when rho0 is supplied. 
         if(gamma_iter[j*(ntime1) + t] == 0){
-
+          // RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
 		  if(nh[(Si_iter[j*(ntime1) + t]-1)*(ntime1) + t] > 1){
 		  		
 		    // Observation belongs to a non-singleton ...
@@ -1409,6 +1409,7 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 		for(t=1;t<*ntime;t++){alpha_iter[t] = alpha_tmp;}
 	    alpha_iter[0] = 1.0;
       }
+
       if(*time_specific_alpha == 1 & *unit_specific_alpha==0){   // local time and global unit 
 	    for(t = 1; t < *ntime; t++){
 	      sumg = 0;
@@ -1424,8 +1425,12 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 
 		  alpha_iter[t] = rbeta(astar, bstar);
         }
-	    alpha_iter[0] = 1.0;
+        ////////////////////////////////////////////////
+	    alpha_iter[0] = 1.0; // WHY THIS??
+        ////////////////////////////////////////////////
       } 
+      
+
       if(*time_specific_alpha == 0 & *unit_specific_alpha==1){ // global time and local unit
         for(j = 0; j < *nsubject; j++){
           sumg = 0;
@@ -1439,7 +1444,9 @@ void informed_ar1_sppm_CODE(int *draws, int *burn, int *thin,
 		  alpha_iter[j*ntime1 + 1] = rbeta(astar, bstar);
         }
 	  }
-      if(*time_specific_alpha == 1 & *unit_specific_alpha==1){ // local time and local unit
+    
+
+    if(*time_specific_alpha == 1 & *unit_specific_alpha==1){ // local time and local unit
         for(j = 0; j < *nsubject; j++){
           for(t = 1; t < *ntime; t++){
             sumg =  gamma_iter[j*ntime1 + t];

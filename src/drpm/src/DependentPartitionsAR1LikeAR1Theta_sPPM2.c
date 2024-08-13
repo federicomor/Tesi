@@ -386,16 +386,17 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 			//
 			//////////////////////////////////////////////////////////////////////////////
 
-
 			for(j = 0; j < *nsubject; j++){
 //				Rprintf("t = %d\n", t);
 //				Rprintf("j ====================================== %d\n", j);
-
+		Rprintf("                 [Update gamma]\n");
+		Rprintf("subject j=%d\n",j);
 
 
 				// at time period one, all gammas are zero (none are ``pegged'')
 				if(t == 0){
 					gamma_iter[j*(ntime1) + t] = 0;
+					Rprintf("we are at time t=1 so nothing to do");
 					// if (verbose==1){
 					// debug_info(i,j,t);
 				// Rprintf("gamma_iter[j*(ntime1) + t] = %d\n", gamma_iter[j*(ntime1) + t]);
@@ -709,6 +710,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //					Rprintf("probh[1] = %f\n", probh[1]);
 										
 					gt = rbinom(1,probh[1]);
+					// gt = rbinom(1,0.5);
 					
 //					Rprintf("gt = %d\n", gt);
 					gamma_iter[j*(ntime1) + t] = gt;
@@ -777,22 +779,24 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 				rho_tmp[jj] = Si_iter[jj*(ntime1) + t];
 
 			}
+			Rprintf("                 [Update rho]\n");
 
 
 			// It seems to me that I can use some of the structure used to carry
 			// out Algorithm 8 from previous code to keep track of empty clusters
 			// etc.  
 			for(j = 0; j < *nsubject; j++) {
-//				Rprintf("t ======= %d\n", t);	
-//				Rprintf("j ================================= %d\n", j);
+				// Rprintf("t ======= %d\n", t);	
+				// Rprintf("j == %d\n", j);
 
-//				RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
-//				RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
-//				RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
+				// RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
+				// RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
+				// RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
 
 				// Only need to update partition relative to units that are not pegged
 				if(gamma_iter[j*(ntime1) + t] == 0) {
-
+					Rprintf("Working on movable unit j=%d (t=%d)\n",j,t);
+					// RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
 					if(nh[(Si_iter[j*(ntime1) + t]-1)*(ntime1) + t] > 1){
 				
 						// Observation belongs to a non-singleton ...
@@ -881,7 +885,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 						Rindx2=0;
 						for(jj = 0; jj < *nsubject; jj++){
 							if(gamma_iter[jj*ntime1 + (t+1)] == 1){
-								// if (jj==j) Rprintf("Unit j=%d entered the comp defintion\n",j) ;
+								Rprintf("Unit jj=%d entered the comp defintion\n",jj);
 								comp2t[Rindx2] = rho_tmp[jj];
 								comptp1[Rindx2] = Si_iter[jj*ntime1 + (t+1)];
 								Rindx2 = Rindx2 + 1;
@@ -890,14 +894,17 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 
 //						Rprintf("Rindx2 = %d\n", Rindx2);
-						// Rprintf("working on unit j=%d\n",j);
-						// RprintIVecAsMat("comp2t", comp2t, 1, *nsubject);
-						// RprintIVecAsMat("comptp1", comptp1, 1, *nsubject);
 
 						// check for compatibility
 						rho_comp = compatibility(comp2t, comptp1, Rindx2);
 
-						// Rprintf("rho_comp = %d\n", rho_comp);
+						RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
+						RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
+						RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
+						Rprintf("Case of assigning to cluster  k=%d\n",k+1);
+						RprintIVecAsMat("comp2t", comp2t, 1, Rindx2);
+						RprintIVecAsMat("comptp1", comptp1, 1, Rindx2);
+						Rprintf("rho_comp = %d\n", rho_comp);
 
 
 						if(rho_comp != 1){
@@ -987,7 +994,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //								lpp = lpp + nh_tmp[kk]*log(Mdp) + lgamma((double) nh_tmp[kk]) + lCn;
 								lpp = lpp + (log(Mdp) + lgamma((double) nh_tmp[kk]) + lCn);
 
-								Rprintf("lpp = %f\n", lpp);
+								// Rprintf("lpp = %f\n", lpp);
 							
 							}
 //							Rprintf("lpp = %f\n", lpp);
@@ -1031,7 +1038,10 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 							}
 
 							// use this to test if MCMC draws from prior are correct
-//							ph[k] = lpp;				
+							// ph[k] = lpp;	
+							// other debug test
+							ph[k] = 0.5;	
+
 
 //							Rprintf("ph[k] = %f\n", ph[k]);
 	
@@ -1058,6 +1068,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					Rindx1 = 0, Rindx2=0;
 					for(jj = 0; jj < *nsubject; jj++){
 						if(gamma_iter[jj*ntime1 + (t+1)] == 1){
+							Rprintf("Unit jj=%d entered the comp defintion\n",jj);
 							comp2t[Rindx2] = rho_tmp[jj];
 							comptp1[Rindx2] = Si_iter[jj*ntime1 + (t+1)];
 							Rindx2 = Rindx2 + 1;
@@ -1067,10 +1078,17 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //					Rprintf("Rindx2 = %d\n", Rindx2);
 //					RprintIVecAsMat("comp2t", comp2t, 1, *nsubject);
 //					RprintIVecAsMat("comptp1", comptp1, 1, *nsubject);
+					rho_comp = compatibility(comp2t, comptp1, Rindx2);
 
+				RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
+				RprintIVecAsMat("Si_iter", Si_iter, *nsubject, ntime1);
+				RprintIVecAsMat("rho_tmp", rho_tmp, 1, *nsubject);
+				Rprintf("Case of assigning to new singleton cluster\n");
+				RprintIVecAsMat("comp2t", comp2t, 1, Rindx2);
+				RprintIVecAsMat("comptp1", comptp1, 1, Rindx2);
+				Rprintf("rho_comp = %d\n", rho_comp);
 
 					// check for compatibility
-					rho_comp = compatibility(comp2t, comptp1, Rindx2);
 
 
 //					Rprintf("rho_comp = %d\n", rho_comp);
@@ -1193,7 +1211,9 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 						}
 
 
-//						ph[nclus_iter[t]] =  lpp;
+						// ph[nclus_iter[t]] =  lpp;
+						// other debug test
+						ph[nclus_iter[t]] =  0.5;
 
 					
 //						Rprintf("ph[nclus_iter[t]] = %f\n", ph[nclus_iter[t]]);
@@ -1205,6 +1225,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 
 					// Now compute the probabilities
 					for(k = 0; k < nclus_iter[t]+1; k++) phtmp[k] = ph[k];
+					RprintVecAsMat("phtmp", phtmp, 1, nclus_iter[t]+1);
 						
 	
 					R_rsort(phtmp,  nclus_iter[t]+1) ;
@@ -1233,7 +1254,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					}
 //					Rprintf("denph = %f\n", denph);
 
-//					RprintVecAsMat("probh", probh, 1, nclus_iter[t]+1);
+					RprintVecAsMat("probh", probh, 1, nclus_iter[t]+1);
 					
 					uu = runif(0.0,1.0);
 //					Rprintf("uu = %f\n", uu);
@@ -1251,7 +1272,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 					}		
 
 
- //					Rprintf("iaux = %d\n \n \n", iaux);
+ 					Rprintf("sampled label = %d\n", iaux);
 
 					if(iaux <= nclus_iter[t]){
 
@@ -1278,7 +1299,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 //					RprintIVecAsMat("nh ", nh, *nsubject, ntime1);
 //					RprintIVecAsMat("nclus_iter", nclus_iter, 1, ntime1);
 //					RprintIVecAsMat("gamma_iter", gamma_iter, *nsubject, ntime1);
-					Rprintf("we entered the if with unit j=%d and we sampled label=%d\n",j,iaux);
+					// Rprintf("we entered the if with unit j=%d and we sampled label=%d\n",j,iaux);
 				} // end if(gamma_iter[j*(ntime1) + t] == 0)
 
 				for(jj = 0; jj < *nsubject; jj++){
@@ -1293,7 +1314,7 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 			
 				relabel(Si_tmp, *nsubject, Si_tmp2, reorder, oldLab);		
 				debug_info(i,j,t);
-RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
+// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
 					// Rprintf("unit j=%d was with gamma_jt=%d (0=movable, 1=fixed)\n",j,gamma_iter[j*(ntime1) + t]);
 					// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
 					// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);	
@@ -1700,7 +1721,7 @@ Forse perché giustamente il loop più esterno è sulle mcmc iterates, quindi de
 //				Rprintf("e1o = %f\n", e1o);
 //				Rprintf("e1n = %f\n", e1n);
 					
-				if(e1n < 1 & e1n > -1){
+				if(e1n < 1 && e1n > -1){
 					
 					llo=lln=0.0;
 					for(t=1; t<*ntime; t++){

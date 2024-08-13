@@ -2,13 +2,14 @@ using SpecialFunctions
 using LinearAlgebra
 using Statistics
 
+logit(x::Real) = log(x / (one(x) - x))
+
 # function section(title::String)
 # 	total_width = length(title) + 4
 # 	debug("┌" * "─" ^ (total_width - 2) * "┐")
 # 	debug("│" * " " * title * " " * "│")
 # 	debug("└" * "─" ^ (total_width - 2) * "┘")
 # end
-
 
 ##################
 ##   RELABEL    ##

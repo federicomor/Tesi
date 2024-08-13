@@ -57,6 +57,7 @@ seed_choice = round(runif(1,0,1000))
 set.seed(seed_choice)
 ```
 
+## fit
 
 ```{r}
 TestModule1 <- juliaImport(juliaCall("include", testModule))
@@ -70,16 +71,16 @@ TestModule1$MCMC_fit(
 	unit_specific_alpha = FALSE,       
 	time_specific_alpha = TRUE,       
 	update_alpha = TRUE,                   
-	include_eta1 = FALSE,                    
+	include_eta1 = TRUE,                    
 	include_phi1 = FALSE,
 	sigma2h_priors = c(1,2),
-	eta_priors = c(1,2),
+	eta1_priors = c(1,2),
 	beta_priors = c(rep(1,p),2),
 	tau2_priors = c(1,2),
 	phi0_priors = c(1,2),
 	phi1_priors = c(1,2),
 	lambda2_priors = c(1,2),
-	alpha_priors = rbind(c(1,1)),   
+	alpha_priors = c(1,1),  
 	
 	spatial_cohesion_idx = 1,
 	sp_params = 0.5,
@@ -90,13 +91,17 @@ TestModule1$MCMC_fit(
 	# covariate_similarity_idx = NA,  
 	mh = c(0.1,0.1,0.7, 0.1, 0.1),             
 	draws = 6,                    
-	burnin = 3,                   
+	burnin = 2,                   
 	thin = 1,                     
 	verbose = TRUE,
 	seed = seed_choice
 )
 ```
 
+## close log
+```{r}
+TestModule1$close_log_file()
+```
 
 
 
