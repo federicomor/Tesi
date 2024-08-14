@@ -256,7 +256,9 @@ try
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
-	sleep(1.0) # to let all the prints be printed
+	sleep(2.0) # to let all the prints be printed
+	println("loading...\r")
+	sleep(2.0) # to let all the prints be printed
 
 	t_start = now()
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
@@ -936,7 +938,10 @@ try
 	t_end = now()
 	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
 
-	return Si_out, Int.(gamma_out)
+	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
+		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
+		fitted, llike, lpml, waic
+
 
 catch e
 	println(e)

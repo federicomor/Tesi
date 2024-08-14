@@ -68,6 +68,7 @@ out = TestModule1$MCMC_fit(
 	M_dp = 19,                     
 	# initial_partition = NA,     
 	starting_alpha = 0.5,         
+	
 	unit_specific_alpha = FALSE,       
 	time_specific_alpha = TRUE,       
 	update_alpha = TRUE,             
@@ -93,8 +94,8 @@ out = TestModule1$MCMC_fit(
 	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	draws = 6,                    
-	burnin = 2,                   
+	draws = 78,                    
+	burnin = 60,                   
 	thin = 2,                     
 	verbose = TRUE,
 	seed = seed_choice
@@ -104,8 +105,83 @@ out = TestModule1$MCMC_fit(
 ## explore output
 ```{r}
 rout = juliaGet(out)
-names(rout) <- c("Si_iter", "gamma_iter")
-rout
+names(rout)  = c("Si_out",
+				 "gamma_out",
+				 "alpha_out", 
+				 "sigma2h_out", 
+				 "muh_out", 
+				 "eta1_iter",
+				 "beta_out",
+				 "theta_out", 
+				 "tau2_out", 
+				 "phi0_out", 
+				 "phi1_out",
+				 "lambda2_out",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si_out       = aperm(rout$Si_out,       c(2, 1, 3))
+rout$gamma_out    = aperm(rout$gamma_out,    c(2, 1, 3))
+rout$sigma2h_out  = aperm(rout$sigma2h_out,  c(2, 1, 3))
+rout$muh_out      = aperm(rout$muh_out,      c(2, 1, 3))
+rout$alpha_out    = aperm(rout$alpha_out,    c(2, 1))
+rout$theta_out    = aperm(rout$theta_out,    c(2, 1))
+rout$tau2_out     = aperm(rout$tau2_out,     c(2, 1))
+rout$eta1_iter    = aperm(rout$eta1_iter,    c(2, 1))
+rout$phi0_out     = matrix(rout$phi0_out,    ncol = 1)
+rout$phi1_out     = matrix(rout$phi1_out,    ncol = 1)
+rout$lambda2_out  = matrix(rout$lambda2_out, ncol = 1)
+```
+
+
+
+
+```{r}
+cat("Si_out       size = ",size(rout$Si_out),"\n")
+cat("gamma_out    size = ",size(rout$gamma_out),"\n")
+cat("sigma2h_out  size = ",size(rout$sigma2h_out),"\n")
+cat("muh_out      size = ",size(rout$muh_out),"\n")
+cat("alpha_out    size = ",size(rout$alpha_out),"\n")
+cat("theta_out    size = ",size(rout$theta_out),"\n")
+cat("tau2_out     size = ",size(rout$tau2_out),"\n")
+cat("eta1_iter    size = ",size(rout$eta1_iter),"\n")
+cat("phi0_out     size = ",size(rout$phi0_out),"\n")
+cat("phi1_out     size = ",size(rout$phi1_out),"\n")
+cat("lambda2_out  size = ",size(rout$lambda2_out),"\n")
+cat("beta_out     size = ",size(rout$beta_out),"\n")
+cat("fitted       size = ",size(rout$fitted),"\n")
+cat("llike        size = ",size(rout$llike),"\n")
+```
+
+
+```{r}
+par(mar=c(4,2,2,2))
+for (time in 1:bigT) {
+	plot(rout$alpha_out[time,],
+		 ylim=c(0,1),
+		 type="l",
+		 xlab="iterates",
+		 ylab="",
+		 main=bquote("Trace plot of " * alpha[.(time)] ))
+}
+```
+# muh
+```{r}
+subject = 1
+for (time in 1:bigT){
+	plot(rout$muh_out[subject,time,],type="l",
+		 main=bquote("Trace plot of " * mu * " at time " * .(time) * 
+		 				" - subject " * .(subject)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+for (time in time_span_plot){
+	par(mar=c(4,4,3,2))
+	acf(drpm1$mu[time,sampled_station,],main=bquote("ACF plot of " * mu * " at week " * .(time) * 
+		 				" - station " * .(sampled_station_name)))
+}
 ```
 
 

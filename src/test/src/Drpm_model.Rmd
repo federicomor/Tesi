@@ -121,7 +121,7 @@ Burn in needs to be >= 10000. This after some long fits with low nburn (to see t
 
 ```{r}
 # niter=3000; nburn=1000; nthin=2
-niter=1000; nburn=1; nthin=1
+niter=10; nburn=1; nthin=1
 # niter=60000; nburn=20000; nthin=40 # original
 # niter=100000; nburn=60000; nthin=40 # new one for more data
 nout <- (niter-nburn)/nthin

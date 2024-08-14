@@ -80,7 +80,7 @@ sp_coords <- matrix(runif(n * 2), nrow = n, ncol = 2)
 
 # fit
 ```{r}
-niter=4; nburn=1; nthin=1
+niter=10; nburn=1; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -148,6 +148,24 @@ drpm1 <- drpm_fit(
 
 cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 ```
+
+```{r}
+cat("\nSi     size = ",size(drpm1$Si),"\n")
+cat("gamma  size = ",size(drpm1$gamma),"\n")
+cat("mu     size = ",size(drpm1$mu),"\n")
+cat("sig2   size = ",size(drpm1$sig2),"\n")
+cat("alpha  size = ",size(drpm1$alpha),"\n")
+cat("theta  size = ",size(drpm1$theta),"\n")
+cat("tau2   size = ",size(drpm1$tau2),"\n")
+cat("eta1   size = ",size(drpm1$eta1),"\n")
+cat("phi0   size = ",size(drpm1$phi0),"\n")
+cat("phi1   size = ",size(drpm1$phi1),"\n")
+cat("lam2   size = ",size(drpm1$lam2),"\n")
+cat("llike  size = ",size(drpm1$llike),"\n")
+cat("fitted size = ",size(drpm1$fitted),"\n")
+```
+
+
 ```{r}
 cat(size(drpm1$alpha),"\n")
 		 drpm1$alpha
