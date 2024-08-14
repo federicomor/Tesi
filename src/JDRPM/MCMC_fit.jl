@@ -13,13 +13,13 @@ include("utils.jl")
 function MCMC_fit(;
 	Y::Matrix{Float64},                   # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
-	X_covariates = missing,               # n*p*T matrix, the covariates for each unit and all times
-	# maybe we sould also decide where to use those covariates, or like separate covariates for clustering proces
-	# and covariates to use inside the likelihood
+	Xlk_covariates = missing,             # n*p*T matrix, the covariates (for all units and all times) to include in the likelihood
+	Xcl_covariates = missing,             # n*p*T matrix, the covariates (for all units and all times) to include in the clustering process
 
 	M_dp::Float64,                        # Dirichlet mass parameter
 	initial_partition = missing,          # Initial partition (if provided)
 	# actually not implemented yet the version with the initial partition (which however i think is useless)
+	# però vabe dovrebbe essere facile da includere
 
 	starting_alpha::Float64,              # Starting value for alpha
 	unit_specific_alpha::Bool,            # Unit-specific alpha values
@@ -31,14 +31,14 @@ function MCMC_fit(;
 	update_eta1::Bool,                    # Update the autoregressive part of eta1?
 	update_phi1::Bool,                    # Update the autoregressive part of phi1?
 
-	sigma2h_priors::Vector{Float64},      # Prior parameters for sigma2h ∼ invGamma(a_sigma,b_sigma)
+	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
 	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
-                                          # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
+										  # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
 	beta_priors::Vector{Float64},         # Prior parameters for beta ∼ 
 	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
 	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2)
 	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
-	                                      # so we just need the variance for the Metropolis update trough N(phi1_old,sigma^2)
+										  # so we just need the variance of the Metropolis update trough N(phi1_old,sigma^2)
 	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda)
 	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha)
 										  # but possibly that pair for each unit j, that's why the abstract array
@@ -53,7 +53,7 @@ function MCMC_fit(;
 
 	verbose::Bool,                        # Verbosity flag	
 	seed::Float64,                        # Random seed for reproducibility
-	io=log_file
+	io=log_file                           # where to save the logs
 	)
 	println("setting seed $seed")
 	Random.seed!(round(Int64,seed))
@@ -108,10 +108,11 @@ try
 
 	############# define auxiliary variables #############
 	sPPM = !ismissing(sp_coords)
-	xPPM = !ismissing(X_covariates)
+	cl_xPPM = !ismissing(Xcl_covariates)
+	lk_xPPM = !ismissing(Xlk_covariates)
 	n, T = size(Y)
 	T_star = T+1
-	p = xPPM ? size(X_covariates)[2] : 0
+	p = lk_xPPM ? size(Xlk_covariates)[2] : 0
 	nout = Int64((draws - burnin)/(thin))
 	if sPPM
 		sp1 = vec(sp_coords[:,1])
@@ -123,65 +124,100 @@ try
 	println("fitting $(Int(draws)) iterates with burnin=$(Int(burnin)) and thinning=$(Int(thin))")
 	println("(thus producing $nout iterates in the end)")
 	println("on n=$n subjects\nfor T=$T time instants")
-	println("with space? $sPPM\nwith covariates? $xPPM")
+	println("with space? $sPPM")
+	println("with covariates in the likelihood? $lk_xPPM")
+	println("with covariates in the clustering process? $cl_xPPM")
 	println()
 
 
 	############# allocate output variables #############
-	Si_out = zeros(Int64,nout,n,T)
-	gamma_out = zeros(Bool,nout,n,T)
+	Si_out = zeros(Int64,n,T,nout)
+	gamma_out = zeros(Bool,n,T,nout)
 	if time_specific_alpha==false && unit_specific_alpha==false
-		alpha_iter = zeros(nout) # for each iterate, a scalar
+		# for each iterate, a scalar
+		alpha_iter = zeros(nout)
 	elseif time_specific_alpha==true && unit_specific_alpha==false
-		alpha_iter = zeros(nout,T_star) # for each iterate, a vector in time
+		# for each iterate, a vector in time
+		alpha_iter = zeros(T_star,nout)
 	elseif time_specific_alpha==false && unit_specific_alpha==true
-		alpha_iter = zeros(nout,n) # for each iterate, a vector in units
+		# for each iterate, a vector in units
+		alpha_iter = zeros(n,nout)
 	elseif time_specific_alpha==true && unit_specific_alpha==true
-		alpha_iter = zeros(nout,n,T_star) # for each iterate, a matrix
+		# for each iterate, a matrix
+		alpha_iter = zeros(n,T_star,nout)
 	end
-	sigma2h_out = zeros(nout,n,T) 
-	muh_out = zeros(nout,n,T) 
-	eta1_out = zeros(nout,n) 
-	if xPPM
-		beta_out = zeros(nout,p,T)
+	sigma2h_out = zeros(n,T,nout)
+	muh_out = zeros(n,T,nout)
+	eta1_out = zeros(n,nout)
+	if lk_xPPM
+		beta_out = zeros(T,p,nout)
+		# so that eg we can write beta_out[t,:,i] = beta_iter[t]
 	end
-	theta_out = zeros(nout,T) 
-	tau2_out = zeros(nout,T) 
-	phi0_out = zeros(nout) 
-	phi1_out = zeros(nout) 
-	lambda2_out = zeros(nout) 
-	fitted = zeros(nout,T,n)
-	llike = zeros(nout,T,n)
+	theta_out = zeros(T,nout)
+	tau2_out = zeros(T,nout)
+	phi0_out = zeros(nout)
+	phi1_out = zeros(nout)
+	lambda2_out = zeros(nout)
+	fitted = zeros(T,n,nout)
+	llike = zeros(T,n,nout)
 	lpml = 0
 	waic = 0
 
 
-	############# allocate working variables #############
+	############# allocate and initialize working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
 	Si_iter[:,end] .= 0
 	gamma_iter = zeros(Bool,n,T_star)
 	if time_specific_alpha==false && unit_specific_alpha==false
-		alpha_iter = starting_alpha # a scalar
+		# a scalar
+		alpha_iter = starting_alpha
 	elseif time_specific_alpha==true && unit_specific_alpha==false
-		alpha_iter = ones(T_star)*starting_alpha # a vector in time
+		# a vector in time
+		alpha_iter = ones(T_star)*starting_alpha
 	elseif time_specific_alpha==false && unit_specific_alpha==true
-		alpha_iter = ones(n)*starting_alpha # a vector in units
+		# a vector in units
+		alpha_iter = ones(n)*starting_alpha
 	elseif time_specific_alpha==true && unit_specific_alpha==true
-		alpha_iter = ones(n,T_star)*starting_alpha # a matrix
+		# a matrix
+		alpha_iter = ones(n,T_star)*starting_alpha
 	end
 
+	# hierarchy level 3
+	phi0_iter = rand(Normal(phi0_priors[1], sqrt(phi0_priors[2])))
+	phi1_iter = 0.0 
+	if include_phi1
+		phi1_iter = rand(Uniform(-1,1))
+	end
+	lambda2_iter = rand(InverseGamma(lambda2_priors...))
+
+	# hierarchy level 2
+	theta_iter = zeros(T_star)
+	theta_iter[1] = rand(Normal(phi0_iter,sqrt(lambda2_iter)))
+	for t in 2:T_star
+		theta_iter[t] = rand(Normal((1-phi1_iter)*phi0_iter + phi1_iter*theta_iter[t-1],sqrt(lambda2_iter*(1-phi1_iter^2))))
+	end
+	tau2_iter = zeros(T_star)
+	for t in 1:T_star
+		tau2_iter[t] = rand(InverseGamma(tau2_priors...))
+	end
+
+	# hierarchy level 1
 	sig2h_iter = ones(n,T_star)
 	muh_iter = zeros(n,T_star)
-	eta1_iter = zeros(n)
-	if xPPM
-		beta_iter = rand(MvNormal(beta_priors[1:end-1],beta_priors[end]*Matrix(I, p, p)))
+	if lk_xPPM
+		beta_iter = Vector{Vector{Float64}}(undef,T_star)
+		for t in 1:T_star
+			beta_iter[t] = rand(MvNormal(beta_priors[1:end-1], beta_priors[end]*I(p)))
+		end
 	end
-	theta_iter = rand(Normal(),T_star)
-	tau2_iter = rand(InverseGamma(tau2_priors...),T_star)
-	phi0_iter = (T==2) ? mean(Normal(phi0_priors[1], sqrt(phi0_priors[2]))) : rand(Normal(phi0_priors[1], sqrt(phi0_priors[2])))
-	phi1_iter = rand(Uniform(-1,1))*include_phi1
-	lambda2_iter = (T==2) ? mean(InverseGamma(lambda2_priors...)) : rand(InverseGamma(lambda2_priors...))
-	
+	eta1_iter = zeros(n)
+	if include_eta1
+		for j in 1:n
+			eta1_iter[j] = rand(Uniform(-1,1))
+		end
+	end
+
+
 	nh = zeros(Int,n,T_star) # numerosity of each cluster k at time t
 	# dimension n since at most there are n clusters (all singletons)
 	nh[1,:] .= n
@@ -200,6 +236,8 @@ try
 	function pretty_log(str)
 		if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
 		if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
+		if str=="nh" println(log_file,"nh\n",tostr(nh)); return; end
+		if str=="nclus_iter" println(log_file,"nclus_iter\n",tostr(nclus_iter)); return; end
 		if str=="muh_iter" println(log_file,"muh_iter\n",tostr(muh_iter)); return; end
 		if str=="sig2h_iter" println(log_file,"sig2h_iter\n",tostr(sig2h_iter)); return; end
 		if str=="alpha_iter" println(log_file,"alpha_iter\n",tostr(alpha_iter)); return; end
@@ -212,6 +250,7 @@ try
 
 
 	############# start MCMC algorithm #############
+	println("Starting MCMC algorithm")
 	t_start = now()
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 
@@ -230,6 +269,7 @@ try
 			debug("► time $t")
 
 			############# update gamma #############
+			# println("############# update gamma")
 			for j in 1:n
 				debug(title*"[update gamma]")
 				debug("▸ subject $j")
@@ -348,6 +388,7 @@ try
 			end
 
 			############# update rho #############
+			# println("############# update rho")
 			debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
@@ -589,6 +630,7 @@ try
 
 
 			############# update muh #############
+			# println("############# update muh")
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -597,14 +639,8 @@ try
 							sum_Y += Y[j,t]
 						end
 					end
-					sig2_post = 1 / (1/tau2_iter[t] + sum(Si_iter[:,t] .== k)/sig2h_iter[k,t])
+					sig2_post = 1 / (1/tau2_iter[t] + nh[k,t]/sig2h_iter[k,t])
 					mu_post = sig2_post * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
-
-					# if isnan(mu_post)
-						# println(@showd mu_post theta_iter[t] sig2_post sum_Y/sig2h_iter[k,t] sum_Y sig2h_iter[k,t])
-						# è sig2h_iter il problema del NAN, lei è 0 certe volte
-						# perché?
-					# end
 
 					muh_iter[k] = rand(Normal(mu_post,sqrt(sig2_post)))
 				end
@@ -620,7 +656,6 @@ try
 							sum_Y += (Y[j,t] - eta1_iter[j]*Y[j,t-1]) * aux1
 						end
 					end
-
 					sig2_post = 1 / (1/tau2_iter[t] + sum_e2/sig2h_iter[k,t]) 
 					mu_post = sig2_post * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
 
@@ -628,10 +663,60 @@ try
 				end
 			end
 			
-			############# update sigma2h #############
 
+			############# update sigma2h #############
+			# println("############# update sigma2h")
+			if t==1
+				for k in 1:nclus_iter[t]
+					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
+					a_star = sig2h_priors[1] + nh[k,t]/2 # should be the same
+					@assert sum(Si_iter[:,t] .== k)  == nh[k,t] # yes it is
+					sum_Y = 0.0
+					S_kt = findall(j -> Si_iter[j,t] == k, 1:n)
+					@assert length(S_kt) == nh[k,t]
+					# if lk_xPPM
+					# 	for j in S_kt
+					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
+					# 	end
+					# else 
+					# 	for j in S_kt
+					# 		sum_Y += (Y[j,t] - muh_iter[k,t])^2
+					# 	end
+					# end
+					for j in S_kt
+						sum_Y += (Y[j,t] - muh_iter[k,t] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0))^2
+					end
+
+					b_star = sig2h_priors[2] + sum_Y/2
+					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
+				end
+
+			else # t>1
+				for k in 1:nclus_iter[t]
+					a_star = sig2h_priors[1] + nh[k,t]/2
+					sum_Y = 0.0
+					S_kt = findall(j -> Si_iter[j,t] == k, 1:n)
+					# if lk_xPPM
+					# 	for j in S_kt
+					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
+					# 	end
+					# else 
+					# 	for j in S_kt
+					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1])^2
+					# 	end
+					# end
+					for j in S_kt
+						sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0))^2
+					end
+
+					b_star = sig2h_priors[2] + sum_Y/2
+					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
+				end
+			end
 			
+
 			############# update theta #############
+			# println("############# update theta")
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -658,7 +743,9 @@ try
 				theta_iter[t] = rand(Normal(mu_post, sqrt(sig2_post)))
 			end 
 			
+
 			############# update tau2 #############
+			# println("############# update tau2")
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -666,14 +753,15 @@ try
 			end
 			a_star = tau2_priors[1] + kt
 			b_star = tau2_priors[2] + aux1/2
-			# tau2_iter[t] = rand(InverseGamma(a_star, b_star))
+			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
 
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
+		# println("############# update eta1")
 		eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
-		if include_eta1
+		if update_eta1
 			for j in 1:n
 				eta1_old = eta1_iter[j]
 				eta1_new = rand(Normal(eta1_old,eta1_priors[2])) # proposal value
@@ -683,11 +771,11 @@ try
 					for t in 2:T
 						# likelihood contribution
 						ll_old += loglikelihood(Normal(
-							muh_iter[j,t] + eta1_old*Y[j,t-1],
+							muh_iter[j,t] + eta1_old*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
 							sqrt(sig2h_iter[j,t]*(1-eta1_old^2))
 							), Y[j,t]) 
 						ll_new += loglikelihood(Normal(
-							muh_iter[j,t] + eta1_new*Y[j,t-1],
+							muh_iter[j,t] + eta1_new*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
 							sqrt(sig2h_iter[j,t]*(1-eta1_new^2))
 							), Y[j,t]) 
 					end
@@ -709,6 +797,7 @@ try
 
 		
 		############# update alpha #############
+		# println("############# update alpha")
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -749,6 +838,7 @@ try
 
 		
 		############# update phi0 #############
+		# println("############# update phi0")
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
@@ -761,8 +851,9 @@ try
 		
 
 		############# update phi1 #############
+		# println("############# update phi1")
 		phi1_priors = sqrt(phi1_priors) # from variance to std dev
-		if include_phi1
+		if update_phi1
 			phi1_old = phi1_iter
 			phi1_new = rand(Normal(phi1_old, phi1_priors)) # proposal value
 
@@ -794,6 +885,7 @@ try
 
 		
 		############# update lambda2 #############
+		# println("############# update lambda2")
 		aux1 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
@@ -801,7 +893,7 @@ try
 		end
 		a_star = lambda2_priors[1] + T/2
 		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + aux1/2
-		# lambda2_iter = rand(InverseGamma(a_star,b_star))	
+		lambda2_iter = rand(InverseGamma(a_star,b_star))	
 	
 
 		############# save MCMC iterates #############

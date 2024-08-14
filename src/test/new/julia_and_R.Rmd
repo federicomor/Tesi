@@ -64,7 +64,8 @@ TestModule1 <- juliaImport(juliaCall("include", testModule))
 TestModule1$MCMC_fit(
 	Y=Y,              
 	sp_coords = sp_coords,             
-	X_covariates = X_covariates,
+	Xlk_covariates = X_covariates,
+	# Xcl_covariates = ,
 	M_dp = 19,                     
 	# initial_partition = NA,     
 	starting_alpha = 0.5,         
@@ -77,7 +78,7 @@ TestModule1$MCMC_fit(
 	update_eta1 = TRUE,                    
 	update_phi1 = TRUE,
 	
-	sigma2h_priors = c(1,2),
+	sig2h_priors = c(3,1),
 	eta1_priors = c(1,2),
 	beta_priors = c(rep(1,p),2),
 	tau2_priors = c(1,2),

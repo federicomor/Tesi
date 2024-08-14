@@ -1,5 +1,6 @@
 using Plots
 
+begin
 function f(x, mu, b)
     term1 = (1/(2*b)) * exp(-1/b * abs(log((x + 1) / (1 - x)) - mu))
     # term2 = (1/(x+1)) + (1/(1-x))
@@ -15,3 +16,5 @@ for b in [0.5, 1, 2]
     ylims!(0,1.2)
     savefig("img/csi_eta_law_plot_b_$(replace(string(b),"."=>"_")).svg")
 end
+end
+
