@@ -38,7 +38,6 @@ cat(testModule)
 # by directly using the module object returned by "include".
 TestModule1 <- juliaImport(juliaCall("include", testModule))
 x = TestModule1$my_example(30)
-x
 
 n = 5
 bigT = 3
@@ -61,7 +60,7 @@ set.seed(seed_choice)
 
 ```{r}
 TestModule1 <- juliaImport(juliaCall("include", testModule))
-TestModule1$MCMC_fit(
+out = TestModule1$MCMC_fit(
 	Y=Y,              
 	sp_coords = sp_coords,             
 	Xlk_covariates = X_covariates,
@@ -96,11 +95,19 @@ TestModule1$MCMC_fit(
 	# covariate_similarity_idx = NA,  
 	draws = 6,                    
 	burnin = 2,                   
-	thin = 1,                     
+	thin = 2,                     
 	verbose = TRUE,
 	seed = seed_choice
 )
 ```
+
+## explore output
+```{r}
+rout = juliaGet(out)
+names(rout) <- c("Si_iter", "gamma_iter")
+rout
+```
+
 
 ## close log
 ```{r}

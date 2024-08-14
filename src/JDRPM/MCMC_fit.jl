@@ -55,7 +55,6 @@ function MCMC_fit(;
 	seed::Float64,                        # Random seed for reproducibility
 	io=log_file                           # where to save the logs
 	)
-	println("setting seed $seed")
 	Random.seed!(round(Int64,seed))
 	
 try
@@ -97,11 +96,11 @@ try
 	end
 
 	if update_eta1==true && include_eta1==false 
-		@error "Be coherent! I cant have update eta1 and not including it.\nCheck what you assigned to update_eta1 and include_eta1."
+		@error "Be coherent! I cant have update eta1 and not including it.\nCheck what you assigned to update_eta1 and include_eta1." _file=""
 		return
 	end
 	if update_phi1==true && include_phi1==false
-		@error "Be coherent! I cant have update phi1 and not including it.\nCheck what you assigned to update_phi1 and include_phi1."
+		@error "Be coherent! I cant have update phi1 and not including it.\nCheck what you assigned to update_phi1 and include_phi1." _file=""
 		return
 	end
 
@@ -113,7 +112,11 @@ try
 	n, T = size(Y)
 	T_star = T+1
 	p = lk_xPPM ? size(Xlk_covariates)[2] : 0
-	nout = Int64((draws - burnin)/(thin))
+	if (draws-burnin)%thin != 0
+		@error "Please define draws, thin and burnin in an integer division-friendly way.\nI.e., such that (draws-burnin) % thin = 0." _file=""
+		return
+	end
+	nout = round(Int64,(draws - burnin)/(thin))
 	if sPPM
 		sp1 = vec(sp_coords[:,1])
 		sp2 = vec(sp_coords[:,2])
@@ -121,9 +124,10 @@ try
 
 
 	############# send feedback #############
-	println("fitting $(Int(draws)) iterates with burnin=$(Int(burnin)) and thinning=$(Int(thin))")
-	println("(thus producing $nout iterates in the end)")
-	println("on n=$n subjects\nfor T=$T time instants")
+	println("- using seed $seed -")
+	println("fitting $(Int(draws)) total iterates (burnin=$(Int(burnin)), thinning=$(Int(thin)))")
+	println("thus producing $nout valid iterates in the end")
+	println("\non n=$n subjects\nfor T=$T time instants")
 	println("with space? $sPPM")
 	println("with covariates in the likelihood? $lk_xPPM")
 	println("with covariates in the clustering process? $cl_xPPM")
@@ -131,20 +135,21 @@ try
 
 
 	############# allocate output variables #############
+	i_out = 1
 	Si_out = zeros(Int64,n,T,nout)
 	gamma_out = zeros(Bool,n,T,nout)
 	if time_specific_alpha==false && unit_specific_alpha==false
 		# for each iterate, a scalar
-		alpha_iter = zeros(nout)
+		alpha_out = zeros(nout)
 	elseif time_specific_alpha==true && unit_specific_alpha==false
 		# for each iterate, a vector in time
-		alpha_iter = zeros(T_star,nout)
+		alpha_out = zeros(T,nout)
 	elseif time_specific_alpha==false && unit_specific_alpha==true
 		# for each iterate, a vector in units
-		alpha_iter = zeros(n,nout)
+		alpha_out = zeros(n,nout)
 	elseif time_specific_alpha==true && unit_specific_alpha==true
 		# for each iterate, a matrix
-		alpha_iter = zeros(n,T_star,nout)
+		alpha_out = zeros(n,T,nout)
 	end
 	sigma2h_out = zeros(n,T,nout)
 	muh_out = zeros(n,T,nout)
@@ -251,11 +256,13 @@ try
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
+	sleep(1.0) # to let all the prints be printed
+
 	t_start = now()
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 
 	for i in 1:draws
-		print("iteration $i\r") # use only this when all finished, for a shorter feedback
+		print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 
 		debug("\n▶ iteration $i")
 
@@ -269,7 +276,6 @@ try
 			debug("► time $t")
 
 			############# update gamma #############
-			# println("############# update gamma")
 			for j in 1:n
 				debug(title*"[update gamma]")
 				debug("▸ subject $j")
@@ -388,7 +394,6 @@ try
 			end
 
 			############# update rho #############
-			# println("############# update rho")
 			debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
@@ -630,7 +635,6 @@ try
 
 
 			############# update muh #############
-			# println("############# update muh")
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -665,7 +669,6 @@ try
 			
 
 			############# update sigma2h #############
-			# println("############# update sigma2h")
 			if t==1
 				for k in 1:nclus_iter[t]
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
@@ -716,7 +719,6 @@ try
 			
 
 			############# update theta #############
-			# println("############# update theta")
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -745,7 +747,6 @@ try
 			
 
 			############# update tau2 #############
-			# println("############# update tau2")
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -759,7 +760,6 @@ try
 		end # for t in 1:T
 		
 		############# update eta1 #############
-		# println("############# update eta1")
 		eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
 		if update_eta1
 			for j in 1:n
@@ -797,7 +797,6 @@ try
 
 		
 		############# update alpha #############
-		# println("############# update alpha")
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -838,7 +837,6 @@ try
 
 		
 		############# update phi0 #############
-		# println("############# update phi0")
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
@@ -851,7 +849,6 @@ try
 		
 
 		############# update phi1 #############
-		# println("############# update phi1")
 		phi1_priors = sqrt(phi1_priors) # from variance to std dev
 		if update_phi1
 			phi1_old = phi1_iter
@@ -885,7 +882,6 @@ try
 
 		
 		############# update lambda2 #############
-		# println("############# update lambda2")
 		aux1 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
@@ -897,12 +893,50 @@ try
 	
 
 		############# save MCMC iterates #############
+		if i>burnin && i%thin==0 
+			Si_out[:,:,i_out] = Si_iter[:,1:T]
+			gamma_out[:,:,i_out] = gamma_iter[:,1:T]
+			if time_specific_alpha==false && unit_specific_alpha==false
+				# for each iterate, a scalar
+				alpha_out[i_out] = alpha_iter
+			elseif time_specific_alpha==true && unit_specific_alpha==false
+				# for each iterate, a vector in time
+				alpha_out[:,i_out] = alpha_iter[1:T]
+			elseif time_specific_alpha==false && unit_specific_alpha==true
+				# for each iterate, a vector in units
+				alpha_out[:,i_out] = alpha_iter
+			elseif time_specific_alpha==true && unit_specific_alpha==true
+				# for each iterate, a matrix
+				alpha_out[:,:,i_out] = alpha_iter[:,1:T]
+			end
+			for t in 1:T
+				for j in 1:n
+					sigma2h_out[j,t,i_out] = sig2h_iter[Si_iter[j,t],t]
+					muh_out[j,t,i_out] = muh_iter[Si_iter[j,t],t]
+				end
+			end
+			eta1_out[:,i_out] = eta1_iter
+			if lk_xPPM
+				for t in 1:T
+					beta_out[t,:,i_out] = beta_iter[t]
+				end
+			end
+			theta_out[:,i_out] = theta_iter[1:T]
+			tau2_out[:,i_out] = tau2_iter[1:T]
+			phi0_out[i_out] = phi0_iter
+			phi1_out[i_out] = phi1_iter
+			lambda2_out[i_out] = lambda2_iter
+
+			i_out += 1
+		end
 
 
 	end # for i in 1:draws
 	println("\ndone!")
 	t_end = now()
 	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
+
+	return Si_out, Int.(gamma_out)
 
 catch e
 	println(e)
@@ -912,13 +946,6 @@ end
 close(log_file)
 # global_logger(ConsoleLogger())	
 end
-
-#= problematic seeds (during the development phase): 
-- 101
-maybe when all is finished the problems will be solved, as probably are caused by running the alg while not being complete
-- 860
-il vettore ph diventava a volte pieno di -Inf o NaN, senza valori utili, nella parte di aggiornare rho
-=#
 
 function close_log_file()
 	close(log_file)
