@@ -1,3 +1,4 @@
+
 begin
 lg_weights = [-1000.0, -2000, -1500, -100, -200]
 ph_tmp = copy(lg_weights)
@@ -45,3 +46,17 @@ begin
 	end
 end
 
+
+begin
+A_star = [0.5695141296842557 -0.5958323106341032; -0.5958323106341032 5.607107634272117]
+invA_star = inv(A_star)
+# invA_star = [1.9755086272843259 0.20992496432168561; 0.20992496432168564 0.20065248429953192]
+
+using LinearAlgebra
+println(eigvals(A_star)) # [0.5000000000009021, 5.67662176395547] all >0
+println(eigvals(invA_star)) # [0.1761611115874664, 1.9999999999963913] still all >0
+
+println(isposdef(A_star)) # true
+isposdef(invA_star) # false
+
+end

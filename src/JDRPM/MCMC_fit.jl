@@ -211,8 +211,10 @@ try
 	muh_iter = zeros(n,T_star)
 	if lk_xPPM
 		beta_iter = Vector{Vector{Float64}}(undef,T_star)
+		beta0 = beta_priors[1:end-1]
+		s2_beta = beta_priors[end]
 		for t in 1:T_star
-			beta_iter[t] = rand(MvNormal(beta_priors[1:end-1], beta_priors[end]*I(p)))
+			beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p)))
 		end
 	end
 	eta1_iter = zeros(n)
@@ -256,9 +258,9 @@ try
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
-	sleep(2.0) # to let all the prints be printed
+	sleep(1.0) # to let all the prints be printed
 	println("loading...\r")
-	sleep(2.0) # to let all the prints be printed
+	sleep(1.0) # to let all the prints be printed
 
 	t_start = now()
 	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
@@ -642,13 +644,13 @@ try
 					sum_Y = 0.0
 					for j in 1:n
 						if Si_iter[j,t]==k 
-							sum_Y += Y[j,t]
+							sum_Y += Y[j,t] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
 						end
 					end
-					sig2_post = 1 / (1/tau2_iter[t] + nh[k,t]/sig2h_iter[k,t])
-					mu_post = sig2_post * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
+					sig2_star = 1 / (1/tau2_iter[t] + nh[k,t]/sig2h_iter[k,t])
+					mu_star = sig2_star * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
 
-					muh_iter[k] = rand(Normal(mu_post,sqrt(sig2_post)))
+					muh_iter[k] = rand(Normal(mu_star,sqrt(sig2_star)))
 				end
 
 			else # t>1
@@ -659,13 +661,13 @@ try
 						if Si_iter[j,t]==k 
 							aux1 = 1 / (1-eta1_iter[j]^2)
 							sum_e2 += aux1
-							sum_Y += (Y[j,t] - eta1_iter[j]*Y[j,t-1]) * aux1
+							sum_Y += (Y[j,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)) * aux1
 						end
 					end
-					sig2_post = 1 / (1/tau2_iter[t] + sum_e2/sig2h_iter[k,t]) 
-					mu_post = sig2_post * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
+					sig2_star = 1 / (1/tau2_iter[t] + sum_e2/sig2h_iter[k,t]) 
+					mu_star = sig2_star * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
 
-					muh_iter[k] = rand(Normal(mu_post,sqrt(sig2_post)))
+					muh_iter[k] = rand(Normal(mu_star,sqrt(sig2_star)))
 				end
 			end
 			
@@ -718,7 +720,28 @@ try
 					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
 				end
 			end
-			
+
+			############# update beta #############
+			if lk_xPPM
+				if t==1
+					sum_Y = zeros(p)
+					A_star = I(p)/s2_beta
+					for j in 1:n
+						X_jt = Xlk_covariates[j,:,t]
+						sum_Y += (Y[j,t]-muh_iter[Si_iter[j],t]) * X_jt / sig2h_iter[Si_iter[j],t]
+						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j],t]
+					end
+					b_star = beta0/s2_beta + sum_Y
+					# beta_iter[t] = rand(MvNormal(b_star, inv(A_star))) 
+					# Symmetric needed for numerical problems
+					# https://discourse.julialang.org/t/isposdef-and-eigvals-do-not-agree/118191/2
+					# but A_star is indeed symm and pos def (by construction) so there is no problem
+					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
+				else
+
+				end
+			end
+						
 
 			############# update theta #############
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
