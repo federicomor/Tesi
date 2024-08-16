@@ -5,7 +5,7 @@ output: html_document
 
 # load drpm
 ```{r}
-devtools::load_all("../../drpm/")
+devtools::load_all("../../drpm_main//")
 ```
 
 

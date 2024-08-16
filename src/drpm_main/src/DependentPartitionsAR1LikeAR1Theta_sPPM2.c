@@ -341,6 +341,8 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	
 int iter_feedback = 10000;
 	for(i = 0; i < *draws; i++){
+			// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
+			// RprintVecAsMat("muh", muh, *nsubject, ntime1);
 Rprintf("iteration %d of %d\r",i,*draws);
 		if((i+1) % iter_feedback == 0){
 			time_t now;
@@ -362,8 +364,9 @@ Rprintf("iteration %d of %d\r",i,*draws);
 
 			
 //			RprintIVecAsMat("nh", nh, *nsubject, ntime1);
-//			RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
-//			RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
+			// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
+			// RprintVecAsMat("muh", muh, *nsubject, ntime1);
+			// RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
 //			Rprintf("nclus_iter[t] = %d\n", nclus_iter[t]);
 
 
@@ -2051,6 +2054,7 @@ Rprintf("iteration %d of %d\r",i,*draws);
 
 
 	}
+	Rprintf("\n");
 
 
 	

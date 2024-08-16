@@ -272,29 +272,29 @@ function MCMC_fit(;
 	sleep(1.0) # to let all the prints be printed
 
 	t_start = now()
-	debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
+	# debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 
 	for i in 1:draws
 		print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 
-		debug("\n▶ iteration $i")
+		# debug("\n▶ iteration $i")
 
-		pretty_log("Si_iter")
-		pretty_log("gamma_iter")
-		pretty_log("muh_iter")
-		pretty_log("sig2h_iter")
-		pretty_log("alpha_iter")
+		# pretty_log("Si_iter")
+		# pretty_log("gamma_iter")
+		# pretty_log("muh_iter")
+		# pretty_log("sig2h_iter")
+		# pretty_log("alpha_iter")
 
 		for t in 1:T
-			debug("► time $t")
+			# debug("► time $t")
 
 			############# update gamma #############
 			for j in 1:n
-				debug(title*"[update gamma]")
-				debug("▸ subject $j")
+				# debug(title*"[update gamma]")
+				# debug("▸ subject $j")
 				if t==1 
 					gamma_iter[j,t] = 0
-					debug("we are at time t=1 so nothing to do")
+					# debug("we are at time t=1 so nothing to do")
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall(jj -> gamma_iter[jj, t] == 1, setdiff(1:n,j))
@@ -327,7 +327,7 @@ function MCMC_fit(;
 						nh_red1[Si_red1[jj]] += 1
 					end
 					nh_red1[Si_red1[end]] += 1 # account for the last added unit j
-					debug(@showd Si_red Si_red1 j_label)
+					# debug(@showd Si_red Si_red1 j_label)
 
 					# start computing weights
 					lg_weights = zeros(nclus_red+1)
@@ -353,8 +353,8 @@ function MCMC_fit(;
 					end
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
 
-					printlgln("before exp and normalization:")
-					debug(@showd lg_weights)
+					# printlgln("before exp and normalization:")
+					# debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
 					max_ph = maximum(lg_weights)
@@ -368,8 +368,8 @@ function MCMC_fit(;
 					end
 					# ... and normalize
 					lg_weights ./= sum_ph
-					printlgln("after exp and normalization:")
-					debug(@showd lg_weights)
+					# printlgln("after exp and normalization:")
+					# debug(@showd lg_weights)
 
 					# compute probh
 					probh = 0.0
@@ -382,7 +382,7 @@ function MCMC_fit(;
 					elseif time_specific_alpha==true && unit_specific_alpha==true
 						probh = alpha_iter[j,t] / (alpha_iter[j,t] + (1 - alpha_iter[j,t]) * lg_weights[j_label])
 					end
-					debug(@showd probh)
+					# debug(@showd probh)
 
 
 					# compatibility check for gamma transition
@@ -401,20 +401,20 @@ function MCMC_fit(;
 					# sample the new gamma
 					gt = rand(Bernoulli(probh))
 					gamma_iter[j, t] = gt
-					printlgln("sampled gamma:")
-					debug(@showd probh gt gamma_iter[:,t])
+					# printlgln("sampled gamma:")
+					# debug(@showd probh gt gamma_iter[:,t])
 				end
 			end
 
 			############# update rho #############
-			debug(title*"[update rho]")
+			# debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
-			debug(@showd movable_units Si_iter[:,t])
+			# debug(@showd movable_units Si_iter[:,t])
 		
 			for j in movable_units
 				# remove unit j from the cluster she is currently in
-				debug(@showd j t)
+				# debug(@showd j t)
 
 				if nh[Si_iter[j,t],t] > 1 # unit j does not belong to a singleton cluster
 					nh[Si_iter[j,t],t] -= 1
@@ -469,9 +469,9 @@ function MCMC_fit(;
 					Si_comp1 = rho_tmp[indexes]
 					Si_comp2 = Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
 					rho_comp = compatibility(Si_comp1, Si_comp2)
-					printlgln("Assigning to cluster k=$k :")
-					pretty_log("gamma_iter"); pretty_log("Si_iter")
-					debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
+					# printlgln("Assigning to cluster k=$k :")
+					# pretty_log("gamma_iter"); # pretty_log("Si_iter")
+					# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 					
 					if rho_comp != 1
 						ph[k] = log(0) # assignment to cluster k is not compatible
@@ -523,9 +523,9 @@ function MCMC_fit(;
 				Si_comp1 = rho_tmp[indexes]
 				Si_comp2 = Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
-				printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
-				pretty_log("gamma_iter"); pretty_log("Si_iter")
-				debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
+				# printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
+				# pretty_log("gamma_iter"); # pretty_log("Si_iter")
+				# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 
 				if rho_comp != 1
 					ph[k] = log(0) # assignment to a new cluster is not compatible
@@ -568,8 +568,8 @@ function MCMC_fit(;
 					nh_tmp[k] -= 1
 				end
 
-				printlgln("Before exp and normalization:")
-				debug(@showd ph)
+				# printlgln("Before exp and normalization:")
+				# debug(@showd ph)
 				# now exponentiate the weights...
 				max_ph = maximum(ph)
 				sum_ph = 0.0
@@ -581,8 +581,8 @@ function MCMC_fit(;
 				# ... and normalize them
 				ph ./= sum_ph
 				
-				printlgln("After exp and normalization:")
-				debug(@showd ph)
+				# printlgln("After exp and normalization:")
+				# debug(@showd ph)
 
 				# now sample the new label Si_iter[j,t]
 				u = rand(Uniform(0,1))
@@ -595,9 +595,9 @@ function MCMC_fit(;
 						break
 					end
 				end
-				debug(@showd cph u)
-				debug(@showd new_label j)
-				printlgln("\n")
+				# debug(@showd cph u)
+				# debug(@showd new_label j)
+				# printlgln("\n")
 				
 				if all(isinf.(ph) .|| isnan.(ph))
 					@warn "No valid weight in ph vector when updating for rho.\n"
@@ -646,7 +646,7 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = sig2h_iter_copy[old_lab[k],t]
 					nh[k,t] = nh_reorder[k]
 				end
-				debug(@showd Si_iter[:,t])
+				# debug(@showd Si_iter[:,t])
 
 			end # for j in movable_units
 
@@ -663,7 +663,7 @@ function MCMC_fit(;
 					sig2_star = 1 / (1/tau2_iter[t] + nh[k,t]/sig2h_iter[k,t])
 					mu_star = sig2_star * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
 
-					muh_iter[k] = rand(Normal(mu_star,sqrt(sig2_star)))
+					muh_iter[k,t] = rand(Normal(mu_star,sqrt(sig2_star)))
 				end
 
 			else # t>1
@@ -680,7 +680,7 @@ function MCMC_fit(;
 					sig2_star = 1 / (1/tau2_iter[t] + sum_e2/sig2h_iter[k,t]) 
 					mu_star = sig2_star * (theta_iter[t]/tau2_iter[t] + sum_Y/sig2h_iter[k,t])
 
-					muh_iter[k] = rand(Normal(mu_star,sqrt(sig2_star)))
+					muh_iter[k,t] = rand(Normal(mu_star,sqrt(sig2_star)))
 				end
 			end
 			
