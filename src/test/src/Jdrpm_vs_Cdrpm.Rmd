@@ -1,0 +1,690 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+# setup
+```{r, warning=FALSE}
+library(salso)
+source("include.R")
+```
+
+
+```{r, warning=FALSE}
+source("plot functions/plotter.R")
+source("include_clusters_functions.R")
+```
+
+# LOAD 
+## load C drpm
+```{r}
+devtools::load_all("../../drpm_main/")
+```
+
+## load J drpm
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("using Pkg; Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+```
+
+# OTHER DATA
+## real PM10 data
+```{r}
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+y=data.frame()
+for(st in stations){
+  y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+  y=rbind(y,y_we_pm10)
+}
+rownames(y) = NULL
+colnames(y)<- c("id",paste0("w", 1:53))
+
+
+cols = colora(105,56,show=F)
+chosen_variable_name = "AQ_pm10"
+trendYearStation_week <- function(file_name){
+
+	data_from_to = df_wsc
+	len_time = 54
+	
+	chosen_variable = (data_from_to[,chosen_variable_name])
+
+	# Crea il grafico ggplot
+	station_trend <- ggplot(data_from_to,aes(x = week, 
+												 y = AQ_pm10,
+												 group=IDStations, 
+												 color = as.factor(IDStations))) +
+		
+		geom_line(show.legend = FALSE) +
+		labs(x = "Stations", y = chosen_variable_name, title = "PM10 first test data") +
+		ylim(range(na.omit(chosen_variable))) +
+		scale_color_manual(values = cols) +
+		theme_bw()+
+		theme(panel.grid = element_blank()) +
+		guides(color = guide_legend())+
+		labs(x="week")
+	
+	len_time = (len_time%/%5)
+	return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
+}
+trendYearStation_week("None")
+
+time_span = 1:10 # low time span for quick testing, real one will be 1:53
+nsubjects = 1:105
+### authors suggested to/did scale the spatial locations and also centered the observations
+y_fit = y[nsubjects,1+time_span]
+
+# -> we have
+y_fit
+std_sites
+```
+
+
+
+
+## data used in Page paper
+```{r}
+source("../Supplementary material/Functions.R")
+
+N <- 50; Tm<-6; M<-1;
+alpha <- c(0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.9999)
+jj = 4
+ndata <- 100
+dat <- rtpartition1(N=N,M=M,rho=alpha[jj],ntime=Tm,tau=5,sig=1,
+					Caron=FALSE,FirstPart=NULL,TYPE="Random",
+				    phi0=0, phi1=1)
+
+y <- t(dat$YMat)
+
+cols = colora(N,seed = 56,show = 0)
+yred=y
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+# SIMPLE TEST
+## data
+```{r}
+# seed_choice = round(runif(1,0,1000))
+# cat(paste0("seed ",seed_choice))
+# set.seed(seed_choice)
+set.seed(345)
+
+# Create the sites data frame
+sites <- data.frame(
+  longitude = c(0, 1, 2, 0, 1, 2, 0, 1, 2) / 2 + runif(9,-0.2,0),
+  latitude = c(2,2,2,1, 1, 1,0,0,0) / 2       + runif(9,-0.2,0)
+)
+sites
+sites = (sites-sapply(sites,mean)) / sapply(sites,sd) 
+sites
+
+YM = 10
+# Generate yt data frame with three clusters for t1
+yt = data.frame(
+	t1 = c(rnorm(1,YM),rnorm(1),rnorm(1),rnorm(1,YM),rnorm(2,1),rnorm(1,YM),rnorm(2,-YM)),
+	t2 = c(rnorm(2,YM),rnorm(1),rnorm(2,YM),rnorm(1,-YM),rnorm(1,YM),rnorm(2,-YM)),
+	t3 = c(rnorm(2,YM),rnorm(1),rnorm(1,YM),rnorm(2,-YM),rnorm(1,YM),rnorm(2,-YM)),
+	t4 = c(rnorm(3,YM),rnorm(2,YM),rnorm(1,-YM),rnorm(1,YM),rnorm(2,-YM))
+)
+yt
+clusters_t1 <- cut(yt$t1, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+clusters_t2 <- cut(yt$t2, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+clusters_t3 <- cut(yt$t3, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+clusters_t4 <- cut(yt$t4, breaks = c(-Inf, -5, 5, Inf), labels = c("cl1", "cl2", "cl3"))
+
+
+boxplot(yt)
+cat(sapply(yt,mean),"\n")
+cat(sapply(yt,sd),"\n")
+# yt = (yt-sapply(yt,mean)) / sapply(yt,sd)
+# yt
+# boxplot(yt)
+
+yred=yt
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10',main="original clusters")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+par(mfrow=c(2,2),mar=c(2,2,2,2))
+plot(sites,col=clusters_t1,pch=19,cex=1.4,main="t=1 real data")
+plot(sites,col=clusters_t2,pch=19,cex=1.4,main="t=2 real data")
+plot(sites,col=clusters_t3,pch=19,cex=1.4,main="t=3 real data")
+plot(sites,col=clusters_t4,pch=19,cex=1.4,main="t=4 real data")
+
+# yt, sites
+time_span = c(1,2,3,4)
+```
+
+
+
+
+## fits
+```{r}
+niter=1000; nburn=500; nthin=2
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+
+seed_choice = round(runif(1,0,1000))
+set.seed(seed_choice)
+cat(paste0("seed ",seed_choice,"\n==========================\n",date(),"\n\n"))
+
+# params
+m0_phi0 = 0
+s20_phi0 = 1
+A_ub_sigma = 5
+a_sigma = 5; b_sigma=2
+A_ub_tau = 5
+a_tau = 5; b_tau=2
+A_ub_lambda = 5
+a_lambda = 5; b_lambda=2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.2
+sig_mh_tau2 = 0.2
+sig_mh_lambda2 = 0.2
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
+
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+
+a_alpha = 2; b_alpha = 2
+```
+## drpm C
+```{r}
+drpm_c <- drpm_fit(
+		y=yt, 
+		s_coords = sites,
+        M=1,
+        initial_partition = NULL,
+		
+        starting_alpha = 0.5,
+        unit_specific_alpha = FALSE,
+        time_specific_alpha = TRUE,
+        alpha_0=FALSE,
+		
+        eta1_0=TRUE,
+        phi1_0=TRUE,
+        # modelPriors=c(0,100^2,1,1,1,1), # original default one
+        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+
+        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+        
+        simpleModel = 0,
+        theta_tau2 = c(0, 2), # only used if simpleModel=1
+
+		SpatialCohesion=3, # auxiliary similarity
+		# SpatialCohesion=4, # double dipper similarity
+		cParms=c(mu0, k0, v0, L0),
+		
+		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+		verbose=TRUE,
+		draws=niter,burn=nburn,thin=nthin) # adaptable one
+```
+
+
+## diagnostics
+```{r}
+for (loc in c(1,2,9)){
+for (time in c(1,2,3,4)){
+	plot(drpm_c$mu[time,loc,],type="l",
+		 main=bquote("Trace plot of " * mu * " at week " * .(time) * " - location " * .(loc)),
+		 xlab = "MCMC iterations",ylab="values")
+	abline(h=mean(drpm_c$mu[time,loc,]))
+}
+}
+```
+
+
+
+## plot
+```{r}
+model_name = "simple_test"
+loss = "VI"
+maxNClusters = 5
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in c(1,2,3,4)){
+
+	salso_out <- salso(t(drpm_c$Si[time-(min(time_span)-1),,]),
+					   loss=binder(a=1),
+					   # loss=loss,
+					   # loss="VI.lb",
+					   maxNClusters = maxNClusters
+					   )
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	# n_clusters = max(clusters_now)
+	n_clusters = unique(clusters_now)
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	# for (cl in n_clusters){
+		# cat("Cluster",cl,"- size",length(ycurrent[which(clusters_now==cl)]),
+			# "- mean",mean(ycurrent[which(clusters_now==cl)]),"\n")
+	# }
+}
+
+library(mclust)
+##########################
+FIT = drpm_c # your fit
+LEN = 4
+##########################
+
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
+						  loss=binder(a=1),
+						  # loss=loss,
+						  # loss="VI.lb",
+						  maxNClusters = maxNClusters
+						  ) # adjust with your fit $Si dimension
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+if (min(ARImats)<0){
+	cols_ARI = colora(ncols_ari,79,0)
+	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+} else {
+	cols_ARI = colora(ncols_ari,56,0)
+	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	brks = seq(0,1,length.out=ncols_ari+1)
+}
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - model ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+
+
+yred=t(drpm_c$fitted[,,size(drpm_c$fitted)[3]])
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10',main="drpm C clusters")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+par(mfrow=c(2,2),mar=c(2,2,2,2))
+cols = as.numeric(df_cluster[df_cluster$Time==1,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=1 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==2,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=2 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==3,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=3 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==4,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=4 - from drpm model")
+```
+
+
+
+## drpm J
+```{r}
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(yt),              
+	sp_coords = as.matrix(sites),
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = FALSE,                    
+	update_phi1 = FALSE,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1^2,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	spatial_cohesion_idx = 4,
+	sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
+	
+	# covariate_similarity_idx = NA,  
+	draws = 100,                    
+	burnin = 20,                   
+	thin = 10,                     
+	logging = FALSE,
+	seed = seed_choice
+)
+```
+
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma_out",
+				 "alpha_out", 
+				 "sigma2h_out", 
+				 "muh_out", 
+				 "eta1_iter",
+				 "beta_out",
+				 "theta_out", 
+				 "tau2_out", 
+				 "phi0_out", 
+				 "phi1_out",
+				 "lambda2_out",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma_out    = aperm(rout$gamma_out,    c(2, 1, 3))
+rout$sigma2h_out  = aperm(rout$sigma2h_out,  c(2, 1, 3))
+rout$muh_out      = aperm(rout$muh_out,      c(2, 1, 3))
+rout$alpha_out    = aperm(rout$alpha_out,    c(2, 1))
+rout$theta_out    = aperm(rout$theta_out,    c(2, 1))
+rout$tau2_out     = aperm(rout$tau2_out,     c(2, 1))
+rout$eta1_iter    = aperm(rout$eta1_iter,    c(2, 1))
+rout$phi0_out     = matrix(rout$phi0_out,    ncol = 1)
+rout$phi1_out     = matrix(rout$phi1_out,    ncol = 1)
+rout$lambda2_out  = matrix(rout$lambda2_out, ncol = 1)
+```
+
+```{r}
+cat("Si           size = ",size(rout$Si),"\n")
+cat("gamma_out    size = ",size(rout$gamma_out),"\n")
+cat("sigma2h_out  size = ",size(rout$sigma2h_out),"\n")
+cat("muh_out      size = ",size(rout$muh_out),"\n")
+cat("alpha_out    size = ",size(rout$alpha_out),"\n")
+cat("theta_out    size = ",size(rout$theta_out),"\n")
+cat("tau2_out     size = ",size(rout$tau2_out),"\n")
+cat("eta1_iter    size = ",size(rout$eta1_iter),"\n")
+cat("phi0_out     size = ",size(rout$phi0_out),"\n")
+cat("phi1_out     size = ",size(rout$phi1_out),"\n")
+cat("lambda2_out  size = ",size(rout$lambda2_out),"\n")
+cat("beta_out     size = ",size(rout$beta_out),"\n")
+cat("fitted       size = ",size(rout$fitted),"\n")
+cat("llike        size = ",size(rout$llike),"\n")
+```
+
+
+
+## plot
+```{r}
+model_name = "simple_test"
+loss = "VI"
+maxNClusters = 5
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in c(1,2,3,4)){
+
+	salso_out <- salso(t(rout$Si[time-(min(time_span)-1),,]),
+					   loss=binder(a=1),
+					   # loss=loss,
+					   # loss="VI.lb",
+					   maxNClusters = maxNClusters
+					   )
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	# n_clusters = max(clusters_now)
+	n_clusters = unique(clusters_now)
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	# for (cl in n_clusters){
+		# cat("Cluster",cl,"- size",length(ycurrent[which(clusters_now==cl)]),
+			# "- mean",mean(ycurrent[which(clusters_now==cl)]),"\n")
+	# }
+}
+
+library(mclust)
+##########################
+FIT = rout # your fit
+LEN = 4
+##########################
+
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
+						  loss=binder(a=1),
+						  # loss=loss,
+						  # loss="VI.lb",
+						  maxNClusters = maxNClusters
+						  ) # adjust with your fit $Si dimension
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+if (min(ARImats)<0){
+	cols_ARI = colora(ncols_ari,79,0)
+	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+} else {
+	cols_ARI = colora(ncols_ari,56,0)
+	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	brks = seq(0,1,length.out=ncols_ari+1)
+}
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - model ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+
+
+#### fitted not yet implemented in julia code
+# yred=t(rout$fitted[,,size(rout$fitted)[3]])
+# cols = colora(size(yred)[1],56,0)
+# for(i in 1:size(yred)[1]){
+#    if(i==1){
+#      plot(1:size(yred)[2],yred[i,],col=cols[i],
+#      	 ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10',main="drpm C clusters")
+#  	  } 
+# 	  else{
+# 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+# 	  }
+# }
+
+par(mfrow=c(2,2),mar=c(2,2,2,2))
+cols = as.numeric(df_cluster[df_cluster$Time==1,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=1 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==2,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=2 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==3,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=3 - from drpm model")
+
+cols = as.numeric(df_cluster[df_cluster$Time==4,]$clusters)
+plot(sites,col=cols,pch=19,cex=1.4,main="t=4 - from drpm model")
+```
+
+
+
+# TRACE PLOTS
+## lambda2
+```{r}
+par(mar=c(4,2,2,2))
+par(mfrow=c(1,2))
+```
+
+
+# CL PLOTS
+```{r}
+######################
+# FIT = drpm_C
+FIT = rout
+model_name = "drpm J"
+######################
+
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span){
+
+	salso_out <- salso(t(FIT$Si[time-(min(time_span)-1),,]),
+					   loss=binder(a=1),
+					   # loss="VI",
+					   # loss="VI.lb",
+					   maxNClusters = 7
+					   )
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	# n_clusters = max(clusters_now)
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	# for (cl in n_clusters){
+		# cat("Cluster",cl,"- size",length(ycurrent[which(clusters_now==cl)]),
+			# "- mean",mean(ycurrent[which(clusters_now==cl)]),"\n")
+	# }
+}
+```
+## ari
+```{r}
+library(mclust)
+LEN = max(time_span)
+
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
+						  loss=binder(a=1),
+						  # loss="VI",
+						  # loss="VI.lb",
+						  maxNClusters =7
+						  ) # adjust with your fit $Si dimension
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+hist(ARImats)
+# pdf(paste0("./figures/Federico/LaggedARI_",model_name,".pdf"), height=8, width=10)
+ncols_ari = 100
+if (min(ARImats)<0){
+	cols_ARI = colora(ncols_ari,79,0)
+	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+} else {
+	cols_ARI = colora(ncols_ari,56,0)
+	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	brks = seq(0,1,length.out=ncols_ari+1)
+}
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - model ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+# dev.off()
+```
+
+
+## heat plot
+```{r}
+clusters_old = NULL
+for(time in time_span){
+	cat(crayon::red("Time",time,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	# q = get_graph_plot(df_cluster_cut,cols)
+	# print(q)
+	p = plot_graph_and_hist(df_cluster_cut,cols)
+	
+	clusters_old = clusters_now
+	
+}
+```

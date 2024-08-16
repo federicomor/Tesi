@@ -20,8 +20,8 @@ library(ggplot2)
 
 # Create the sites data frame
 sites <- data.frame(
-  longitude = c(0, 1, 2, 0, 1, 2, 0, 1, 2) / 2,# + runif(9,-0.2,0),
-  latitude = c(2,2,2,1, 1, 1,0,0,0) / 2        #+ runif(9,-0.2,0)
+  longitude = c(0, 1, 2, 0, 1, 2, 0, 1, 2) / 2 + runif(9,-0.2,0),
+  latitude = c(2,2,2,1, 1, 1,0,0,0) / 2        + runif(9,-0.2,0)
 )
 sites
 sites = (sites-sapply(sites,mean)) / sapply(sites,sd) 

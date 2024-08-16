@@ -34,7 +34,7 @@ function MCMC_fit(;
 	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
 	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
 										  # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
-	beta_priors::Vector{Float64},         # Prior parameters for beta ∼ 
+	beta_priors = missing,                # Prior parameters for beta ∼ 
 	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
 	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2)
 	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
@@ -51,13 +51,13 @@ function MCMC_fit(;
 	burnin::Float64,                      # Number of burn-in sa
 	thin::Float64,                        # Thinning interval
 
-	verbose::Bool,                        # Verbosity flag	
+	logging::Bool,                        # Wheter to save execution infos to log file
 	seed::Float64,                        # Random seed for reproducibility
 	io=log_file                           # where to save the logs
 	)
 	Random.seed!(round(Int64,seed))
 	
-try
+# try
 	############# check some stuff #############
 	if spatial_cohesion_idx == 1 && !(sp_params isa Real) 
 		@error "Wrong params for spatial cohesion 1.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
@@ -111,6 +111,7 @@ try
 	lk_xPPM = !ismissing(Xlk_covariates)
 	n, T = size(Y)
 	T_star = T+1
+
 	p = lk_xPPM ? size(Xlk_covariates)[2] : 0
 	if (draws-burnin)%thin != 0
 		@error "Please define draws, thin and burnin in an integer division-friendly way.\nI.e., such that (draws-burnin) % thin = 0." _file=""
@@ -120,6 +121,11 @@ try
 	if sPPM
 		sp1 = vec(sp_coords[:,1])
 		sp2 = vec(sp_coords[:,2])
+	end
+
+	if lk_xPPM && ismissing(beta_priors)
+		@error "Cannot use covariates in the likelihood if beta_priors is not defined." _file=""
+		return
 	end
 
 
@@ -163,11 +169,14 @@ try
 	phi0_out = zeros(nout)
 	phi1_out = zeros(nout)
 	lambda2_out = zeros(nout)
-	fitted = zeros(T,n,nout)
-	llike = zeros(T,n,nout)
-	lpml = 0
-	waic = 0
+	fitted = zeros(n,T,nout)
+	llike = zeros(n,T,nout)
+	LPML = 0.0
+	WAIC = 0.0
 
+	CPO = zeros(n,T)
+	mean_likelhd = zeros(n,T)
+	mean_loglikelhd = zeros(n,T)
 
 	############# allocate and initialize working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
@@ -483,20 +492,20 @@ try
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
 
-						# debug case
-						ph[k] = 0.5
-						# real case
-						# if t==1
-						# 	ph[k] = loglikelihood(Normal(
-						# 		muh_iter[k,t],
-						# 		sqrt(sig2h_iter[k,t])),
-						# 		Y[j,t]) + lpp
-						# else
-						# 	ph[k] = loglikelihood(Normal(
-						# 		muh_iter[k,t] + eta1_iter[j]*Y[j,t-1],
-						# 		sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
-						# 		Y[j,t]) + lpp
-						# end
+						### debug case
+						# ph[k] = 0.5
+						### real case
+						if t==1
+							ph[k] = loglikelihood(Normal(
+								muh_iter[k,t] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+								sqrt(sig2h_iter[k,t])),
+								Y[j,t]) + lpp
+						else
+							ph[k] = loglikelihood(Normal(
+								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+								sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
+								Y[j,t]) + lpp
+						end
 
 						# restore params after "rho_jt = k" simulation
 						nh_tmp[k] -= 1
@@ -540,20 +549,20 @@ try
 						lpp += log(M_dp) + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 					end
-					# debug case
-					ph[k] = 0.5
-					# real case
-					# if t==1
-					# 	ph[k] = loglikelihood(Normal(
-					# 		muh_draw + eta1_iter[j]*Y[j,t-1],
-					# 		sqrt(sig2h_draw)),
-					# 		Y[j,t]) + lpp
-					# else
-					# 	ph[k] = loglikelihood(Normal(
-					# 		muh_draw,
-					# 		sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
-					# 		Y[j,t]) + lpp
-					# end
+					### debug case
+					# ph[k] = 0.5
+					### real case
+					if t==1
+						ph[k] = loglikelihood(Normal(
+							muh_draw + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							sqrt(sig2h_draw)),
+							Y[j,t]) + lpp
+					else
+						ph[k] = loglikelihood(Normal(
+							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
+							Y[j,t]) + lpp
+					end
 
 					# restore params after "rho_jt = k" simulation
 					nh_tmp[k] -= 1
@@ -586,7 +595,9 @@ try
 						break
 					end
 				end
-				debug(@showd new_label)
+				debug(@showd cph u)
+				debug(@showd new_label j)
+				printlgln("\n")
 				
 				if all(isinf.(ph) .|| isnan.(ph))
 					@warn "No valid weight in ph vector when updating for rho.\n"
@@ -614,14 +625,16 @@ try
 				#     units j 2 3 4 5 ->  units j 2 3 4 5
 				#    labels 1 1 1 2 2    labels 3 1 1 2 2
 				Si_tmp = copy(Si_iter[:,t])
-				Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)
+
+				Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)				
+				# - Si_relab gives the relabelled partition
+				# - nh_reorder gives the numerosities of the relabelled partition, ie "nh_reorder[k] = #(units of new cluster k)"
+				# - old_lab tells "the index in position i (which before was cluster i) is now called cluster old_lab[i]"
 				# eg:             Original labels (Si): 4 2 1 1 1 3 1 4 5 
 				#          Relabeled groups (Si_relab): 1 2 3 3 3 4 3 1 5
 				# Reordered cluster sizes (nh_reorder): 2 1 4 1 1 0 0 0 0
 				# 	              Old labels (old_lab): 4 2 1 3 5 0 0 0 0 
-				# - Si_relab gives the relabelled partition
-				# - nh_reorder gives the numerosities of the relabelled partition, ie "nh_reorder[k] = #(units of new cluster k)"
-				# - old_lab tells "the index in position i (which before was cluster i) is now called cluster old_lab[i]"
+
 				# now fix everything (morally permute params)
 				Si_iter[:,t] = Si_relab
 				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
@@ -728,17 +741,24 @@ try
 					A_star = I(p)/s2_beta
 					for j in 1:n
 						X_jt = Xlk_covariates[j,:,t]
-						sum_Y += (Y[j,t]-muh_iter[Si_iter[j],t]) * X_jt / sig2h_iter[Si_iter[j],t]
+						sum_Y += (Y[j,t] - muh_iter[Si_iter[j],t]) * X_jt / sig2h_iter[Si_iter[j],t]
 						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j],t]
 					end
 					b_star = beta0/s2_beta + sum_Y
-					# beta_iter[t] = rand(MvNormal(b_star, inv(A_star))) 
-					# Symmetric needed for numerical problems
+					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
+					# Symmetric is needed for numerical problems
 					# https://discourse.julialang.org/t/isposdef-and-eigvals-do-not-agree/118191/2
 					# but A_star is indeed symm and pos def (by construction) so there is no problem
-					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 				else
-
+					sum_Y = zeros(p)
+					A_star = I(p)/s2_beta
+					for j in 1:n
+						X_jt = Xlk_covariates[j,:,t]
+						sum_Y += (Y[j,t] - muh_iter[Si_iter[j],t] - eta1_iter[j]*Y[j,t-1]) * X_jt / sig2h_iter[Si_iter[j],t]
+						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j],t]
+					end
+					b_star = beta0/s2_beta + sum_Y
+					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 				end
 			end
 						
@@ -908,14 +928,14 @@ try
 		
 		############# update lambda2 #############
 		aux1 = 0.0
-		# i found that looping on t rather than using sum(... for t in ...) seems faster
+		# I found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
 			aux1 += (theta_iter[t] - (1-phi1_iter)*phi0_iter - phi1_iter*theta_iter[t-1])^2
 		end
 		a_star = lambda2_priors[1] + T/2
 		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + aux1/2
 		lambda2_iter = rand(InverseGamma(a_star,b_star))	
-	
+
 
 		############# save MCMC iterates #############
 		if i>burnin && i%thin==0 
@@ -952,24 +972,67 @@ try
 			phi1_out[i_out] = phi1_iter
 			lambda2_out[i_out] = lambda2_iter
 
+
+			############# save fitted values and metrics #############
+			for j in 1:n
+				for t in 1:T
+					muh_jt = muh_iter[Si_iter[j,t],t]
+					sig2h_jt = sig2h_iter[Si_iter[j,t],t]
+					if t==1
+						llike[j,t,i_out] = logpdf(Normal(
+							muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							sqrt(sig2h_jt)
+							), Y[j,t])
+						fitted[j,t,i_out] = muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
+					else # t>1
+						llike[j,t,i_out] = logpdf(Normal(
+							muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							sqrt(sig2h_jt*(1-eta1_iter[j]^2))
+							), Y[j,t])
+						fitted[j,t,i_out] = muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
+					end
+					mean_likelhd[j,t] += exp(llike[j,t,i_out])
+					mean_loglikelhd[j,t] += llike[j,t,i_out]
+					CPO[j,t] += exp(-llike[j,t,i_out])
+				end
+			end
+
 			i_out += 1
 		end
 
-
 	end # for i in 1:draws
+
 	println("\ndone!")
 	t_end = now()
 	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
 
+	############# compute LPML and WAIC #############
+	for j in 1:n
+		for t in 1:T
+			LPML += log(CPO[j,t])
+		end
+	end
+	LPML -= n*T*log(nout) # scaling factor
+	
+	# adjust mean variables
+	mean_likelhd ./= nout
+	mean_loglikelhd./= nout
+	for j in 1:n
+		for t in 1:T
+			WAIC += 2*mean_loglikelhd[j,t] - log(mean_likelhd[j,t])
+		end
+	end
+	WAIC *= -2
+
 	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
 		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
-		fitted, llike, lpml, waic
+		fitted, llike, LPML, WAIC
 
 
-catch e
-	println(e)
-	close(log_file)
-end
+# catch e
+	# println(e)
+	# close(log_file)
+# end
 
 close(log_file)
 # global_logger(ConsoleLogger())	
