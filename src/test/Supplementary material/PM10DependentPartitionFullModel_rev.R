@@ -5,14 +5,13 @@
 #######################################################################################
 
 # Set working directory to folder "JCGS_Codes" folder.
-setwd("JCGS_Codes")
+setwd("C:/Users/feder/Desktop/Uni magistrale/Tesi/src/test/Supplementary material/")
 source("Functions.R")
 library(salso)
 library(drpm)
 library(MCMCpack)
 library(mclust)
 
-#
 # This data is found in the gstat package
 library(gstat)
 data(DE_RB_2005)

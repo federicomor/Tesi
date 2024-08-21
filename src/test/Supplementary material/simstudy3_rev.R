@@ -9,7 +9,7 @@ args <- commandArgs(TRUE)
 # included in the drpm R package.  These fit the linearDDP
 # weighted DDP, and DP models.
 
-# args <- c(100, 4, 100, 5, 0.0, 0.5)
+args <- c(100, 4, 100, 5, 0.0, 0.5)
 
 ndata <- as.numeric(args[1])
 datatype <- as.numeric(args[2])
@@ -157,7 +157,7 @@ colnames(waic) <- colnames(ari) <- colnames(lpml) <- c("drpm", "wddp", "lddp", "
 probpeg <- matrix(NA, nrow=ndata,ncol=2)
 colnames(probpeg) <- c("gamma","alpha")
 
-# ii <- 1
+ii <- 1
 for(ii in 1:ndata){
 
   cat("dataset ================================================= ", ii, "\n")
@@ -261,7 +261,41 @@ for(ii in 1:ndata){
       ari.mat.wddp[jj,t] <- adjustedRandIndex(wddp$Si[jj, (N*(t-1)+1):(N*t)], tp[,t])
     }
   }
-
+  ##### this sim code does not involve time
+  ##### eg Yvec is just a vector, not a matrix
+  ##### so maybe it is not so relevant for the thesis testing
+  # LEN = Tm
+  # ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+  # rho_ARI <- list()
+  # for(k in 1:LEN){
+  # 	rho_ARI[[k]] <- salso(t(wddp$Si[k,,]),
+  # 						  loss=binder(a=1),
+  # 						  # loss=loss,
+  # 						  # loss="VI.lb",
+  # 						  maxNClusters = maxNClusters
+  # 	) # adjust with your fit $Si dimension
+  # } 
+  # for(k in 1: LEN){
+  # 	for(kk in 1: LEN){
+  # 		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+  # 	}
+  # }
+  # ncols_ari = 100
+  # if (min(ARImats)<0){
+  # 	cols_ARI = colora(ncols_ari,79,0)
+  # 	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+  # } else {
+  # 	cols_ARI = colora(ncols_ari,56,0)
+  # 	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+  # 	brks = seq(0,1,length.out=ncols_ari+1)
+  # }
+  # library(fields)
+  # image.plot(ari.mat.wddp[nout,],
+  # 		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
+  # 		   breaks=brks)
+  # mtext(text=c(paste("",1:Tm)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+  # mtext(text=c(paste("",1:Tm)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+  
 
 
   ##################################################################

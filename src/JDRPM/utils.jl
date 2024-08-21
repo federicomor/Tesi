@@ -156,16 +156,17 @@ end
 
 # paper 3 section 3.1
 function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)
-	dim = length(s1)
-	if dim==1 
+	sdim = length(s1)
+	if sdim==1 
 		return lg ? log(M) : M
 	end
-	out = log(M) + lgamma(dim)
+	# out = log(M) + lgamma(sdim)
+	out = 0.0
 	# compute the centroids
 	cent1 = mean(s1)
 	cent2 = mean(s2)
 	# compute the sum of the distances (the D_h in the paper)
-	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:dim)
+	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:sdim)
 
 	# decide what to return
 	if sum_dist >= 1
@@ -180,20 +181,17 @@ end
 
 # paper 3 section 3.1
 function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real; lg::Bool, M::Real=1.0)
-	dim = length(s1)
-	out = log(M) + lgamma(dim)
-	# @show M, dim, log(M), lgamma(dim)
-	# @show out
-	for i in 1:dim
-		for j in 1:dim
+	sdim = length(s1)
+	# out = log(M) + lgamma(sdim)
+	out = 1.0
+	for i in 1:sdim
+		for j in 1:sdim
 			dist = sqrt((s1[i] - s1[j])^2 + (s2[i] - s2[j])^2)
 			if dist > a
 				return lg ? log(0.0) : 0.0 # in this case the rest vanishes
 			end
 		end
 	end
-	# @show M, dim, log(M), lgamma(dim)
-	# @show out, lg, exp(out)
 	return lg ? out : exp(out)
 end
 
@@ -204,29 +202,40 @@ end
 
 # paper 3 section 3.1
 function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
-	dim = length(s1)
+	sdim = length(s1)
 	sp = [s1 s2]
 	sbar = vec(mean(sp, dims=1))
-	S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:dim)
+	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
+	# FIXED: sum is slow because i didnt initialize S
+	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
+	S = zeros(2,2)
+	for i in 1:sdim
+		S += (sp[i,:] - sbar)*(sp[i,:] - sbar)'
+	end
 	
 	# compute updated parameters
-	# for 3
-	kn = k0+dim
-	vn = v0+dim
-	Psi_n = Psi + S + (k0*dim)/(k0+dim)*(sbar-mu_0)*(sbar-mu_0)'
-	# for 4
-	knn = kn+dim
-	vnn = vn+dim
-	mu_n = (k0*mu_0 + dim*sbar)/(k0+dim)
-	Psi_nn = Psi_n + S + (kn*dim)/(kn+dim)*(sbar-mu_n)*(sbar-mu_n)'
+	# for cohesion 3
+	kn = k0+sdim
+	vn = v0+sdim
+	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*(sbar-mu_0)*(sbar-mu_0)'
 	
 	if Cohesion == 3
-		out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
-	elseif Cohesion == 4
-		out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(det(Psi_n)) - 0.5 * vnn * log(det(Psi_nn)) + log(kn) - log(knn)
+		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
+		return lg ? out : exp(out)
 	end
 
-	return lg ? out : exp(out)
+	# for cohesion 4
+	knn = kn+sdim
+	vnn = vn+sdim
+	mu_n = (k0*mu_0 + sdim*sbar)/(k0+sdim)
+	Psi_nn = Psi_n + S + (kn*sdim)/(kn+sdim)*(sbar-mu_n)*(sbar-mu_n)'
+	
+	if Cohesion == 4
+		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(det(Psi_n)) - 0.5 * vnn * log(det(Psi_nn)) + log(kn) - log(knn)
+		return lg ? out : exp(out)
+	end
+
+	return NaN
 end
 
 
