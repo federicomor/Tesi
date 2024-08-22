@@ -24,8 +24,15 @@ end = len = lenght = length
 assert = stopifnot
 ln = log
 
-extrema = function(vec){
-	return(c(min(vec),max(vec)))
+# extrema = function(vec){
+# 	return(c(min(vec),max(vec)))
+# }
+extrema <- function(...) {
+	# Combine all input vectors into one
+	combined <- c(...)
+	
+	# Return the minimum and maximum of the combined vector
+	return(c(min(combined), max(combined)))
 }
 
 count_na = function(vec){

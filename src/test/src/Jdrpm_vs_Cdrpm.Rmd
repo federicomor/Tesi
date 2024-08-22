@@ -6,15 +6,11 @@ output: html_document
 # setup
 ```{r, warning=FALSE}
 library(salso)
+library(RColorBrewer)
 source("include.R")
 ```
 
 
-```{r, warning=FALSE}
-# when working on real PM10 data
-source("plot functions/plotter.R")
-source("include_clusters_functions.R")
-```
 
 # LOAD 
 ## load C drpm
@@ -1368,6 +1364,12 @@ for(i in 1:size(yred)[1]){
 # 3. PM10 DATA
 of the bayesian project
 
+```{r, warning=FALSE}
+# when working on real PM10 data
+source("plot functions/plotter.R")
+source("include_clusters_functions.R")
+```
+
 
 ## real PM10 data
 ```{r}
@@ -1386,21 +1388,24 @@ for(st in stations){
 rownames(y) = NULL
 colnames(y)<- c("id",paste0("w", 1:53))
 
-time_span = 1:3 # low time span for quick testing, real one will be 1:53
-# nsubjects = 1:105
-y_fit = y[,1+time_span]
+time_span = 1:20 # low time span for quick testing, real one will be 1:53
+quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
+# nsubjects = 1:7
+y = y[nsubjects,1+time_span]
 
 #############################################
 # authors suggested to/did scale the spatial locations and also centered the observations
 
-mn <- apply(y_fit,2,mean)
-sd <- apply(y_fit,2,sd)
+mn <- apply(y,2,mean)
+sd <- apply(y,2,sd)
 
-y <- t(t(y_fit) - mn)
+y <- t(t(y) - mn)
 
 Tm = tps <- ncol(y) # time span
 N = size(y)[1] # number of units
+num_units = N
 
+sites = sites[nsubjects,]
 smn <- apply(sites,2,mean)
 ssd <- apply(sites,2,sd)
 s_std <- t((t(sites) - smn)/ssd)
@@ -1425,13 +1430,13 @@ s_std
 ## Fits
 ```{r}
 seed = as.integer(runif(1,0,1000))*1.0
-seed = 111.0
+seed = 687.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=60000; nburn=20000; nthin=20
-niter=12000; nburn=6000; nthin=4
+niter=40000; nburn=32000; nthin=4
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -1445,21 +1450,22 @@ A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
 
-a_sigma  = 5; b_sigma  = 2
-a_tau    = 0.2; b_tau    = 2
-a_lambda = 5; b_lambda = 2
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
 eta1_scale = 0.9
 
-sig_mh_sig2 = 0.2
-sig_mh_tau2 = 0.2
-sig_mh_lambda2 = 0.2
-sig_mh_eta1 = 0.2
-sig_mh_phi1 = 0.2
+sig_mh_sig2 = 0.15
+sig_mh_tau2 = 0.15
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
 update_phi1 = TRUE
 
 a_alpha = 2; b_alpha = 2
+time_specific_alpha = F
 
 # now space
 spatial_cohesion = 3
@@ -1474,13 +1480,13 @@ L0 = 1
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
 		y=y, 
-		# s_coords = s_std,
+		s_coords = s_std,
         M=1,
         initial_partition = NULL,
 		
         starting_alpha = 0.5,
         unit_specific_alpha = FALSE,
-        time_specific_alpha = TRUE,
+        time_specific_alpha = time_specific_alpha,
         alpha_0=FALSE,
 		
         eta1_0=!(update_eta1),
@@ -1533,7 +1539,7 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
-	# sp_coords = s_std,
+	sp_coords = s_std,
 	M_dp = 1,                     
 	initial_partition = NA,
 	Xlk_covariates = NA,
@@ -1541,7 +1547,7 @@ out = module_JDRPM$MCMC_fit(
 	
 	starting_alpha = 0.5,         
 	unit_specific_alpha = FALSE,       
-	time_specific_alpha = TRUE,       
+	time_specific_alpha = time_specific_alpha,       
 	update_alpha = TRUE,             
 	
 	include_eta1 = TRUE,                    
@@ -1660,13 +1666,13 @@ for (time in 1:Tm){
 		par(mfrow=c(1,2),mar=c(2,2,4,2))
 
 	plot(drpm1$mu[time,unitj,],type="l",
-		 ylim=c(min(drpm1$mu[time,unitj,],rout$mu[time,unitj,]),
-		 	   max(drpm1$mu[time,unitj,],rout$mu[time,unitj,])),
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$muh[time,unitj,],type="l",
-		 ylim=c(min(drpm1$muh[time,unitj,],rout$muh[time,unitj,]),
-		 	   max(drpm1$muh[time,unitj,],rout$muh[time,unitj,])),
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1682,9 +1688,11 @@ for (time in 1:Tm){
 
 	plot(drpm1$sig2[time,unitj,],type="l",
 		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$sigma2h[time,unitj,],type="l",
 		 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -1698,9 +1706,13 @@ cat("did we update eta1?", update_eta1)
 for (unit in 1:N){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
 		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
 		 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1712,9 +1724,13 @@ for (unit in 1:N){
 for (time in 1:Tm){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,unit],rout$theta[,unit]),
+		 	    max(drpm1$theta[,unit],rout$theta[,unit])),
 		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,unit],rout$theta[,unit]),
+		 	    max(drpm1$theta[,unit],rout$theta[,unit])),
 		 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1748,9 +1764,13 @@ dim(rout$phi1)
 cat("did we update phi1?", update_phi1)
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -1759,9 +1779,13 @@ dim(rout$phi0)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -1771,9 +1795,13 @@ dim(rout$lambda2)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lamb2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$lambda2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 ```
@@ -1965,46 +1993,66 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 
 ##########################################################
 
+# cols = colora(size(yred)[1],56,0)
+cols = colora(size(yred)[1],"div",show = 0)
+
 # take last sample (maybe not the best choice)
-yred=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 par(mar=c(4,4,4,2))
-cols = colora(size(yred)[1],56,0)
-for(i in 1:size(yred)[1]){
+for(i in 1:size(yredC)[1]){
    if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],
-     	 ylim=extrema(yred),type='l',xlab='time',ylab="fitted values",main="model C")
+     plot(1:size(yredC)[2],yredC[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredC),
+     	 type='l',xlab='time',ylab="fitted values",main="model C")
  	  } 
 	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+		  lines(1:size(yredC)[2],yredC[i,],col=cols[i])
 	  }
 }
 
 # take last sample (maybe not the best choice)
-yred=t(rout$fitted[,,size(rout$fitted)[3]])
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 par(mar=c(4,4,4,2))
-cols = colora(size(yred)[1],56,0)
-for(i in 1:size(yred)[1]){
+for(i in 1:size(yredJ)[1]){
    if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],
-     	 ylim=extrema(yred),type='l',xlab='time',ylab="fitted values",main="model J")
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredC),
+     	 type='l',xlab='time',ylab="fitted values",main="model J")
  	  } 
 	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
 	  }
 }
 
 # original real data
-cols = colora(N,seed = 56,show = 0)
 yred=y
-cols = colora(size(yred)[1],56,0)
 for(i in 1:size(yred)[1]){
    if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
-     	 xlab='time',ylab='values',main="original data")
+     plot(1:size(yred)[2],yred[i,],col=cols[i],type='l',
+     	 xlab='time',ylab='values',main="original data",
+     	 ylim=extrema(yred,yredJ,yredC))
  	  } 
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
+}
+```
+
+```{r}
+num_cols = 4
+cols = qualitative_hcl(num_cols, palette = "Dark 3")
+# cols <- rainbow(num_cols)
+# cols <- brewer.pal(num_cols, "Paired")
+# cols <- c(brewer.pal(12, "Paired"), brewer.pal(12, "Set3"))
+
+for(time in time_span){
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	plot(s_std,
+		 col=cols[df_cluster_cut$clusters],
+		 pch=19,
+		 cex=2,
+		 main=paste("Time",time)
+		 )
 }
 ```
 
