@@ -4,6 +4,8 @@ using LinearAlgebra
 using Random
 using Logging
 using Dates
+using TimerOutputs
+using ProgressMeter
 
 ############# for debug #############
 log_file = open("log.txt", "w+")
@@ -33,12 +35,12 @@ function MCMC_fit(;
 
 	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
 	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
-										  # plus the variance for the Metropolis update trough N(eta1_old,sigma^2)
+										  # plus the std dev for the Metropolis update trough N(eta1_old,mhsig_eta1^2)
 	beta_priors = missing,                # Prior parameters for beta ∼ 
 	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
 	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2)
 	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
-										  # so we just need the variance of the Metropolis update trough N(phi1_old,sigma^2)
+										  # so we just need the std dev of the Metropolis update trough N(phi1_old,mhsig_phi1^2)
 	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda)
 	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha)
 										  # but possibly that pair for each unit j, that's why the abstract array
@@ -56,7 +58,14 @@ function MCMC_fit(;
 	io=log_file                           # where to save the logs
 	)
 	Random.seed!(round(Int64,seed))
-	
+	to = TimerOutput()
+
+	# debug(@showd sp_params)
+	# println(sp_params)
+	# println(typeof(sp_params))
+	# println(typeof.(sp_params))
+
+
 # try
 	############# check some stuff #############
 	if spatial_cohesion_idx == 1 && !(sp_params isa Real) 
@@ -121,6 +130,7 @@ function MCMC_fit(;
 	if sPPM
 		sp1 = vec(sp_coords[:,1])
 		sp2 = vec(sp_coords[:,2])
+		sp_original = copy(sp_coords)
 	end
 
 	if lk_xPPM && ismissing(beta_priors)
@@ -271,11 +281,24 @@ function MCMC_fit(;
 	println("loading...\r")
 	sleep(1.0) # to let all the prints be printed
 
-	t_start = now()
 	# debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
+	t_start = now()
+	progresso = Progress(round(Int64(draws)),
+			showspeed=true,
+			dt=0.5, # update every 10 seconds
+			barlen=0, # no progress bar
+			)
 
 	for i in 1:draws
-		print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
+		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
+		# there is also the ProgressMeter option, maybe is cooler
+
+		# testing the safeness of the @views
+		if sPPM
+			@assert sp_original == sp_coords
+			@assert sp_original[:,1] == sp1
+			@assert sp_original[:,2] == sp2
+		end
 
 		# debug("\n▶ iteration $i")
 
@@ -289,6 +312,7 @@ function MCMC_fit(;
 			# debug("► time $t")
 
 			############# update gamma #############
+			@timeit to " gamma " begin
 			for j in 1:n
 				# debug(title*"[update gamma]")
 				# debug("▸ subject $j")
@@ -297,16 +321,17 @@ function MCMC_fit(;
 					# debug("we are at time t=1 so nothing to do")
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
-					indexes = findall(jj -> gamma_iter[jj, t] == 1, setdiff(1:n,j))
+					indexes = findall(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
 					Si_red = Si_iter[indexes, t]
 					Si_red1 = copy(Si_red)
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
-					if sPPM
-						sp1_red = sp1[indexes]
-						sp2_red = sp2[indexes]
-					end
+					# if sPPM
+					# 	sp1_red = @view sp1[indexes]
+					# 	sp2_red = @view sp2[indexes]
+					# end
+					# it is not used here but later
 
 					# compute n_red's and nclus_red's and relabel
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
@@ -337,10 +362,17 @@ function MCMC_fit(;
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							sp_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
-							s1o = sp1[sp_idxs]
-							s2o = sp2[sp_idxs]
-							s1n = push!(copy(sp1),sp1[j])
-							s2n = push!(copy(sp2),sp2[j])
+							# s1o = sp1[sp_idxs]
+							# s2o = sp2[sp_idxs]
+							# s1n = push!(copy(sp1),sp1[j])
+							# s2n = push!(copy(sp2),sp2[j])
+							# maybe this way is more memory efficient (check it is safe however)
+							# yes it should be safe
+							s1o = @view sp1[sp_idxs]
+							s2o = @view sp2[sp_idxs]
+							s1n = @view sp1[union!(sp_idxs,j)]
+							s2n = @view sp2[union!(sp_idxs,j)]
+							
 							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params, lg=true, M=M_dp)
 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 						end
@@ -408,7 +440,9 @@ function MCMC_fit(;
 				end
 			end
 
+			end
 			############# update rho #############
+			@timeit to " rho " begin
 			# debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
@@ -652,8 +686,9 @@ function MCMC_fit(;
 
 			end # for j in movable_units
 
-
+			end
 			############# update muh #############
+			@timeit to " muh " begin
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -686,8 +721,9 @@ function MCMC_fit(;
 				end
 			end
 			
-
+			end
 			############# update sigma2h #############
+			@timeit to " sigma2h " begin
 			if t==1
 				for k in 1:nclus_iter[t]
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
@@ -735,8 +771,9 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
 				end
 			end
-
+			end
 			############# update beta #############
+			@timeit to " beta " begin
 			if lk_xPPM
 				if t==1
 					sum_Y = zeros(p)
@@ -764,8 +801,9 @@ function MCMC_fit(;
 				end
 			end
 						
-
+			end
 			############# update theta #############
+			@timeit to " theta " begin
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -792,8 +830,9 @@ function MCMC_fit(;
 				theta_iter[t] = rand(Normal(mu_post, sqrt(sig2_post)))
 			end 
 			
-
+			end
 			############# update tau2 #############
+			@timeit to " tau2 " begin
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -802,12 +841,14 @@ function MCMC_fit(;
 			a_star = tau2_priors[1] + kt
 			b_star = tau2_priors[2] + aux1/2
 			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
-
+			end
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
-		eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
+		@timeit to " eta1 " begin
+		# eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
+		# no, the input argument is already the std dev
 		if update_eta1
 			for j in 1:n
 				eta1_old = eta1_iter[j]
@@ -842,8 +883,9 @@ function MCMC_fit(;
 			end
 		end
 
-		
+		end
 		############# update alpha #############
+		@timeit to " alpha " begin
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -882,8 +924,9 @@ function MCMC_fit(;
 			end
 		end
 
-		
+		end
 		############# update phi0 #############
+		@timeit to " phi0 " begin
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
@@ -894,9 +937,11 @@ function MCMC_fit(;
 		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*aux2 )
 		phi0_iter = rand(Normal(mu_post, sqrt(sig2_post)))
 		
-
+		end
 		############# update phi1 #############
-		phi1_priors = sqrt(phi1_priors) # from variance to std dev
+		@timeit to " phi1 " begin
+		# phi1_priors = sqrt(phi1_priors) # from variance to std dev
+		# no, the input argument is already the std dev
 		if update_phi1
 			phi1_old = phi1_iter
 			phi1_new = rand(Normal(phi1_old, phi1_priors)) # proposal value
@@ -927,8 +972,9 @@ function MCMC_fit(;
 			end
 		end
 
-		
+		end		
 		############# update lambda2 #############
+		@timeit to " lambda2 " begin
 		aux1 = 0.0
 		# I found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
@@ -938,7 +984,7 @@ function MCMC_fit(;
 		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + aux1/2
 		lambda2_iter = rand(InverseGamma(a_star,b_star))	
 
-
+		end
 		############# save MCMC iterates #############
 		if i>burnin && i%thin==0 
 			Si_out[:,:,i_out] = Si_iter[:,1:T]
@@ -1002,6 +1048,9 @@ function MCMC_fit(;
 			i_out += 1
 		end
 
+	next!(progresso)
+	# next!(progresso; showvalues = [(:i,i), (:i_out,i_out)])
+
 	end # for i in 1:draws
 
 	println("\ndone!")
@@ -1026,7 +1075,11 @@ function MCMC_fit(;
 	end
 	WAIC *= -2
 
-	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
+	debug(@showd to)
+	# debug(@showd eta1_iter)
+	close(log_file)
+
+	return to, Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
 		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
 		fitted, llike, LPML, WAIC
 
@@ -1036,7 +1089,6 @@ function MCMC_fit(;
 	# close(log_file)
 # end
 
-close(log_file)
 # global_logger(ConsoleLogger())	
 end
 

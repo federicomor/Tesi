@@ -155,7 +155,7 @@ end
 #####################################
 
 # paper 3 section 3.1
-function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)
+function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	if sdim==1 
 		return lg ? log(M) : M
@@ -180,7 +180,7 @@ function cohesion1(s1::Vector{Float64}, s2::Vector{Float64}, alpha::Real; lg::Bo
 end
 
 # paper 3 section 3.1
-function cohesion2(s1::Vector{Float64}, s2::Vector{Float64}, a::Real; lg::Bool, M::Real=1.0)
+function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real; lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	# out = log(M) + lgamma(sdim)
 	out = 1.0
@@ -201,7 +201,7 @@ function G2a(a::Real, lg::Bool)
 end
 
 # paper 3 section 3.1
-function cohesion3_4(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
+function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	sp = [s1 s2]
 	sbar = vec(mean(sp, dims=1))
@@ -244,7 +244,7 @@ end
 # but are the same, test them on these if you want
 # (s1, s2, Psi, Psi_vec) = ([0.06541394973925674, 0.1875903839556078, 0.7065742551867602, 0.8223492385591462], [0.6711654699192571, 0.6199278925430733, 0.36880242735326396, 0.9723482028752322], [2.0 1.0; 1.0 3.0], [2.0, 1.0, 1.0, 3.0])
 ##################
-# function cohesion3_4_C(s1::Vector{Float64}, s2::Vector{Float64}, mu_0::Vector{Real}, k0::Real, v0::Real, Psi_vec::Vector{Real}, Cohesion::Int, lg::Bool)
+# function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::Vector{Real}, k0::Real, v0::Real, Psi_vec::Vector{Real}, Cohesion::Int, lg::Bool)
 # 		dim = length(s1)
 # 		# Compute sample means
 # 		sbar1 = mean(s1)
@@ -298,7 +298,7 @@ end
 # end
 
 # paper 6 pag 4, cluster variance/entropy similarity function
-function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
+function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	# compute the centroids
 	cent1 = mean(s1)
@@ -311,7 +311,7 @@ function cohesion5(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool
 end
 
 # non trovata su nessun paper
-function cohesion6(s1::Vector{Float64}, s2::Vector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
+function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
 	dim = length(s1)
 	if dim==1
 		return lg ? 0.0 : 1.0
@@ -358,7 +358,7 @@ end
 # @show y5 - log(x5)
 # @show y6 - log(x6)
 
-function spatial_cohesion(idx::Real, s1::Vector{Float64}, s2::Vector{Float64}, sp_params; lg::Bool, M::Real)
+function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params; lg::Bool, M::Real)
 	idx==1.0 && return cohesion1(s1,s2,sp_params...,lg=lg,M=M) 
 	idx==2.0 && return cohesion2(s1,s2,sp_params...,lg=lg,M=M) 
 	idx==3.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=3) 

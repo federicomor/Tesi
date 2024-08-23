@@ -44,8 +44,11 @@ cat(testModule)
 # Importing a local module is also possible in one line,
 # by directly using the module object returned by "include".
 TestModule1 <- juliaImport(juliaCall("include", testModule))
-x = TestModule1$my_example(30)
+x = TestModule1$my_example(300)
+```
 
+
+```{r}
 n = 5
 bigT = 3
 p = 2
