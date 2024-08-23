@@ -67,7 +67,7 @@ for(i in 1:size(yred)[1]){
 
 ## Fits
 ```{r}
-niter=20000; nburn=12000; nthin=8
+niter=30000; nburn=22000; nthin=8
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -86,11 +86,11 @@ a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
 eta1_scale = 0.9
 
-sig_mh_sig2 = 0.2
-sig_mh_tau2 = 0.2
-sig_mh_lambda2 = 0.2
-sig_mh_eta1 = 0.2
-sig_mh_phi1 = 0.2
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
 update_phi1 = TRUE
@@ -550,14 +550,15 @@ for(k in 1: LEN){
 	}
 }
 ncols_ari = 100
-if (min(ARImats)<0){
+# if (min(ARImats)<0){
 	cols_ARI = colora(ncols_ari,79,0)
-	brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
-} else {
-	cols_ARI = colora(ncols_ari,56,0)
-	cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
-	brks = seq(0,1,length.out=ncols_ari+1)
-}
+	# brks = seq(floor(min(ARImats)),1,length.out=ncols_ari+1)
+	brks = seq(-1,1,length.out=ncols_ari+1)
+# } else {
+	# cols_ARI = colora(ncols_ari,56,0)
+	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	# brks = seq(0,1,length.out=ncols_ari+1)
+# }
 # or see ?designer.colors for colors
 library(fields)
 image.plot(ARImats,
@@ -626,8 +627,10 @@ image.plot(ARImats,
 		   breaks=brks)
 mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+```
 
 
+```{r}
 ##########################################################
 
 # take last sample (maybe not the best choice)
@@ -671,6 +674,8 @@ for(i in 1:size(yred)[1]){
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
 }
+legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+
 ```
 
 # ==========
@@ -727,9 +732,9 @@ setwd(currwd)
 
 
 ### subset test
-kk = 10
-y = y[1:kk,]
-s_std = s_std[1:kk,]
+sub_k = 10
+y = y[1:sub_k,]
+s_std = s_std[1:sub_k,]
 ```
 
 ## Fits
@@ -741,7 +746,7 @@ cat("seed",seed,"\n")
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=60000; nburn=20000; nthin=20
-niter=1000; nburn=800; nthin=2
+niter=10000; nburn=6000; nthin=4
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -760,11 +765,11 @@ a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
 eta1_scale = 0.9
 
-sig_mh_sig2 = 0.2
-sig_mh_tau2 = 0.2
-sig_mh_lambda2 = 0.2
-sig_mh_eta1 = 0.2
-sig_mh_phi1 = 0.2
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
 update_phi1 = TRUE
@@ -872,10 +877,9 @@ out = module_JDRPM$MCMC_fit(
 	spatial_cohesion_idx = spatial_cohesion,
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
-	# covariate_similarity_idx = NA,  
-	draws = niter,                    
-	burnin = nburn,                   
-	thin = nthin,                     
+	# covariate_similarity_idx = NA,
+	draws = niter,burnin = nburn, thin = nthin,
+	# draws = 2,burnin = 0, thin = 1,
 	logging = FALSE,
 	seed = seed
 )

@@ -129,8 +129,8 @@ function MCMC_fit(;
 	end
 	nout = round(Int64,(draws - burnin)/(thin))
 	if sPPM
-		sp1 = vec(sp_coords[:,1])
-		sp2 = vec(sp_coords[:,2])
+		sp1 = copy(vec(sp_coords[:,1]))
+		sp2 = copy(vec(sp_coords[:,2]))
 		sp_original = copy(sp_coords)
 	end
 
@@ -273,6 +273,9 @@ function MCMC_fit(;
 		if str=="phi0_iter" println(log_file,"phi0_iter\n",tostr(phi0_iter)); return; end
 		if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
 		if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
+		if str=="sp_coords" println(log_file,"sp_coords\n",tostr(sp_coords)); return; end
+		if str=="sp1" println(log_file,"sp1\n",tostr(sp1)); return; end
+		if str=="sp2" println(log_file,"sp2\n",tostr(sp2)); return; end
 	end
 
 
@@ -329,10 +332,10 @@ function MCMC_fit(;
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
-					# if sPPM
-					# 	sp1_red = @view sp1[indexes]
-					# 	sp2_red = @view sp2[indexes]
-					# end
+					if sPPM
+						sp1_red = @view sp1[indexes]
+						sp2_red = @view sp2[indexes]
+					end
 					# it is not used here but later
 
 					# compute n_red's and nclus_red's and relabel
@@ -364,19 +367,23 @@ function MCMC_fit(;
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							sp_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
-							# s1o = sp1[sp_idxs]
-							# s2o = sp2[sp_idxs]
-							# s1n = push!(copy(sp1),sp1[j])
-							# s2n = push!(copy(sp2),sp2[j])
-							# maybe this way is more memory efficient (check it is safe however)
-							# yes it should be safe
-							s1o = @view sp1[sp_idxs]
-							s2o = @view sp2[sp_idxs]
-							s1n = @view sp1[union!(sp_idxs,j)]
-							s2n = @view sp2[union!(sp_idxs,j)]
-							
+
+							# pretty_log("sp_coords")
+							# pretty_log("sp1")
+							# pretty_log("sp2")
+							# debug(@showd sp_idxs)
+							# printlgln("\n")
+
+							s1o = sp1_red[sp_idxs]
+							s2o = sp2_red[sp_idxs]
+							s1n = copy(s1o); push!(s1n, sp1[j])
+							s2n = copy(s2o); push!(s2n, sp2[j])
+
 							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params, lg=true, M=M_dp)
 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+
+							# debug(@showd s1o s2o s1n s2n j lCo lCn)
+
 						end
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
 						# lg_weights[k] = lCn - lCo # in theory we should use this since we wrote the full cohesions
@@ -522,8 +529,8 @@ function MCMC_fit(;
 						for kk in 1:nclus_temp
 							if sPPM
 								indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
-								s1n = sp1[indexes]
-								s2n = sp2[indexes]
+								s1n = @view sp1[indexes]
+								s2n = @view sp2[indexes]
 								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 							end
 							lpp += log(M_dp) + lgamma(nh_tmp[kk])
@@ -580,8 +587,8 @@ function MCMC_fit(;
 					for kk in 1:nclus_temp
 						if sPPM
 							indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
-							s1n = sp1[indexes]
-							s2n = sp2[indexes]
+							s1n = @view sp1[indexes]
+							s2n = @view sp2[indexes]
 							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 						end
 						lpp += log(M_dp) + lgamma(nh_tmp[kk])
