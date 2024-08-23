@@ -57,6 +57,7 @@ function MCMC_fit(;
 	seed::Float64,                        # Random seed for reproducibility
 	io=log_file                           # where to save the logs
 	)
+	println("Logging to file: ", abspath("log.txt"))
 	Random.seed!(round(Int64,seed))
 	to = TimerOutput()
 
@@ -278,15 +279,16 @@ function MCMC_fit(;
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
 	sleep(1.0) # to let all the prints be printed
-	println("loading...\r")
-	sleep(1.0) # to let all the prints be printed
+	# println("loading...\r")
+	# sleep(1.0) # to let all the prints be printed
 
 	# debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 	t_start = now()
 	progresso = Progress(round(Int64(draws)),
 			showspeed=true,
-			dt=0.5, # update every 10 seconds
-			barlen=0, # no progress bar
+			output=stdout, # default is stderr, which turns out in orange on R
+			dt=2, # update feedback every 2 seconds
+			barlen=0 # no progress bar
 			)
 
 	for i in 1:draws
@@ -1049,7 +1051,6 @@ function MCMC_fit(;
 		end
 
 	next!(progresso)
-	# next!(progresso; showvalues = [(:i,i), (:i_out,i_out)])
 
 	end # for i in 1:draws
 
@@ -1075,11 +1076,11 @@ function MCMC_fit(;
 	end
 	WAIC *= -2
 
+	printlgln(string(now()))
 	debug(@showd to)
-	# debug(@showd eta1_iter)
 	close(log_file)
 
-	return to, Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
+	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
 		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
 		fitted, llike, LPML, WAIC
 
