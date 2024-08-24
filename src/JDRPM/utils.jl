@@ -16,7 +16,7 @@ logit(x::Real) = log(x / (one(x) - x))
 ##################
 
 # dont overwrite Si - ignore corollary variables
-function relabel(Si::Vector{Int}, n::Int)
+function relabel(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
@@ -34,10 +34,10 @@ function relabel(Si::Vector{Int}, n::Int)
 	end
 	return Sirelab
 end
-relabel(Si::Vector{Int}) = relabel(Si,length(Si))
+relabel(Si::AbstractVector{Int}) = relabel(Si,length(Si))
 
 # overwrite Si - ignore the corollary variables
-function relabel!(Si::Vector{Int}, n::Int)
+function relabel!(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
@@ -57,10 +57,10 @@ function relabel!(Si::Vector{Int}, n::Int)
 		Si[j] = Sirelab[j]
 	end
 end
-relabel!(Si::Vector{Int}) = relabel!(Si,length(Si))
+relabel!(Si::AbstractVector{Int}) = relabel!(Si,length(Si))
 
 # dont overwrite Si - deal with the corollary variables
-function relabel_full(Si::Vector{Int}, n::Int)
+function relabel_full(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	nhrelab = zeros(Int,n)
 	oldLab = zeros(Int,n)
@@ -82,11 +82,11 @@ function relabel_full(Si::Vector{Int}, n::Int)
 	end
 	return Sirelab, nhrelab, oldLab
 end
-relabel_full(Si::Vector{Int}) = relabel_full(Si,length(Si))
+relabel_full(Si::AbstractVector{Int}) = relabel_full(Si,length(Si))
 
 
 # dont overwrite Si - deal with the corollary variables
-function relabel_full!(Si::Vector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
+function relabel_full!(Si::AbstractVector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
 	fill!(Sirelab, 0)
 	fill!(nhrelab, 0)
 	fill!(oldLab, 0)
@@ -209,8 +209,9 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 	# FIXED: sum is slow because i didnt initialize S
 	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
 	S = zeros(2,2)
-	for i in 1:sdim
-		S += (sp[i,:] - sbar)*(sp[i,:] - sbar)'
+	@inbounds for i in 1:sdim
+		vtemp = sp[i,:] - sbar
+		S += (vtemp)*(vtemp)'
 	end
 	
 	# compute updated parameters
@@ -220,7 +221,7 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*(sbar-mu_0)*(sbar-mu_0)'
 	
 	if Cohesion == 3
-		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
+		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
 		return lg ? out : exp(out)
 	end
 
@@ -231,7 +232,47 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 	Psi_nn = Psi_n + S + (kn*sdim)/(kn+sdim)*(sbar-mu_n)*(sbar-mu_n)'
 	
 	if Cohesion == 4
-		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(det(Psi_n)) - 0.5 * vnn * log(det(Psi_nn)) + log(kn) - log(knn)
+		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
+		return lg ? out : exp(out)
+	end
+
+	return NaN
+end
+
+function cohesion3_4_v2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp::Matrix{Float64}, S::Matrix{Float64},
+	mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
+	
+	sdim = length(s1)
+	sp = [s1 s2]
+	sbar = vec(mean(sp, dims=1))
+	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
+	# FIXED: sum is slow because i didnt initialize S
+	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
+	fill!(S,0)
+	@inbounds for i in 1:sdim
+		vtemp = sp[i,:] - sbar
+		S += (vtemp)*(vtemp)'
+	end
+	
+	# compute updated parameters
+	# for cohesion 3
+	kn = k0+sdim
+	vn = v0+sdim
+	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*(sbar-mu_0)*(sbar-mu_0)'
+	
+	if Cohesion == 3
+		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
+		return lg ? out : exp(out)
+	end
+
+	# for cohesion 4
+	knn = kn+sdim
+	vnn = vn+sdim
+	mu_n = (k0*mu_0 + sdim*sbar)/(k0+sdim)
+	Psi_nn = Psi_n + S + (kn*sdim)/(kn+sdim)*(sbar-mu_n)*(sbar-mu_n)'
+	
+	if Cohesion == 4
+		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 		return lg ? out : exp(out)
 	end
 
@@ -365,6 +406,15 @@ function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVe
 	idx==4.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=4) 
 	idx==5.0 && return cohesion5(s1,s2,sp_params...,lg=lg,M=M) 
 	idx==6.0 && return cohesion6(s1,s2,sp_params...,lg=lg,M=M) 
+end
+
+function spatial_cohesion_v2(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params; lg::Bool, M::Real)
+	idx==1.0 && return   cohesion1(s1, s2, sp_params..., lg=lg, M=M) 
+	idx==2.0 && return   cohesion2(s1, s2, sp_params..., lg=lg, M=M) 
+	idx==3.0 && return cohesion3_4_v2(s1, s2, sp, S, sp_params..., lg=lg, M=M,Cohesion=3) 
+	idx==4.0 && return cohesion3_4_v2(s1, s2, sp, S, sp_params..., lg=lg, M=M,Cohesion=4) 
+	idx==5.0 && return   cohesion5(s1, s2, sp_params..., lg=lg, M=M) 
+	idx==6.0 && return   cohesion6(s1, s2, sp_params..., lg=lg, M=M) 
 end
 
 ############################################

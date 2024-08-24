@@ -7,7 +7,6 @@ using Dates
 using TimerOutputs
 using ProgressMeter
 
-############# for debug #############
 log_file = open("log.txt", "w+")
 include("debug.jl")
 include("utils.jl")
@@ -54,18 +53,17 @@ function MCMC_fit(;
 	thin::Float64,                        # Thinning interval
 
 	logging::Bool,                        # Wheter to save execution infos to log file
-	seed::Float64,                        # Random seed for reproducibility
-	io=log_file                           # where to save the logs
+	seed::Float64                         # Random seed for reproducibility
 	)
-	println("Logging to file: ", abspath("log.txt"))
 	Random.seed!(round(Int64,seed))
+
+	if logging
+		println("Logging to file: ", abspath("log.txt"))
+
+		printlgln(replace(string(now()),"T" => "   "))
+		debug("current seed = $seed")
+	end
 	to = TimerOutput()
-
-	# debug(@showd sp_params)
-	# println(sp_params)
-	# println(typeof(sp_params))
-	# println(typeof.(sp_params))
-
 
 # try
 	############# check some stuff #############
@@ -285,25 +283,17 @@ function MCMC_fit(;
 	# println("loading...\r")
 	# sleep(1.0) # to let all the prints be printed
 
-	# debug("LOG FILE\ncurrent seed = $seed") # ▶►▸
 	t_start = now()
 	progresso = Progress(round(Int64(draws)),
 			showspeed=true,
 			output=stdout, # default is stderr, which turns out in orange on R
-			dt=2, # update feedback every 2 seconds
+			dt=1, # every how many seconds update the feedback
 			barlen=0 # no progress bar
 			)
 
 	for i in 1:draws
 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 		# there is also the ProgressMeter option, maybe is cooler
-
-		# testing the safeness of the @views
-		if sPPM
-			@assert sp_original == sp_coords
-			@assert sp_original[:,1] == sp1
-			@assert sp_original[:,2] == sp2
-		end
 
 		# debug("\n▶ iteration $i")
 
@@ -332,16 +322,17 @@ function MCMC_fit(;
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
+					@timeit to " sPPM 1 " begin
 					if sPPM
 						sp1_red = @view sp1[indexes]
 						sp2_red = @view sp2[indexes]
 					end
-					# it is not used here but later
+					end
 
 					# compute n_red's and nclus_red's and relabel
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
 					n_red1 = length(Si_red1)
-					@assert n_red1 == n_red+1
+					# @assert n_red1 == n_red+1
 					relabel!(Si_red,n_red)
 					relabel!(Si_red1,n_red1)
 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red) # = number of clusters
@@ -364,6 +355,7 @@ function MCMC_fit(;
 					lCo = 0.0; lCn = 0.0
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
+						@timeit to " sPPM 2 " begin
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							sp_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
@@ -374,6 +366,7 @@ function MCMC_fit(;
 							# debug(@showd sp_idxs)
 							# printlgln("\n")
 
+							# forse qui qualcosa da poter fare dovrebbe esserci
 							s1o = sp1_red[sp_idxs]
 							s2o = sp2_red[sp_idxs]
 							s1n = copy(s1o); push!(s1n, sp1[j])
@@ -383,15 +376,17 @@ function MCMC_fit(;
 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 
 							# debug(@showd s1o s2o s1n s2n j lCo lCn)
-
+						end
 						end
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
 						# lg_weights[k] = lCn - lCo # in theory we should use this since we wrote the full cohesions
 					end
 					# ... or unit j can create a singleton
 					lCn = 0.0
+					@timeit to " sPPM 3 " begin
 					if sPPM
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
+					end
 					end
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
 					# lg_weights[nclus_red+1] = lCn # in theory we should use this since we wrote the full cohesions
@@ -527,11 +522,13 @@ function MCMC_fit(;
 
 						lpp = 0.0
 						for kk in 1:nclus_temp
+							@timeit to " sPPM 4 " begin
 							if sPPM
 								indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
 								s1n = @view sp1[indexes]
 								s2n = @view sp2[indexes]
 								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+							end
 							end
 							lpp += log(M_dp) + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
@@ -585,11 +582,13 @@ function MCMC_fit(;
 
 					lpp = 0.0
 					for kk in 1:nclus_temp
+						@timeit to " sPPM 5 " begin
 						if sPPM
 							indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
 							s1n = @view sp1[indexes]
 							s2n = @view sp2[indexes]
 							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+						end
 						end
 						lpp += log(M_dp) + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
@@ -644,10 +643,11 @@ function MCMC_fit(;
 				# debug(@showd new_label j)
 				# printlgln("\n")
 				
-				if all(isinf.(ph) .|| isnan.(ph))
-					@warn "No valid weight in ph vector when updating for rho.\n"
-					close(log_file); return
-				end
+				# old if for testing, now we can remove to optimize/speed up the computation
+				# if all(isinf.(ph) .|| isnan.(ph))
+				# 	@warn "No valid weight in ph vector when updating for rho.\n"
+				# 	close(log_file); return
+				# end
 
 				if new_label <= nclus_iter[t]
 					# we enter an existing cluster
@@ -669,7 +669,7 @@ function MCMC_fit(;
 				# eg:       (before)            (after)
 				#     units j 2 3 4 5 ->  units j 2 3 4 5
 				#    labels 1 1 1 2 2    labels 3 1 1 2 2
-				Si_tmp = copy(Si_iter[:,t])
+				Si_tmp = @view Si_iter[:,t]
 
 				Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)				
 				# - Si_relab gives the relabelled partition
@@ -737,10 +737,8 @@ function MCMC_fit(;
 				for k in 1:nclus_iter[t]
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
 					a_star = sig2h_priors[1] + nh[k,t]/2 # should be the same
-					@assert sum(Si_iter[:,t] .== k)  == nh[k,t] # yes it is
 					sum_Y = 0.0
 					S_kt = findall(j -> Si_iter[j,t] == k, 1:n)
-					@assert length(S_kt) == nh[k,t]
 					# if lk_xPPM
 					# 	for j in S_kt
 					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
@@ -1083,8 +1081,9 @@ function MCMC_fit(;
 	end
 	WAIC *= -2
 
-	printlgln(string(now()))
-	debug(@showd to)
+	if logging
+		debug(@showd to)
+	end
 	close(log_file)
 
 	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
