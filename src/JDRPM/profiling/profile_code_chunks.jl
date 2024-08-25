@@ -89,3 +89,6 @@ end
 # ProfileCanvas.@profview_allocs spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 
 # Copy-Item "C:/Users/feder/AppData/Local/Temp/jl_cdGNc7W9m9.html" -Destination ".\Tesi\src\JDRPM\profiling\"
+
+
+

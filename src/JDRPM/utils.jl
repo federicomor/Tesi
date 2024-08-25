@@ -248,58 +248,58 @@ end
 # but are the same, test them on these if you want
 # (s1, s2, Psi, Psi_vec) = ([0.06541394973925674, 0.1875903839556078, 0.7065742551867602, 0.8223492385591462], [0.6711654699192571, 0.6199278925430733, 0.36880242735326396, 0.9723482028752322], [2.0 1.0; 1.0 3.0], [2.0, 1.0, 1.0, 3.0])
 ##################
-# function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::Vector{Real}, k0::Real, v0::Real, Psi_vec::Vector{Real}, Cohesion::Int, lg::Bool)
-# 		dim = length(s1)
-# 		# Compute sample means
-# 		sbar1 = mean(s1)
-# 		sbar2 = mean(s2)
-# 		# Compute deviations from the sample mean
-# 		Vs1, Vs2, Vs3, Vs4 = 0.0, 0.0, 0.0, 0.0
-# 		for i in 1:dim
-# 			s_sbar1 = s1[i] - sbar1
-# 			s_sbar2 = s2[i] - sbar2
-# 			Vs1 += s_sbar1 * s_sbar1
-# 			Vs2 += s_sbar1 * s_sbar2
-# 			Vs3 += s_sbar2 * s_sbar1
-# 			Vs4 += s_sbar2 * s_sbar2
-# 		end
-# 		# Updated parameters
-# 		kn = k0 + dim
-# 		vn = v0 + dim
-# 		knn = kn + dim
-# 		vnn = vn + dim
-# 		mun1 = k0 / (k0 + dim) * mu_0[1] + dim / (k0 + dim) * sbar1
-# 		mun2 = k0 / (k0 + dim) * mu_0[2] + dim / (k0 + dim) * sbar2
-# 		sbar_mu_01 = sbar1 - mu_0[1]
-# 		sbar_mu_02 = sbar2 - mu_0[2]
-# 		sbar_mun1 = sbar1 - mun1
-# 		sbar_mun2 = sbar2 - mun2
-# 		Vsbarmu_01 = sbar_mu_01^2
-# 		Vsbarmu_02 = sbar_mu_01 * sbar_mu_02
-# 		Vsbarmu_03 = copy(Vsbarmu_02)
-# 		Vsbarmu_04 = sbar_mu_02^2
-# 		Vsbarmun1 = sbar_mun1^2
-# 		Vsbarmun2 = sbar_mun1 * sbar_mun2
-# 		Vsbarmun3 = copy(Vsbarmun2)
-# 		Vsbarmun4 = sbar_mun2^2
-# 		Ln1 = Psi_vec[1] + Vs1 + k0 * dim / (k0 + dim) * Vsbarmu_01
-# 		Ln2 = Psi_vec[2] + Vs2 + k0 * dim / (k0 + dim) * Vsbarmu_02
-# 		Ln3 = Psi_vec[3] + Vs3 + k0 * dim / (k0 + dim) * Vsbarmu_03
-# 		Ln4 = Psi_vec[4] + Vs4 + k0 * dim / (k0 + dim) * Vsbarmu_04
-# 		Lnn1 = Ln1 + Vs1 + kn * dim / (kn + dim) * Vsbarmun1
-# 		Lnn2 = Ln2 + Vs2 + kn * dim / (kn + dim) * Vsbarmun2
-# 		Lnn3 = Ln3 + Vs3 + kn * dim / (kn + dim) * Vsbarmun3
-# 		Lnn4 = Ln4 + Vs4 + kn * dim / (kn + dim) * Vsbarmun4
-# 		dPsi_vec = Psi_vec[1] * Psi_vec[4] - Psi_vec[2] * Psi_vec[3]
-# 		dLn = Ln1 * Ln4 - Ln2 * Ln3
-# 		dLnn = Lnn1 * Lnn4 - Lnn2 * Lnn3
-# 		if Cohesion == 3
-# 			out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(dPsi_vec) - 0.5 * vn * log(dLn) + log(k0) - log(kn)
-# 		elseif Cohesion == 4
-# 			out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(dLn) - 0.5 * vnn * log(dLnn) + log(kn) - log(knn)
-# 		end
-# 		return lg ? out : exp(out)
-# end
+function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
+		dim = length(s1)
+		# Compute sample means
+		sbar1 = mean(s1)
+		sbar2 = mean(s2)
+		# Compute deviations from the sample mean
+		Vs1, Vs2, Vs3, Vs4 = 0.0, 0.0, 0.0, 0.0
+		for i in 1:dim
+			s_sbar1 = s1[i] - sbar1
+			s_sbar2 = s2[i] - sbar2
+			Vs1 += s_sbar1 * s_sbar1
+			Vs2 += s_sbar1 * s_sbar2
+			Vs3 += s_sbar2 * s_sbar1
+			Vs4 += s_sbar2 * s_sbar2
+		end
+		# Updated parameters
+		kn = k0 + dim
+		vn = v0 + dim
+		knn = kn + dim
+		vnn = vn + dim
+		mun1 = k0 / (k0 + dim) * mu_0[1] + dim / (k0 + dim) * sbar1
+		mun2 = k0 / (k0 + dim) * mu_0[2] + dim / (k0 + dim) * sbar2
+		sbar_mu_01 = sbar1 - mu_0[1]
+		sbar_mu_02 = sbar2 - mu_0[2]
+		sbar_mun1 = sbar1 - mun1
+		sbar_mun2 = sbar2 - mun2
+		Vsbarmu_01 = sbar_mu_01^2
+		Vsbarmu_02 = sbar_mu_01 * sbar_mu_02
+		Vsbarmu_03 = copy(Vsbarmu_02)
+		Vsbarmu_04 = sbar_mu_02^2
+		Vsbarmun1 = sbar_mun1^2
+		Vsbarmun2 = sbar_mun1 * sbar_mun2
+		Vsbarmun3 = copy(Vsbarmun2)
+		Vsbarmun4 = sbar_mun2^2
+		Ln1 = Psi[1] + Vs1 + k0 * dim / (k0 + dim) * Vsbarmu_01
+		Ln2 = Psi[2] + Vs2 + k0 * dim / (k0 + dim) * Vsbarmu_02
+		Ln3 = Psi[3] + Vs3 + k0 * dim / (k0 + dim) * Vsbarmu_03
+		Ln4 = Psi[4] + Vs4 + k0 * dim / (k0 + dim) * Vsbarmu_04
+		Lnn1 = Ln1 + Vs1 + kn * dim / (kn + dim) * Vsbarmun1
+		Lnn2 = Ln2 + Vs2 + kn * dim / (kn + dim) * Vsbarmun2
+		Lnn3 = Ln3 + Vs3 + kn * dim / (kn + dim) * Vsbarmun3
+		Lnn4 = Ln4 + Vs4 + kn * dim / (kn + dim) * Vsbarmun4
+		dPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
+		dLn = Ln1 * Ln4 - Ln2 * Ln3
+		dLnn = Lnn1 * Lnn4 - Lnn2 * Lnn3
+		if Cohesion == 3
+			out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(dPsi) - 0.5 * vn * log(dLn) + log(k0) - log(kn)
+		elseif Cohesion == 4
+			out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(dLn) - 0.5 * vnn * log(dLnn) + log(kn) - log(knn)
+		end
+		return lg ? out : exp(out)
+end
 
 # paper 6 pag 4, cluster variance/entropy similarity function
 function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
@@ -365,8 +365,8 @@ end
 function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params; lg::Bool, M::Real)
 	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg=lg,M=M) 
-	idx==3.0 && return cohesion3_4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=3) 
-	idx==4.0 && return cohesion3_4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=4) 
+	idx==3.0 && return cohesion3_4_C(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=3) 
+	idx==4.0 && return cohesion3_4_C(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=4) 
 	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg=lg,M=M) 
 end

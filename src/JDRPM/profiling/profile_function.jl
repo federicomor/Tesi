@@ -3,7 +3,7 @@ using Profile
 
 include("../MCMC_fit.jl")
 
-N = 50
+N = 80
 T = 12
 y = rand(N,T)
 sp = rand(N,2)
