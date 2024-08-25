@@ -792,7 +792,7 @@ L0 = 1
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
 		y=y, 
-		s_coords = s_std,
+		# s_coords = s_std,
         M=1,
         initial_partition = NULL,
 		

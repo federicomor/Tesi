@@ -28,7 +28,7 @@ function compute_cohesion_v2(n,T,rho_tmp,n_labels,spatial_cohesion_idx,sp_params
 	
 	sp = zeros(n,2)
 	S = zeros(2,2)
-
+	
 	for kk in 1:n_labels
 		indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
 		s1n = @view sp1[indexes]

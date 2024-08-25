@@ -1,8 +1,10 @@
 using SpecialFunctions
 using LinearAlgebra
 using Statistics
+using StaticArrays
 
 logit(x::Real) = log(x / (one(x) - x))
+const logpi = log(π)
 
 # function section(title::String)
 # 	total_width = length(title) + 4
@@ -196,7 +198,7 @@ function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::
 end
 
 function G2a(a::Real, lg::Bool)
-	out = log(π) + lgamma(a) + lgamma(a - 0.5)
+	out = logpi + lgamma(a) + lgamma(a - 0.5)
 	return lg ? out : exp(out)
 end
 
@@ -204,24 +206,25 @@ end
 function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	sp = [s1 s2]
-	sbar = vec(mean(sp, dims=1))
+	sbar = @SVector [mean(s1), mean(s2)]
 	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
 	# FIXED: sum is slow because i didnt initialize S
 	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
 	S = zeros(2,2)
-	@inbounds for i in 1:sdim
-		vtemp = sp[i,:] - sbar
-		S += (vtemp)*(vtemp)'
+	for i in 1:sdim
+		vtemp1 = sp[i,:] - sbar
+		S += (vtemp1)*(vtemp1)'
 	end
 	
 	# compute updated parameters
 	# for cohesion 3
 	kn = k0+sdim
 	vn = v0+sdim
-	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*(sbar-mu_0)*(sbar-mu_0)'
+	vtemp2 = sbar-mu_0
+	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*vtemp2*vtemp2'
 	
 	if Cohesion == 3
-		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
+		out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
 		return lg ? out : exp(out)
 	end
 
@@ -232,47 +235,7 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 	Psi_nn = Psi_n + S + (kn*sdim)/(kn+sdim)*(sbar-mu_n)*(sbar-mu_n)'
 	
 	if Cohesion == 4
-		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
-		return lg ? out : exp(out)
-	end
-
-	return NaN
-end
-
-function cohesion3_4_v2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp::Matrix{Float64}, S::Matrix{Float64},
-	mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
-	
-	sdim = length(s1)
-	sp = [s1 s2]
-	sbar = vec(mean(sp, dims=1))
-	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
-	# FIXED: sum is slow because i didnt initialize S
-	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
-	fill!(S,0)
-	@inbounds for i in 1:sdim
-		vtemp = sp[i,:] - sbar
-		S += (vtemp)*(vtemp)'
-	end
-	
-	# compute updated parameters
-	# for cohesion 3
-	kn = k0+sdim
-	vn = v0+sdim
-	Psi_n = Psi + S + (k0*sdim)/(k0+sdim)*(sbar-mu_0)*(sbar-mu_0)'
-	
-	if Cohesion == 3
-		out = -sdim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
-		return lg ? out : exp(out)
-	end
-
-	# for cohesion 4
-	knn = kn+sdim
-	vnn = vn+sdim
-	mu_n = (k0*mu_0 + sdim*sbar)/(k0+sdim)
-	Psi_nn = Psi_n + S + (kn*sdim)/(kn+sdim)*(sbar-mu_n)*(sbar-mu_n)'
-	
-	if Cohesion == 4
-		out = -sdim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
+		out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 		return lg ? out : exp(out)
 	end
 
@@ -400,21 +363,12 @@ end
 # @show y6 - log(x6)
 
 function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params; lg::Bool, M::Real)
-	idx==1.0 && return cohesion1(s1,s2,sp_params...,lg=lg,M=M) 
-	idx==2.0 && return cohesion2(s1,s2,sp_params...,lg=lg,M=M) 
-	idx==3.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=3) 
-	idx==4.0 && return cohesion3_4(s1,s2,sp_params...,lg=lg,M=M,Cohesion=4) 
-	idx==5.0 && return cohesion5(s1,s2,sp_params...,lg=lg,M=M) 
-	idx==6.0 && return cohesion6(s1,s2,sp_params...,lg=lg,M=M) 
-end
-
-function spatial_cohesion_v2(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params; lg::Bool, M::Real)
-	idx==1.0 && return   cohesion1(s1, s2, sp_params..., lg=lg, M=M) 
-	idx==2.0 && return   cohesion2(s1, s2, sp_params..., lg=lg, M=M) 
-	idx==3.0 && return cohesion3_4_v2(s1, s2, sp, S, sp_params..., lg=lg, M=M,Cohesion=3) 
-	idx==4.0 && return cohesion3_4_v2(s1, s2, sp, S, sp_params..., lg=lg, M=M,Cohesion=4) 
-	idx==5.0 && return   cohesion5(s1, s2, sp_params..., lg=lg, M=M) 
-	idx==6.0 && return   cohesion6(s1, s2, sp_params..., lg=lg, M=M) 
+	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg=lg,M=M) 
+	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg=lg,M=M) 
+	idx==3.0 && return cohesion3_4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=3) 
+	idx==4.0 && return cohesion3_4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,Cohesion=4) 
+	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg=lg,M=M) 
+	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg=lg,M=M) 
 end
 
 ############################################

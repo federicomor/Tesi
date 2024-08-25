@@ -6,6 +6,7 @@ using Logging
 using Dates
 using TimerOutputs
 using ProgressMeter
+using StaticArrays
 
 log_file = open("log.txt", "w+")
 include("debug.jl")
@@ -249,8 +250,12 @@ function MCMC_fit(;
 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
 
 
-	############# auxiliary working variables #############
-
+	############# pre-allocate auxiliary working variables #############
+	n_red = 0
+	n_red1 = 0
+	nclus_red = 0
+	nclus_red1 = 0
+	j_label = 0
 
 	############# testing (for now) on random values #############
 	# Si_iter = rand(collect(1:n),n,T_star)
@@ -342,7 +347,8 @@ function MCMC_fit(;
 					j_label = Si_red1[end]
 
 					# compute also nh_red's
-					nh_red = zeros(Int64,nclus_red); nh_red1 = zeros(Int64,nclus_red1)
+					nh_red = zeros(Int64,nclus_red)
+					nh_red1 = zeros(Int64,nclus_red1)
 					for jj in 1:n_red
 						nh_red[Si_red[jj]] += 1 # = numerosities for each cluster label
 						nh_red1[Si_red1[jj]] += 1
@@ -371,11 +377,8 @@ function MCMC_fit(;
 							s2o = sp2_red[sp_idxs]
 							s1n = copy(s1o); push!(s1n, sp1[j])
 							s2n = copy(s2o); push!(s2n, sp2[j])
-
 							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params, lg=true, M=M_dp)
 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
-
-							# debug(@showd s1o s2o s1n s2n j lCo lCn)
 						end
 						end
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
