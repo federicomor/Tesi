@@ -747,7 +747,7 @@ seed = as.integer(runif(1,0,1000))*1.0
 seed = 98.0
 cat("seed",seed,"\n")
 
-niter=20000; nburn=2000; nthin=3
+niter=200; nburn=100; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=40000; nburn=22000; nthin=10 # folder section 2 run 40k
 nout <- (niter-nburn)/nthin

@@ -312,7 +312,7 @@ function MCMC_fit(;
 			# debug("► time $t")
 
 			############# update gamma #############
-			@timeit to " gamma " begin
+			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
 			for j in 1:n
 				# debug(title*"[update gamma]")
 				# debug("▸ subject $j")
@@ -327,12 +327,12 @@ function MCMC_fit(;
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
-					@timeit to " sPPM 1 " begin
+					# @timeit to " sPPM 1 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						sp1_red = @view sp1[indexes]
 						sp2_red = @view sp2[indexes]
 					end
-					end
+					# end # of the @timeit for sPPM
 
 					# compute n_red's and nclus_red's and relabel
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
@@ -361,7 +361,7 @@ function MCMC_fit(;
 					lCo = 0.0; lCn = 0.0
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
-						@timeit to " sPPM 2 " begin
+						# @timeit to " sPPM 2 " begin # if logging uncomment this line, and the corresponding "end"
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							sp_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
@@ -380,17 +380,17 @@ function MCMC_fit(;
 							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params, lg=true, M=M_dp)
 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 						end
-						end
+						# end # of the @timeit for sPPM
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
 						# lg_weights[k] = lCn - lCo # in theory we should use this since we wrote the full cohesions
 					end
 					# ... or unit j can create a singleton
 					lCn = 0.0
-					@timeit to " sPPM 3 " begin
+					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
 					end
-					end
+					# end # of the @timeit for sPPM
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
 					# lg_weights[nclus_red+1] = lCn # in theory we should use this since we wrote the full cohesions
 
@@ -445,11 +445,11 @@ function MCMC_fit(;
 					# printlgln("sampled gamma:")
 					# debug(@showd probh gt gamma_iter[:,t])
 				end
-			end
+			end # for j in 1:n
 
-			end
+			# end # of the @timeit for gamma
 			############# update rho #############
-			@timeit to " rho " begin
+			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
@@ -525,14 +525,14 @@ function MCMC_fit(;
 
 						lpp = 0.0
 						for kk in 1:nclus_temp
-							@timeit to " sPPM 4 " begin
+							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
 							if sPPM
 								indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
 								s1n = @view sp1[indexes]
 								s2n = @view sp2[indexes]
 								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 							end
-							end
+							# end # of the @timeit for sPPM
 							lpp += log(M_dp) + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
@@ -585,14 +585,14 @@ function MCMC_fit(;
 
 					lpp = 0.0
 					for kk in 1:nclus_temp
-						@timeit to " sPPM 5 " begin
+						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
 						if sPPM
 							indexes = findall(jj -> rho_tmp[jj]==kk, 1:n)
 							s1n = @view sp1[indexes]
 							s2n = @view sp2[indexes]
 							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 						end
-						end
+						# end # of the @timeit for sPPM
 						lpp += log(M_dp) + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 					end
@@ -698,9 +698,9 @@ function MCMC_fit(;
 
 			end # for j in movable_units
 
-			end
+			# end # of the @timeit for rho
 			############# update muh #############
-			@timeit to " muh " begin
+			# @timeit to " muh " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -733,9 +733,9 @@ function MCMC_fit(;
 				end
 			end
 			
-			end
+			# end # of the @timeit for muh
 			############# update sigma2h #############
-			@timeit to " sigma2h " begin
+			# @timeit to " sigma2h " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
@@ -781,9 +781,9 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
 				end
 			end
-			end
+			# end # of the @timeit for sigma2h
 			############# update beta #############
-			@timeit to " beta " begin
+			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
 			if lk_xPPM
 				if t==1
 					sum_Y = zeros(p)
@@ -811,9 +811,9 @@ function MCMC_fit(;
 				end
 			end
 						
-			end
+			# end # of the @timeit for beta
 			############# update theta #############
-			@timeit to " theta " begin
+			# @timeit to " theta " begin # if logging uncomment this line, and the corresponding "end"
 			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -840,9 +840,9 @@ function MCMC_fit(;
 				theta_iter[t] = rand(Normal(mu_post, sqrt(sig2_post)))
 			end 
 			
-			end
+			# end # of the @timeit for theta
 			############# update tau2 #############
-			@timeit to " tau2 " begin
+			# @timeit to " tau2 " begin # if logging uncomment this line, and the corresponding "end"
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -851,12 +851,12 @@ function MCMC_fit(;
 			a_star = tau2_priors[1] + kt
 			b_star = tau2_priors[2] + aux1/2
 			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
-			end
+			# end # of the @timeit for tau2
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
-		@timeit to " eta1 " begin
+		# @timeit to " eta1 " begin # if logging uncomment this line, and the corresponding "end"
 		# eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_eta1
@@ -893,9 +893,9 @@ function MCMC_fit(;
 			end
 		end
 
-		end
+		# end # of the @timeit for eta1
 		############# update alpha #############
-		@timeit to " alpha " begin
+		# @timeit to " alpha " begin # if logging uncomment this line, and the corresponding "end"
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -934,9 +934,9 @@ function MCMC_fit(;
 			end
 		end
 
-		end
+		# end # of the @timeit for alpha
 		############# update phi0 #############
-		@timeit to " phi0 " begin
+		# @timeit to " phi0 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
@@ -947,9 +947,9 @@ function MCMC_fit(;
 		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*aux2 )
 		phi0_iter = rand(Normal(mu_post, sqrt(sig2_post)))
 		
-		end
+		# end # of the @timeit for phi0
 		############# update phi1 #############
-		@timeit to " phi1 " begin
+		# @timeit to " phi1 " begin # if logging uncomment this line, and the corresponding "end"
 		# phi1_priors = sqrt(phi1_priors) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_phi1
@@ -982,9 +982,9 @@ function MCMC_fit(;
 			end
 		end
 
-		end		
+		# end # of the @timeit for phi1
 		############# update lambda2 #############
-		@timeit to " lambda2 " begin
+		# @timeit to " lambda2 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 0.0
 		# I found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
@@ -994,7 +994,7 @@ function MCMC_fit(;
 		b_star = lambda2_priors[2] + (theta_iter[1] - phi0_iter)^2 / 2 + aux1/2
 		lambda2_iter = rand(InverseGamma(a_star,b_star))	
 
-		end
+		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############
 		if i>burnin && i%thin==0 
 			Si_out[:,:,i_out] = Si_iter[:,1:T]
