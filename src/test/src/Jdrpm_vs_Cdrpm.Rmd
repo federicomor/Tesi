@@ -744,10 +744,10 @@ cat("T =",Tm,"\n")
 ## Fits
 ```{r}
 seed = as.integer(runif(1,0,1000))*1.0
-seed = 98.0
+seed = 881.0
 cat("seed",seed,"\n")
 
-niter=200; nburn=100; nthin=2
+niter=30000; nburn=22000; nthin=8
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=40000; nburn=22000; nthin=10 # folder section 2 run 40k
 nout <- (niter-nburn)/nthin
@@ -792,7 +792,7 @@ L0 = 1
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
 		y=y, 
-		# s_coords = s_std,
+		s_coords = s_std,
         M=1,
         initial_partition = NULL,
 		
@@ -851,7 +851,7 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
-	# sp_coords = s_std,
+	sp_coords = s_std,
 	M_dp = 1,                     
 	initial_partition = NA,
 	Xlk_covariates = NA,
@@ -1110,9 +1110,10 @@ for (t in 1:Tm) {
   partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder")
 }
 
-# cols=colora(len=10, seed=67, show=0)
-cols=colora(len=10, seed=44, show=0)
+cols=colora(len=10, seed=67, show=0) # purples
+# cols=colora(len=10, seed=44, show=0) # greens
 # cols = colora(len=10,"rand")
+
 heatmap_matrix <- do.call(rbind, partitions_drpmc)
 # Generate the heatmap
 heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
@@ -1328,13 +1329,13 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 
 ##########################################################
 
-cols = colora(size(yred)[1],56,0)
-# cols = colora(size(yred)[1],"div",show = 0)
-
 # take last sample (maybe not the best choice)
 yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yred=y
+
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
 
 par(mar=c(4,4,4,2))
 for(i in 1:size(yredC)[1]){

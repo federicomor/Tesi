@@ -1,8 +1,8 @@
 using ProfileCanvas
 using Profile
 
+# run in the REPL, not as a new process
 include("../MCMC_fit.jl")
-
 N = 80
 T = 12
 y = rand(N,T)
@@ -35,8 +35,8 @@ seed = 123.0
 
 ################### with ProfileCanvas (better)
 
-ProfileCanvas.@profview_allocs MCMC_fit(
-# ProfileCanvas.@profview MCMC_fit(
+# ProfileCanvas.@profview_allocs MCMC_fit(
+ProfileCanvas.@profview MCMC_fit(
     Y=y,              
     sp_coords = sp,
     M_dp = 1.0,                     
