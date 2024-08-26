@@ -1103,14 +1103,18 @@ partitions_drpmj <- list()
 for (t in 1:Tm) {
   Sic_t <- drpm1$Si[t, , ]
   Sic_t <- t(Sic_t) 
-  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder")
+  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
+  							   #, maxNClusters = 10
+  							   )
 
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
-  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder")
+  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
+  							   #, maxNClusters = 10
+  							   )
 }
 
-cols=colora(len=10, seed=67, show=0) # purples
+cols=colora(len=20, seed=67, show=0) # purples
 # cols=colora(len=10, seed=44, show=0) # greens
 # cols = colora(len=10,"rand")
 
@@ -1209,14 +1213,15 @@ for (t in 1:Tm) {
 model_name = "model C"
 FIT = drpm1
 LEN = Tm
-# maxNClusters = 5
+loss = "binder"
+maxNClusters = 10
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
 	salso_out <- salso(t(FIT$Si[time,,]),
-					   loss=binder(a=1),
-					   # loss=loss,
+					   # loss=binder(a=1),
+					   loss=loss,
 					   # loss="VI.lb",
 					   # loss = "VI",
 					   # maxNClusters = maxNClusters
@@ -1238,8 +1243,8 @@ ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
 	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  loss=binder(a=1),
-						  # loss=loss,
+						  # loss=binder(a=1),
+						  loss=loss,
 						  # loss="VI.lb",
 						  # maxNClusters = maxNClusters
 						  ) # adjust with your fit $Si dimension
@@ -1251,12 +1256,15 @@ for(k in 1: LEN){
 }
 ncols_ari = 100
 # if (min(ARImats)<0){
-	cols_ARI = colora(ncols_ari,79,0)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # } else {
 	# cols_ARI = colora(ncols_ari,56,0)
 	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
 	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # }
 # or see ?designer.colors for colors
 library(fields)
@@ -1270,14 +1278,14 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 model_name = "model J"
 FIT = rout
 LEN = Tm
-# maxNClusters = 5
+maxNClusters = 10
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
 	salso_out <- salso(t(FIT$Si[time,,]),
-					   loss=binder(a=1),
-					   # loss=loss,
+					   # loss=binder(a=1),
+					   loss=loss,
 					   # loss="VI.lb",
 					   # loss = "VI",
 					   # maxNClusters = maxNClusters
@@ -1299,8 +1307,8 @@ ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
 	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  loss=binder(a=1),
-						  # loss=loss,
+						  # loss=binder(a=1),
+						  loss=loss,
 						  # loss="VI.lb",
 						  # maxNClusters = maxNClusters
 						  ) # adjust with your fit $Si dimension
@@ -1312,12 +1320,15 @@ for(k in 1: LEN){
 }
 ncols_ari = 100
 # if (min(ARImats)<0){
-	cols_ARI = colora(ncols_ari,79,0)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # } else {
 	# cols_ARI = colora(ncols_ari,56,0)
 	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
 	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # }
 # or see ?designer.colors for colors
 library(fields)
@@ -1326,7 +1337,10 @@ image.plot(ARImats,
 		   breaks=brks)
 mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+```
 
+
+```{r warning=FALSE}
 ##########################################################
 
 # take last sample (maybe not the best choice)

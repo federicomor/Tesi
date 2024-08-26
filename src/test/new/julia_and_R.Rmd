@@ -28,6 +28,16 @@ juliaEval("using Pkg; Pkg.status()")
 # juliaEval("rand(Beta(10,10))")
 ```
 
+
+```{r}
+pdf("colori.pdf",height=8, width=10)
+par(mfrow=c(20,6),mar=c(1,1,1,1))
+for (seed in 1:115){
+	colora(10,seed)
+}
+dev.off()
+```
+
 # data
 ```{r}
 # Importing a module without a package

@@ -15,8 +15,8 @@ include("utils.jl")
 function MCMC_fit(;
 	Y::Matrix{Float64},                   # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
-	Xlk_covariates = missing,             # n*p*T matrix, the covariates (for all units and all times) to include in the likelihood
-	Xcl_covariates = missing,             # n*p*T matrix, the covariates (for all units and all times) to include in the clustering process
+	Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
+	Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
 
 	M_dp::Float64,                        # Dirichlet mass parameter
 	initial_partition = missing,          # Initial partition (if provided)
@@ -1091,7 +1091,7 @@ function MCMC_fit(;
 
 	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
 		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
-		fitted, llike, LPML, WAIC
+		fitted, llike, -LPML, WAIC
 
 
 # catch e
