@@ -61,7 +61,7 @@ function relabel!(Si::AbstractVector{Int}, n::Int)
 end
 relabel!(Si::AbstractVector{Int}) = relabel!(Si,length(Si))
 
-# dont overwrite Si - deal with the corollary variables
+# dont overwrite Si - consider corollary variables
 function relabel_full(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	nhrelab = zeros(Int,n)
@@ -87,7 +87,7 @@ end
 relabel_full(Si::AbstractVector{Int}) = relabel_full(Si,length(Si))
 
 
-# dont overwrite Si - deal with the corollary variables
+# dont overwrite Si - consider corollary variables
 function relabel_full!(Si::AbstractVector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
 	fill!(Sirelab, 0)
 	fill!(nhrelab, 0)
@@ -126,7 +126,6 @@ end
 
 
 
-
 ########################
 ##   COMPATIBILITY    ##
 ########################
@@ -149,7 +148,6 @@ end
 # rho3 = [3, 1, 3, 2, 1]
 # println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho2))
 # println(rho1, "\n", rho2, " -> ", compatibility(rho1,rho3))
-
 
 
 #####################################
@@ -238,8 +236,6 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 		out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 		return lg ? out : exp(out)
 	end
-
-	return NaN
 end
 
 
@@ -249,56 +245,73 @@ end
 # (s1, s2, Psi, Psi_vec) = ([0.06541394973925674, 0.1875903839556078, 0.7065742551867602, 0.8223492385591462], [0.6711654699192571, 0.6199278925430733, 0.36880242735326396, 0.9723482028752322], [2.0 1.0; 1.0 3.0], [2.0, 1.0, 1.0, 3.0])
 ##################
 function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
-		dim = length(s1)
-		# Compute sample means
-		sbar1 = mean(s1)
-		sbar2 = mean(s2)
-		# Compute deviations from the sample mean
-		Vs1, Vs2, Vs3, Vs4 = 0.0, 0.0, 0.0, 0.0
-		for i in 1:dim
-			s_sbar1 = s1[i] - sbar1
-			s_sbar2 = s2[i] - sbar2
-			Vs1 += s_sbar1 * s_sbar1
-			Vs2 += s_sbar1 * s_sbar2
-			Vs3 += s_sbar2 * s_sbar1
-			Vs4 += s_sbar2 * s_sbar2
-		end
-		# Updated parameters
-		kn = k0 + dim
-		vn = v0 + dim
-		knn = kn + dim
-		vnn = vn + dim
-		mun1 = k0 / (k0 + dim) * mu_0[1] + dim / (k0 + dim) * sbar1
-		mun2 = k0 / (k0 + dim) * mu_0[2] + dim / (k0 + dim) * sbar2
-		sbar_mu_01 = sbar1 - mu_0[1]
-		sbar_mu_02 = sbar2 - mu_0[2]
-		sbar_mun1 = sbar1 - mun1
-		sbar_mun2 = sbar2 - mun2
-		Vsbarmu_01 = sbar_mu_01^2
-		Vsbarmu_02 = sbar_mu_01 * sbar_mu_02
-		Vsbarmu_03 = copy(Vsbarmu_02)
-		Vsbarmu_04 = sbar_mu_02^2
-		Vsbarmun1 = sbar_mun1^2
-		Vsbarmun2 = sbar_mun1 * sbar_mun2
-		Vsbarmun3 = copy(Vsbarmun2)
-		Vsbarmun4 = sbar_mun2^2
-		Ln1 = Psi[1] + Vs1 + k0 * dim / (k0 + dim) * Vsbarmu_01
-		Ln2 = Psi[2] + Vs2 + k0 * dim / (k0 + dim) * Vsbarmu_02
-		Ln3 = Psi[3] + Vs3 + k0 * dim / (k0 + dim) * Vsbarmu_03
-		Ln4 = Psi[4] + Vs4 + k0 * dim / (k0 + dim) * Vsbarmu_04
-		Lnn1 = Ln1 + Vs1 + kn * dim / (kn + dim) * Vsbarmun1
-		Lnn2 = Ln2 + Vs2 + kn * dim / (kn + dim) * Vsbarmun2
-		Lnn3 = Ln3 + Vs3 + kn * dim / (kn + dim) * Vsbarmun3
-		Lnn4 = Ln4 + Vs4 + kn * dim / (kn + dim) * Vsbarmun4
-		dPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
-		dLn = Ln1 * Ln4 - Ln2 * Ln3
-		dLnn = Lnn1 * Lnn4 - Lnn2 * Lnn3
-		if Cohesion == 3
-			out = -dim * log(π) + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(dPsi) - 0.5 * vn * log(dLn) + log(k0) - log(kn)
-		elseif Cohesion == 4
-			out = -dim * log(π) + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(dLn) - 0.5 * vnn * log(dLnn) + log(kn) - log(knn)
-		end
+	sdim = length(s1)
+	# Compute sample means
+	sbar1 = mean(s1)
+	sbar2 = mean(s2)
+	# Compute deviations from the sample mean
+	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
+	for i in 1:sdim
+		s_sbar1 = s1[i] - sbar1
+		s_sbar2 = s2[i] - sbar2
+
+		S1 += s_sbar1 * s_sbar1
+		S4 += s_sbar2 * s_sbar2
+		S2 += s_sbar1 * s_sbar2
+	end
+	S3 = copy(S2) # to avoid repeating computations
+
+	# Updated parameters for cohesion 3
+	kn = k0 + sdim
+	vn = v0 + sdim
+
+	auxvec1_1 = sbar1 - mu_0[1]
+	auxvec1_2 = sbar2 - mu_0[2]
+
+	auxmat1_1 = auxvec1_1^2
+	auxmat1_2 = auxvec1_1 * auxvec1_2
+	auxmat1_3 = copy(auxmat1_2)
+	auxmat1_4 = auxvec1_2^2
+
+	auxconst1 = k0 * sdim
+	auxconst2 = k0 + sdim
+	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
+	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
+	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
+	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
+
+	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
+	detPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
+
+	if Cohesion == 3
+		out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(detPsi) - 0.5 * vn * log(detPsi_n) + log(k0) - log(kn)
 		return lg ? out : exp(out)
+	end
+	
+	# Updated parameters for cohesion 4
+	knn = kn + sdim
+	vnn = vn + sdim
+
+	mu_n_1 = (k0 * mu_0[1] + sdim * sbar1) / (auxconst2)
+	mu_n_2 = (k0 * mu_0[2] + sdim * sbar2) / (auxconst2)
+	sbar_mun1 = sbar1 - mu_n_1
+	sbar_mun2 = sbar2 - mu_n_2
+
+	auxmat2_1 = sbar_mun1^2
+	auxmat2_2 = sbar_mun1 * sbar_mun2
+	auxmat2_3 = copy(auxmat2_2)
+	auxmat2_4 = sbar_mun2^2
+
+	auxconst3 = kn * sdim
+	auxconst4 = kn + sdim
+	Psi_nn_1 = Psi_n_1 + S1 + auxconst3 / (auxconst4) * auxmat2_1
+	Psi_nn_2 = Psi_n_2 + S2 + auxconst3 / (auxconst4) * auxmat2_2
+	Psi_nn_3 = Psi_n_3 + S3 + auxconst3 / (auxconst4) * auxmat2_3
+	Psi_nn_4 = Psi_n_4 + S4 + auxconst3 / (auxconst4) * auxmat2_4
+	detPsi_nn = Psi_nn_1 * Psi_nn_4 - Psi_nn_2 * Psi_nn_3
+	
+	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(detPsi_n) - 0.5 * vnn * log(detPsi_nn) + log(kn) - log(knn)
+	return lg ? out : exp(out)
 end
 
 # paper 6 pag 4, cluster variance/entropy similarity function
@@ -375,7 +388,9 @@ end
 ##   SIMILARITY FUNCTIONS (covariates)    ##
 ############################################
 
-
 # farle singole, concentrate su una singola covariata per volta
 # e come sopra con la parte spaziale, in modo cioè sceglibile/flessibile
 # normalizzare le covariate
+
+
+

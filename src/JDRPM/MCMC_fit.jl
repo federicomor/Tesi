@@ -88,6 +88,13 @@ function MCMC_fit(;
 		return
 	end
 
+	if spatial_cohesion_idx == 3 || spatial_cohesion_idx == 4
+		if !issymmetric(sp_params[4])
+			@error "Matrix Psi of the spatial parameters must be symmetric." _file=""
+			return
+		end
+	end
+
 	if (time_specific_alpha==false && unit_specific_alpha==false) || (time_specific_alpha==true && unit_specific_alpha==false)
 		# cases of alpha being a scalar or a vector in time
 		# so we should get as priors the two params of the Beta 
