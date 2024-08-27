@@ -947,7 +947,7 @@ cat("waic = ",rout$waic,"\n")
 ```
 
 ```{r}
-# save(drpm1, rout, out, file = "ran_space_data.Rdata")
+save(drpm1, rout, out, file = "ran_section2_withspace_30k22b8t.Rdata")
 # load(file = "ran_space_data.Rdata")
 ```
 
@@ -1094,6 +1094,8 @@ plot(rout$lambda2[,1],type="l",
 
 ## Partition plots
 ```{r, warning=F}
+maxNClusters = 11
+
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
 partitions_drpmc <- list()
@@ -1104,17 +1106,30 @@ for (t in 1:Tm) {
   Sic_t <- drpm1$Si[t, , ]
   Sic_t <- t(Sic_t) 
   partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
-  							   #, maxNClusters = 10
+  							   , maxNClusters = maxNClusters
   							   )
 
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
   partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
-  							   #, maxNClusters = 10
+  							   , maxNClusters = maxNClusters
   							   )
 }
 
-cols=colora(len=20, seed=67, show=0) # purples
+cat(crayon::red("DRPM - C\n"))
+for (t in 1:Tm){
+	cat("Time",time,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
+}
+cat("\n")
+cat(crayon::red("DRPM - J\n"))
+for (t in 1:Tm){
+	cat("Time",time,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
+}
+```
+
+
+```{r, warning=F}
+cols=colora(len=maxNClusters, seed=67, show=0) # purples
 # cols=colora(len=10, seed=44, show=0) # greens
 # cols = colora(len=10,"rand")
 
@@ -1209,23 +1224,15 @@ for (t in 1:Tm) {
 
 ## Ari plot
 ```{r warning=FALSE}
+LEN = Tm
 ##########################
 model_name = "model C"
-FIT = drpm1
-LEN = Tm
-loss = "binder"
-maxNClusters = 10
+partition = partitions_drpmc
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
-	salso_out <- salso(t(FIT$Si[time,,]),
-					   # loss=binder(a=1),
-					   loss=loss,
-					   # loss="VI.lb",
-					   # loss = "VI",
-					   # maxNClusters = maxNClusters
-					   )
+	salso_out <- partition[[time]]
 	df_temp = data.frame(
 		clusters = salso_out
 	)
@@ -1242,12 +1249,7 @@ library(mclust)
 ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
-	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  # loss=binder(a=1),
-						  loss=loss,
-						  # loss="VI.lb",
-						  # maxNClusters = maxNClusters
-						  ) # adjust with your fit $Si dimension
+	rho_ARI[[k]] <- partition[[k]]
 }
 for(k in 1: LEN){
 	for(kk in 1: LEN){
@@ -1276,20 +1278,12 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 
 ##########################
 model_name = "model J"
-FIT = rout
-LEN = Tm
-maxNClusters = 10
+partition = partitions_drpmj
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
-	salso_out <- salso(t(FIT$Si[time,,]),
-					   # loss=binder(a=1),
-					   loss=loss,
-					   # loss="VI.lb",
-					   # loss = "VI",
-					   # maxNClusters = maxNClusters
-					   )
+	salso_out <- partition[[time]]
 	df_temp = data.frame(
 		clusters = salso_out
 	)
@@ -1306,12 +1300,7 @@ library(mclust)
 ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
-	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  # loss=binder(a=1),
-						  loss=loss,
-						  # loss="VI.lb",
-						  # maxNClusters = maxNClusters
-						  ) # adjust with your fit $Si dimension
+	rho_ARI[[k]] <- partition[[k]]
 }
 for(k in 1: LEN){
 	for(kk in 1: LEN){
@@ -1337,10 +1326,7 @@ image.plot(ARImats,
 		   breaks=brks)
 mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
-```
 
-
-```{r warning=FALSE}
 ##########################################################
 
 # take last sample (maybe not the best choice)
@@ -1387,6 +1373,28 @@ for(i in 1:size(yred)[1]){
 	  }
 }
 ```
+
+## salso plots
+```{r}
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+##########################
+
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
+}
+```
+
+
 
 # ==========
 

@@ -1073,6 +1073,9 @@ function MCMC_fit(;
 		end
 	end
 	LPML -= n*T*log(nout) # scaling factor
+	LPML = -LPML # fix sign
+
+	println("LPML: $LPML (the higher the better)")
 	
 	# adjust mean variables
 	mean_likelhd ./= nout
@@ -1083,6 +1086,7 @@ function MCMC_fit(;
 		end
 	end
 	WAIC *= -2
+	println("WAIC: $WAIC (the lower the better)")
 
 	if logging
 		debug(@showd to)
@@ -1091,7 +1095,7 @@ function MCMC_fit(;
 
 	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
 		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
-		fitted, llike, -LPML, WAIC
+		fitted, llike, LPML, WAIC
 
 
 # catch e
