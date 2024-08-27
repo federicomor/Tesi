@@ -389,7 +389,6 @@ function MCMC_fit(;
 						end
 						# end # of the @timeit for sPPM
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
-						# lg_weights[k] = lCn - lCo # in theory we should use this since we wrote the full cohesions
 					end
 					# ... or unit j can create a singleton
 					lCn = 0.0
@@ -399,7 +398,6 @@ function MCMC_fit(;
 					end
 					# end # of the @timeit for sPPM
 					lg_weights[nclus_red+1] = log(M_dp) + lCn
-					# lg_weights[nclus_red+1] = lCn # in theory we should use this since we wrote the full cohesions
 
 					# printlgln("before exp and normalization:")
 					# debug(@showd lg_weights)

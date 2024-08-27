@@ -61,7 +61,7 @@ end
 # but are the same, test them on these if you want
 # (s1, s2, Psi, Psi_vec) = ([0.06541394973925674, 0.1875903839556078, 0.7065742551867602, 0.8223492385591462], [0.6711654699192571, 0.6199278925430733, 0.36880242735326396, 0.9723482028752322], [2.0 1.0; 1.0 3.0], [2.0, 1.0, 1.0, 3.0])
 ##################
-function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
+function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	# Compute sample means
 	sbar1 = mean(s1)
@@ -100,10 +100,48 @@ function cohesion3_4_C(s1::AbstractVector{Float64}, s2::AbstractVector{Float64},
 	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
 	detPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
 
-	if Cohesion == 3
-		out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(detPsi) - 0.5 * vn * log(detPsi_n) + log(k0) - log(kn)
-		return lg ? out : exp(out)
+	out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(detPsi) - 0.5 * vn * log(detPsi_n) + log(k0) - log(kn)
+	return lg ? out : exp(out)
+
+end
+
+function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; lg::Bool, M::Real=1.0)
+	sdim = length(s1)
+	# Compute sample means
+	sbar1 = mean(s1)
+	sbar2 = mean(s2)
+	# Compute deviations from the sample mean
+	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
+	for i in 1:sdim
+		s_sbar1 = s1[i] - sbar1
+		s_sbar2 = s2[i] - sbar2
+
+		S1 += s_sbar1 * s_sbar1
+		S4 += s_sbar2 * s_sbar2
+		S2 += s_sbar1 * s_sbar2
 	end
+	S3 = copy(S2) # to avoid repeating computations
+
+	# Updated parameters for cohesion 3
+	kn = k0 + sdim
+	vn = v0 + sdim
+
+	auxvec1_1 = sbar1 - mu_0[1]
+	auxvec1_2 = sbar2 - mu_0[2]
+
+	auxmat1_1 = auxvec1_1^2
+	auxmat1_2 = auxvec1_1 * auxvec1_2
+	auxmat1_3 = copy(auxmat1_2)
+	auxmat1_4 = auxvec1_2^2
+
+	auxconst1 = k0 * sdim
+	auxconst2 = k0 + sdim
+	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
+	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
+	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
+	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
+
+	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
 	
 	# Updated parameters for cohesion 4
 	knn = kn + sdim
@@ -141,10 +179,10 @@ v0 = 5.0
 Psi =[1.0 0.3; 0.3 1.0]
 M_dp = 1
 
-println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=true) == cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=true))
-println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=false) == cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=false))
-println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=true) == cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=true))
-println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false) == cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false))
+println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=true) == cohesion3(s1n,s2n,mu_0,k0,v0,Psi,lg=true))
+println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=false) == cohesion3(s1n,s2n,mu_0,k0,v0,Psi,lg=false))
+println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=true) == cohesion4(s1n,s2n,mu_0,k0,v0,Psi,lg=true))
+println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false) == cohesion4(s1n,s2n,mu_0,k0,v0,Psi,lg=false))
 
 @btime cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=true)
 @btime cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=3,lg=true)
