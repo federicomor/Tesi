@@ -947,8 +947,8 @@ cat("waic = ",rout$waic,"\n")
 ```
 
 ```{r}
-save(drpm1, rout, out, file = "ran_section2_withspace_30k22b8t.Rdata")
-# load(file = "ran_space_data.Rdata")
+# save(drpm1, rout, out, file = "ran_section2_withspace_30k22b8t.Rdata")
+load(file = "ran_section2_withspace_30k22b8t.Rdata")
 ```
 
 
@@ -1425,11 +1425,11 @@ for(st in stations){
 rownames(y) = NULL
 colnames(y)<- c("id",paste0("w", 1:53))
 
-time_span = 1:20 # low time span for quick testing, real one will be 1:53
+time_span = 1:5 # low time span for quick testing, real one will be 1:53
 # quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
-# nsubjects = 1:7
+nsubjects = 1:40
 ### tutti:
-nsubjects = 1:105
+# nsubjects = 1:105
 y = y[nsubjects,1+time_span]
 
 #############################################
@@ -1469,14 +1469,13 @@ s_std
 ## Fits
 ```{r}
 seed = as.integer(runif(1,0,1000))*1.0
-# seed = 687.0
-seed = 555.0
+seed = 858.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=60000; nburn=20000; nthin=20
-niter=20000; nburn=10000; nthin=10
+niter=1000; nburn=200; nthin=4
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -1576,8 +1575,32 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```
 
 ```{r}
-save(drpm1, file = "temp_error.Rdata")
-load(file = "temp_error.Rdata")
+# save(drpm1, file = "temp_error.Rdata")
+# load(file = "temp_error.Rdata")
+```
+
+## covariates
+```{r}
+n = dim(y)[1]
+Tm
+p = 4
+X_lk = array(data = 0, dim = c(n, p, Tm))
+dim(X_lk)
+
+colnames(df_wsc)
+covariate_scelte = c("Altitude","WE_tot_precipitation",
+					 "EM_nox_traffic","WE_wind_speed_100m_mean")
+for(i in 1:n){
+	st = stations[i]
+	for(t in 1:Tm){
+		df_st = df_wsc[which(df_wsc$IDStations == st),]
+		for (pp in 1:p){
+			X_lk[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+		}
+	}
+}
+colnames(X_lk) = covariate_scelte
+head(X_lk)
 ```
 
 
@@ -1586,10 +1609,10 @@ load(file = "temp_error.Rdata")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
-	# sp_coords = s_std,
+	sp_coords = s_std,
 	M_dp = 1,                     
 	initial_partition = NA,
-	Xlk_covariates = NA,
+	Xlk_covariates = X_lk,
 	Xcl_covariates = NA,
 	
 	starting_alpha = 0.5,         
@@ -1604,8 +1627,10 @@ out = module_JDRPM$MCMC_fit(
 	
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
-	# beta_priors = c(rep(1,p),2),
-	beta_priors = NA,
+	
+	beta_priors = c(rep(0,p),2),
+	# beta_priors = NA,
+	
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
 	phi1_priors = sig_mh_phi1^2,
@@ -1616,13 +1641,20 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	draws = niter,                    
-	burnin = nburn,                   
-	thin = nthin,                     
+	# draws = niter, burnin = nburn, thin = nthin,
+	draws = 10, burnin = 6, thin = 2,
 	logging = TRUE,
 	seed = seed
 )
 ```
+
+-- without covariates
+done!
+Elapsed time: 2 seconds, 753 milliseconds
+LPML: -52.09245933075181 (the higher the better)
+WAIC: 10.256530969537543 (the lower the better)
+
+-- with covariates
 
 
 ```{r}
@@ -1857,6 +1889,9 @@ plot(rout$lambda2[,1],type="l",
 
 ## Partition plots
 ```{r, warning=F}
+maxNClusters = 11
+
+# partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
 partitions_drpmc <- list()
 partitions_drpmj <- list()
@@ -1865,16 +1900,34 @@ partitions_drpmj <- list()
 for (t in 1:Tm) {
   Sic_t <- drpm1$Si[t, , ]
   Sic_t <- t(Sic_t) 
-  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder")
+  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
+  							   , maxNClusters = maxNClusters
+  							   )
 
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
-  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder")
+  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
+  							   , maxNClusters = maxNClusters
+  							   )
 }
 
-# cols=colora(len=10, seed=67, show=0)
-cols=colora(len=10, seed=44, show=0)
+cat(crayon::red("DRPM - C\n"))
+for (t in 1:Tm){
+	cat("Time",time,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
+}
+cat("\n")
+cat(crayon::red("DRPM - J\n"))
+for (t in 1:Tm){
+	cat("Time",time,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
+}
+```
+
+
+```{r, warning=F}
+cols=colora(len=maxNClusters, seed=67, show=0) # purples
+# cols=colora(len=10, seed=44, show=0) # greens
 # cols = colora(len=10,"rand")
+
 heatmap_matrix <- do.call(rbind, partitions_drpmc)
 # Generate the heatmap
 heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
@@ -1964,24 +2017,18 @@ for (t in 1:Tm) {
 }
 ```
 
+
 ## Ari plot
 ```{r warning=FALSE}
+LEN = Tm
 ##########################
 model_name = "model C"
-FIT = drpm1
-LEN = Tm
-# maxNClusters = 5
+partition = partitions_drpmc
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
-	salso_out <- salso(t(FIT$Si[time,,]),
-					   loss=binder(a=1),
-					   # loss=loss,
-					   # loss="VI.lb",
-					   # loss = "VI",
-					   # maxNClusters = maxNClusters
-					   )
+	salso_out <- partition[[time]]
 	df_temp = data.frame(
 		clusters = salso_out
 	)
@@ -1998,12 +2045,7 @@ library(mclust)
 ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
-	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  loss=binder(a=1),
-						  # loss=loss,
-						  # loss="VI.lb",
-						  # maxNClusters = maxNClusters
-						  ) # adjust with your fit $Si dimension
+	rho_ARI[[k]] <- partition[[k]]
 }
 for(k in 1: LEN){
 	for(kk in 1: LEN){
@@ -2012,12 +2054,15 @@ for(k in 1: LEN){
 }
 ncols_ari = 100
 # if (min(ARImats)<0){
-	cols_ARI = colora(ncols_ari,79,0)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # } else {
 	# cols_ARI = colora(ncols_ari,56,0)
 	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
 	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # }
 # or see ?designer.colors for colors
 library(fields)
@@ -2029,20 +2074,12 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 
 ##########################
 model_name = "model J"
-FIT = rout
-LEN = Tm
-# maxNClusters = 5
+partition = partitions_drpmj
 ##########################
 
 df_cluster = data.frame(clusters=c(),Time=c())
 for(time in 1:Tm){
-	salso_out <- salso(t(FIT$Si[time,,]),
-					   loss=binder(a=1),
-					   # loss=loss,
-					   # loss="VI.lb",
-					   # loss = "VI",
-					   # maxNClusters = maxNClusters
-					   )
+	salso_out <- partition[[time]]
 	df_temp = data.frame(
 		clusters = salso_out
 	)
@@ -2059,12 +2096,7 @@ library(mclust)
 ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
 rho_ARI <- list()
 for(k in 1:LEN){
-	rho_ARI[[k]] <- salso(t(FIT$Si[k,,]),
-						  loss=binder(a=1),
-						  # loss=loss,
-						  # loss="VI.lb",
-						  # maxNClusters = maxNClusters
-						  ) # adjust with your fit $Si dimension
+	rho_ARI[[k]] <- partition[[k]]
 }
 for(k in 1: LEN){
 	for(kk in 1: LEN){
@@ -2073,12 +2105,15 @@ for(k in 1: LEN){
 }
 ncols_ari = 100
 # if (min(ARImats)<0){
-	cols_ARI = colora(ncols_ari,79,0)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # } else {
 	# cols_ARI = colora(ncols_ari,56,0)
 	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
 	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
 # }
 # or see ?designer.colors for colors
 library(fields)
@@ -2090,13 +2125,13 @@ mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, c
 
 ##########################################################
 
-cols = colora(size(yred)[1],56,0)
-# cols = colora(size(yred)[1],"div",show = 0)
-
 # take last sample (maybe not the best choice)
 yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yred=y
+
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
 
 par(mar=c(4,4,4,2))
 for(i in 1:size(yredC)[1]){
@@ -2135,21 +2170,24 @@ for(i in 1:size(yred)[1]){
 }
 ```
 
-```{r}
-num_cols = 10
-cols = qualitative_hcl(num_cols, palette = "Dark 3")
-# cols <- rainbow(num_cols)
-# cols <- brewer.pal(num_cols, "Paired")
-# cols <- c(brewer.pal(12, "Paired"), brewer.pal(12, "Set3"))
 
-for(time in time_span){
-	df_cluster_cut = df_cluster[df_cluster$Time==time,]
-	plot(s_std,
-		 col=cols[df_cluster_cut$clusters],
-		 pch=19,
-		 cex=2,
-		 main=paste("Time",time)
-		 )
+## salso plots
+```{r}
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+##########################
+
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
 }
 ```
 

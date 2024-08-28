@@ -127,13 +127,18 @@ function MCMC_fit(;
 	lk_xPPM = !ismissing(Xlk_covariates)
 	n, T = size(Y)
 	T_star = T+1
-
 	p = lk_xPPM ? size(Xlk_covariates)[2] : 0
+
 	if (draws-burnin)%thin != 0
 		@error "Please define draws, thin and burnin in an integer division-friendly way.\nI.e., such that (draws-burnin) % thin = 0." _file=""
 		return
 	end
-	nout = round(Int64,(draws - burnin)/(thin))
+	nout = round(Int64, (draws - burnin)/(thin))
+	if nout < 0 
+		@error "Wrong iterations parameters." _file=""
+		return
+	end
+
 	if sPPM
 		sp1 = copy(vec(sp_coords[:,1]))
 		sp2 = copy(vec(sp_coords[:,2]))
@@ -145,14 +150,13 @@ function MCMC_fit(;
 		return
 	end
 
-
 	############# send feedback #############
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")
 	println("\non n=$n subjects\nfor T=$T time instants")
 	println("with space? $sPPM")
-	println("with covariates in the likelihood? $lk_xPPM")
+	println("with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p)" : "")
 	println("with covariates in the clustering process? $cl_xPPM")
 	println()
 
@@ -242,7 +246,9 @@ function MCMC_fit(;
 		for t in 1:T_star
 			beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p)))
 		end
+		# debug(@showd beta0 s2_beta)
 	end
+
 	eta1_iter = zeros(n)
 	if include_eta1
 		for j in 1:n
@@ -286,6 +292,7 @@ function MCMC_fit(;
 		if str=="sp_coords" println(log_file,"sp_coords\n",tostr(sp_coords)); return; end
 		if str=="sp1" println(log_file,"sp1\n",tostr(sp1)); return; end
 		if str=="sp2" println(log_file,"sp2\n",tostr(sp2)); return; end
+		if str=="beta_iter" println(log_file,"beta_iter\n",tostr(beta_iter)); return; end
 	end
 
 
@@ -365,7 +372,9 @@ function MCMC_fit(;
 
 					# start computing weights
 					lg_weights = zeros(nclus_red+1)
-					lCo = 0.0; lCn = 0.0
+					lCo = 0.0; lCn = 0.0 # log cohesions (so for space) old and new
+					lSo = 0.0; lSn = 0.0 # log similarities(so for covariates) old and new
+					# TOWARDS COVARIATE DEVELOPMENT
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
 						# @timeit to " sPPM 2 " begin # if logging uncomment this line, and the corresponding "end"
@@ -390,8 +399,10 @@ function MCMC_fit(;
 						# end # of the @timeit for sPPM
 						lg_weights[k] = log(nh_red[k]) + lCn - lCo
 					end
+					
 					# ... or unit j can create a singleton
 					lCn = 0.0
+					lSn = 0.0 # TOWARDS COVARIATE DEVELOPMENT
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
@@ -537,6 +548,9 @@ function MCMC_fit(;
 								s2n = @view sp2[indexes]
 								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 							end
+							if cl_xPPM
+								# TOWARDS COVARIATE DEVELOPMENT
+							end
 							# end # of the @timeit for sPPM
 							lpp += log(M_dp) + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
@@ -547,12 +561,12 @@ function MCMC_fit(;
 						### real case
 						if t==1
 							ph[k] = loglikelihood(Normal(
-								muh_iter[k,t] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+								muh_iter[k,t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t])),
 								Y[j,t]) + lpp
 						else
 							ph[k] = loglikelihood(Normal(
-								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
 								Y[j,t]) + lpp
 						end
@@ -597,6 +611,9 @@ function MCMC_fit(;
 							s2n = @view sp2[indexes]
 							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
 						end
+						if cl_xPPM
+							# TOWARDS COVARIATE DEVELOPMENT
+						end
 						# end # of the @timeit for sPPM
 						lpp += log(M_dp) + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
@@ -606,12 +623,12 @@ function MCMC_fit(;
 					### real case
 					if t==1
 						ph[k] = loglikelihood(Normal(
-							muh_draw + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw)),
 							Y[j,t]) + lpp
 					else
 						ph[k] = loglikelihood(Normal(
-							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
 							Y[j,t]) + lpp
 					end
@@ -711,7 +728,7 @@ function MCMC_fit(;
 					sum_Y = 0.0
 					for j in 1:n
 						if Si_iter[j,t]==k 
-							sum_Y += Y[j,t] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
+							sum_Y += Y[j,t] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
 						end
 					end
 					sig2_star = 1 / (1/tau2_iter[t] + nh[k,t]/sig2h_iter[k,t])
@@ -728,7 +745,7 @@ function MCMC_fit(;
 						if Si_iter[j,t]==k 
 							aux1 = 1 / (1-eta1_iter[j]^2)
 							sum_e2 += aux1
-							sum_Y += (Y[j,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)) * aux1
+							sum_Y += (Y[j,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)) * aux1
 						end
 					end
 					sig2_star = 1 / (1/tau2_iter[t] + sum_e2/sig2h_iter[k,t]) 
@@ -757,7 +774,7 @@ function MCMC_fit(;
 					# 	end
 					# end
 					for j in S_kt
-						sum_Y += (Y[j,t] - muh_iter[k,t] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0))^2
+						sum_Y += (Y[j,t] - muh_iter[k,t] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0))^2
 					end
 
 					b_star = sig2h_priors[2] + sum_Y/2
@@ -779,7 +796,7 @@ function MCMC_fit(;
 					# 	end
 					# end
 					for j in S_kt
-						sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0))^2
+						sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0))^2
 					end
 
 					b_star = sig2h_priors[2] + sum_Y/2
@@ -790,16 +807,21 @@ function MCMC_fit(;
 			############# update beta #############
 			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
 			if lk_xPPM
+				debug(@showd t)
 				if t==1
 					sum_Y = zeros(p)
 					A_star = I(p)/s2_beta
 					for j in 1:n
-						X_jt = Xlk_covariates[j,:,t]
-						sum_Y += (Y[j,t] - muh_iter[Si_iter[j],t]) * X_jt / sig2h_iter[Si_iter[j],t]
-						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j],t]
+						X_jt = @view Xlk_covariates[j,:,t]
+						sum_Y += (Y[j,t] - muh_iter[Si_iter[j,t],t]) * X_jt / sig2h_iter[Si_iter[j,t],t]
+						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j,t],t]
 					end
+					debug(@showd A_star)
 					b_star = beta0/s2_beta + sum_Y
-					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
+					debug(@showd b_star)
+					A_star = Symmetric(A_star)
+					beta_iter[t] = rand(MvNormalCanon(A_star*b_star, A_star))
+					# beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 					# Symmetric is needed for numerical problems
 					# https://discourse.julialang.org/t/isposdef-and-eigvals-do-not-agree/118191/2
 					# but A_star is indeed symm and pos def (by construction) so there is no problem
@@ -807,13 +829,19 @@ function MCMC_fit(;
 					sum_Y = zeros(p)
 					A_star = I(p)/s2_beta
 					for j in 1:n
-						X_jt = Xlk_covariates[j,:,t]
-						sum_Y += (Y[j,t] - muh_iter[Si_iter[j],t] - eta1_iter[j]*Y[j,t-1]) * X_jt / sig2h_iter[Si_iter[j],t]
-						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j],t]
+						X_jt = @view Xlk_covariates[j,:,t]
+						sum_Y += (Y[j,t] - muh_iter[Si_iter[j,t],t] - eta1_iter[j]*Y[j,t-1]) * X_jt / sig2h_iter[Si_iter[j,t],t]
+						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j,t],t]
 					end
+					debug(@showd A_star)
 					b_star = beta0/s2_beta + sum_Y
-					beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
+					debug(@showd b_star)
+					A_star = Symmetric(A_star)
+					beta_iter[t] = rand(MvNormalCanon(A_star*b_star, A_star))
+					# beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 				end
+				pretty_log("beta_iter")
+				println(beta_iter)
 			end
 						
 			# end # of the @timeit for beta
@@ -874,11 +902,11 @@ function MCMC_fit(;
 					for t in 2:T
 						# likelihood contribution
 						ll_old += loglikelihood(Normal(
-							muh_iter[j,t] + eta1_old*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_iter[Si_iter[j,t],t] + eta1_old*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_iter[j,t]*(1-eta1_old^2))
 							), Y[j,t]) 
 						ll_new += loglikelihood(Normal(
-							muh_iter[j,t] + eta1_new*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_iter[Si_iter[j,t],t] + eta1_new*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_iter[j,t]*(1-eta1_new^2))
 							), Y[j,t]) 
 					end
@@ -1043,22 +1071,27 @@ function MCMC_fit(;
 					sig2h_jt = sig2h_iter[Si_iter[j,t],t]
 					if t==1
 						llike[j,t,i_out] = logpdf(Normal(
-							muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_jt + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+							# muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
 							sqrt(sig2h_jt)
 							), Y[j,t])
-						fitted[j,t,i_out] = muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
+						fitted[j,t,i_out] = muh_jt + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
+						# fitted[j,t,i_out] = muh_jt + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
 					else # t>1
 						llike[j,t,i_out] = logpdf(Normal(
-							muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
+							muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+							# muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0),
 							sqrt(sig2h_jt*(1-eta1_iter[j]^2))
 							), Y[j,t])
-						fitted[j,t,i_out] = muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
+						fitted[j,t,i_out] = muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
+						# fitted[j,t,i_out] = muh_jt + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(Xlk_covariates[j,:,t], beta_iter[t]) : 0)
 					end
 					mean_likelhd[j,t] += exp(llike[j,t,i_out])
 					mean_loglikelhd[j,t] += llike[j,t,i_out]
 					CPO[j,t] += exp(-llike[j,t,i_out])
 				end
 			end
+			# debug(@showd fitted mean_likelhd mean_loglikelhd CPO)
 
 			i_out += 1
 		end
