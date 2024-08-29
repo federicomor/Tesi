@@ -1469,7 +1469,7 @@ s_std
 ## Fits
 ```{r}
 seed = as.integer(runif(1,0,1000))*1.0
-seed = 858.0
+seed = 758.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
@@ -1583,13 +1583,48 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```{r}
 n = dim(y)[1]
 Tm
-p = 4
+
+colnames(df_wsc)
+covariate_scelte = c(
+	# "Altitude",
+	# "WE_temp_2m"                 ,
+	# "WE_wind_speed_10m_mean"      ,
+	# "WE_wind_speed_10m_max"      ,
+	# "WE_mode_wind_direction_10m"  ,
+	# "WE_tot_precipitation"       ,
+	# "WE_precipitation_t",
+	"WE_surface_pressure"        ,
+	# "WE_solar_radiation"          ,
+	# "WE_rh_min"                  ,
+	"WE_rh_mean"
+	# "WE_rh_max"                  ,
+	# "WE_wind_speed_100m_mean"     ,
+	# "WE_wind_speed_100m_max"     ,
+	# "WE_mode_wind_direction_100m" ,
+	# "WE_blh_layer_max"           ,
+	# "WE_blh_layer_min"            ,
+	# "EM_nh3_livestock_mm"        ,
+	# "EM_nh3_agr_soils"            ,
+	# "EM_nh3_agr_waste_burn"      ,
+	# "EM_nh3_sum"                  ,
+	# "EM_nox_traffic"             ,
+	# "EM_nox_sum"                  ,
+	# "EM_so2_sum"                 ,
+	# "LI_pigs"                     ,
+	# "LI_bovine"                  ,
+	# "LI_pigs_v2"                  ,
+	# "LI_bovine_v2"               ,
+	# "LA_hvi"                      ,
+	# "LA_lvi"                     ,
+	# "LA_land_use"                 ,
+	# "day"                        ,
+	# "week",
+	)
+
+p = lenght(covariate_scelte)
 X_lk = array(data = 0, dim = c(n, p, Tm))
 dim(X_lk)
 
-colnames(df_wsc)
-covariate_scelte = c("Altitude","WE_tot_precipitation",
-					 "EM_nox_traffic","WE_wind_speed_100m_mean")
 for(i in 1:n){
 	st = stations[i]
 	for(t in 1:Tm){
@@ -1628,7 +1663,7 @@ out = module_JDRPM$MCMC_fit(
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
 	
-	beta_priors = c(rep(0,p),2),
+	beta_priors = c(rep(0,p),1),
 	# beta_priors = NA,
 	
 	tau2_priors = c(a_tau,b_tau),
@@ -1641,20 +1676,12 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	# draws = niter, burnin = nburn, thin = nthin,
-	draws = 10, burnin = 6, thin = 2,
+	draws = niter, burnin = nburn, thin = nthin,
+	# draws = 100, burnin = 80, thin = 1,
 	logging = TRUE,
 	seed = seed
 )
 ```
-
--- without covariates
-done!
-Elapsed time: 2 seconds, 753 milliseconds
-LPML: -52.09245933075181 (the higher the better)
-WAIC: 10.256530969537543 (the lower the better)
-
--- with covariates
 
 
 ```{r}
@@ -1714,6 +1741,7 @@ cat("lpml = ",rout$lpml,"\n")
 cat("waic = ",rout$waic,"\n")
 ```
 
+
 ```{r}
 save(drpm1, rout, out, file = "ran_30k_with_space.Rdata")
 # load(file = "ran_space_data.Rdata")
@@ -1721,6 +1749,26 @@ save(drpm1, rout, out, file = "ran_30k_with_space.Rdata")
 
 
 ## Trace plots
+
+### beta
+```{r}
+covariata_idx = 2
+cols = colora(size(rout$beta)[3],25,0)
+par(mar=c(3,3,3,1))
+for (iter in 1:size(rout$beta)[3]){
+	if(iter==1) {
+		plot(rout$beta[,1,iter],
+			 ylim=extrema(rout$beta[,1,]),
+			 main=covariate_scelte[covariata_idx],
+			 col = cols[iter])
+	} else {
+		lines(rout$beta[,1,iter],col = cols[iter])
+	}
+}
+
+boxplot(rout$beta[,1,])
+```
+
 ### alpha
 ```{r}
 for (time in 1:Tm){

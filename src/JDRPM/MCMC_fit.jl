@@ -807,7 +807,6 @@ function MCMC_fit(;
 			############# update beta #############
 			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
 			if lk_xPPM
-				debug(@showd t)
 				if t==1
 					sum_Y = zeros(p)
 					A_star = I(p)/s2_beta
@@ -816,15 +815,14 @@ function MCMC_fit(;
 						sum_Y += (Y[j,t] - muh_iter[Si_iter[j,t],t]) * X_jt / sig2h_iter[Si_iter[j,t],t]
 						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j,t],t]
 					end
-					debug(@showd A_star)
 					b_star = beta0/s2_beta + sum_Y
-					debug(@showd b_star)
 					A_star = Symmetric(A_star)
-					beta_iter[t] = rand(MvNormalCanon(A_star*b_star, A_star))
-					# beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 					# Symmetric is needed for numerical problems
 					# https://discourse.julialang.org/t/isposdef-and-eigvals-do-not-agree/118191/2
 					# but A_star is indeed symm and pos def (by construction) so there is no problem
+					beta_iter[t] = rand(MvNormalCanon(b_star, A_star)) # quicker and more accurate method
+					# Am1_star = inv(A_star) # old method with the MvNormal and the inversion required
+					# beta_iter[t] = rand(MvNormal(inv(Symmetric(A_star))*b_star, inv(Symmetric(A_star))))
 				else
 					sum_Y = zeros(p)
 					A_star = I(p)/s2_beta
@@ -833,15 +831,13 @@ function MCMC_fit(;
 						sum_Y += (Y[j,t] - muh_iter[Si_iter[j,t],t] - eta1_iter[j]*Y[j,t-1]) * X_jt / sig2h_iter[Si_iter[j,t],t]
 						A_star += (X_jt * X_jt') / sig2h_iter[Si_iter[j,t],t]
 					end
-					debug(@showd A_star)
 					b_star = beta0/s2_beta + sum_Y
-					debug(@showd b_star)
 					A_star = Symmetric(A_star)
-					beta_iter[t] = rand(MvNormalCanon(A_star*b_star, A_star))
-					# beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
+					beta_iter[t] = rand(MvNormalCanon(b_star, A_star)) # quicker and more accurate method
+					# Am1_star = inv(A_star) # old method with the MvNormal and the inversion required
+					# beta_iter[t] = rand(MvNormal(inv(Symmetric(A_star))*b_star, inv(Symmetric(A_star))))
 				end
 				pretty_log("beta_iter")
-				println(beta_iter)
 			end
 						
 			# end # of the @timeit for beta

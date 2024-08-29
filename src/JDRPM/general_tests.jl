@@ -62,12 +62,13 @@ beta_iter[t] = rand(MvNormal(b_star, inv(Symmetric(A_star))))
 ##########################################
 
 
-mu = [1,2,3]
-A = rand(3,3) # auxiliary for sigma construction
+p = 5
+mu = rand(p)
+A = rand(p,p) # auxiliary for sigma construction
 sigma = Symmetric(A * A')
 isigma = Symmetric(inv(sigma))
 
 Random.seed!(34)
-rand(MvNormal(mu, sigma))
+println(rand(MvNormal(sigma*mu, sigma)))
 Random.seed!(34)
-rand(MvNormalCanon(isigma*mu, isigma))
+println(rand(MvNormalCanon(mu, isigma)))
