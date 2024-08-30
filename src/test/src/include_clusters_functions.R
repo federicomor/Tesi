@@ -746,10 +746,10 @@ get_boxplot_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time"
 
 library(gridExtra)
 cat(crayon::red("- plot_graph_and_hist(df_cluster_cut)\n"))
-plot_graph_and_hist = function(df_cluster_cut,cols=cols_default,titolo=paste("Time",time),annotate=FALSE,jittera=FALSE){
+plot_graph_and_hist = function(df_cluster_cut,cols=cols_default,titolo="",annotate=FALSE,jittera=FALSE){
 clusters_now = df_cluster_cut$clusters
 # GRAPH #######################
-q_graph = get_graph_plot(df_cluster_cut,cols,titolo = titolo)
+q_graph = get_graph_plot(df_cluster_cut,cols,titolo = paste(titolo,"// Time",time))
 # HIST #######################
 # by hand as we have to remove the legend here, while the function produces it
 # n_clusters = max(clusters_now)

@@ -428,4 +428,46 @@ end
 # normalizzare le covariate
 
 
+# Cluster variance/entropy similarity function
+function similarity1(X_jt::Union{Vector{Float64}, Vector{String}}, alpha::Real; lg::Bool)
+	# eg Xstar_jt would be X_cl[indexes,covariate_index,t] 
+
+	if isa(first(X_jt),Float64) # numerical
+		xbar_j = mean(X_jt)
+		card_Sjt = length(X_jt)
+		Hx = 0.0
+		for i in 1:card_Sjt
+			Hx += (X_jt[i] - xbar_j)^2 
+		end
+		Hx /= card_Sjt
+		
+		return lg ? -alpha * Hx : exp(-alpha * Hx) 
+
+	else # categorical
+		# X_jt = ["Old", "Young", "Middle", "Young", "Old", "Old"]
+		unique_keys = unique(X_jt)
+		@show unique_keys
+		counts = Dict(key => 0.0 for key in unique_keys)
+		for item in X_jt
+		    counts[item] += 1
+		end
+		@show counts
+		total = length(X_jt)
+		for key in keys(counts)
+		    counts[key] /= total
+		end
+		Hx = 0.0
+		for r in 1:length(counts)
+			Hx -= counts[r] * log(counts[r])
+		end
+		
+		return lg ? -alpha * Hx : exp(-alpha * Hx) 
+	end
+end
+
+
+
+
+
+
 

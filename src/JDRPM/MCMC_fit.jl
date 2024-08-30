@@ -373,7 +373,7 @@ function MCMC_fit(;
 					# start computing weights
 					lg_weights = zeros(nclus_red+1)
 					lCo = 0.0; lCn = 0.0 # log cohesions (so for space) old and new
-					lSo = 0.0; lSn = 0.0 # log similarities(so for covariates) old and new
+					lSo = 0.0; lSn = 0.0 # log similarities (so for covariates) old and new
 					# TOWARDS COVARIATE DEVELOPMENT
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
@@ -837,7 +837,6 @@ function MCMC_fit(;
 					# Am1_star = inv(A_star) # old method with the MvNormal and the inversion required
 					# beta_iter[t] = rand(MvNormal(inv(Symmetric(A_star))*b_star, inv(Symmetric(A_star))))
 				end
-				pretty_log("beta_iter")
 			end
 						
 			# end # of the @timeit for beta
