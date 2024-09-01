@@ -1401,6 +1401,145 @@ for (time in 1:Tm){
 # 3. PM10 DATA
 of the bayesian project
 
+## covariates
+```{r}
+numerical_covariates = c(
+	"Altitude"
+	,"WE_temp_2m"
+	,"WE_wind_speed_10m_mean"
+	,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	, "WE_tot_precipitation"
+	# ,"WE_precipitation_t" # t was for type, categorical
+	,"WE_surface_pressure"
+	,"WE_solar_radiation"
+	,"WE_rh_min"
+	,"WE_rh_mean"
+	,"WE_rh_max"
+	,"WE_wind_speed_100m_mean"
+	,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
+	,"WE_blh_layer_min"
+	,"EM_nh3_livestock_mm"
+	,"EM_nh3_agr_soils"
+	,"EM_nh3_agr_waste_burn"
+	,"EM_nh3_sum"
+	,"EM_nox_traffic"
+	,"EM_nox_sum"
+	,"EM_so2_sum"
+	,"LI_pigs"
+	,"LI_bovine"
+	,"LI_pigs_v2"
+	,"LI_bovine_v2"
+	,"LA_hvi"
+	,"LA_lvi"
+	,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+Tm_cor_comp = 53
+
+yfull=data.frame()
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:53))
+
+time_span = 1:53
+nsubjects = 1:105
+y = yfull[nsubjects,1+time_span]
+
+cor_matrix <- matrix(NA, nrow=length(numerical_covariates), ncol=Tm_cor_comp)
+rownames(cor_matrix) <- numerical_covariates
+colnames(cor_matrix) <- paste("Time", 1:Tm_cor_comp, sep="_")
+
+# Loop over the covariates and time points
+for (t in 1:Tm_cor_comp) {
+	df_at_t = df_wsc[which(df_wsc$Time==unique(df_wsc$Time)[t]),]
+  for (i in 1:length(numerical_covariates)) {
+    covariata <- numerical_covariates[i]
+    cor_matrix[i, t] <- cor(df_at_t[[covariata]], y[, t])
+    # y[,t] represents the PM10 values at time t
+  }
+}
+```
+
+
+```{r}
+size(cor_matrix)
+
+ncols_ari = 100
+cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+brks = seq(min(-1,floor(min(cor_matrix))),1,length.out=ncols_ari+1)
+	
+# pdf("cova.pdf",height = 6.3,width = 10)
+par(mar=c(2,9,2,1))
+
+library(fields)
+image.plot(t(cor_matrix),
+		   main="Correlation between Covariates and PM10 values",axes=F,col=cols_ARI,
+		   breaks=brks)
+
+# mtext(text=c(paste("",1:size(cor_matrix)[1])), side=2, 
+mtext(text=numerical_covariates[1:size(cor_matrix)[1]], side=2, 
+	  line=0.3,at=seq(0,1,length=size(cor_matrix)[1]), las=1, cex=0.7)
+mtext(text=c(paste("",1:size(cor_matrix)[2])), side=1, 
+	  line=0.3,at=seq(0,1,length=size(cor_matrix)[2]), las=2, cex=0.8)
+
+# dev.off()
+```
+
+```{r}
+pdf("heatmap_covariate_cor.pdf",width = 25, height = 20)
+
+# layout(matrix(c(1,0,0,2), 2, 2, byrow = TRUE),
+# 	   widths = c(1,1,4,4), heights =c(1,1,4,4))
+
+library(gplots)
+heatmap.2(cor_matrix, 
+          Rowv=NA, Colv=NA, 
+          dendrogram="none", 
+          trace="none", 
+          # col=colorRampPalette(c("blue", "white", "red"))(100),
+		  col = rev(colora(100,seed=104,0)),
+		  key=TRUE,
+		  key.title="Correlation", key.xlab="Value",
+          density.info="none", 
+          margins=c(6, 12),  # Adjust margins to fit labels
+          cellnote=round(cor_matrix, 1),  # Display correlation values in cells
+          notecol="black",  # Color of the text in cells
+          # notecol="white",  # Color of the text in cells
+          xlab="Time", ylab="Covariates",
+          main="Correlation Heatmap",
+		  )
+dev.off()
+```
+
+
+
+```{r}
+numerical_covariates_focus = c("WE_temp_2m","Altitude","WE_wind_speed_10m_mean")
+for (covariata in numerical_covariates_focus) {
+	for (t in 1:Tm){
+		df_at_t = df_wsc[which(df_wsc$Time==unique(df_wsc$Time)[t]),]
+		
+		par(mar=c(2,4,2,0))
+			plot(df_at_t[[covariata]], y[,t],
+				 ylab="PM10 values",
+				 xlab="",
+				 main=paste(covariata,"- Correlation:",
+				 		   round(cor(df_at_t[[covariata]],y[,t]),2),
+				 		   "- time",t)
+				 )
+		}
+}
+```
+
+
 ## real PM10 data
 ```{r}
 sites = data.frame(
@@ -1410,20 +1549,24 @@ std_sites = data.frame(
 	longitude = unique(df_wsc$Longitude), 
 	latitude = unique(df_wsc$Latitude))
 stations = unique(df_wsc$IDStations)
-y=data.frame()
+yfull=data.frame()
 for(st in stations){
 	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
-	y=rbind(y,y_we_pm10)
+	yfull=rbind(yfull,y_we_pm10)
 }
-rownames(y) = NULL
-colnames(y)<- c("id",paste0("w", 1:53))
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:53))
 
 time_span = 1:10 # low time span for quick testing, real one will be 1:53
+
+### alcuni a caso:
 # quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
-# nsubjects = 1:50
+### alcuni:
+nsubjects = 1:20
 ### tutti:
-nsubjects = 1:105
-y = y[nsubjects,1+time_span]
+# nsubjects = 1:105
+
+y = yfull[nsubjects,1+time_span]
 
 #############################################
 # authors suggested to/did scale the spatial locations and also centered the observations
@@ -1459,10 +1602,12 @@ y
 s_std
 ```
 
+
+
 ## Fits
 ```{r}
 # as.integer(runif(1,0,1000))*1.0
-seed = 481.0
+seed = 584.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
@@ -1572,7 +1717,8 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 # load(file = "temp_error.Rdata")
 ```
 
-## covariates
+
+## scelta covariate
 ```{r}
 n = dim(y)[1]
 # Tm
@@ -1581,15 +1727,15 @@ colnames(df_wsc)
 # penso vadano scelte quelle correlate alla target variable
 # perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
 covariate_scelte = c(
-	# "Altitude"
-	# "WE_temp_2m"
-	# ,"WE_wind_speed_10m_mean"
+	"Altitude"
+	,"WE_temp_2m"
+	,"WE_wind_speed_10m_mean"
 	# ,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
-	"WE_tot_precipitation"
+	# "WE_tot_precipitation"
 	# ,"WE_precipitation_t"
 	# ,"WE_surface_pressure"
-	,"WE_solar_radiation"
+	# ,"WE_solar_radiation"
 	# ,"WE_rh_min"
 	# ,"WE_rh_mean"
 	# ,"WE_rh_max"
@@ -1635,6 +1781,17 @@ head(X_lk)
 ```
 
 
+```{r}
+p = 1
+X_lk_copy = array(data = 0, dim = c(n, p, Tm))
+
+# X_lk_copy[,1,] = X_lk[,1,]
+X_lk_copy[,1,] = y*2
+
+X_lk = X_lk_copy
+# X_lk[,,] / 2 == y[,1]
+```
+
 ## drpm J
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
@@ -1658,10 +1815,8 @@ out = module_JDRPM$MCMC_fit(
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
 
-	# Xlk_covariates = X_lk,
-	# beta_priors = c(rep(0,p),1),
-	Xlk_covariates = NA,
-	beta_priors = NA,
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	# Xlk_covariates = NA,   beta_priors = NA,
 	
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
@@ -1673,12 +1828,35 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	draws = niter, burnin = nburn, thin = nthin,
-	# draws = 100, burnin = 80, thin = 1,
+	# draws = niter, burnin = nburn, thin = nthin,
+	draws = 60000, burnin = 55000, thin = 5,
 	logging = TRUE,
 	seed = seed
 )
 ```
+
+
+con
+LPML: -1330.9103179215952 (the higher the better)
+WAIC: 75.42884454241916 (the lower the better)
+
+```
+draws = 10000, burnin = 9000, thin = 2,
+
+senza 
+Elapsed time: 27 seconds, 778 milliseconds
+LPML: -424.4560327439583 (the higher the better)
+WAIC: -69.62662452505964 (the lower the better)
+
+con
+Elapsed time: 30 seconds, 471 milliseconds
+LPML: -862.5732953406753 (the higher the better)
+WAIC: 227.00164167413186 (the lower the better)
+```
+
+
+
+
 
 -------------------------------------------
 - run 100k
@@ -1745,6 +1923,66 @@ rout$phi1     = matrix(rout$phi1,    ncol = 1)
 rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
+
+
+```{r}
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+yred=y
+
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
+
+par(mar=c(4,4,4,2))
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredJ),
+     	 type='l',xlab='time',ylab="fitted values",main="model J - no Xlk")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+```
+
+```{r}
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+yred=y
+
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
+
+par(mar=c(4,4,4,2))
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredJ),
+     	 type='l',xlab='time',ylab="fitted values",main="model J - with Xlk")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+
+yredJ=y
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
+
+par(mar=c(4,4,4,2))
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredJ),
+     	 type='l',xlab='time',ylab="fitted values",main="Original values")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+```
+
+
+
 ```{r}
 names(rout)
 
@@ -1776,6 +2014,8 @@ rout = rout_copy
 
 ```{r}
 # rout_copy = rout
+### non salvare l'out ma solo l'rout
+
 # save(rout,out,file="julia_outputs_tmp.Rdata")
 # save(drpm1, rout, out, file = "ran_100k_with_Xlk.Rdata")
 load(file = "ran_100k_with_Xlk.Rdata")
@@ -1786,6 +2026,7 @@ load(file = "ran_100k_with_Xlk.Rdata")
 
 ### beta
 ```{r}
+covariate_scelte = c("2 * AQ_pm10")
 for (covariata_idx in 1:length(covariate_scelte)){
 	cols = colora(size(rout$beta)[3],44,0)
 	# verde scuro: iterazioni iniziali
@@ -1801,8 +2042,12 @@ for (covariata_idx in 1:length(covariate_scelte)){
 			lines(rout$beta[,covariata_idx,iter],col = cols[iter])
 		}
 	}
-	boxplot(rout$beta[,covariata_idx,],
-			main=covariate_scelte[covariata_idx])
+	legend("topleft",legend = c("initial iterates","final iterates"),
+		   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+		   lwd=3,cex=0.6,bty="n"
+		   )
+	# boxplot(rout$beta[,covariata_idx,],
+		# main=covariate_scelte[covariata_idx])
 }
 ```
 
@@ -1813,11 +2058,11 @@ for (time in 1:Tm){
 
 plot(drpm1$alpha[,time],type="l",
 	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$alpha[,time],type="l",
 	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 }
 ```
