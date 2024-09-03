@@ -189,3 +189,58 @@ println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false) == cohesion4(s1n
 @btime cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=true)
 @btime cohesion3_4_C(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=true)
 
+##################################
+using ProfileCanvas
+
+function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
+	n = length(X_jt)
+	nm = n/2
+	xbar = mean(X_jt)
+	aux1 = b_c + 0.5 * (sum(X_jt .^ 2) - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
+	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	return lg ? out : exp(out)
+end
+
+function similarity4_v2(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
+	n = length(X_jt)
+	nm = n/2
+	xbar = mean(X_jt)
+	aux2 = 0.0
+	# @inbounds @fastmath @simd for x in X_jt
+		# aux2 += x^2
+	# end	
+	@inbounds @fastmath @simd for i in 1:n
+		aux2 += X_jt[i]^2
+	end
+	# @show aux2
+	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
+	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	return lg ? out : exp(out)
+end
+
+
+X_jt = rand(80)
+mu_c = 0
+lambda_c = 1
+a_c = 2
+b_c = 2
+
+@btime similarity4(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+@btime similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+
+similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+# right one: 26.18445410365393
+# with simd: 26.184454103653934
+#  fastmath: 26.184454103653934
+
+# ProfileCanvas.@profview_allocs similarity4(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+# ProfileCanvas.@profview begin 
+# ProfileCanvas.@profview_allocs begin 
+# @btime begin
+# 	res = 0
+# 	for _ in 1:100
+# 		idxs = rand(collect(1:60),10)
+# 		Xn = @view X_jt[idxs]
+# 		res += similarity4(Xn,mu_c,lambda_c,a_c,b_c,lg=true)
+# 	end
+# end

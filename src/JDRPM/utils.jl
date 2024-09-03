@@ -537,8 +537,12 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 	n = length(X_jt)
 	nm = n/2
 	xbar = mean(X_jt)
-	aux1 = b_c + 0.5 * (sum(X_jt .^ 2) - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
-	# @show aux1
+	aux2 = 0.0
+	@inbounds @fastmath @simd for i in 1:n
+		aux2 += X_jt[i]^2
+	end
+	# @show aux2
+	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
 	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
 	return lg ? out : exp(out)
 end

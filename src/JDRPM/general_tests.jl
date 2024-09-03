@@ -228,6 +228,8 @@ cv_params = [mu_c,lambda_c,a_c,b_c]
 X_jt = [1,1,2,2,2,1,2,1,1,1] ./ 10
 @btime covariate_similarity(4,X_jt,cv_params,lg=true)
 
+covariate_similarity(4,[1],cv_params,lg=true)
+
 X_jt = [1,1,2,2,2,1,2,1,1,100] ./ 10
 covariate_similarity(4,X_jt,cv_params,lg=true)
 

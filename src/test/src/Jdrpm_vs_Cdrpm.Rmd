@@ -1586,8 +1586,8 @@ std_sites = data.frame(
 stations = unique(df_wsc$IDStations)
 yfull=data.frame()
 
-# target = "AQ_pm10"
-target = "WE_tot_precipitation"
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
 
 for(st in stations){
 	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
@@ -1596,14 +1596,14 @@ for(st in stations){
 rownames(yfull) = NULL
 colnames(yfull)<- c("id",paste0("w", 1:53))
 
-time_span = 1:10 # low time span for quick testing, real one will be 1:53
+time_span = 1:18 # low time span for quick testing, real one will be 1:53
 
 ### alcuni a caso:
 # quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
 ### alcuni:
-nsubjects = 1:20
+# nsubjects = 1:20
 ### tutti:
-# nsubjects = 1:105
+nsubjects = 1:105
 
 y = yfull[nsubjects,1+time_span]
 
@@ -1646,13 +1646,13 @@ s_std
 ## Fits
 ```{r}
 # as.integer(runif(1,0,1000))*1.0
-seed = 61.0
+seed = 881.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
-# niter=60000; nburn=20000; nthin=20
-niter=80000; nburn=60000; nthin=20
+niter=30000; nburn=20000; nthin=10
+# niter=80000; nburn=60000; nthin=20
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -1723,6 +1723,7 @@ drpm1 <- drpm_fit(
 		
 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
 		verbose=TRUE,
+		# draws=10000,burn=8000,thin=2)
 		draws=niter,burn=nburn,thin=nthin)
 
 tempo_fine <- Sys.time()
@@ -1759,8 +1760,69 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 # load(file = "temp_error.Rdata")
 ```
 
+## clustering covariates
+```{r}
+n = dim(y)[1]
+# Tm
 
-## scelta covariate
+# colnames(df_wsc)
+covariate_scelte = c(
+	"Altitude"
+	# ,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	# "WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	# ,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+p = lenght(covariate_scelte)
+X_cl = array(data = 0, dim = c(n, p, Tm))
+dim(X_cl)
+cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
+
+for(i in 1:n){
+	st = stations[i]
+	for(t in 1:Tm){
+		df_st = df_wsc[which(df_wsc$IDStations == st),]
+		for (pp in 1:p){
+			X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+		}
+	}
+}
+colnames(X_cl) = covariate_scelte
+head(X_cl)
+```
+
+
+
+## likelihood covariates
 ```{r}
 n = dim(y)[1]
 # Tm
@@ -1842,7 +1904,6 @@ out = module_JDRPM$MCMC_fit(
 	sp_coords = s_std,
 	M_dp = 1,                     
 	initial_partition = NA,
-	Xcl_covariates = NA,
 	
 	starting_alpha = 0.5,         
 	unit_specific_alpha = FALSE,       
@@ -1856,9 +1917,6 @@ out = module_JDRPM$MCMC_fit(
 	
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
-
-	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
-	Xlk_covariates = NA,   beta_priors = NA,
 	
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
@@ -1866,12 +1924,21 @@ out = module_JDRPM$MCMC_fit(
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	
+	######## space
 	spatial_cohesion_idx = spatial_cohesion,
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
-	# covariate_similarity_idx = NA,  
+	######## likelihood covariates
+	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	Xlk_covariates = NA, beta_priors = NA,
+	
+	######## clustering covariates
+	covariate_similarity_idx = 4,
+	cv_params = list(0,1,2,2),
+	Xcl_covariates = X_cl,
+	
 	draws = niter, burnin = nburn, thin = nthin,
-	# draws = 60000, burnin = 55000, thin = 5,
+	# draws = 10, burnin = 0, thin = 1,
 	logging = TRUE,
 	seed = seed
 )
@@ -2247,7 +2314,7 @@ dim(rout$lambda2)
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$lam2[,1],type="l",
 	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
-		 	    max(drpm1$lamb2[,1],rout$lambda2[,1])),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$lambda2[,1],type="l",
@@ -2261,7 +2328,7 @@ plot(rout$lambda2[,1],type="l",
 
 ## Partition plots
 ```{r, warning=F}
-maxNClusters = 6
+# maxNClusters = 6
 
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
@@ -2273,36 +2340,38 @@ for (t in 1:Tm) {
   Sic_t <- drpm1$Si[t, , ]
   Sic_t <- t(Sic_t) 
   partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
+  							   # , maxNClusters = maxNClusters
   							   )
 
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
   partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
+  							   # , maxNClusters = maxNClusters
   							   )
 }
-
+maxk = 0
 cat(crayon::red("DRPM - C\n"))
 for (t in 1:Tm){
 	cat("Time",t,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmc[[t]])),maxk)
 }
 cat("\n")
 cat(crayon::red("DRPM - J\n"))
 for (t in 1:Tm){
 	cat("Time",t,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmj[[t]])),maxk)
 }
 ```
 
 
 ```{r, warning=F}
-# cols=colora(len=maxNClusters, seed=67, show=1)
-# cols=colora(len=maxNClusters, seed=41, show=0) # greens/light-blues
-# cols=colora(len=maxNClusters, seed=73, show=0) # dark blues
-# cols=colora(len=maxNClusters, seed=32, show=0) # viridis
-# cols=colora(len=maxNClusters, seed=22, show=0) # reds/blues
-# cols=colora(len=maxNClusters, seed=44, show=0) # greens
-cols=colora(len=maxNClusters, seed=56, show=0) # la 56
+# cols=colora(len=maxk, seed=67, show=1)
+# cols=colora(len=maxk, seed=41, show=0) # greens/light-blues
+# cols=colora(len=maxk, seed=73, show=0) # dark blues
+# cols=colora(len=maxk, seed=32, show=0) # viridis
+# cols=colora(len=maxk, seed=22, show=0) # reds/blues
+# cols=colora(len=maxk, seed=44, show=0) # greens
+cols=colora(len=maxk, seed=56, show=0) # la 56
 # cols = colora(len=10,"rand")
 
 heatmap_matrix <- do.call(rbind, partitions_drpmc)
@@ -2553,6 +2622,26 @@ for(i in 1:size(yred)[1]){
 ##########################
 model_name = "model C"
 partition = partitions_drpmc
+# model_name = "model J"
+# partition = partitions_drpmj
+##########################
+
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
+}
+
+
+##########################
+# model_name = "model C"
+# partition = partitions_drpmc
 model_name = "model J"
 partition = partitions_drpmj
 ##########################
@@ -2576,10 +2665,34 @@ for (time in 1:Tm){
 # preparation
 source("plot functions/plotter.R")
 source("include_clusters_functions.R")
+```
+
+
+```{r warning=FALSE}
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
 
 sites = data.frame(
 	longitude = unique(df_weekly$Longitude), 
 	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+y=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+	y=rbind(y,y_we_pm10)
+}
+rownames(y) = NULL
+colnames(y)<- c("id",paste0("w", 1:53))
+
+time_span = 1:10 # low time span for quick testing, real one will be 1:53
 ```
 
 
@@ -2600,6 +2713,11 @@ for(time in time_span){
 		Latitude = sites$latitude,
 		clusters = salso_out[1:105]
 	)
+	
+	idxs = which(is.na(df_temp$clusters))
+	# replace(df_temp$clusters, idxs, 3)
+	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
 	df_temp$Time = rep(time,dim(df_temp)[1])
 	df_cluster = rbind(df_cluster,df_temp)
 	
@@ -2632,19 +2750,22 @@ for(time in time_span){
 	
 	cur_num = sprintf("%02d", time)
 	ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
-		   plot=p, units="px",width=2500, height=1200, dpi=300)
-		   # units="px",width=2500, height=1400, dpi=300)
+	plot=p, units="px",width=2500, height=1200, dpi=300)
 	dev.off()
 	
 	clusters_old = clusters_now
 }
 ```
 
+
+
+
+
 ```{r,warning=F}
 ##########################
 # model_name = "model C"
 # partition = partitions_drpmc
-model_name = "model J - no Xlk"
+model_name = "model J - with X_cl"
 partition = partitions_drpmj
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
@@ -2657,6 +2778,9 @@ for(time in time_span){
 		Latitude = sites$latitude,
 		clusters = salso_out[1:105]
 	)
+	idxs = which(is.na(df_temp$clusters))
+	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
 	df_temp$Time = rep(time,dim(df_temp)[1])
 	df_cluster = rbind(df_cluster,df_temp)
 	
@@ -2697,7 +2821,18 @@ for(time in time_span){
 }
 ```
 
-
+```{r}
+png("../../tmp_images/Clusters and covariate relation - model J with X_cl.png",
+	width = 600, height = 300,units = "px")
+par(mar=c(4,4,2,1))
+mean(X_cl[which(partition[[1]]==1),,1])
+mean(X_cl[which(partition[[1]]==2),,1])
+mean(X_cl[which(partition[[1]]==3),,1])
+plot(X_cl[,,1],pch=19,col=partition[[1]],
+	 main="model J with X_cl",
+	 xlab="units",ylab="Altitude")
+dev.off()
+```
 
 fino a qui ha tutto senso questa parte
 # ==========
