@@ -1,9 +1,10 @@
 using ProfileCanvas
 using Profile
+using Cthulhu
 
 # run in the REPL, not as a new process
 include("../MCMC_fit.jl")
-N = 80
+N = 40
 T = 12
 y = rand(N,T)
 sp = rand(N,2)
@@ -28,15 +29,17 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 1000.
-burnin = 0.
-thin = 1.
+niter = 10000.
+burnin = 9000.
+thin = 5.
 seed = 123.0
 
 ################### with ProfileCanvas (better)
 
 # ProfileCanvas.@profview_allocs MCMC_fit(
-ProfileCanvas.@profview MCMC_fit(
+# ProfileCanvas.@profview MCMC_fit(
+# @descend MCMC_fit(
+out = MCMC_fit(
     Y=y,              
     sp_coords = sp,
     M_dp = 1.0,                     
@@ -72,4 +75,24 @@ ProfileCanvas.@profview MCMC_fit(
     thin = thin,                     
     logging = true,
     seed = seed
-)
+);
+
+using MCMCChains
+
+out[1]
+out[2]
+out[3]
+out[4]
+out[5]
+out[6]
+
+alpha = out[3][:,801:end]
+alpha_res = reshape(alpha,200,12,1)
+alpha_1 = alpha_res[:,1,1]
+alpha_2 = alpha_res[:,2,1]
+alpha_3 = alpha_res[:,3,1]
+vals = [alpha_1  alpha_2 alpha_3]
+vals_res = reshape(vals,200,3,1)
+
+chn = Chains(vals_res, [:alpha_1,:alpha_2,:alpha_3])
+traceplot(chn)

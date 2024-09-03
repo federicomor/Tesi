@@ -67,7 +67,8 @@ for(i in 1:size(yred)[1]){
 
 ## Fits
 ```{r}
-niter=30000; nburn=22000; nthin=8
+# niter=30000; nburn=22000; nthin=8
+niter=10000; nburn=2000; nthin=8
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -264,6 +265,7 @@ cat("waic = ",rout$waic,"\n")
 
 
 ## Trace plots
+
 ### alpha
 ```{r}
 for (time in 1:Tm){
@@ -271,11 +273,11 @@ for (time in 1:Tm){
 
 plot(drpm1$alpha[,time],type="l",
 	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$alpha[,time],type="l",
 	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -288,9 +290,13 @@ for (time in 1:Tm){
 		par(mfrow=c(1,2),mar=c(2,2,4,2))
 
 	plot(drpm1$mu[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$muh[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -306,9 +312,11 @@ for (time in 1:Tm){
 
 	plot(drpm1$sig2[time,unitj,],type="l",
 		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$sigma2h[time,unitj,],type="l",
 		 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -322,10 +330,14 @@ cat("did we update eta1?", update_eta1)
 for (unit in 1:N){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$eta1[,unit],type="l",
-		 main=bquote("Model DRPM C\nTrace plot of tau2 at unit "*.(unit)),
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$eta1[,unit],type="l",
-		 main=bquote("Model DRPM J\nTrace plot of tau2 at unit "*.(unit)),
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -336,9 +348,13 @@ for (unit in 1:N){
 for (time in 1:Tm){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
 		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
 		 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -352,9 +368,11 @@ dim(rout$tau2)
 for (time in 1:Tm){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
 		 main=bquote("Model DRPM C\nTrace plot of tau2 at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
 		 main=bquote("Model DRPM J\nTrace plot of tau2 at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -370,9 +388,13 @@ dim(rout$phi1)
 cat("did we update phi1?", update_phi1)
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -381,9 +403,13 @@ dim(rout$phi0)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -393,12 +419,18 @@ dim(rout$lambda2)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$lambda2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 ```
+
+
 
 
 ## Partition plots
@@ -880,9 +912,12 @@ out = module_JDRPM$MCMC_fit(
 	spatial_cohesion_idx = spatial_cohesion,
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
+	# spatial_cohesion_idx = 2,
+	# sp_params = list(0.1),
+	
 	# covariate_similarity_idx = NA,
-	# draws = 2,burnin = 0, thin = 1,
-	draws = niter,burnin = nburn, thin = nthin,
+	draws = 2,burnin = 0, thin = 1,
+	# draws = niter,burnin = nburn, thin = nthin,
 	logging = TRUE,
 	seed = seed
 )
@@ -1401,7 +1436,7 @@ for (time in 1:Tm){
 # 3. PM10 DATA
 of the bayesian project
 
-## covariates
+## covariates inspection
 ```{r}
 numerical_covariates = c(
 	"Altitude"
@@ -1550,8 +1585,12 @@ std_sites = data.frame(
 	latitude = unique(df_wsc$Latitude))
 stations = unique(df_wsc$IDStations)
 yfull=data.frame()
+
+# target = "AQ_pm10"
+target = "WE_tot_precipitation"
+
 for(st in stations){
-	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
 	yfull=rbind(yfull,y_we_pm10)
 }
 rownames(yfull) = NULL
@@ -1607,7 +1646,7 @@ s_std
 ## Fits
 ```{r}
 # as.integer(runif(1,0,1000))*1.0
-seed = 584.0
+seed = 61.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
@@ -1693,6 +1732,9 @@ print(round(differenza_tempo,digits = 4))
 
 cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 ```
+
+LPML = 98.2203655319962 
+WAIC = -211.142931562583
 
 ```{r}
 names(drpm1)
@@ -1815,8 +1857,8 @@ out = module_JDRPM$MCMC_fit(
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
 
-	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
-	# Xlk_covariates = NA,   beta_priors = NA,
+	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	Xlk_covariates = NA,   beta_priors = NA,
 	
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
@@ -1828,8 +1870,8 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	# draws = niter, burnin = nburn, thin = nthin,
-	draws = 60000, burnin = 55000, thin = 5,
+	draws = niter, burnin = nburn, thin = nthin,
+	# draws = 60000, burnin = 55000, thin = 5,
 	logging = TRUE,
 	seed = seed
 )
@@ -2260,7 +2302,7 @@ for (t in 1:Tm){
 # cols=colora(len=maxNClusters, seed=32, show=0) # viridis
 # cols=colora(len=maxNClusters, seed=22, show=0) # reds/blues
 # cols=colora(len=maxNClusters, seed=44, show=0) # greens
-cols=colora(len=maxNClusters, seed=56, show=0) # greens
+cols=colora(len=maxNClusters, seed=56, show=0) # la 56
 # cols = colora(len=10,"rand")
 
 heatmap_matrix <- do.call(rbind, partitions_drpmc)
@@ -2511,8 +2553,8 @@ for(i in 1:size(yred)[1]){
 ##########################
 model_name = "model C"
 partition = partitions_drpmc
-# model_name = "model J"
-# partition = partitions_drpmj
+model_name = "model J"
+partition = partitions_drpmj
 ##########################
 
 par(mar=c(1,1,1,1))
@@ -2661,7 +2703,133 @@ fino a qui ha tutto senso questa parte
 # ==========
 questa parte dopo no invece, non ci ho ancora lavorato
 
+# TESTS
 
+```{r}
+library(gower)
+dat1 <- as.data.frame(c(1,1,10))
+colnames(dat1) = c("X")
+dat2 <- as.data.frame(c(1,1,5))
+colnames(dat2) = c("X")
+gower_dist(dat1, dat2)
+```
+
+# ==========
+
+# BSPOONS TASKS
+```{r}
+enrolled = c(
+	191	     ,    
+	185	     ,    
+	384	     ,    
+	377	     ,    
+	369	     ,    
+	421	     ,    
+	397	     ,    
+	218	     ,    
+	432	     ,    
+	0	     ,    
+	0	     ,    
+	0)    
+
+
+
+job_offers =c(
+	0,
+   20,
+   23,
+   9,
+   42,
+   39,
+   33,
+   48,
+   38,
+   20,
+   52,
+   0)
+
+months = c(
+"Jan" ,
+"Feb"  ,
+"Mar" ,
+"Apr"  ,
+"May" ,
+"Jun"  ,
+"Jul" ,
+"Aug"  ,
+"Sep" ,
+"Oct"  ,
+"Nov" ,
+"Dec"  )
+
+
+spend = c(
+ 340000,
+ 497250,
+ 646000,
+ 804100,
+ 960500,
+ 991950,
+ 1008950,
+ 880600,
+ 889950,
+ 552500,
+ 367200,
+ 0)
+```
+
+```{r}
+data = data.frame(
+	enrolled = enrolled,
+	job_offers = job_offers,
+	months = months,
+	spend = spend
+)
+
+data
+```
+
+# q1
+```{r}
+a = sum(data$enrolled[1:6])
+b = sum(data$job_offers[3:8])
+cat(a,"\n")
+cat(b,"\n")
+b*100/a
+```
+
+# q1
+
+# q1
+
+# q1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ==========
+# 4. OTHER DATA
 
 
 
@@ -3236,10 +3404,6 @@ for(time in time_span){
 }
 ```
 
-
-
-
-# OTHER DATA
 
 
 

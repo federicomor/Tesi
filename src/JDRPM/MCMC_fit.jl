@@ -48,6 +48,7 @@ function MCMC_fit(;
 	spatial_cohesion_idx = missing,       # cohesion choice
 	sp_params = missing,                  # Parameters for spatial cohesion functions
 	covariate_similarity_idx = missing,   # similarity choice
+	cv_params = missing,                  # Parameters for covariates similarity functions
 
 	draws::Float64,                       # Number of MCMC draws
 	burnin::Float64,                      # Number of burn-in sa
@@ -68,32 +69,38 @@ function MCMC_fit(;
 
 # try
 	############# check some stuff #############
-	if spatial_cohesion_idx == 1 && !(sp_params isa Real) 
-		@error "Wrong params for spatial cohesion 1.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
-		return
-	elseif spatial_cohesion_idx == 2 && !(sp_params isa Real)
-		@error "Wrong params for spatial cohesion 2.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
-		return
-	elseif spatial_cohesion_idx == 3 && !(sp_params isa Vector && length.(sp_params) == [2,1,1,4])
-		@error "Wrong params for spatial cohesion 3.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix).\nReceived: $(typeof(sp_params))." _file=""
-		return
-	elseif spatial_cohesion_idx == 4 && !(sp_params isa Vector && length.(sp_params) == [2,1,1,4])
-		@error "Wrong params for spatial cohesion 4.\nExpected input form: (1x2 Vector, Real, Real, 2x2 Matrix).\nReceived: $(typeof(sp_params))." _file=""
-		return
-	elseif spatial_cohesion_idx == 5 && !(sp_params isa Real)
-		@error "Wrong params for spatial cohesion 5.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
-		return
-	elseif spatial_cohesion_idx == 6 && !(sp_params isa Real)
-		@error "Wrong params for spatial cohesion 6.\nExpected input form: (Real).\nReceived: $(typeof(sp_params))." _file=""
+
+	if !ismissing(sp_params) && !(sp_params isa Vector)
+		@error "The sp_params are required to be passed in julia Vector form (i.e. list on R)." _file=""
 		return
 	end
 
-	if spatial_cohesion_idx == 3 || spatial_cohesion_idx == 4
-		if !issymmetric(sp_params[4])
-			@error "Matrix Psi of the spatial parameters must be symmetric." _file=""
-			return
-		end
+	if spatial_cohesion_idx == 1 && length.(sp_params) != [1] 
+		@error "Wrong params for spatial cohesion 1.\nExpected input form: [Real]." _file=""
+		return
+	elseif spatial_cohesion_idx == 2 && length.(sp_params) != [1]
+		@error "Wrong params for spatial cohesion 2.\nExpected input form: [Real]." _file=""
+		return
+	elseif spatial_cohesion_idx == 3 && length.(sp_params) != [2,1,1,4]
+		@error "Wrong params for spatial cohesion 3.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
+		return
+	elseif spatial_cohesion_idx == 4 && length.(sp_params) != [2,1,1,4]
+		@error "Wrong params for spatial cohesion 4.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
+		return
+	elseif spatial_cohesion_idx == 5 && length.(sp_params) != [1]
+		@error "Wrong params for spatial cohesion 5.\nExpected input form: [Real]." _file=""
+		return
+	elseif spatial_cohesion_idx == 6 && length.(sp_params) != [1]
+		@error "Wrong params for spatial cohesion 6.\nExpected input form: [Real]." _file=""
+		return
 	end
+
+	if (spatial_cohesion_idx == 3 || spatial_cohesion_idx == 4) && !issymmetric(sp_params[4])
+		@error "Matrix Psi of the spatial parameters must be symmetric." _file=""
+		return
+	end
+
+	# if covariate_similarity_idx == 1 && !(cv_params isa )
 
 	if (time_specific_alpha==false && unit_specific_alpha==false) || (time_specific_alpha==true && unit_specific_alpha==false)
 		# cases of alpha being a scalar or a vector in time
@@ -140,9 +147,8 @@ function MCMC_fit(;
 	end
 
 	if sPPM
-		sp1 = copy(vec(sp_coords[:,1]))
-		sp2 = copy(vec(sp_coords[:,2]))
-		sp_original = copy(sp_coords)
+		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
+		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
 	end
 
 	if lk_xPPM && ismissing(beta_priors)
@@ -155,9 +161,9 @@ function MCMC_fit(;
 	println("fitting $(Int(draws)) total iterates (burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")
 	println("\non n=$n subjects\nfor T=$T time instants")
-	println("with space? $sPPM")
+	println("with space? $sPPM", sPPM ? " (cohesion function $(Int(spatial_cohesion_idx)))" : "")
 	println("with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p)" : "")
-	println("with covariates in the clustering process? $cl_xPPM")
+	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (similarity function $(Int(covariate_similarity_idx)))" : "")
 	println()
 
 
@@ -269,6 +275,7 @@ function MCMC_fit(;
 	nclus_red = 0
 	nclus_red1 = 0
 	j_label = 0
+	# they are scalars so shouldnt really impact the computational load
 
 	############# testing (for now) on random values #############
 	# Si_iter = rand(collect(1:n),n,T_star)
@@ -305,7 +312,7 @@ function MCMC_fit(;
 	t_start = now()
 	progresso = Progress(round(Int64(draws)),
 			showspeed=true,
-			output=stdout, # default is stderr, which turns out in orange on R
+			output=stdout, # default is stderr, which turns out in orange color on R
 			dt=1, # every how many seconds update the feedback
 			barlen=0 # no progress bar
 			)
@@ -372,8 +379,8 @@ function MCMC_fit(;
 
 					# start computing weights
 					lg_weights = zeros(nclus_red+1)
-					lCo = 0.0; lCn = 0.0 # log cohesions (so for space) old and new
-					lSo = 0.0; lSn = 0.0 # log similarities (so for covariates) old and new
+					lCo::Float64 = 0.0; lCn::Float64 = 0.0 # log cohesions (so for space) old and new
+					lSo::Float64 = 0.0; lSn::Float64 = 0.0 # log similarities (so for covariates) old and new
 					# TOWARDS COVARIATE DEVELOPMENT
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
@@ -429,7 +436,7 @@ function MCMC_fit(;
 					# debug(@showd lg_weights)
 
 					# compute probh
-					probh = 0.0
+					probh::Float64 = 0.0
 					if time_specific_alpha==false && unit_specific_alpha==false
 						probh = alpha_iter / (alpha_iter + (1 - alpha_iter) * lg_weights[j_label])
 					elseif time_specific_alpha==true && unit_specific_alpha==false
@@ -602,7 +609,7 @@ function MCMC_fit(;
 					nh_tmp[k] += 1
 					nclus_temp = sum(nh_tmp .> 0)
 
-					lpp = 0.0
+					lpp::Float64 = 0.0
 					for kk in 1:nclus_temp
 						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
 						if sPPM
@@ -842,7 +849,7 @@ function MCMC_fit(;
 			# end # of the @timeit for beta
 			############# update theta #############
 			# @timeit to " theta " begin # if logging uncomment this line, and the corresponding "end"
-			aux1 = 1 / (lambda2_iter*(1-phi1_iter^2))
+			aux1::Float64 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
 			for k in 1:kt
@@ -893,7 +900,8 @@ function MCMC_fit(;
 				eta1_new = rand(Normal(eta1_old,eta1_priors[2])) # proposal value
 
 				if (-1 <= eta1_new <= 1)
-					ll_old = 0.0; ll_new = 0.0
+					ll_old::Float64 = 0.0
+					ll_new::Float64 = 0.0
 					for t in 2:T
 						# likelihood contribution
 						ll_old += loglikelihood(Normal(
