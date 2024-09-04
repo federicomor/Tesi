@@ -1,6 +1,5 @@
 using LinearAlgebra
 using BenchmarkTools
-using Cthulhu
 
 include("../utils.jl")
 

@@ -191,7 +191,6 @@ println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false) == cohesion4(s1n
 
 ##################################
 using ProfileCanvas
-using LoopVectorization
 
 function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
 	n = length(X_jt)

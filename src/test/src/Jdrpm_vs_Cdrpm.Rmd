@@ -1605,7 +1605,11 @@ dev.off()
 
 
 ```{r}
-numerical_covariates_focus = c("WE_temp_2m","Altitude","WE_wind_speed_10m_mean")
+numerical_covariates_focus = c("WE_temp_2m",
+							   "Altitude",
+							   "WE_wind_speed_10m_mean",
+								"EM_nh3_sum"
+							   )
 for (covariata in numerical_covariates_focus) {
 	for (t in 1:Tm){
 		df_at_t = df_wsc[which(df_wsc$Time==unique(df_wsc$Time)[t]),]
@@ -1644,14 +1648,14 @@ for(st in stations){
 rownames(yfull) = NULL
 colnames(yfull)<- c("id",paste0("w", 1:53))
 
-time_span = 1:18 # low time span for quick testing, real one will be 1:53
+time_span = 1:2 # low time span for quick testing, real one will be 1:53
 
 ### alcuni a caso:
 # quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
 ### alcuni:
-# nsubjects = 1:20
+nsubjects = 1:10
 ### tutti:
-nsubjects = 1:105
+# nsubjects = 1:105
 
 y = yfull[nsubjects,1+time_span]
 
@@ -1694,12 +1698,14 @@ s_std
 ## Fits
 ```{r}
 # as.integer(runif(1,0,1000))*1.0
-seed = 881.0
+# seed = 881.0
+seed = 314.0
 cat("seed",seed,"\n")
 
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
-niter=30000; nburn=20000; nthin=10
+# niter=30000; nburn=20000; nthin=10
+niter=40000; nburn=28000; nthin=8
 # niter=80000; nburn=60000; nthin=20
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
@@ -1879,9 +1885,9 @@ colnames(df_wsc)
 # penso vadano scelte quelle correlate alla target variable
 # perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
 covariate_scelte = c(
-	"Altitude"
-	,"WE_temp_2m"
-	,"WE_wind_speed_10m_mean"
+	# "Altitude"
+	"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
 	# ,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
 	# "WE_tot_precipitation"
@@ -1932,7 +1938,7 @@ colnames(X_lk) = covariate_scelte
 head(X_lk)
 ```
 
-
+fictitious covariate, just for testing
 ```{r}
 p = 1
 X_lk_copy = array(data = 0, dim = c(n, p, Tm))
@@ -1977,21 +1983,23 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	######## likelihood covariates
-	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
-	Xlk_covariates = NA, beta_priors = NA,
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	# Xlk_covariates = NA, beta_priors = NA,
 	
 	######## clustering covariates
-	covariate_similarity_idx = 4,
-	cv_params = list(0,1,2,2),
-	Xcl_covariates = X_cl,
-	
-	draws = niter, burnin = nburn, thin = nthin,
-	# draws = 10, burnin = 0, thin = 1,
+	# covariate_similarity_idx = 4,
+	# cv_params = list(0,1,2,2),
+	# Xcl_covariates = X_cl,
+
+	# draws = niter, burnin = nburn, thin = nthin,
+	draws = 5, burnin = 0, thin = 1,
 	logging = TRUE,
 	seed = seed
 )
 ```
 
+
+-------------------------------
 
 con
 LPML: -1330.9103179215952 (the higher the better)
@@ -2083,6 +2091,8 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 
 ```{r}
+model_name = "model J with X_lk"
+################################
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yred=y
 
@@ -2094,7 +2104,7 @@ for(i in 1:size(yredJ)[1]){
    if(i==1){
      plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
      	 ylim=extrema(yred,yredJ,yredJ),
-     	 type='l',xlab='time',ylab="fitted values",main="model J - no Xlk")
+     	 type='l',xlab='time',ylab="fitted values",main=model_name)
  	  } 
 	  else{
 		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
@@ -2183,7 +2193,6 @@ load(file = "ran_100k_with_Xlk.Rdata")
 
 ### beta
 ```{r}
-covariate_scelte = c("2 * AQ_pm10")
 for (covariata_idx in 1:length(covariate_scelte)){
 	cols = colora(size(rout$beta)[3],44,0)
 	# verde scuro: iterazioni iniziali

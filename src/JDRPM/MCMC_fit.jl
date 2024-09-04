@@ -247,13 +247,14 @@ try
 	sig2h_iter = ones(n,T_star)
 	muh_iter = zeros(n,T_star)
 	if lk_xPPM
-		beta_iter = Vector{Vector{Float64}}(undef,T_star)
+		beta_iter = Vector{Vector{Float64}}(undef,T)
 		beta0 = beta_priors[1:end-1]
 		s2_beta = beta_priors[end]
-		for t in 1:T_star
-			beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p_lk)))
+		for t in 1:T
+			# beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p_lk)))
+			beta_iter[t] = beta0 # inizializzare con la media?
 		end
-		# debug(@showd beta0 s2_beta)
+		# debug(@showd beta_iter)
 	end
 
 	eta1_iter = zeros(n)
