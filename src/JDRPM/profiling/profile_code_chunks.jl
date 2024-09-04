@@ -191,6 +191,7 @@ println(cohesion3_4(s1n,s2n,mu_0,k0,v0,Psi,Cohesion=4,lg=false) == cohesion4(s1n
 
 ##################################
 using ProfileCanvas
+using LoopVectorization
 
 function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
 	n = length(X_jt)
@@ -218,8 +219,26 @@ function similarity4_v2(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real
 	return lg ? out : exp(out)
 end
 
+function similarity4_v3(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
+	n = length(X_jt)
+	nm = n/2
+	xbar = mean(X_jt)
+	aux2 = 0.0
+	# @inbounds @fastmath @simd for x in X_jt
+		# aux2 += x^2
+	# end	
+	@inbounds @fastmath @turbo for i in 1:n
+		aux2 += X_jt[i]^2
+	end
+	# @show aux2
+	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
+	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	return lg ? out : exp(out)
+end
+
 
 X_jt = rand(80)
+# X_jt = Float64.([])
 mu_c = 0
 lambda_c = 1
 a_c = 2
@@ -227,6 +246,19 @@ b_c = 2
 
 @btime similarity4(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
 @btime similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+@btime similarity4_v3(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+
+X = rand(Int8,100)
+@btime begin
+res=0
+@fastmath @simd for i in 1:100
+	res += X[i]^2
+end
+res
+end
+
+similarity4(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
+similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
 
 similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
 # right one: 26.18445410365393
@@ -244,3 +276,12 @@ similarity4_v2(X_jt,mu_c,lambda_c,a_c,b_c,lg=true)
 # 		res += similarity4(Xn,mu_c,lambda_c,a_c,b_c,lg=true)
 # 	end
 # end
+
+###############################################
+
+using VectorizedStatistics
+s0 = rand(80)
+idxs = [1,2,3,6,7,8,9,11]
+s1 = @view s0[idxs]
+@btime s1a = mean(s1)
+@btime s1b = vmean(s1)

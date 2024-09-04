@@ -6,7 +6,6 @@ using Logging
 using Dates
 using TimerOutputs
 using ProgressMeter
-using StaticArrays
 
 log_file = open("log.txt", "w+")
 include("debug.jl")
@@ -424,7 +423,7 @@ try
 
 						# Xcl_covariates is a n*p*T matrix
 						if cl_xPPM
-							@inbounds for p in 1:p_cl
+							for p in 1:p_cl
 								Xo = Xcl_covariates_red[aux_idxs,p]
 								Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
 								lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
@@ -445,7 +444,7 @@ try
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
 					end
 					if cl_xPPM
-						@inbounds for p in 1:p_cl
+						for p in 1:p_cl
 							lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
 						end
 					end

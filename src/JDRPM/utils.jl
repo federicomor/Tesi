@@ -1,7 +1,5 @@
 using SpecialFunctions
-using LinearAlgebra
 using Statistics
-using StaticArrays
 
 logit(x::Real) = log(x / (one(x) - x))
 const logpi = log(π)
@@ -206,7 +204,7 @@ end
 function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
 	sdim = length(s1)
 	sp = [s1 s2]
-	sbar = @SVector [mean(s1), mean(s2)]
+	sbar = [mean(s1), mean(s2)]
 	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
 	# FIXED: sum is slow because i didnt initialize S
 	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
@@ -248,7 +246,7 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	sbar2 = mean(s2)
 	# Compute deviations from the sample mean
 	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
-	for i in 1:sdim
+	@inbounds for i in 1:sdim
 		s_sbar1 = s1[i] - sbar1
 		s_sbar2 = s2[i] - sbar2
 
@@ -292,7 +290,7 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	sbar2 = mean(s2)
 	# Compute deviations from the sample mean
 	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
-	for i in 1:sdim
+	@inbounds for i in 1:sdim
 		s_sbar1 = s1[i] - sbar1
 		s_sbar2 = s2[i] - sbar2
 

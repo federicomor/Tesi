@@ -775,11 +775,13 @@ cat("T =",Tm,"\n")
 
 ## Fits
 ```{r}
-seed = as.integer(runif(1,0,1000))*1.0
-seed = 881.0
+# as.integer(runif(1,0,1000))*1.0
+# seed = 881.0
+seed = 314.0
 cat("seed",seed,"\n")
 
-niter=50000; nburn=34000; nthin=8
+# niter=50000; nburn=34000; nthin=8
+niter=30000; nburn=22000; nthin=8
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=40000; nburn=22000; nthin=10 # folder section 2 run 40k
 nout <- (niter-nburn)/nthin
@@ -916,8 +918,8 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	draws = 2,burnin = 0, thin = 1,
-	# draws = niter,burnin = nburn, thin = nthin,
+	# draws = 2,burnin = 0, thin = 1,
+	draws = niter,burnin = nburn, thin = nthin,
 	logging = TRUE,
 	seed = seed
 )
@@ -982,8 +984,8 @@ cat("waic = ",rout$waic,"\n")
 ```
 
 ```{r}
-# save(drpm1, rout, out, file = "ran_section2_withspace_30k22b8t.Rdata")
-load(file = "ran_section2_withspace_30k22b8t.Rdata")
+save(drpm1, rout, file = "ran_section2_withspace_30k22b8t_of0409.Rdata")
+# load(file = "ran_section2_withspace_30k22b8t.Rdata")
 ```
 
 
@@ -995,11 +997,11 @@ for (time in 1:Tm){
 
 plot(drpm1$alpha[,time],type="l",
 	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$alpha[,time],type="l",
 	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
-	 ),
+	 ), ylim=c(0,1),
 	 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -1012,9 +1014,13 @@ for (time in 1:Tm){
 		par(mfrow=c(1,2),mar=c(2,2,4,2))
 
 	plot(drpm1$mu[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$muh[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
 		 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1030,9 +1036,11 @@ for (time in 1:Tm){
 
 	plot(drpm1$sig2[time,unitj,],type="l",
 		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$sigma2h[time,unitj,],type="l",
 		 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 		 xlab = "MCMC iterations",ylab="values")
 }
 ```
@@ -1046,9 +1054,13 @@ cat("did we update eta1?", update_eta1)
 for (unit in 1:N){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
 		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
 		 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1060,9 +1072,13 @@ for (unit in 1:N){
 for (time in 1:Tm){
 	par(mfrow=c(1,2),mar=c(2,2,4,2))
 	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
 		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 	plot(rout$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
 		 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
 		 xlab = "MCMC iterations",ylab="values")
 }
@@ -1096,9 +1112,13 @@ dim(rout$phi1)
 cat("did we update phi1?", update_phi1)
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi1"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -1107,9 +1127,13 @@ dim(rout$phi0)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of phi0"),
 	 xlab = "MCMC iterations",ylab="values")
 
@@ -1119,17 +1143,22 @@ dim(rout$lambda2)
 
 par(mfrow=c(1,2),mar=c(2,2,4,2))
 plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 plot(rout$lambda2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
 	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
 	 xlab = "MCMC iterations",ylab="values")
 ```
 
 
+
 ## Partition plots
 ```{r, warning=F}
-maxNClusters = 11
+maxNClusters = 7
 
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
@@ -1202,8 +1231,8 @@ for (unit in 1:num_units) {
   lines(1:Tm, partition_matrix[unit, ]+unit/100, type = "l", pch = 19,
         col = unit, lwd = 1)
 }
-legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
-       lty = 1, lwd = 2, pch = 19, bty = "n")
+# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
+       # lty = 1, lwd = 2, pch = 19, bty = "n")
 
 
 partitions = partitions_drpmj
@@ -1223,8 +1252,8 @@ for (unit in 1:num_units) {
   lines(1:Tm, partition_matrix[unit, ]+unit/100, type = "l", pch = 19,
         col = unit, lwd = 1)
 }
-legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
-       lty = 1, lwd = 2, pch = 19, bty = "n")
+# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
+       # lty = 1, lwd = 2, pch = 19, bty = "n")
 
 
 ####################################################################
@@ -1426,6 +1455,25 @@ for (time in 1:Tm){
 	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
 	# plot(ssout,type="dendrogram")
 	# dev.off()
+}
+```
+
+```{r}
+##########################
+model = "J"
+partition = partitions_drpmj
+model = "C"
+partition = partitions_drpmc
+##########################
+par(mfrow=c(3,4),mar=c(1,1,2,1),oma=c(1,1,1,1))
+# cols = rainbow(12)
+for (time in 1:Tm){
+	plot(s_std,pch=19,
+		 # col=cols[partition[[time]]],
+		 col=partition[[time]],
+		 xlab="",ylab="",
+		 axes = F,
+		 main=paste0(model," at t=",time, " (clmax=7)"))
 }
 ```
 
