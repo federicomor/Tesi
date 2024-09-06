@@ -911,15 +911,15 @@ out = module_JDRPM$MCMC_fit(
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	
-	spatial_cohesion_idx = spatial_cohesion,
-	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = spatial_cohesion,
+	# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
-	# spatial_cohesion_idx = 2,
-	# sp_params = list(0.1),
+	spatial_cohesion_idx = 1,
+	sp_params = list(0.1,0.5),
 	
 	# covariate_similarity_idx = NA,
-	# draws = 2,burnin = 0, thin = 1,
-	draws = niter,burnin = nburn, thin = nthin,
+	draws = 2,burnin = 0, thin = 1,
+	# draws = niter,burnin = nburn, thin = nthin,
 	logging = TRUE,
 	seed = seed
 )
@@ -984,8 +984,8 @@ cat("waic = ",rout$waic,"\n")
 ```
 
 ```{r}
-save(drpm1, rout, file = "ran_section2_withspace_30k22b8t_of0409.Rdata")
-# load(file = "ran_section2_withspace_30k22b8t.Rdata")
+# save(drpm1, rout, file = "ran_section2_withspace_30k22b8t_of0409.Rdata")
+load(file = "ran_section2_withspace_30k22b8t_of0409.Rdata")
 ```
 
 
@@ -1158,7 +1158,7 @@ plot(rout$lambda2[,1],type="l",
 
 ## Partition plots
 ```{r, warning=F}
-maxNClusters = 7
+# maxNClusters = 7
 
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
@@ -1170,13 +1170,13 @@ for (t in 1:Tm) {
   Sic_t <- drpm1$Si[t, , ]
   Sic_t <- t(Sic_t) 
   partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
+  							   # , maxNClusters = maxNClusters
   							   )
 
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
   partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
+  							   # , maxNClusters = maxNClusters
   							   )
 }
 
@@ -1462,8 +1462,8 @@ for (time in 1:Tm){
 ##########################
 model = "J"
 partition = partitions_drpmj
-model = "C"
-partition = partitions_drpmc
+# model = "C"
+# partition = partitions_drpmc
 ##########################
 par(mfrow=c(3,4),mar=c(1,1,2,1),oma=c(1,1,1,1))
 # cols = rainbow(12)
@@ -1473,7 +1473,8 @@ for (time in 1:Tm){
 		 col=partition[[time]],
 		 xlab="",ylab="",
 		 axes = F,
-		 main=paste0(model," at t=",time, " (clmax=7)"))
+		 cex=pmax(y[, time]/6, rep(0.5, N)),
+		 main=paste0(model," at t=",time))
 }
 ```
 
@@ -3023,8 +3024,18 @@ b*100/a
 # ==========
 # 4. OTHER DATA
 
+```{r}
+install.packages("spacetime")
+library(spacetime)
+data(air)
+rural = STFDF(stations, dates, data.frame(PM10 = as.vector(air)))
+```
+```{r}
+rural@data
+```
 
 
+# ==========
 
 <!-- # 2. SIMPLE TEST -->
 ## data

@@ -27,12 +27,14 @@ function benchmark_functions()
         
         # Benchmark cohes3
         benchmark1 = @benchmark cohesion3($s1, $s2, $mu_0, $k0, $v0, $Psi, lg=true)
+        # benchmark1 = @benchmark cohesion3(s1, s2, mu_0, k0, v0, Psi, lg=true)
         time_cohes3 = minimum(benchmark1).time / 1e6  # Convert to milliseconds
         allocs_cohes3 = minimum(benchmark1).allocs
         memory_cohes3 = minimum(benchmark1).memory / 1024  # Convert to KB
         
         # Benchmark cohes3_vect
         benchmark2 = @benchmark cohesion3_4($s1, $s2, $mu_0, $k0, $v0, $Psi, Cohesion=3, lg=true)
+        # benchmark2 = @benchmark cohesion3_4(s1, s2, mu_0, k0, v0, Psi, Cohesion=3, lg=true)
         time_cohes3_vect = minimum(benchmark2).time / 1e6  # Convert to milliseconds
         allocs_cohes3_vect = minimum(benchmark2).allocs
         memory_cohes3_vect = minimum(benchmark2).memory / 1024  # Convert to KB
@@ -54,14 +56,14 @@ results = benchmark_functions()
 
 # Plot execution time
 plot(results["n"], results["time_cohes3_scal"], label="scalar form", xlabel="n", ylabel="Time (ms)", title="Execution Time",
-yscale=:log10,
+# yscale=:log10,
 marker=:circle
 )
 plot!(results["n"], results["time_cohes3_vect"], label="vector form",
-yscale=:log10,
+# yscale=:log10,
 marker=:circle
 )
-savefig("execution_time.svg")
+savefig("execution_time.pdf")
 
 # Plot memory allocations
 plot(results["n"], results["allocs_cohes3_scal"], label="scalar form", xlabel="n", ylabel="Allocations", title="Memory Allocations",
@@ -72,7 +74,7 @@ plot!(results["n"], results["allocs_cohes3_vect"], label="vector form",
 # yscale=:log10,
 marker=:circle
 )
-savefig("memory_allocations.svg")
+savefig("memory_allocations.pdf")
 
 # Plot memory usage
 plot(results["n"], results["memory_cohes3_scal"], label="scalar form", xlabel="n", ylabel="Memory (KB)", title="Memory Usage",
@@ -81,7 +83,7 @@ marker=:circle
 plot!(results["n"], results["memory_cohes3_vect"], label="vector form",
 marker=:circle
 )
-savefig("memory_usage.svg")
+savefig("memory_usage.pdf")
 
 
 #########################################
@@ -116,3 +118,5 @@ Random.seed!(1)
 	end
 end
 res
+
+bout = @benchmark cohesion3(s1, s2, mu_0, k0, v0, Psi, lg=true)
