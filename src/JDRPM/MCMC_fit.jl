@@ -1160,6 +1160,7 @@ try
 	LPML = -LPML # fix sign
 
 	println("LPML: $LPML (the higher the better)")
+	# println("LPML: $LPML - the ↑ the :)")
 	
 	# adjust mean variables
 	mean_likelhd ./= nout
@@ -1171,6 +1172,7 @@ try
 	end
 	WAIC *= -2
 	println("WAIC: $WAIC (the lower the better)")
+	# println("WAIC: $WAIC - the ↓ the :)")
 
 	if logging
 		debug(@showd to)
