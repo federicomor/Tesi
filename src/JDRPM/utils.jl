@@ -420,22 +420,21 @@ function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 		xbar_j = mean(X_jt)
 		card_Sjt = length(X_jt)
 		Hx = 0.0
-		for i in 1:card_Sjt
+		@inbounds for i in eachindex(X_jt)
 			Hx += (X_jt[i] - xbar_j)^2 
 		end
 		Hx /= card_Sjt
-		
 		return lg ? -alpha * Hx : exp(-alpha * Hx) 
 
 	else # categorical case
 		# X_jt = ["Old", "Young", "Middle", "Young", "Old", "Old"]
 		unique_keys = unique(X_jt)
-		@show unique_keys
+		# @show unique_keys
 		counts = Dict(key => 0.0 for key in unique_keys)
 		for item in X_jt
 			counts[item] += 1
 		end
-		@show counts
+		# @show counts
 		total = length(X_jt)
 		for key in keys(counts)
 			counts[key] /= total
@@ -444,7 +443,6 @@ function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 		for r in keys(counts)
 			Hx -= counts[r] * log(counts[r])
 		end
-		
 		return lg ? -alpha * Hx : exp(-alpha * Hx) 
 	end
 end
@@ -472,7 +470,6 @@ function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	if isa(first(X_jt),Real) 
 		R = (maximum(X_jt) - minimum(X_jt))
 		if R==0.0 R=eps() end
-		H /= R
 	else R=0.0 end
 	n_j = length(X_jt)
 	for l in 1:(n_j-1)
@@ -480,7 +477,6 @@ function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 			H += gower_d(X_jt[l], X_jt[k], R)
 		end
 	end 
-
 	out = -alpha * H
 	return lg ? out : exp(out)
 end
@@ -491,7 +487,6 @@ function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	if isa(first(X_jt),Real) 
 		R = (maximum(X_jt) - minimum(X_jt))
 		if R==0.0 R=eps() end
-		H /= R
 	else R=0.0 end
 	n_j = length(X_jt)
 	for l in 1:(n_j-1)
@@ -536,7 +531,7 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 	nm = n/2
 	xbar = mean(X_jt)
 	aux2 = 0.0
-	@inbounds @fastmath @simd for i in 1:n
+	@inbounds @fastmath @simd for i in eachindex(X_jt)
 		aux2 += X_jt[i]^2
 	end
 	# @show aux2

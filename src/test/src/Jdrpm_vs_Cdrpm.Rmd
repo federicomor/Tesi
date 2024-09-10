@@ -715,6 +715,7 @@ legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,c
 # ==========
 
 # 2. SPACE DATA
+Spatio-temporal data set with rural background PM10 concentrations in Germany 2005
 ```{r}
 currwd = getwd()
 setwd("C:/Users/feder/Desktop/Uni magistrale/Tesi/src/test/Supplementary material/")

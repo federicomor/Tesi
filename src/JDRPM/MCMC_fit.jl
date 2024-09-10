@@ -50,7 +50,7 @@ function MCMC_fit(;
 	cv_params = missing,                  # Parameters for covariates similarity functions
 
 	draws::Float64,                       # Number of MCMC draws
-	burnin::Float64,                      # Number of burn-in sa
+	burnin::Float64,                      # Number of burn-in
 	thin::Float64,                        # Thinning interval
 
 	logging::Bool,                        # Wheter to save execution infos to log file

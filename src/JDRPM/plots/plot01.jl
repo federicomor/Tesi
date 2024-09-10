@@ -87,6 +87,133 @@ savefig("memory_usage.pdf")
 
 
 #########################################
+
+X_jt = rand(100)
+function test1(X_jt::Vector{Float64})
+	aux2 = 0.0
+	@inbounds @fastmath @simd for i in eachindex(X_jt)
+		aux2 += X_jt[i]^2
+	end
+	return aux2
+end
+function test2(X_jt::Vector{Float64})
+	aux2 = 0.0
+	for i in eachindex(X_jt)
+		aux2 += X_jt[i]^2
+	end
+	return aux2
+end
+function test3(X_jt::Vector{Float64})
+	aux2 = 0.0
+	@inbounds for i in eachindex(X_jt)
+		@inbounds aux2 += X_jt[i]^2
+	end
+	return aux2
+end
+function test4(X_jt::Vector{Float64})
+	aux2 = 0.0
+	@inbounds @simd for i in eachindex(X_jt)
+		aux2 += X_jt[i]^2
+	end
+	return aux2
+end
+
+test1_label = "@inbounds @simd @fastmath"
+test2_label = "no annotations"
+test3_label = "@inbounds"
+test4_label = "@inbounds @simd"
+
+
+test1(X_jt)
+test2(X_jt)
+test3(X_jt)
+test4(X_jt)
+
+using BenchmarkTools
+using Plots
+ns = [5,10,20,50,100, 250, 500, 1000] 
+function benchmark_tests(ns)
+    results = Dict(
+        "time_test1" => Float64[],
+        "allocs_test1" => Int[],
+        "memory_test1" => Float64[],
+        "time_test2" => Float64[],
+        "allocs_test2" => Int[],
+        "memory_test2" => Float64[],
+        "time_test3" => Float64[],
+        "allocs_test3" => Int[],
+        "memory_test3" => Float64[],
+        "time_test4" => Float64[],
+        "allocs_test4" => Int[],
+        "memory_test4" => Float64[]
+    )
+
+    for n in ns # Vector sizes to benchmark
+        println("Benchmarking with n = $n")
+        X_jt = rand(n)
+
+        # Benchmark test1
+        bench1 = @benchmark test1($X_jt)
+		println("\t",test1(X_jt))
+        push!(results["time_test1"], minimum(bench1).time / 1e6)
+        push!(results["allocs_test1"], minimum(bench1).allocs)
+        push!(results["memory_test1"], minimum(bench1).memory / 1024)
+
+        # Benchmark test2
+        bench2 = @benchmark test2($X_jt)
+		println("\t",test2(X_jt))
+        push!(results["time_test2"], minimum(bench2).time / 1e6)
+        push!(results["allocs_test2"], minimum(bench2).allocs)
+        push!(results["memory_test2"], minimum(bench2).memory / 1024)
+
+        # Benchmark test3
+        bench3 = @benchmark test3($X_jt)
+		println("\t",test3(X_jt))
+        push!(results["time_test3"], minimum(bench3).time / 1e6)
+        push!(results["allocs_test3"], minimum(bench3).allocs)
+        push!(results["memory_test3"], minimum(bench3).memory / 1024)
+
+        # Benchmark test4
+        bench4 = @benchmark test4($X_jt)
+		println("\t",test4(X_jt))
+        push!(results["time_test4"], minimum(bench4).time / 1e6)
+        push!(results["allocs_test4"], minimum(bench4).allocs)
+        push!(results["memory_test4"], minimum(bench4).memory / 1024)
+    end
+
+    return results
+end
+
+results = benchmark_tests(ns)
+
+# Plot execution time
+plot(ns, results["time_test2"], label=test2_label, marker=:circle,markersize=3,yscale=:log10)
+plot!(ns, results["time_test3"], label=test3_label, marker=:circle,markersize=3,yscale=:log10)
+plot!(ns, results["time_test4"], label=test4_label, marker=:circle,markersize=3,yscale=:log10)
+plot!(xlabel="n", ylabel="Time (ms)", title="Execution Time", legend=:bottomright,
+      ns, results["time_test1"], label=test1_label, marker=:circle,markersize=3,yscale=:log10)
+savefig("execution_time_tests_sims.pdf")
+
+# Plot memory allocations
+plot(ns, results["allocs_test1"], label="test1", xlabel="n", ylabel="Allocations", title="Memory Allocations", marker=:circle)
+plot!(ns, results["allocs_test2"], label="test2", marker=:circle)
+plot!(ns, results["allocs_test3"], label="test3", marker=:circle)
+plot!(ns, results["allocs_test4"], label="test4", marker=:circle)
+savefig("memory_allocations_tests.pdf")
+
+# Plot memory usage
+plot(ns, results["memory_test1"], label="test1", xlabel="n", ylabel="Memory (KB)", title="Memory Usage", marker=:circle)
+plot!(ns, results["memory_test2"], label="test2", marker=:circle)
+plot!(ns, results["memory_test3"], label="test3", marker=:circle)
+plot!(ns, results["memory_test4"], label="test4", marker=:circle)
+savefig("memory_usage_tests.pdf")
+
+
+
+
+
+
+#########################################
 using Random
 using ProfileCanvas
 

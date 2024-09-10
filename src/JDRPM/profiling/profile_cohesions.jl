@@ -31,8 +31,6 @@ sp_params = [mu_0, k0, v0, Psi]
 @code_llvm spatial_cohesion_splat(4,s1,s2,sp_params,lg=true,M=1)
 
 
-
-
 cohesion1(s1,s2,alpha,lg=true)
 cohesion2(s1,s2,a,lg=true)
 
@@ -43,7 +41,6 @@ cohesion3_4(s1, s2, mu_0, k0, v0, Psi,Cohesion=4,lg=true)
 
 @timev cohesion5(s1,s2,phi,lg=true)
 @timev cohesion6(s1,s2,phi,lg=true)
-
 
 
 #############################################
