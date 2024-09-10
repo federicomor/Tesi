@@ -919,8 +919,8 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	draws = 2,burnin = 0, thin = 1,
-	# draws = niter,burnin = nburn, thin = nthin,
+	# draws = 2,burnin = 0, thin = 1,
+	draws = niter,burnin = nburn, thin = nthin,
 	logging = TRUE,
 	seed = seed
 )

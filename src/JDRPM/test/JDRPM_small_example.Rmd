@@ -1,0 +1,300 @@
+---
+title: "JDRPM_small_example"
+---
+
+# load JDRPM
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# setup project
+juliaEval("using Pkg")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+```
+
+# Space data
+Spatio-temporal data set with rural background PM10 concentrations in Germany 2005
+```{r}
+library(salso)
+# This data is found in the gstat package
+library(gstat)
+data(DE_RB_2005)
+dat <- DE_RB_2005
+
+# Create ymat with columns corresponding to time rows stations
+N <- length(dat@sp)
+Tm <- 365
+y <- matrix(NA, nrow=N, ncol=Tm)
+for(i in 1:Tm){
+	y[dat@index[dat@index[,2]==i,1], i] <- dat@data[dat@index[,2]==i,1]
+}
+
+# Try to create an average PM10 per month
+year <- c(rep(1,31),rep(2,28),rep(3,31),rep(4,30),rep(5,31),
+         rep(6,30),rep(7,31),rep(8,31),rep(9,30),rep(10,31),
+         rep(11,30),rep(12,31))
+week <- rep(1:52, each=7)
+ymn <- t(apply(y, 1, function(x) tapply(x,year,mean, na.rm=TRUE)))
+
+## Keep those that don't have any missing values when overageing over a month
+ysub2 <- ymn[-c(4,16,25,27,30,43,52,59,69),]
+
+mn <- apply(ysub2,2,mean)
+sd <- apply(ysub2,2,sd)
+
+# Center the observations
+y <- t(t(ysub2) - mn)
+
+Tm = tps <- ncol(y) # time span
+N = dim(y)[1] # number of units
+
+s_coords <- (dat@sp@coords)[-c(4,16,25,27,30,43,52,59,69),]
+smn <- apply(s_coords,2,mean)
+ssd <- apply(s_coords,2,sd)
+s_std <- t((t(s_coords) - smn)/ssd)
+
+### subset test
+# sub_k = 1
+# y = y[1:sub_k,]
+# s_std = s_std[1:sub_k,]
+```
+
+# params
+```{r}
+seed = 314.0
+cat("seed",seed,"\n")
+
+# just for a small example as the file says
+# niter=10000; nburn=8000; nthin=2
+niter=3000; nburn=1000; nthin=2
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+```
+
+```{r}
+# params
+m0_phi0 = 0
+s20_phi0 = 1
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+spatial_cohesion = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+
+# fit
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y),              
+	sp_coords = s_std,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = update_eta1,                    
+	update_phi1 = update_phi1,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1^2,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	### space
+	spatial_cohesion_idx = spatial_cohesion,
+	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.1),
+	
+	draws = niter,burnin = nburn, thin = nthin,
+	logging = TRUE,
+	seed = seed
+)
+```
+
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma",
+				 "alpha", 
+				 "sigma2h", 
+				 "muh", 
+				 "eta1",
+				 "beta",
+				 "theta", 
+				 "tau2", 
+				 "phi0", 
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+rout$alpha        = aperm(rout$alpha,    c(2, 1))
+rout$theta        = aperm(rout$theta,    c(2, 1))
+rout$tau2         = aperm(rout$tau2,     c(2, 1))
+rout$eta1         = aperm(rout$eta1,    c(2, 1))
+rout$phi0     = matrix(rout$phi0,    ncol = 1)
+rout$phi1     = matrix(rout$phi1,    ncol = 1)
+rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+```
+
+# plots
+```{r}
+library(RColorBrewer)
+colora = function(len=2, seed=33, show=1, seed_div = "Set3"){
+	hcols_ = hcl.pals()
+	if(seed=="rand"){
+		seed = round(runif(1,0,115))
+		col.ramp_ = hcl.colors(len,palette=hcols_[seed%%115+1])
+	}
+	if(seed=="div"){ # create a divergent palette
+		col.ramp_ = brewer.pal(len, seed_div)
+		# possible seed_div choices (and max len supported)
+		# Set3	    12
+		# Paired    12
+		# Pastel1   9
+		# Set1	    9
+		# Accent    8
+		# Dark2     8
+		# Pastel2   8
+		# Set2	    8
+	}
+	else{
+		col.ramp_ = hcl.colors(len,palette=hcols_[seed%%115+1])
+	}
+	if(show==1){
+		dati_ <- matrix(1:100, ncol = 1)
+		par(mar=rep(2,4))
+		image(dati_, col = col.ramp_, axes = FALSE)
+		title(main=paste("palette",seed,"of",len,"colors"))
+		# title(main=paste("palette",seed))
+	}
+	return(col.ramp_)
+	
+}
+##########################################################
+
+# Initialize a list to store the partitions for each time instant
+partitions_drpmj <- list()
+
+# Loop over each time instant to extract the partition
+for (t in 1:Tm) {
+  Sij_t <- rout$Si[t, , ]
+  Sij_t <- t(Sij_t) 
+  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder")
+}
+##########################################################
+
+##########################
+model_name = "model J"
+partition = partitions_drpmj
+##########################
+
+df_cluster = data.frame(clusters=c(),Time=c())
+for(time in 1:Tm){
+	salso_out <- partition[[time]]
+	df_temp = data.frame(
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+library(mclust)
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=Tm, ncol=Tm)
+rho_ARI <- list()
+for(k in 1:Tm){
+	rho_ARI[[k]] <- partition[[k]]
+}
+for(k in 1: Tm){
+	for(kk in 1: Tm){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+# if (min(ARImats)<0){
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# } else {
+	# cols_ARI = colora(ncols_ari,56,0)
+	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
+	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# }
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:Tm)), side=2, line=0.3,at=seq(0,1,length=Tm), las=1, cex=0.8)
+mtext(text=c(paste("",1:Tm)), side=1, line=0.3,at=seq(0,1,length=Tm), las=2, cex=0.8)
+
+##########################################################
+
+##########################
+model = "JDRPM"
+partition = partitions_drpmj
+##########################
+
+par(mfrow=c(3,4),mar=c(1,1,2,1),oma=c(1,1,1,1))
+# cols = rainbow(12)
+for (time in 1:Tm){
+	plot(s_std,pch=19,
+		 # col=cols[partition[[time]]],
+		 col=partition[[time]],
+		 xlab="",ylab="",
+		 axes = F,
+		 cex=pmax(y[, time]/6, rep(0.5, N)),
+		 main=paste0(model," at t=",time))
+}
+```
+

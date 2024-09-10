@@ -1,5 +1,3 @@
-title = "\t"^12 # space for title sections in log prints
-
 function tostr(obj)
     io = IOBuffer()
     show(io, "text/plain", obj)
@@ -21,3 +19,10 @@ macro showd(exs...)
 	end
 	return :(string($(args...)))
 end
+
+# function section(title::String)
+# 	total_width = length(title) + 4
+# 	debug("┌" * "─" ^ (total_width - 2) * "┐")
+# 	debug("│" * " " * title * " " * "│")
+# 	debug("└" * "─" ^ (total_width - 2) * "┘")
+# end

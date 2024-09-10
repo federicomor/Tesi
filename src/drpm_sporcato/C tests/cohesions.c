@@ -106,67 +106,110 @@ double Cohesion2(double *s1, double *s2, double a, int dim, int lg) {
 }
 
 // Cohesion3_4 function implementation
-double Cohesion3_4(double *s1, double *s2, double *mu0, double k0, double v0, double *L0, int dim, int Cohesion, int lg) {
-    int ii;
-    double kn, vnn, out, sbar1 = 0, sbar2 = 0, Vs1 = 0, Vs2 = 0, Vs3 = 0, Vs4 = 0;
-    double mun1, mun2, dL0, dLn, dLnn, s_sbar1, s_sbar2, sbar_mu01, sbar_mu02, Vsbarmu01, Vsbarmu02, Vsbarmu03, Vsbarmu04, Ln1, Ln2, Ln3, Ln4, Lnn1, Lnn2, Lnn3, Lnn4;
 
-    for (ii = 0; ii < dim; ii++) {
-        sbar1 += s1[ii] / (double) dim;
-        sbar2 += s2[ii] / (double) dim;
-    }
+double Cohesion3_4(double *s1, double *s2, double *mu0, double k0, double v0, double *L0,
+					int dim, int Cohesion, int lg){
 
-    for (ii = 0; ii < dim; ii++) {
-        s_sbar1 = s1[ii] - sbar1;
-        s_sbar2 = s2[ii] - sbar2;
-        Vs1 += s_sbar1 * s_sbar1;
-        Vs2 += s_sbar1 * s_sbar2;
-        Vs3 += s_sbar2 * s_sbar1;
-        Vs4 += s_sbar2 * s_sbar2;
-    }
+	int ii;
+	double kn,knn,vn,vnn,out,sbar1,sbar2,dL0,dLn,dLnn;
+	double s_sbar1,s_sbar2;
+	double sbar_mu01, sbar_mu02, sbar_mun1, sbar_mun2, mun1, mun2; 
+	// double munn1, munn2;
+	double Vs1, Vs2, Vs3, Vs4;
+	double Vsbarmu01, Vsbarmu02, Vsbarmu03, Vsbarmu04;
+	double Vsbarmun1, Vsbarmun2, Vsbarmun3, Vsbarmun4;
+	double Ln1, Ln2, Ln3, Ln4, Lnn1, Lnn2, Lnn3, Lnn4;
 
-    kn = k0 + dim;
-    vnn = v0 + dim;
+	sbar1=0.0, sbar2=0.0;
+	for(ii=0; ii<dim; ii++){
 
-    mun1 = k0 / (k0 + dim) * mu0[0] + dim / (k0 + dim) * sbar1;
-    mun2 = k0 / (k0 + dim) * mu0[1] + dim / (k0 + dim) * sbar2;
+		sbar1 = sbar1 + s1[ii]/(double) dim;
+		sbar2 = sbar2 + s2[ii]/(double) dim;
 
-    sbar_mu01 = sbar1 - mu0[0];
-    sbar_mu02 = sbar2 - mu0[1];
+	}
 
-    Vsbarmu01 = sbar_mu01 * sbar_mu01;
-    Vsbarmu02 = sbar_mu01 * sbar_mu02;
-    Vsbarmu03 = sbar_mu02 * sbar_mu01;
-    Vsbarmu04 = sbar_mu02 * sbar_mu02;
 
-    Ln1 = L0[0] + Vs1 + k0 * (dim) / (k0 + dim) * Vsbarmu01;
-    Ln2 = L0[1] + Vs2 + k0 * (dim) / (k0 + dim) * Vsbarmu02;
-    Ln3 = L0[2] + Vs3 + k0 * (dim) / (k0 + dim) * Vsbarmu03;
-    Ln4 = L0[3] + Vs4 + k0 * (dim) / (k0 + dim) * Vsbarmu04;
+	Vs1=0.0, Vs2=0.0, Vs3=0.0, Vs4=0.0;
+	for(ii=0; ii<dim; ii++){
 
-    Lnn1 = Ln1 + Vs1 + kn * (dim) / (kn + dim) * (sbar1 - mun1) * (sbar1 - mun1);
-    Lnn2 = Ln2 + Vs2 + kn * (dim) / (kn + dim) * (sbar1 - mun1) * (sbar2 - mun2);
-    Lnn3 = Ln3 + Vs3 + kn * (dim) / (kn + dim) * (sbar2 - mun2) * (sbar1 - mun1);
-    Lnn4 = Ln4 + Vs4 + kn * (dim) / (kn + dim) * (sbar2 - mun2) * (sbar2 - mun2);
+		s_sbar1 = s1[ii] - sbar1;
+		s_sbar2 = s2[ii] - sbar2;
 
-    dL0 = L0[0] * L0[3] - L0[1] * L0[2];
-    dLn = Ln1 * Ln4 - Ln2 * Ln3;
-    dLnn = Lnn1 * Lnn4 - Lnn2 * Lnn3;
 
-    if (Cohesion == 3) {
-        out = -dim * log(M_PI) +
-              (G2a(0.5 * (v0 + dim), 1) - G2a(0.5 * v0, 1)) +
-              (0.5 * v0 * log(dL0) - 0.5 * (v0 + dim) * log(dLn)) +
-              (log(k0) - log(kn));
-    } else if (Cohesion == 4) {
-        out = -dim * log(M_PI) +
-              (G2a(0.5 * vnn, 1) - G2a(0.5 * (v0 + dim), 1)) +
-              (0.5 * (v0 + dim) * log(dLn) - 0.5 * vnn * log(dLnn)) +
-              (log(kn) - log(kn + dim));
-    }
+		Vs1 = Vs1 + s_sbar1*s_sbar1;
+		Vs2 = Vs2 + s_sbar1*s_sbar2;
+		Vs3 = Vs3 + s_sbar2*s_sbar1;
+		Vs4 = Vs4 + s_sbar2*s_sbar2;
 
-    if (!lg) out = exp(out);
-    return out;
+	}
+
+
+	kn = k0 + dim; vn = v0 + dim;
+	knn = kn + dim; vnn = vn + dim;
+
+//	Rprintf("kn = %f\n", kn);
+//	Rprintf("vn = %f\n", vn);
+
+//	Rprintf("knn = %f\n", knn);
+//	Rprintf("vnn = %f\n", vnn);
+
+	mun1 = k0/(k0+dim)*mu0[0] + dim/(k0+dim)*sbar1;
+	mun2 = k0/(k0+dim)*mu0[1] + dim/(k0+dim)*sbar2;
+	//munn1 = kn/(kn+dim)*mun1 + dim/(kn+dim)*sbar1;
+	//munn2 = kn/(kn+dim)*mun2 + dim/(kn+dim)*sbar2;
+
+
+	sbar_mu01 = sbar1 - mu0[0];
+	sbar_mu02 = sbar2 - mu0[1];
+	sbar_mun1 = sbar1 - mun1;
+	sbar_mun2 = sbar2 - mun2;
+
+
+	Vsbarmu01 = sbar_mu01*sbar_mu01, Vsbarmun1 = sbar_mun1*sbar_mun1;
+	Vsbarmu02 = sbar_mu01*sbar_mu02, Vsbarmun2 = sbar_mun1*sbar_mun2;
+	Vsbarmu03 = sbar_mu02*sbar_mu01, Vsbarmun3 = sbar_mun2*sbar_mun1;
+	Vsbarmu04 = sbar_mu02*sbar_mu02, Vsbarmun4 = sbar_mun2*sbar_mun2;
+
+	Ln1 = L0[0] + Vs1 + k0*(dim)/(k0+dim)*Vsbarmu01;
+	Ln2 = L0[1] + Vs2 + k0*(dim)/(k0+dim)*Vsbarmu02;
+	Ln3 = L0[2] + Vs3 + k0*(dim)/(k0+dim)*Vsbarmu03;
+	Ln4 = L0[3] + Vs4 + k0*(dim)/(k0+dim)*Vsbarmu04;
+
+	Lnn1 = Ln1 + Vs1 + kn*(dim)/(kn+dim)*Vsbarmun1;
+	Lnn2 = Ln2 + Vs2 + kn*(dim)/(kn+dim)*Vsbarmun2;
+	Lnn3 = Ln3 + Vs3 + kn*(dim)/(kn+dim)*Vsbarmun3;
+	Lnn4 = Ln4 + Vs4 + kn*(dim)/(kn+dim)*Vsbarmun4;
+
+
+	dL0 = L0[0]*L0[3] - L0[1]*L0[2];
+	dLn = Ln1*Ln4 - Ln2*Ln3;
+	dLnn = Lnn1*Lnn4 - Lnn2*Lnn3;
+
+//	RprintVecAsMat("L0", L0, 2, 2);
+//	RprintVecAsMat("Ln", Ln, 2, 2);
+//	RprintVecAsMat("Lnn", Lnn, 2, 2);
+
+
+
+	if(Cohesion==3){
+		out = -dim*log(M_PI) +
+		      (G2a(0.5*vn, 1) - G2a(0.5*v0, 1)) +
+		      (0.5*v0*log(dL0) - 0.5*vn*log(dLn)) +
+		      (log(k0) - log(kn));
+	}
+	if(Cohesion==4){
+//		Rprintf("G2a(0.5*vn) = %f\n", G2a(0.5*vn,1));
+//		Rprintf("G2a(0.5*vnn) = %f\n", G2a(0.5*vnn,1));
+		out = -dim*log(M_PI) +
+		      (G2a(0.5*vnn,1) - G2a(0.5*vn,1)) +
+		      (0.5*vn*log(dLn) - 0.5*vnn*log(dLnn)) +
+		      (log(kn) - log(knn));
+	}
+	printf("out %f\n",out);
+//	Rprintf("out = %f\n", out);
+	if(!lg) out = exp(out);
+	return(out);
+
 }
 
 // G2a function implementation
@@ -179,8 +222,10 @@ double G2a(double a, int lg) {
 
 int main() {
     // Test data
-    double s1[] = {1.0, 2.0, 3.0};
-    double s2[] = {4.0, 5.0, 6.0};
+    // double s1[] = {1.0, 2.0, 3.0};
+    // double s2[] = {4.0, 5.0, 6.0};
+	double s1[] = {1.0, 1.0, 11};
+    double s2[] = {1.0, 1.1, 1.1};
     double phi = 0.5;
     double epsilon = 0.1;
     double a = 5.0;
@@ -195,8 +240,10 @@ int main() {
     printf("Cohesion1 result: %f\n", result1);
 
     // Test Cohesion2
-    double result2 = Cohesion2(s1, s2, a, dim, lg);
-    printf("Cohesion2 result: %f\n", result2);
+    double result2f = Cohesion2(s1, s2, a, dim, 0);
+    printf("Cohesion2 result: %f\n", result2f); 
+	double result2t = Cohesion2(s1, s2, a, dim, 1);
+    printf("Cohesion2 result: %f\n", result2t);
 
 
     // Test Cohesion3_4 for Cohesion3

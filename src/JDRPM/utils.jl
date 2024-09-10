@@ -5,18 +5,11 @@ logit(x::Real) = log(x / (one(x) - x))
 const logpi = log(π)
 const log2pi = log(2*π)
 
-# function section(title::String)
-# 	total_width = length(title) + 4
-# 	debug("┌" * "─" ^ (total_width - 2) * "┐")
-# 	debug("│" * " " * title * " " * "│")
-# 	debug("└" * "─" ^ (total_width - 2) * "┘")
-# end
-
 ##################
 ##   RELABEL    ##
 ##################
 
-# dont overwrite Si - ignore corollary variables
+# dont overwrite Si, ignore corollary variables
 function relabel(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
@@ -37,7 +30,7 @@ function relabel(Si::AbstractVector{Int}, n::Int)
 end
 relabel(Si::AbstractVector{Int}) = relabel(Si,length(Si))
 
-# overwrite Si - ignore the corollary variables
+# overwrite Si, ignore the corollary variables
 function relabel!(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
@@ -60,7 +53,7 @@ function relabel!(Si::AbstractVector{Int}, n::Int)
 end
 relabel!(Si::AbstractVector{Int}) = relabel!(Si,length(Si))
 
-# dont overwrite Si - consider corollary variables
+# dont overwrite Si, consider corollary variables
 function relabel_full(Si::AbstractVector{Int}, n::Int)
 	Sirelab = zeros(Int,n)
 	nhrelab = zeros(Int,n)
@@ -86,7 +79,7 @@ end
 relabel_full(Si::AbstractVector{Int}) = relabel_full(Si,length(Si))
 
 
-# dont overwrite Si - consider corollary variables
+# dont overwrite Si, consider corollary variables
 function relabel_full!(Si::AbstractVector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
 	fill!(Sirelab, 0)
 	fill!(nhrelab, 0)
@@ -192,7 +185,7 @@ function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::
 			end
 		end
 	end
-	return lg ? out : exp(out)
+	return lg ? log(out) : out
 end
 
 function G2a(a::Real, lg::Bool)
@@ -255,7 +248,6 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 		S2 += s_sbar1 * s_sbar2
 	end
 	S3 = copy(S2) # to avoid repeating computations
-
 	# Updated parameters for cohesion 3
 	kn = k0 + sdim
 	vn = v0 + sdim
@@ -318,7 +310,6 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
 	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
 	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
-
 	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
 	
 	# Updated parameters for cohesion 4
@@ -341,6 +332,7 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	Psi_nn_2 = Psi_n_2 + S2 + auxconst3 / (auxconst4) * auxmat2_2
 	Psi_nn_3 = Psi_n_3 + S3 + auxconst3 / (auxconst4) * auxmat2_3
 	Psi_nn_4 = Psi_n_4 + S4 + auxconst3 / (auxconst4) * auxmat2_4
+
 	detPsi_nn = Psi_nn_1 * Psi_nn_4 - Psi_nn_2 * Psi_nn_3
 	
 	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(detPsi_n) - 0.5 * vnn * log(detPsi_nn) + log(kn) - log(knn)
@@ -403,6 +395,8 @@ function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVe
 	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg=lg,M=M) 
 end
+
+
 
 ############################################
 ##   SIMILARITY FUNCTIONS (covariates)    ##
@@ -526,6 +520,7 @@ end
 # similarity3(XX_jt,3,lg=false)
 
 
+##### auxiliary similarity
 function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
 	n = length(X_jt)
 	nm = n/2

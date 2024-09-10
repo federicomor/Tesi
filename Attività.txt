@@ -16,3 +16,15 @@ Slides:
 1. Model review
 2. Our changes and contribution
 3. Test on air pollution data
+
+
+
+
+
+
+- rifare il test di Page su gstat con gli stessi parametri e mostrare che esce "meglio"
+- vedere se riusciamo a gestire anche NA sui dati mancanti, le Y_it, simulando dalla likelihood
+- fare i test finali con i dati che riceverò e fare il confronto ben chiaro
+
+- valutare se fare con Page un pacchetto su R
+- e intanto sistemare il codice github per renderlo comprensibile
