@@ -536,13 +536,9 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 end
 
 
-function similarity5(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
-	return lg ? 0.0 : 1.0
-end
-
-
 # 1,2,3 work on both covariate types
 # 4 and 5 only on numerical
+# sim5 removed, double dippery is too much
 
 # numerical covariates specialization
 function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector; lg::Bool)
@@ -551,7 +547,6 @@ function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params
 	idx==2.0 && return similarity2(X_jt,cv_params[1],lg=lg) 
 	idx==3.0 && return similarity3(X_jt,cv_params[1],lg=lg) 
 	idx==4.0 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg=lg) 
-	idx==5.0 && return similarity5(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg=lg) 
 end
 
 # categorical covariates specialization

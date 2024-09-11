@@ -19,8 +19,6 @@ function MCMC_fit(;
 
 	M_dp::Float64,                        # Dirichlet mass parameter
 	initial_partition = missing,          # Initial partition (if provided)
-	# actually not implemented yet the version with the initial partition (which however i think is useless)
-	# però vabe dovrebbe essere facile da includere
 
 	starting_alpha::Float64,              # Starting value for alpha
 	unit_specific_alpha::Bool,            # Unit-specific alpha values
@@ -70,7 +68,7 @@ try
 	############# check some stuff #############
 
 	if !ismissing(sp_params) && !(sp_params isa Vector)
-		@error "The sp_params are required to be passed in julia Vector form (i.e. list on R)." _file=""
+		@error "The sp_params are required to be passed in julia Vector form (i.e. list on R);\ne.g. sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)) for cohesion 4 (the auxiliary one)." _file=""
 		return
 	end
 
@@ -99,7 +97,24 @@ try
 		return
 	end
 
-	# if covariate_similarity_idx == 1 && !(cv_params isa )
+	if !ismissing(X_cl) && !(cv_params isa Vector)
+		@error "The cv_params are required to be passed in julia Vector form (i.e. list on R);\ne.g. cv_params = list(0,1,2,2) for similarity 4 (the auxiliary one)." _file=""
+		return
+	end
+
+	if covariate_similarity == 1 && length.(cv_params) != [1] 
+		@error "Wrong params for covariate similarity 1.\nExpected input form: [Real]." _file=""
+		return
+	elseif covariate_similarity == 2 && length.(cv_params) != [1]
+		@error "Wrong params for covariate similarity 2.\nExpected input form: [Real]." _file=""
+		return
+	elseif covariate_similarity == 3 && length.(cv_params) != [1]
+		@error "Wrong params for covariate similarity 3.\nExpected input form: [Real]." _file=""
+		return
+	elseif covariate_similarity == 4 && length.(cv_params) != [1,1,1,1]
+		@error "Wrong params for covariate similarity 4.\nExpected input form: [Real, Real, Real, Real]." _file=""
+		return
+	end
 
 	if (time_specific_alpha==false && unit_specific_alpha==false) || (time_specific_alpha==true && unit_specific_alpha==false)
 		# cases of alpha being a scalar or a vector in time
@@ -118,11 +133,11 @@ try
 	end
 
 	if update_eta1==true && include_eta1==false 
-		@error "Be coherent! I cant have update eta1 and not including it.\nCheck what you assigned to update_eta1 and include_eta1." _file=""
+		@error "Be coherent! I can't have 'update eta1' true and simultaneously not including it.\nCheck what you assigned to update_eta1 and include_eta1." _file=""
 		return
 	end
 	if update_phi1==true && include_phi1==false
-		@error "Be coherent! I cant have update phi1 and not including it.\nCheck what you assigned to update_phi1 and include_phi1." _file=""
+		@error "Be coherent! I can't have 'update phi1' true and simultaneously not including it.\nCheck what you assigned to update_phi1 and include_phi1." _file=""
 		return
 	end
 
@@ -135,14 +150,29 @@ try
 	T_star = T+1
 	p_lk = lk_xPPM ? size(Xlk_covariates)[2] : 0
 	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
-	
+
+
+	############# some more checks #############
+	if !ismissing(initial_partition)
+		if length(initial_partition) != n
+			@error "The initial parition provided does not cover all the $n units of data Y." _file=""
+			return
+		elseif any(initial_partition .<= 0)
+			@error "Labels for the initial partition provided should start from 1." _file=""
+			return
+		else # all good
+			relabel!(initial_partition,n)
+			Si_iter[:,1] = initial_partition
+			gamma_iter[:,1] = 1
+		end
+	end
 
 	if (draws-burnin)%thin != 0
-		@error "Please define draws, thin and burnin in an integer division-friendly way.\nI.e., such that (draws-burnin) % thin = 0." _file=""
+		@error "Please define draws, thin and burnin in an integer division-friendly way;\ni.e. such that (draws-burnin) % thin = 0." _file=""
 		return
 	end
 	nout = round(Int64, (draws - burnin)/(thin))
-	if nout < 0 
+	if nout <= 0 
 		@error "Wrong iterations parameters." _file=""
 		return
 	end
@@ -153,7 +183,7 @@ try
 	end
 
 	if lk_xPPM && ismissing(beta_priors)
-		@error "Cannot use covariates in the likelihood if beta_priors is not defined." _file=""
+		@error "Cannot use covariates in the likelihood if beta_priors is not defined.\nProvide them e.g. as beta_priors = c(rep(0,p),1)." _file=""
 		return
 	end
 

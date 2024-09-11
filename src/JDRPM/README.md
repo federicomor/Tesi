@@ -117,5 +117,11 @@ function MCMC_fit(;
     )
 ```
 
-# Small test example
-Try to run the `test/JDRPM_small_example.Rmd` file.
+# Tests and examples
+Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.
+
+See instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) (sorry for the confusing double src in the path) to see examples regarding all possible combinations of calls of the function. There are in fact
+
+- section 1 "_PAPER TEST_" which fits with **target only**, i.e. some data Y from a simulated dataset
+- section 2 "_SPACE DATA_" which fits with **target + space**
+- section 2 "_PM10 DATA_" which fits with **target + space + covariates** (in the likelihood and/or in the clustering)
