@@ -1,7 +1,7 @@
 # `JDRPM` setup guide
 1. Be sure to have Julia installed. You can download it from [her official site](https://julialang.org/downloads/).
 
-2. Install on R the [`JuliaConnectoR`](https://github.com/stefan-m-lenz/JuliaConnectoR) library (see the installation section there on the github link for further instructions). This is like installing any other library, so on R just do:
+2. Install on R the [`JuliaConnectoR`](https://github.com/stefan-m-lenz/JuliaConnectoR) library (see the installation section there on the github link for further instructions or if you have any problem). This is like installing any other library, so on R just do:
 ```R
 install.packages("JuliaConnectoR")
 ```
@@ -40,33 +40,33 @@ juliaEval("Pkg.status()") # a check to have correctly loaded the package; it sho
 module = normalizePath("<path/to/where/you/stored/JDRPM>/src/JDRPM.jl") # locate the "main" file
 module_JDRPM = juliaImport(juliaCall("include", module)) # load the "main" file
 ```
-4. To actually fit the model, you have to call the fitting function, which however returns a Julia object, so then it has to be converted back to an R one. That is, the fitting process implies actually a two step, to get to the final and usable-on-R results.
+4. To actually fit the model and get the results, you have to call the fitting function which however returns a Julia object, so then you have to convert it back to an R object. That is, the fitting process implies actually two steps:
 ```R
-#### the fit, with ... being all the parameters
+#### 1) the fit, with ... being all the parameters
 out = module_JDRPM$MCMC_fit(...) 
 
-#### the conversion and reshape
+#### 2) the conversion, and reshape
 rout = juliaGet(out)
 names(rout)  = c("Si","gamma","alpha", "sigma2h", "muh", "eta1","beta","theta", "tau2", 
     "phi0", "phi1","lambda2","fitted","llike","lpml","waic")
 
 # reshape some stuff to uniform it to DRPM output
-rout$Si           = aperm(rout$Si,       c(2, 1, 3))
-rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
-rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
-rout$muh          = aperm(rout$muh,      c(2, 1, 3))
-rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
-rout$llike        = aperm(rout$llike,    c(2, 1, 3))
-rout$alpha        = aperm(rout$alpha,    c(2, 1))
-rout$theta        = aperm(rout$theta,    c(2, 1))
-rout$tau2         = aperm(rout$tau2,     c(2, 1))
-rout$eta1         = aperm(rout$eta1,     c(2, 1))
-rout$phi0         = matrix(rout$phi0,    ncol = 1)
-rout$phi1         = matrix(rout$phi1,    ncol = 1)
-rout$lambda2      = matrix(rout$lambda2, ncol = 1)
+rout$Si      = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma   = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh     = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted  = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike   = aperm(rout$llike,    c(2, 1, 3))
+rout$alpha   = aperm(rout$alpha,    c(2, 1))
+rout$theta   = aperm(rout$theta,    c(2, 1))
+rout$tau2    = aperm(rout$tau2,     c(2, 1))
+rout$eta1    = aperm(rout$eta1,     c(2, 1))
+rout$phi0    = matrix(rout$phi0,    ncol = 1)
+rout$phi1    = matrix(rout$phi1,    ncol = 1)
+rout$lambda2 = matrix(rout$lambda2, ncol = 1)
 ```
 
-5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list:
+5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list. Otherwise see [here](#tests-and-examples) for some examples, or scan trough the julia code itself, or read the modeling and implementation chapters of the Tesi.pdf document (when it will be finished).
 ```julia
 function MCMC_fit(;
     Y::Matrix{Float64},                   # n*T matrix, the observed values
@@ -120,7 +120,7 @@ function MCMC_fit(;
 # Tests and examples
 Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.
 
-See instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) (sorry for the confusing double src in the path) to see examples regarding all possible combinations of calls of the function. There are in fact
+See instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) to see examples regarding all possible combinations of calls of the function. There are in fact
 
 - section 1 "_PAPER TEST_" which fits with **target only**, i.e. some data Y from a simulated dataset
 - section 2 "_SPACE DATA_" which fits with **target + space**
