@@ -6,13 +6,14 @@
 install.packages("JuliaConnectoR")
 ```
 
-3. Download and activate the package relative to `JDRPM`. You can do this step also staying inside R. To do it, create a section that look like this:
+3. Download and activate the package relative to `JDRPM`. You can do this step also staying inside R. To do it, create a section that looks like this:
 ```R
 library(JuliaConnectoR) # load the interface library
 juliaSetupOk() # check it returns TRUE
 
 juliaEval("using Pkg") # load the Package manager on Julia
 
+#### IMPORTANT
 #### the next line has to be executed only the first time, i.e. at the installation
 juliaEval("Pkg.instantiate(\"<path/to/where/you/stored/JDRPM>\")") 
 #### since it is required to download (and install, only once) all the depdendencies
@@ -22,7 +23,8 @@ juliaEval("Pkg.instantiate(\"<path/to/where/you/stored/JDRPM>\")")
 # so it just depends on where it is the current R file you are working on
 
 juliaEval("Pkg.activate(\"<path/to/where/you/stored/JDRPM>\")") # load the JDRPM pacakge
-juliaEval("Pkg.status()") # a check to have correctly loaded the package; it should print something like this:
+juliaEval("Pkg.status()") # a check to have correctly loaded the package;
+# it should print something like this:
 # Project JDRPM v0.1.0
 # Status `C:\Users\feder\Desktop\Uni magistrale\Tesi\src\JDRPM\Project.toml`
 #   [6e4b80f9] BenchmarkTools v1.5.0
@@ -118,10 +120,9 @@ function MCMC_fit(;
 ```
 
 # Tests and examples
-Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.
-
-See instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) to see examples regarding all possible combinations of calls of the function. There are in fact
+Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.   
+Try instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) to see examples regarding all possible combinations of calls of the function. There are in fact
 
 - section 1 "_PAPER TEST_" which fits with **target only**, i.e. some data Y from a simulated dataset
 - section 2 "_SPACE DATA_" which fits with **target + space**
-- section 2 "_PM10 DATA_" which fits with **target + space + covariates** (in the likelihood and/or in the clustering)
+- section 3 "_PM10 DATA_" which fits with **target + space + covariates** (in the likelihood and/or in the clustering)
