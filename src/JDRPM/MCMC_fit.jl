@@ -12,7 +12,9 @@ include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
-	Y::Matrix{Float64},                   # n*T matrix, the observed values
+	# Y::Matrix{Float64},                   # n*T matrix, the observed values
+	# Y::Matrix{Union{Missing, Float64}},   # n*T matrix, the observed values
+	Y::Matrix,                            # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
 	Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
 	Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
@@ -65,55 +67,67 @@ function MCMC_fit(;
 	to = TimerOutput()
 
 try
+
 	############# check some stuff #############
-
-	if !ismissing(sp_params) && !(sp_params isa Vector)
-		@error "The sp_params are required to be passed in julia Vector form (i.e. list on R);\ne.g. sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)) for cohesion 4 (the auxiliary one)." _file=""
-		return
+	if !ismissing(sp_coords)
+		if ismissing(sp_params)
+			@error "Please provide sp_params if you want to fit with spatial information." _file=""
+			return
+		end
+		if !(sp_params isa Vector)
+			@error "The sp_params are required to be passed in julia Vector form (i.e. list on R)." _file=""
+			return
+		end
+		if spatial_cohesion_idx == 1 && length.(sp_params) != [1] 
+			@error "Wrong params for spatial cohesion 1.\nExpected input form: [Real]." _file=""
+			return
+		elseif spatial_cohesion_idx == 2 && length.(sp_params) != [1]
+			@error "Wrong params for spatial cohesion 2.\nExpected input form: [Real]." _file=""
+			return
+		elseif spatial_cohesion_idx == 3 && length.(sp_params) != [2,1,1,4]
+			@error "Wrong params for spatial cohesion 3.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
+			return
+		elseif spatial_cohesion_idx == 4 && length.(sp_params) != [2,1,1,4]
+			@error "Wrong params for spatial cohesion 4.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
+			return
+		elseif spatial_cohesion_idx == 5 && length.(sp_params) != [1]
+			@error "Wrong params for spatial cohesion 5.\nExpected input form: [Real]." _file=""
+			return
+		elseif spatial_cohesion_idx == 6 && length.(sp_params) != [1]
+			@error "Wrong params for spatial cohesion 6.\nExpected input form: [Real]." _file=""
+			return
+		end
+		if (spatial_cohesion_idx == 3 || spatial_cohesion_idx == 4) && !issymmetric(sp_params[4])
+			@error "Matrix Psi of the spatial parameters must be symmetric." _file=""
+			return
+		end
 	end
 
-	if spatial_cohesion_idx == 1 && length.(sp_params) != [1] 
-		@error "Wrong params for spatial cohesion 1.\nExpected input form: [Real]." _file=""
-		return
-	elseif spatial_cohesion_idx == 2 && length.(sp_params) != [1]
-		@error "Wrong params for spatial cohesion 2.\nExpected input form: [Real]." _file=""
-		return
-	elseif spatial_cohesion_idx == 3 && length.(sp_params) != [2,1,1,4]
-		@error "Wrong params for spatial cohesion 3.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
-		return
-	elseif spatial_cohesion_idx == 4 && length.(sp_params) != [2,1,1,4]
-		@error "Wrong params for spatial cohesion 4.\nExpected input form: [1x2 Vector, Real, Real, 2x2 Matrix]." _file=""
-		return
-	elseif spatial_cohesion_idx == 5 && length.(sp_params) != [1]
-		@error "Wrong params for spatial cohesion 5.\nExpected input form: [Real]." _file=""
-		return
-	elseif spatial_cohesion_idx == 6 && length.(sp_params) != [1]
-		@error "Wrong params for spatial cohesion 6.\nExpected input form: [Real]." _file=""
-		return
+	if !ismissing(Xcl_covariates) 
+		if !(cv_params isa Vector)
+			@error "The cv_params are required to be passed in julia Vector form (i.e. list on R)." _file=""
+			return
+		end
+		if covariate_similarity == 1 && length.(cv_params) != [1] 
+			@error "Wrong params for covariate similarity 1.\nExpected input form: [Real]." _file=""
+			return
+		elseif covariate_similarity == 2 && length.(cv_params) != [1]
+			@error "Wrong params for covariate similarity 2.\nExpected input form: [Real]." _file=""
+			return
+		elseif covariate_similarity == 3 && length.(cv_params) != [1]
+			@error "Wrong params for covariate similarity 3.\nExpected input form: [Real]." _file=""
+			return
+		elseif covariate_similarity == 4 && length.(cv_params) != [1,1,1,1]
+			@error "Wrong params for covariate similarity 4.\nExpected input form: [Real, Real, Real, Real]." _file=""
+			return
+		end
 	end
 
-	if (spatial_cohesion_idx == 3 || spatial_cohesion_idx == 4) && !issymmetric(sp_params[4])
-		@error "Matrix Psi of the spatial parameters must be symmetric." _file=""
-		return
-	end
-
-	if !ismissing(X_cl) && !(cv_params isa Vector)
-		@error "The cv_params are required to be passed in julia Vector form (i.e. list on R);\ne.g. cv_params = list(0,1,2,2) for similarity 4 (the auxiliary one)." _file=""
-		return
-	end
-
-	if covariate_similarity == 1 && length.(cv_params) != [1] 
-		@error "Wrong params for covariate similarity 1.\nExpected input form: [Real]." _file=""
-		return
-	elseif covariate_similarity == 2 && length.(cv_params) != [1]
-		@error "Wrong params for covariate similarity 2.\nExpected input form: [Real]." _file=""
-		return
-	elseif covariate_similarity == 3 && length.(cv_params) != [1]
-		@error "Wrong params for covariate similarity 3.\nExpected input form: [Real]." _file=""
-		return
-	elseif covariate_similarity == 4 && length.(cv_params) != [1,1,1,1]
-		@error "Wrong params for covariate similarity 4.\nExpected input form: [Real, Real, Real, Real]." _file=""
-		return
+	if !ismissing(Xlk_covariates)
+		if ismissing(beta_priors)
+			@error "Cannot use covariates in the likelihood if beta_priors is not defined." _file=""
+			return
+		end
 	end
 
 	if (time_specific_alpha==false && unit_specific_alpha==false) || (time_specific_alpha==true && unit_specific_alpha==false)
@@ -160,10 +174,6 @@ try
 		elseif any(initial_partition .<= 0)
 			@error "Labels for the initial partition provided should start from 1." _file=""
 			return
-		else # all good
-			relabel!(initial_partition,n)
-			Si_iter[:,1] = initial_partition
-			gamma_iter[:,1] = 1
 		end
 	end
 
@@ -182,19 +192,15 @@ try
 		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
 	end
 
-	if lk_xPPM && ismissing(beta_priors)
-		@error "Cannot use covariates in the likelihood if beta_priors is not defined.\nProvide them e.g. as beta_priors = c(rep(0,p),1)." _file=""
-		return
-	end
-
 	############# send feedback #############
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")
 	println("\non n=$n subjects\nfor T=$T time instants")
-	println("with space? $sPPM")
+	println("\nwith space? $sPPM")
 	println("with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
 	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
+	println("are there missing data in Y? $(any(ismissing.(Y)))")
 	println()
 
 
@@ -236,10 +242,16 @@ try
 	mean_likelhd = zeros(n,T)
 	mean_loglikelhd = zeros(n,T)
 
+
 	############# allocate and initialize working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
 	Si_iter[:,end] .= 0
 	gamma_iter = zeros(Bool,n,T_star)
+	if !ismissing(initial_partition)
+		initp = relabel(initial_partition,n)
+		Si_iter[:,1] = initp
+		gamma_iter[:,1] .= 1
+	end
 	if time_specific_alpha==false && unit_specific_alpha==false
 		# a scalar
 		alpha_iter = starting_alpha
@@ -282,7 +294,7 @@ try
 		s2_beta = beta_priors[end]
 		for t in 1:T
 			# beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p_lk)))
-			beta_iter[t] = beta0 # inizializzare con la media?
+			beta_iter[t] = beta0 # initialize with the mean? maybe it's better
 		end
 		# debug(@showd beta_iter)
 	end
@@ -293,7 +305,6 @@ try
 			eta1_iter[j] = rand(Uniform(-1,1))
 		end
 	end
-
 
 	nh = zeros(Int,n,T_star) # numerosity of each cluster k at time t
 	# dimension n since at most there are n clusters (all singletons)
@@ -310,11 +321,11 @@ try
 	# they are scalars so shouldnt really impact the computational load
 
 
-	############# testing (for now) on random values #############
+	############# random initialization for testing? #############
 	# Si_iter = rand(collect(1:n),n,T_star)
 	# gamma_iter = rand((0,1),n,T_star)
-	
 
+	
 	############# some more logging #############
 	function pretty_log(str)
 		if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
@@ -341,6 +352,7 @@ try
 	sleep(1.0) # to let all the prints be printed
 	# println("loading...\r")
 	# sleep(1.0) # to let all the prints be printed
+	# is enough just one, almost certainly no sleep is actually necessary
 
 	t_start = now()
 	progresso = Progress(round(Int64(draws)),
@@ -368,11 +380,9 @@ try
 			############# update gamma #############
 			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
 			for j in 1:n
-				# debug(title*"[update gamma]")
-				# debug("▸ subject $j")
 				if t==1 
 					gamma_iter[j,t] = 0
-					# debug("we are at time t=1 so nothing to do")
+					# at the first time units get reallocated
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
@@ -542,6 +552,10 @@ try
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
 			# debug(@showd movable_units Si_iter[:,t])
+
+			# all_movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
+			# movable_units = findall(x->x==0, ismissing.(Y[all_movable_units,t]))
+			# nas_movable_units = findall(x->x==1, ismissing.(Y[all_movable_units,t])) # these have NAs
 		
 			for j in movable_units
 				# remove unit j from the cluster she is currently in

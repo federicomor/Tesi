@@ -1,6 +1,12 @@
 module JDRPM
 
-export my_example, MCMC_fit, close_log_file
+export my_example, MCMC_fit, close_log_file, test_R_to_J_conversion
+
+function test_R_to_J_conversion(variable)
+	println("typeof variable: $(typeof(variable))")
+	println("size: $(size(variable))")
+	println("content:\n",variable)
+end
 
 function my_example(iters::Number)
 	result = 0.0

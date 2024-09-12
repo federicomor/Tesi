@@ -10,7 +10,7 @@ const log2pi = log(2*π)
 ##################
 
 # dont overwrite Si, ignore corollary variables
-function relabel(Si::AbstractVector{Int}, n::Int)
+function relabel(Si::AbstractVector{<:Real}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
@@ -28,10 +28,10 @@ function relabel(Si::AbstractVector{Int}, n::Int)
 	end
 	return Sirelab
 end
-relabel(Si::AbstractVector{Int}) = relabel(Si,length(Si))
+relabel(Si::AbstractVector{<:Real}) = relabel(Si,length(Si))
 
 # overwrite Si, ignore the corollary variables
-function relabel!(Si::AbstractVector{Int}, n::Int)
+function relabel!(Si::AbstractVector{<:Real}, n::Int)
 	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
@@ -51,10 +51,10 @@ function relabel!(Si::AbstractVector{Int}, n::Int)
 		Si[j] = Sirelab[j]
 	end
 end
-relabel!(Si::AbstractVector{Int}) = relabel!(Si,length(Si))
+relabel!(Si::AbstractVector{<:Real}) = relabel!(Si,length(Si))
 
 # dont overwrite Si, consider corollary variables
-function relabel_full(Si::AbstractVector{Int}, n::Int)
+function relabel_full(Si::AbstractVector{<:Real}, n::Int)
 	Sirelab = zeros(Int,n)
 	nhrelab = zeros(Int,n)
 	oldLab = zeros(Int,n)
@@ -76,11 +76,11 @@ function relabel_full(Si::AbstractVector{Int}, n::Int)
 	end
 	return Sirelab, nhrelab, oldLab
 end
-relabel_full(Si::AbstractVector{Int}) = relabel_full(Si,length(Si))
+relabel_full(Si::AbstractVector{<:Real}) = relabel_full(Si,length(Si))
 
 
 # dont overwrite Si, consider corollary variables
-function relabel_full!(Si::AbstractVector{Int}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
+function relabel_full!(Si::AbstractVector{<:Real}, n::Int, Sirelab::Vector{Int}, nhrelab::Vector{Int}, oldLab::Vector{Int})
 	fill!(Sirelab, 0)
 	fill!(nhrelab, 0)
 	fill!(oldLab, 0)

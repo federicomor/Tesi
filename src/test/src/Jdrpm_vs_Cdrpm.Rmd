@@ -162,6 +162,23 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```
 
 
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM$test_R_to_J_conversion(as.matrix(y))
+
+ynan = y
+ynan[1,1] = NA
+ynan[5,2] = NA
+ynan
+
+module_JDRPM$test_R_to_J_conversion(as.matrix(ynan))
+
+module_JDRPM$test_R_to_J_conversion(c(1,2,1,2,2))
+
+
+```
+
+
 ## drpm J
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
@@ -172,6 +189,7 @@ out = module_JDRPM$MCMC_fit(
 	initial_partition = NA,
 	Xlk_covariates = NA,
 	Xcl_covariates = NA,
+	# initial_partition = c(1,2,1,2,2),
 	
 	starting_alpha = 0.5,         
 	unit_specific_alpha = FALSE,       
@@ -193,8 +211,8 @@ out = module_JDRPM$MCMC_fit(
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	
-	spatial_cohesion_idx = 4,
-	sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
+	# spatial_cohesion_idx = 4,
+	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
 	draws = niter,                    
@@ -205,6 +223,11 @@ out = module_JDRPM$MCMC_fit(
 )
 ```
 
+
+prima della modifica NA
+Elapsed time: 5 seconds, 66 milliseconds
+LPML: -71.0356621197883 (the higher the better)
+WAIC: 115.7803058815076 (the lower the better)
 
 ```{r}
 rout = juliaGet(out)
