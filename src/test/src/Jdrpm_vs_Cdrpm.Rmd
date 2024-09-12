@@ -39,6 +39,7 @@ module_JDRPM <- juliaImport(juliaCall("include", module))
 ```{r}
 seed = as.integer(runif(1,0,1000))*1.0
 seed = 398.0
+# seed = 881.0
 set.seed(seed)
 cat(seed)
 
@@ -65,10 +66,35 @@ for(i in 1:size(yred)[1]){
 }
 ```
 
+## introduce NA test
+```{r}
+##### at a new time 7
+# y_with_na = cbind(y,rep(NA,5))
+# y
+# y_with_na
+# module_JDRPM$test_R_to_J_conversion(as.matrix(y_with_na))
+
+##### deleting values at existent time t, to maybe study MSE
+t = 4
+y_with_na = y
+y_with_na[,t] = rep(NA,5)
+
+##### just some NA
+y_with_na = y
+y_with_na[3,3] = NA
+y_with_na[1,2] = NA
+y_with_na[5,5] = NA
+
+y
+y_with_na
+```
+
+
 ## Fits
 ```{r}
+niter=40000; nburn=28000; nthin=12
 # niter=30000; nburn=22000; nthin=8
-niter=10000; nburn=2000; nthin=8
+# niter=10000; nburn=2000; nthin=8
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -108,7 +134,8 @@ a_alpha = 2; b_alpha = 2
 ```{r}
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
-		y=y, 
+		# y=y, 
+		y=y_with_na, 
 		# s_coords = NA,
         M=1,
         initial_partition = NULL,
@@ -162,28 +189,13 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```
 
 
-```{r}
-module_JDRPM <- juliaImport(juliaCall("include", module))
-module_JDRPM$test_R_to_J_conversion(as.matrix(y))
-
-ynan = y
-ynan[1,1] = NA
-ynan[5,2] = NA
-ynan
-
-module_JDRPM$test_R_to_J_conversion(as.matrix(ynan))
-
-module_JDRPM$test_R_to_J_conversion(c(1,2,1,2,2))
-
-
-```
-
 
 ## drpm J
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
-	Y=as.matrix(y),              
+	# Y=as.matrix(y),              
+	Y=as.matrix(y_with_na),              
 	sp_coords = NA,
 	M_dp = 1,                     
 	initial_partition = NA,
@@ -218,7 +230,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,                    
 	burnin = nburn,                   
 	thin = nthin,                     
-	logging = FALSE,
+	logging = TRUE,
 	seed = seed
 )
 ```
@@ -228,6 +240,16 @@ prima della modifica NA
 Elapsed time: 5 seconds, 66 milliseconds
 LPML: -71.0356621197883 (the higher the better)
 WAIC: 115.7803058815076 (the lower the better)
+
+
+col test NA al nuove tempo 7
+Elapsed time: 32 seconds, 812 milliseconds
+LPML: -79.11521717334799 (the higher the better)
+WAIC: 133.1380673800629 (the lower the better)
+
+Elapsed time: 1 minute, 59 seconds, 885 milliseconds (not real, it was logging)
+LPML: -63.85166419645225 (the higher the better)
+WAIC: 109.08046537523906 (the lower the better)
 
 ```{r}
 rout = juliaGet(out)
@@ -264,6 +286,77 @@ rout$phi1     = matrix(rout$phi1,    ncol = 1)
 rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
+## NA/MSE analysis
+
+```{r}
+for(j in 1:N){
+	values_j = c()
+	for(t in 1:Tm){
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+	}
+	cat(median(values_j),"\n")
+}
+size(rout$fitted)
+```
+
+```{r}
+##### take last sample (maybe not the best choice)
+yred=t(rout$fitted[,,size(rout$fitted)[3]])
+
+##### take the median/mean/mode
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredJ = summary_fitted
+yred=y
+
+par(mar=c(4,4,4,2))
+cols = colora(size(yredJ)[1],56,0)
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yred),type='l',xlab='time',ylab="fitted values",
+     	 main="model J")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+
+# original real data
+cols = colora(N,seed = 56,show = 0)
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred,yredJ),type='l',
+     	 xlab='time',ylab='values',main="original data")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+```
+
+```{r}
+t = 4
+j = 2
+plot(1:1000,rout$fitted[t,j,],type="l")
+```
+
+
+
 ```{r}
 names(rout)
 

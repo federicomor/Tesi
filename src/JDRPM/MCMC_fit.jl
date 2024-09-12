@@ -203,6 +203,30 @@ try
 	println("are there missing data in Y? $(any(ismissing.(Y)))")
 	println()
 
+	############# update to handle missing data #############
+	# to remember which units and at which times had a missing value
+	missing_map = ismissing.(Y)
+	# eg will be something like this
+	# julia> Y
+	# 6×4 Matrix{Union{Missing, Float64}}:
+	#  1.2        missing  5.0  6.0
+	#  3.4       5.5       1.0  1.0
+	#   missing  1.0       1.0  3.0
+	#   missing  5.0       5.0  7.0
+	#  4.0       4.0       4.0  1.0
+	#  1.0       1.0       1.0  0.0
+	# 
+	# julia> ismissing.(Y) # the missing_map
+	# 6×4 BitMatrix:
+	#  0  1  0  0
+	#  0  0  0  0
+	#  1  0  0  0
+	#  1  0  0  0
+	#  0  0  0  0
+	#  0  0  0  0
+	# so with the map we note that if we encounter a 1 when working on [j,t] we have to simulate the Y value
+	# The map is needed since when we simulate it it will no longer be missing, and therefore we could "lose track" of him
+	# debug(@showd missing_map)
 
 	############# allocate output variables #############
 	i_out = 1
@@ -545,21 +569,36 @@ try
 				end
 			end # for j in 1:n
 
+			for t in 1:T
+				# small performance tweak, iterate first over cols since julia is column-major in storing matrices
+				for j in 1:n
+					# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
+					# so we need now to simulate (from the likelihood) the values for the data which are missing
+					if missing_map[j,t] == true
+						# we have to use a missing map to remember which units and at which times had a missing value,
+						# in order to simulate just them and instead use the given value for the other units and times
+						# printlgln("We fix the NA for [j,t]=[$j,$t]")
+						Y[j,t] = rand(Normal(
+									muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+									sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
+									))
+						# debug(@showd Y)
+						# printlgln("we sampled $(Y[j,t])")
+					end
+				end
+			end
+
 			# end # of the @timeit for gamma
 			############# update rho #############
 			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
-			# debug(title*"[update rho]")
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
-			# debug(@showd movable_units Si_iter[:,t])
-
-			# all_movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
-			# movable_units = findall(x->x==0, ismissing.(Y[all_movable_units,t]))
-			# nas_movable_units = findall(x->x==1, ismissing.(Y[all_movable_units,t])) # these have NAs
 		
 			for j in movable_units
+				# printlgln("working on unit j=$j at t=$t")
 				# remove unit j from the cluster she is currently in
 				# debug(@showd j t)
+				# debug(@showd movable_units)
 
 				if nh[Si_iter[j,t],t] > 1 # unit j does not belong to a singleton cluster
 					nh[Si_iter[j,t],t] -= 1

@@ -18,11 +18,6 @@ Slides:
 3. Test on air pollution data
 
 
-				if missing_map[j,t]==true
-					# we had a missing value for Y[j,t], so we simulate it from the likelihood the value
-					# we have to use a missing map to remember which and where were the missing values, so
-					# to simulate just them and instead use the given
-
 
 
 - rifare il test di Page su gstat con gli stessi parametri e mostrare che esce "meglio"
