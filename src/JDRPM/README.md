@@ -13,16 +13,19 @@ juliaSetupOk() # check it returns TRUE
 
 juliaEval("using Pkg") # load the Package manager on Julia
 
-#### IMPORTANT
-#### the next line has to be executed only the first time, i.e. at the installation
-juliaEval("Pkg.instantiate(\"<path/to/where/you/stored/JDRPM>\")") 
-#### since it is required to download (and install, only once) all the depdendencies
+juliaEval("Pkg.activate(\"<path/to/where/you/stored/JDRPM>\")") # load the JDRPM pacakge
+
+# the next line has to be executed only the first time, i.e. at the installation
+# since it is required to download (and install, only once) all the depdendencies
+juliaEval("Pkg.instantiate()") 
+# but actually Julia Package manager is smart enough to not re-install everything,
+# so you can even leave it there after the first installation
+# go here for more details https://pkgdocs.julialang.org/v1/environments/
 
 # about <path/to/where/you/stored/JDRPM>, in my case was for example this:
 # juliaEval("Pkg.activate(\"../../JDRPM\")")
 # so it just depends on where it is the current R file you are working on
 
-juliaEval("Pkg.activate(\"<path/to/where/you/stored/JDRPM>\")") # load the JDRPM pacakge
 juliaEval("Pkg.status()") # a check to have correctly loaded the package;
 # it should print something like this:
 # Project JDRPM v0.1.0

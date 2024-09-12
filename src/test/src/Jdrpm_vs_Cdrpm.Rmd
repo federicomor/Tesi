@@ -23,6 +23,12 @@ devtools::load_all("../../drpm_main/")
 library(JuliaConnectoR)
 juliaSetupOk()
 
+juliaEval("using Pkg")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("Pkg.instantiate()")
+
+juliaEval("Pkg.status()")
+
 # setup project
 juliaEval("using Pkg; Pkg.status()")
 juliaEval("Pkg.activate(\"../../JDRPM\")")
