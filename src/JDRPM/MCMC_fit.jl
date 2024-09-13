@@ -63,13 +63,25 @@ function MCMC_fit(;
 
 		printlgln(replace(string(now()),"T" => "   "))
 		debug("current seed = $seed")
+		to = TimerOutput()
 	end
-	to = TimerOutput()
 
 try
 
+	############# define auxiliary variables #############
+	# missing is for when we dont provide the argument when fitting
+	# nothing is for when we provide it but is NULL, on R
+	sPPM = !ismissing(sp_coords) && !isnothing(sp_coords)
+	cl_xPPM = !ismissing(Xcl_covariates) && !isnothing(Xcl_covariates)
+	lk_xPPM = !ismissing(Xlk_covariates) && !isnothing(Xcl_covariates)
+	n, T = size(Y)
+	T_star = T+1
+	p_lk = lk_xPPM ? size(Xlk_covariates)[2] : 0
+	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
+	Y_has_NA = any(ismissing.(Y))
+
 	############# check some stuff #############
-	if !ismissing(sp_coords)
+	if sPPM
 		if ismissing(sp_params)
 			@error "Please provide sp_params if you want to fit with spatial information." _file=""
 			return
@@ -103,7 +115,7 @@ try
 		end
 	end
 
-	if !ismissing(Xcl_covariates) 
+	if cl_xPPM
 		if !(cv_params isa Vector)
 			@error "The cv_params are required to be passed in julia Vector form (i.e. list on R)." _file=""
 			return
@@ -123,7 +135,7 @@ try
 		end
 	end
 
-	if !ismissing(Xlk_covariates)
+	if lk_xPPM
 		if ismissing(beta_priors)
 			@error "Cannot use covariates in the likelihood if beta_priors is not defined." _file=""
 			return
@@ -154,16 +166,6 @@ try
 		@error "Be coherent! I can't have 'update phi1' true and simultaneously not including it.\nCheck what you assigned to update_phi1 and include_phi1." _file=""
 		return
 	end
-
-
-	############# define auxiliary variables #############
-	sPPM = !ismissing(sp_coords)
-	cl_xPPM = !ismissing(Xcl_covariates)
-	lk_xPPM = !ismissing(Xlk_covariates)
-	n, T = size(Y)
-	T_star = T+1
-	p_lk = lk_xPPM ? size(Xlk_covariates)[2] : 0
-	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
 
 
 	############# some more checks #############
@@ -200,8 +202,9 @@ try
 	println("\nwith space? $sPPM")
 	println("with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
 	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
-	println("are there missing data in Y? $(any(ismissing.(Y)))")
+	println("are there missing data in Y? $Y_has_NA")
 	println()
+
 
 	############# update to handle missing data #############
 	# to remember which units and at which times had a missing value
@@ -351,29 +354,32 @@ try
 
 	
 	############# some more logging #############
-	function pretty_log(str)
-		if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
-		if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
-		if str=="nh" println(log_file,"nh\n",tostr(nh)); return; end
-		if str=="nclus_iter" println(log_file,"nclus_iter\n",tostr(nclus_iter)); return; end
-		if str=="muh_iter" println(log_file,"muh_iter\n",tostr(muh_iter)); return; end
-		if str=="sig2h_iter" println(log_file,"sig2h_iter\n",tostr(sig2h_iter)); return; end
-		if str=="alpha_iter" println(log_file,"alpha_iter\n",tostr(alpha_iter)); return; end
-		if str=="theta_iter" println(log_file,"theta_iter\n",tostr(theta_iter)); return; end
-		if str=="tau2_iter" println(log_file,"tau2_iter\n",tostr(tau2_iter)); return; end
-		if str=="phi0_iter" println(log_file,"phi0_iter\n",tostr(phi0_iter)); return; end
-		if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
-		if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
-		if str=="sp_coords" println(log_file,"sp_coords\n",tostr(sp_coords)); return; end
-		if str=="sp1" println(log_file,"sp1\n",tostr(sp1)); return; end
-		if str=="sp2" println(log_file,"sp2\n",tostr(sp2)); return; end
-		if str=="beta_iter" println(log_file,"beta_iter\n",tostr(beta_iter)); return; end
+	if logging
+		function pretty_log(str)
+			if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
+			if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
+			if str=="nh" println(log_file,"nh\n",tostr(nh)); return; end
+			if str=="nclus_iter" println(log_file,"nclus_iter\n",tostr(nclus_iter)); return; end
+			if str=="muh_iter" println(log_file,"muh_iter\n",tostr(muh_iter)); return; end
+			if str=="sig2h_iter" println(log_file,"sig2h_iter\n",tostr(sig2h_iter)); return; end
+			if str=="alpha_iter" println(log_file,"alpha_iter\n",tostr(alpha_iter)); return; end
+			if str=="theta_iter" println(log_file,"theta_iter\n",tostr(theta_iter)); return; end
+			if str=="tau2_iter" println(log_file,"tau2_iter\n",tostr(tau2_iter)); return; end
+			if str=="phi0_iter" println(log_file,"phi0_iter\n",tostr(phi0_iter)); return; end
+			if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
+			if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
+			if str=="sp_coords" println(log_file,"sp_coords\n",tostr(sp_coords)); return; end
+			if str=="sp1" println(log_file,"sp1\n",tostr(sp1)); return; end
+			if str=="sp2" println(log_file,"sp2\n",tostr(sp2)); return; end
+			if str=="beta_iter" println(log_file,"beta_iter\n",tostr(beta_iter)); return; end
+		end
 	end
+
 
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
-	sleep(1.0) # to let all the prints be printed
+	# sleep(1.0) # to let all the prints be printed
 	# println("loading...\r")
 	# sleep(1.0) # to let all the prints be printed
 	# is enough just one, almost certainly no sleep is actually necessary
@@ -569,24 +575,82 @@ try
 				end
 			end # for j in 1:n
 
-			for t in 1:T
-				# small performance tweak, iterate first over cols since julia is column-major in storing matrices
-				for j in 1:n
-					# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
-					# so we need now to simulate (from the likelihood) the values for the data which are missing
-					if missing_map[j,t] == true
-						# we have to use a missing map to remember which units and at which times had a missing value,
-						# in order to simulate just them and instead use the given value for the other units and times
-						# printlgln("We fix the NA for [j,t]=[$j,$t]")
-						Y[j,t] = rand(Normal(
-									muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
-									sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
-									))
-						# debug(@showd Y)
-						# printlgln("we sampled $(Y[j,t])")
+			############# sample the missing values #############
+			if Y_has_NA
+				for t in 1:T
+					# small performance tweak, iterate first over cols since julia is column-major in storing matrices
+					for j in 1:n
+						# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
+						# so we need now to simulate (from the likelihood) the values for the data which are missing
+						# and we simulate them using as parameters the one sampled at the current iteration
+						if missing_map[j,t] == true
+							# we have to use a missing map to remember which units and at which times had a missing value,
+							# in order to simulate just them and instead use the given value for the other units and times
+							# printlgln("We fix the NA for [j,t]=[$j,$t]")
+							Y[j,t] = rand(Normal(
+										muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+										sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
+										))
+							# debug(@showd Y)
+							# printlgln("we sampled $(Y[j,t])")
+						end
 					end
 				end
 			end
+
+			# if Y_has_NA
+			# 	# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
+			# 	# so we need now to simulate (from the likelihood) the values for the data which are missing
+			# 	# and we simulate them using as parameters the one sampled at the current iteration
+			# 	for idx in findall(missing_map)
+			# 		# we have to use a missing map to remember which units and at which times had a missing value,
+			# 		# in order to simulate just them and instead use the given value for the other units and times
+			# 		(j,t) = Tuple(idx)
+			# 		if t == 1
+			# 			Y[j,t] = rand(Normal(
+			# 				muh_iter[Si_iter[j,t],t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+			# 				sqrt(sig2h_iter[Si_iter[j,t],t])
+			# 				))
+			# 		else
+			# 			Y[j,t] = rand(Normal(
+			# 				muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+			# 				sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
+			# 				))
+			# 		end
+			# 	end
+			# end
+
+			# # update, (i guess) more correct method: 
+			# # we sample each of the parameters, that are linked to the Y, from their posterior
+			# # and then we use them to sample from the likelihood f(Y|sampled params)
+			# # wait wasnt this what we were already doing?
+			# if Y_has_NA
+			# 	for idx in findall(missing_map)
+			# 		(j,t) = Tuple(idx)
+			# 		if t==1
+			# 			mu_sampled = 
+			# 			if lk_xPPM 
+			# 				mu_sampled += dot(view(Xlk_covariates,j,:,t), beta_sampled)
+			# 			end
+			# 			sig2_sampled = 
+			# 			Y[idx] = rand(Normal(
+			# 				mu_sampled + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_sampled) : 0),
+			# 				sqrt(sig2_sampled)
+			# 				))
+			# 		else
+			# 			mu_sampled = 
+			# 			if lk_xPPM 
+			# 				mu_sampled += dot(view(Xlk_covariates,j,:,t), beta_sampled)
+			# 			end
+			# 			sig2_sampled = 
+			# 			Y[idx] = rand(Normal(
+			# 				mu_sampled + eta1_iter[j]*Y[j,t-1],
+			# 				sqrt(sig2_sampled *(1-eta1_iter[j]^2))
+			# 				))
+			# 		end
+
+			# 	end
+			# end
 
 			# end # of the @timeit for gamma
 			############# update rho #############
@@ -757,12 +821,12 @@ try
 					### real case
 					if t==1
 						ph[k] = loglikelihood(Normal(
-							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0.0),
+							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw)),
 							Y[j,t]) + lpp
 					else
 						ph[k] = loglikelihood(Normal(
-							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0.0),
+							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
 							Y[j,t]) + lpp
 					end
@@ -1062,7 +1126,7 @@ try
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
-				sumg = sum(gamma_iter)
+				sumg = sum(gamma_iter[:,1:T])
 				a_star = alpha_priors[1] + sumg
 				b_star = alpha_priors[2] + n*T - sumg
 				alpha_iter = rand(Beta(a_star, b_star))
@@ -1079,7 +1143,7 @@ try
 			elseif time_specific_alpha==false && unit_specific_alpha==true
 				# a vector in units
 				for j in 1:n
-					sumg = sum(gamma_iter[j,:])
+					sumg = sum(gamma_iter[j,1:T])
 					a_star = alpha_priors[1,j] + sumg
 					b_star = alpha_priors[2,j] + T - sumg
 					alpha_iter[j] = rand(Beta(a_star, b_star))

@@ -339,21 +339,21 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	//
 	// ===================================================================================
 	
-int iter_feedback = 10000;
 	for(i = 0; i < *draws; i++){
-			// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
-			// RprintVecAsMat("muh", muh, *nsubject, ntime1);
-Rprintf("iteration %d of %d\r",i,*draws);
-		if((i+1) % iter_feedback == 0){
-			time_t now;
-			time(&now);
 
-			Rprintf("\nmcmc iter = %d =========================================== \n", i+1);
-			Rprintf("%s", ctime(&now));
+	if(i % 100 == 0){
+		Rprintf("mcmc iter = %d\r",i);
+	}
+// 		if((i+1) % 10000 == 0){
+// 			time_t now;
+// 			time(&now);
 
-//			RprintVecAsMat("alpha_iter", alpha_iter, 1, *ntime);
+// 			Rprintf("mcmc iter = %d \n", i+1);
+// 			Rprintf("%s", ctime(&now));
 
-		}
+// //			RprintVecAsMat("alpha_iter", alpha_iter, 1, *ntime);
+
+// 		}
 
 //		Rprintf("*ntime = %d\n", *ntime);
 
@@ -364,9 +364,8 @@ Rprintf("iteration %d of %d\r",i,*draws);
 
 			
 //			RprintIVecAsMat("nh", nh, *nsubject, ntime1);
-			// RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
-			// RprintVecAsMat("muh", muh, *nsubject, ntime1);
-			// RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
+//			RprintIVecAsMat("Si", Si_iter, *nsubject, ntime1);
+//			RprintIVecAsMat("gamma", gamma_iter, *nsubject, ntime1);
 //			Rprintf("nclus_iter[t] = %d\n", nclus_iter[t]);
 
 
@@ -2054,7 +2053,6 @@ Rprintf("iteration %d of %d\r",i,*draws);
 
 
 	}
-	Rprintf("\n");
 
 
 	

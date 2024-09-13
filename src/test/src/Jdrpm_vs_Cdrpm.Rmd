@@ -23,9 +23,9 @@ devtools::load_all("../../drpm_main/")
 library(JuliaConnectoR)
 juliaSetupOk()
 
-juliaEval("using Pkg")
-juliaEval("Pkg.activate(\"../../JDRPM\")")
-juliaEval("Pkg.instantiate()")
+# juliaEval("using Pkg")
+# juliaEval("Pkg.activate(\"../../JDRPM\")")
+# juliaEval("Pkg.instantiate()")
 
 juliaEval("Pkg.status()")
 
@@ -98,9 +98,11 @@ y_with_na
 
 ## Fits
 ```{r}
-niter=40000; nburn=28000; nthin=12
+# niter=40000; nburn=28000; nthin=12
 # niter=30000; nburn=22000; nthin=8
 # niter=10000; nburn=2000; nthin=8
+niter=1000; nburn=200; nthin=4
+
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -140,15 +142,15 @@ a_alpha = 2; b_alpha = 2
 ```{r}
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
-		# y=y, 
-		y=y_with_na, 
+		y=y,
+		# y=y_with_na, 
 		# s_coords = NA,
         M=1,
         initial_partition = NULL,
 		
         starting_alpha = 0.5,
         unit_specific_alpha = FALSE,
-        time_specific_alpha = TRUE,
+        time_specific_alpha = 0,
         alpha_0=FALSE,
 		
         eta1_0=!(update_eta1),
@@ -200,8 +202,8 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
-	# Y=as.matrix(y),              
-	Y=as.matrix(y_with_na),              
+	Y=as.matrix(y),
+	# Y=as.matrix(y_with_na),              
 	sp_coords = NA,
 	M_dp = 1,                     
 	initial_partition = NA,
@@ -211,7 +213,7 @@ out = module_JDRPM$MCMC_fit(
 	
 	starting_alpha = 0.5,         
 	unit_specific_alpha = FALSE,       
-	time_specific_alpha = TRUE,       
+	time_specific_alpha = FALSE,       
 	update_alpha = TRUE,             
 	
 	include_eta1 = TRUE,                    
@@ -236,7 +238,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,                    
 	burnin = nburn,                   
 	thin = nthin,                     
-	logging = TRUE,
+	logging = FALSE,
 	seed = seed
 )
 ```
@@ -283,7 +285,12 @@ rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
 rout$muh          = aperm(rout$muh,      c(2, 1, 3))
 rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
 rout$llike        = aperm(rout$llike,    c(2, 1, 3))
-rout$alpha        = aperm(rout$alpha,    c(2, 1))
+if (is.null(size(rout$alpha))) {
+	# do nothing
+# } else if size(rout$alpha) == 2 {
+} else {
+	rout$alpha        = aperm(rout$alpha,    c(2, 1))
+}
 rout$theta        = aperm(rout$theta,    c(2, 1))
 rout$tau2         = aperm(rout$tau2,     c(2, 1))
 rout$eta1         = aperm(rout$eta1,    c(2, 1))
@@ -292,24 +299,28 @@ rout$phi1     = matrix(rout$phi1,    ncol = 1)
 rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
+
+```{r}
+plot(drpm1$alpha[,2],type="l",ylim=c(0,1))
+plot(rout$alpha,type="l",ylim=c(0,1))
+```
+
 ## NA/MSE analysis
 
 ```{r}
-for(j in 1:N){
-	values_j = c()
-	for(t in 1:Tm){
-		for (it in 1:size(rout$fitted)[3]){
-			values_j = c(values_j,rout$fitted[t,j,it])
-		}
-	}
-	cat(median(values_j),"\n")
-}
-size(rout$fitted)
+y_with_na
+y
+j = 5
+t = 6
+par(mar=c(2,2,3,1))
+plot(rout$fitted[t,j,],type="l",main=paste0("trace plot of j=",j," at t=",t))
+abline(h=y[j,t],col="#005500")
 ```
 
 ```{r}
 ##### take last sample (maybe not the best choice)
-yred=t(rout$fitted[,,size(rout$fitted)[3]])
+# for (it in 0:10){
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]-6])
 
 ##### take the median/mean/mode
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
@@ -333,6 +344,7 @@ for(i in 1:size(yredJ)[1]){
    if(i==1){
      plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
      	 ylim=extrema(yredJ,yred),type='l',xlab='time',ylab="fitted values",
+     	 # main=paste("model J",it))
      	 main="model J")
  	  } 
 	  else{
@@ -347,20 +359,14 @@ for(i in 1:size(yred)[1]){
    if(i==1){
      plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred,yredJ),type='l',
      	 xlab='time',ylab='values',main="original data")
- 	  } 
+ 	  }
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
 }
 legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
-```
 
-```{r}
-t = 4
-j = 2
-plot(1:1000,rout$fitted[t,j,],type="l")
 ```
-
 
 
 ```{r}
@@ -553,6 +559,89 @@ plot(rout$lambda2[,1],type="l",
 ```
 
 
+# functions
+```{r}
+N = 5
+Tm = 6
+
+generate_partition = function(model){
+	partition = list()
+	for (t in 1:Tm){
+		Si_jt <- model$Si[t, , ]
+		Si_jt <- t(Si_jt) 
+		partition[[t]] <- salso(Si_jt, loss = "binder")
+	}
+	return(partition)
+}
+
+plot_partition_with_numbers = function(partition,title){
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, labels = as.character(unit),
+	         col = partition_matrix[unit, t], cex = 1.5)
+	  }
+	}
+}
+
+plot_ARI = function(partition,title){
+	LEN = Tm
+	df_cluster = data.frame(clusters=c(),Time=c())
+	for(time in 1:Tm){
+		salso_out <- partition[[time]]
+		df_temp = data.frame(
+			clusters = salso_out
+		)
+		df_temp$Time = rep(time,dim(df_temp)[1])
+		df_cluster = rbind(df_cluster,df_temp)
+		# clusters log
+		# clusters_now = df_temp$clusters
+		# n_clusters = unique(clusters_now)
+		# cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	}
+	library(mclust)
+	# build the ARI matrix
+	ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+	rho_ARI <- list()
+	for(k in 1:LEN){
+		rho_ARI[[k]] <- partition[[k]]
+	}
+	for(k in 1: LEN){
+		for(kk in 1: LEN){
+			ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+		}
+	}
+	ncols_ari = 100
+	# if (min(ARImats)<0){
+		# cols_ARI = colora(ncols_ari,79,0)
+		# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# } else {
+		# cols_ARI = colora(ncols_ari,56,0)
+		# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+		cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+		# cols_ARI = colora(ncols_ari,102,0)
+		# brks = seq(0,1,length.out=ncols_ari+1)
+		brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# }
+	# or see ?designer.colors for colors
+	library(fields)
+	image.plot(ARImats,
+			   main=paste0("Lagged ARI values - ",title),axes=FALSE,col=cols_ARI,
+			   breaks=brks)
+	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+}
+```
+
+```{r}
+parts = generate_partition(drpm1)
+plot_partition_with_numbers(parts,title="model C")
+plot_ARI(parts,title="model C")
+```
 
 
 ## Partition plots
@@ -829,9 +918,9 @@ for(i in 1:size(yred)[1]){
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
+	text(0.92,yred[i,1],paste(i),col=cols[i])
 }
-legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
-
+# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
 ```
 
 # ==========
@@ -3123,18 +3212,6 @@ b*100/a
 # q1
 
 # q1
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
