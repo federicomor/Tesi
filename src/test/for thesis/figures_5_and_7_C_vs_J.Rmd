@@ -166,15 +166,15 @@ plot_ARI = function(partition,title){
 
 example
 ```{r,warning=F}
-################################
-# model_name="model J"
-# model = rout
-model_name="model C"
-model = C.models.out[[1]]
-################################
-parts = generate_partition(rout)
-plot_partition_with_numbers(parts,model_name)
-plot_ARI(parts,model_name)
+# ################################
+# # model_name="model J"
+# # model = rout
+# model_name="model C"
+# model = C.models.out[[1]]
+# ################################
+# parts = generate_partition(rout)
+# plot_partition_with_numbers(parts,model_name)
+# plot_ARI(parts,model_name)
 ```
 
 #========
@@ -186,10 +186,9 @@ plot_ARI(parts,model_name)
 seed = 314.0
 cat("seed",seed,"\n")
 
-# niter=30000; nburn=22000; nthin=8
-# niter=120; nburn=20; nthin=2 # valori del file originale (?)
-niter=20; nburn=0; nthin=1 # test super veloce
-# niter=2000; nburn=1000; nthin=4
+# niter=50000; nburn=10000; nthin=40 # valori del file originale
+niter=30000; nburn=22000; nthin=8 # secondo i miei test
+# niter=20; nburn=0; nthin=1 # test super veloce
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -197,7 +196,7 @@ cat(nout,"valid iterations\n")
 ```{r}
 # params
 m0_phi0 = 0
-s20_phi0 = 1
+s20_phi0 = 2
 A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
@@ -228,6 +227,16 @@ L0 = 1
 
 
 # Fit C
+ci ha messo 43 minuti a fittare 3k iterazioni per ogni modello
+sono 16 modelli => tempo medio per iterazione = 43min / (3k*16) = 0.0008958333
+
+il fit serio prevede 50k iterazioni per modello
+=> tempo tot stimate = 0.0008958333 * (50k*16) = 716min = 12h :/
+con 40k iterazioni?
+=> tempo tot stimate = 0.0008958333 * (40k*16) = 573min = 9.5h :/
+con 30k iterazioni?
+=> tempo tot stimate = 0.0008958333 * (30k*16) = 430min = 7h :/
+
 ```{r,warning=F}
 tempo_inizio <- Sys.time()
 set.seed(1)
@@ -237,7 +246,7 @@ hh <- 1
 # h <- "111"; s <- "0";
 model <- "C"
 for(s in c("0","1")){
-	pdf(paste0("gstat_test_C_sp",s,".pdf"),height=11.7, width=8)
+	pdf(paste0("gstat_test_C_sp",s,".pdf"),height=11.7, width=8.3)
 	par(mfrow=c(4,2),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
 	
 	for(h in c("111","110","101","100","011","010","001","000")){
@@ -258,6 +267,7 @@ for(s in c("0","1")){
 	  cat("space is ", s, "\n")
 	  cat("seed is ", 1*hh, "\n")
 	  set.seed(1*hh)
+	  # set.seed(runif(1,0,100))
 
 # param_0 = 1 <=> we update it
 # param_0 = 0 <=> we dont update it
@@ -286,7 +296,7 @@ for(s in c("0","1")){
     cat("lpml = ", out$lpml, "\n")
     cat("waic = ", out$waic, "\n\n\n")
 		C.models.out[[hh]] <-  out
-		names(C.models.out)[hh] <- paste0("out_",h,"_","sp",s,"_",model)
+		names(C.models.out)[hh] <- paste0("Cout_",h,"_","sp",s,"_",model)
 
         # If there is desire to produce plot of each fit uncomment these lines
 		rho <- list()
@@ -332,7 +342,42 @@ cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 ```
 
+```{r,warning=F}
+##########################
+model_name = "model C"
+partition = generate_partition(C.models.out[[1]])
+##########################
 
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
+}
+```
+
+```{r,warning=F}
+##########################
+model = "model C"
+partition = generate_partition(C.models.out[[1]])
+##########################
+par(mfrow=c(3,4),mar=c(1,1,2,1),oma=c(1,1,1,1))
+# cols = rainbow(12)
+for (time in 1:Tm){
+	plot(s_std,pch=19,
+		 # col=cols[partition[[time]]],
+		 col=partition[[time]],
+		 xlab="",ylab="",
+		 axes = F,
+		 cex=pmax(y[, time]/6, rep(0.5, N)),
+		 main=paste0(model," at t=",time))
+}
+```
 
 
 # Fit J
@@ -346,7 +391,7 @@ hh <- 1
 # h <- "111"; s <- "0";
 # model <- "J"
 for(s in c("0","1")){
-	pdf(paste0("gstat_test_J_sp",s,".pdf"),height=11.7, width=8)
+	pdf(paste0("gstat_test_J_sp",s,".pdf"),height=11.7, width=8.3)
 	par(mfrow=c(4,2),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
 	
 	for(h in c("111","110","101","100","011","010","001","000")){
@@ -368,8 +413,9 @@ for(s in c("0","1")){
 
 	  cat("model is ", h, "\n")
 	  cat("space is ", s, "\n")
-	  # cat("seed is ", 1*hh, "\n")
+	  cat("seed is ", 1*hh, "\n")
 	  # set.seed(1*hh)
+	  seed = 1*hh
 
 	  out = module_JDRPM$MCMC_fit(
 			Y=as.matrix(y),              
@@ -403,37 +449,41 @@ for(s in c("0","1")){
 			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 			draws = niter,burnin = nburn, thin = nthin,
 			logging = FALSE,
-			seed = seed
+			seed = seed,
+			simple_return = TRUE
 		)
 	  
-		rout = juliaGet(out)
-		names(rout) = c("Si","gamma","alpha", "sigma2h", "muh", "eta1","beta",
-						 "theta", "tau2", "phi0", "phi1","lambda2","fitted",
-						 "llike","lpml","waic")
-		
-		# reshape some stuff to uniform it to drpm output
-		rout$Si           = aperm(rout$Si,       c(2, 1, 3))
-		rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
-		rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
-		rout$muh          = aperm(rout$muh,      c(2, 1, 3))
-		rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
-		rout$llike        = aperm(rout$llike,    c(2, 1, 3))
-		if (is.null(size(rout$alpha))) {
-			# do nothing
-		# } else if size(rout$alpha) == 2 {
-		} else {
-			rout$alpha        = aperm(rout$alpha,    c(2, 1))
-		}
-		rout$theta        = aperm(rout$theta,    c(2, 1))
-		rout$tau2         = aperm(rout$tau2,     c(2, 1))
-		rout$eta1         = aperm(rout$eta1,    c(2, 1))
-		rout$phi0     = matrix(rout$phi0,    ncol = 1)
-		rout$phi1     = matrix(rout$phi1,    ncol = 1)
-		rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+		# rout = juliaGet(out)
+		# names(rout) = c("Si","gamma","alpha", "sigma2h", "muh", "eta1","beta",
+		# 				 "theta", "tau2", "phi0", "phi1","lambda2","fitted",
+		# 				 "llike","lpml","waic")
+		# # reshape some stuff to uniform it to drpm output
+		# rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+		# rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+		# rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+		# rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+		# rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+		# rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+		# if (is.null(size(rout$alpha))) {
+		# 	# do nothing
+		# # } else if size(rout$alpha) == 2 {
+		# } else {
+		# 	rout$alpha        = aperm(rout$alpha,    c(2, 1))
+		# }
+		# rout$theta        = aperm(rout$theta,    c(2, 1))
+		# rout$tau2         = aperm(rout$tau2,     c(2, 1))
+		# rout$eta1         = aperm(rout$eta1,    c(2, 1))
+		# rout$phi0     = matrix(rout$phi0,    ncol = 1)
+		# rout$phi1     = matrix(rout$phi1,    ncol = 1)
+		# rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+	    ############### now easier with simple_return option
+	    rout = juliaGet(out)
+		names(rout) = c("Si","lpml","waic")
+		rout$Si = aperm(rout$Si, c(2, 1, 3))
 			  
 	  
 		J.models.out[[hh]] <- rout
-		names(J.models.out)[hh] <- paste0("out_",h,"_","sp",s,"_",model)
+		names(J.models.out)[hh] <- paste0("Jout_",h,"_","sp",s,"_",model)
 
         # If there is desire to produce plot of each fit uncomment these lines
 		rho <- list()
@@ -478,6 +528,15 @@ cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 ```
 
+seed 314
+LPML: -1474.0155769224234 (the higher the better)
+WAIC: 2596.6593009005455 (the lower the better)
+
+LPML: -2037.7808103148377 (the higher the better)
+WAIC: 3012.108243465729 (the lower the better)
+
+LPML: -2105.1022829807366 (the higher the better)
+WAIC: 2868.5795119399577 (the lower the better)
 
 
 ```{r,warning=F}
@@ -493,7 +552,6 @@ model = C.models.out[[1]]
 parts = generate_partition(rout)
 plot_ARI(parts,model_name)
 ```
-
 
 #========
 # Plots

@@ -1004,7 +1004,7 @@ cat(nout,"valid iterations\n")
 ```{r}
 # params
 m0_phi0 = 0
-s20_phi0 = 1
+s20_phi0 = 10
 A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
@@ -1130,15 +1130,22 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	# draws = 2,burnin = 0, thin = 1,
-	draws = niter,burnin = nburn, thin = nthin,
-	logging = TRUE,
-	seed = seed
+	draws = 2,burnin = 0, thin = 1,
+	# draws = niter,burnin = nburn, thin = nthin,
+	logging = FALSE,
+	seed = seed,
+	simple_return = TRUE
 )
 ```
 
 
 ```{r}
+#### if simple_return is TRUE
+rout = juliaGet(out)
+names(rout) = c("Si","lpml","waic")
+rout$Si = aperm(rout$Si, c(2, 1, 3))
+
+#### if simple_return is FALSE
 rout = juliaGet(out)
 names(rout)  = c("Si",
 				 "gamma",
@@ -1368,9 +1375,10 @@ plot(rout$lambda2[,1],type="l",
 
 
 
+
 ## Partition plots
 ```{r, warning=F}
-# maxNClusters = 7
+maxNClusters = 3
 
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
@@ -1391,22 +1399,29 @@ for (t in 1:Tm) {
   							   # , maxNClusters = maxNClusters
   							   )
 }
-
+maxk = 0
 cat(crayon::red("DRPM - C\n"))
 for (t in 1:Tm){
 	cat("Time",t,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmc[[t]])),maxk)
 }
 cat("\n")
 cat(crayon::red("DRPM - J\n"))
 for (t in 1:Tm){
 	cat("Time",t,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmj[[t]])),maxk)
 }
 ```
 
 
 ```{r, warning=F}
-cols=colora(len=maxNClusters, seed=67, show=0) # purples
-# cols=colora(len=10, seed=44, show=0) # greens
+# cols=colora(len=maxk, seed=67, show=1)
+# cols=colora(len=maxk, seed=41, show=0) # greens/light-blues
+# cols=colora(len=maxk, seed=73, show=0) # dark blues
+# cols=colora(len=maxk, seed=32, show=0) # viridis
+# cols=colora(len=maxk, seed=22, show=0) # reds/blues
+# cols=colora(len=maxk, seed=44, show=0) # greens
+cols=colora(len=maxk, seed=56, show=0) # la 56
 # cols = colora(len=10,"rand")
 
 heatmap_matrix <- do.call(rbind, partitions_drpmc)
@@ -1440,7 +1455,7 @@ abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted
 abline(v = 1:Tm, col = "lightgray", lty = "dotted")
 # Plot lines and points for each unit
 for (unit in 1:num_units) {
-  lines(1:Tm, partition_matrix[unit, ]+unit/100, type = "l", pch = 19,
+  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
         col = unit, lwd = 1)
 }
 # legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
@@ -1461,7 +1476,7 @@ axis(2, at = unique(as.vector(partition_matrix)), las = 2)
 abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted")
 abline(v = 1:Tm, col = "lightgray", lty = "dotted")
 for (unit in 1:num_units) {
-  lines(1:Tm, partition_matrix[unit, ]+unit/100, type = "l", pch = 19,
+  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
         col = unit, lwd = 1)
 }
 # legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
@@ -1497,7 +1512,6 @@ for (t in 1:Tm) {
   }
 }
 ```
-
 ## Ari plot
 ```{r warning=FALSE}
 LEN = Tm

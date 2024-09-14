@@ -1,9 +1,3 @@
----
-title: "Untitled"
-output: html_document
----
-
-```{r}
 #######################################################################################
 #						    										 				  #
 # Spatio-temporal data set with rural background PM10 concentrations in Germany 2005  #
@@ -11,41 +5,14 @@ output: html_document
 #######################################################################################
 
 # Set working directory to folder "JCGS_Codes" folder.
-# setwd("JCGS_Codes")
-# source("Functions.R")
+setwd("JCGS_Codes")
+source("Functions.R")
 library(salso)
+library(drpm)
 library(MCMCpack)
 library(mclust)
-```
 
-
-# LOAD 
-## load C drpm
-```{r}
-devtools::load_all("../../drpm_main/")
-```
-
-## load J drpm
-```{r}
-library(JuliaConnectoR)
-juliaSetupOk()
-
-# juliaEval("using Pkg")
-# juliaEval("Pkg.activate(\"../../JDRPM\")")
-# juliaEval("Pkg.instantiate()")
-
-# setup project
-juliaEval("using Pkg; Pkg.status()")
-juliaEval("Pkg.activate(\"../../JDRPM\")")
-juliaEval("using Pkg; Pkg.status()")
-
-module = normalizePath("../../JDRPM/src/JDRPM.jl")
-module_JDRPM <- juliaImport(juliaCall("include", module))
-```
-
-
-# DATA
-```{r}
+#
 # This data is found in the gstat package
 library(gstat)
 data(DE_RB_2005)
@@ -77,69 +44,41 @@ sd <- apply(ysub2,2,sd)
 # Center the observations
 y <- t(t(ysub2) - mn)
 
+
 tps <- ncol(y)
 
 s_coords <- (dat@sp@coords)[-c(4,16,25,27,30,43,52,59,69),]
 smn <- apply(s_coords,2,mean)
 ssd <- apply(s_coords,2,sd)
 s_std <- t((t(s_coords) - smn)/ssd)
-```
 
 
-# PARAMS
-```{r}
-# as.integer(runif(1,0,1000))*1.0
-# seed = 881.0
-seed = 314.0
-cat("seed",seed,"\n")
 
-# niter=30000; nburn=22000; nthin=8
-# niter=120; nburn=20; nthin=2 # valori del file originale (?)
-niter=2000; nburn=1000; nthin=4
+# modelPriors = c(m0, s20, Asig, Atau, Alam, a, b, be)
+# m0 - mean of theta (or phi0)
+# s20 - variance of theta (or phi0)
+# Asig - maximum value for sigma
+# Atau - maximum value for tau
+# Alam - maximum value for lambda
+# a - shape 1 for alpha
+# b - shape 2 for alpha
+# b - scale for eta1
+modelPriors <- c(0,100, 10, 5, 5, 2, 2, 1)
+
+# m, k0, nu0, L0
+cParms <- c(0,1,5,1)
+
+# SIG, TAU, LAM, ETA1, PHI1
+mh <- c(1,1, 1, 0.1, 0.1)
+sp <- 4
+
+niter=50000; nburn=10000; nthin=40
 nout <- (niter-nburn)/nthin
-cat(nout,"valid iterations\n")
-```
 
-```{r}
-# params
-m0_phi0 = 0
-s20_phi0 = 1
-A_ub_sigma = 5
-A_ub_tau = 5
-A_ub_lambda = 5
-
-a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
-a_lambda = 2; b_lambda = 2
-eta1_scale = 0.9
-
-sig_mh_sig2 = 0.1
-sig_mh_tau2 = 0.1
-sig_mh_lambda2 = 0.1
-sig_mh_eta1 = 0.1
-sig_mh_phi1 = 0.1
-
-update_eta1 = TRUE
-update_phi1 = TRUE
-
-a_alpha = 2; b_alpha = 2
-
-# now space
-sp = 4
-mu0 = 0 
-k0 = 1
-v0 = 5
-L0 = 1
-```
-
-
-# FIT
-```{r}
 alpha = 0.0
 set.seed(1)
 models.out <- list()
 hh <- 1
-s="1"
 # h <- "111"; s <- "0";
 model <- "AR1"
 for(s in c("0","1")){
@@ -163,100 +102,71 @@ for(s in c("0","1")){
 	  cat("seed is ", 1*hh, "\n")
 	  set.seed(1*hh)
 	  print(date())
-	  out <- drpm_fit(draws=niter, burn=nburn, thin=nthin, y=y, M=1, s_coords=sc,
-					        time_specific_alpha=FALSE, modelPriors=modelPriors,
-	  				# param_0 = true  (1) <=> we dont update it
-	  				# param_0 = false (0) <=> we update it
+	  out <- drpm_fit(draws=niter, burn=nburn, thin=nthin, y=y, M=1,s_coords=sc,
+					          global_alpha=FALSE, modelPriors=modelPriors,
 		                alpha_0 = ifelse(alphaUpdate, 0, 1),
 		                eta1_0 = ifelse(eta1Update, 0, 1),
 		                phi1_0 = ifelse(phi1Update, 0, 1),
 					          SpatialCohesion=sp, cParms=cParms,mh=mh)
-	  
-# 	  out = drpm_fit(
-# 		y=y,
-# 		s_coords = sc,
-#         M=1,
-#         initial_partition = NULL,
-#         starting_alpha = 0.5,
-#         unit_specific_alpha = FALSE,
-#         time_specific_alpha = FALSE,
-# 		alpha_0 = ifelse(alphaUpdate, 0, 1),
-#         eta1_0 = ifelse(eta1Update, 0, 1),
-#         phi1_0 = ifelse(phi1Update, 0, 1),
-#         modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
-#         alphaPriors=rbind(c(a_alpha,b_alpha)),
-#         simpleModel = 0,
-# 		SpatialCohesion=sp,
-# 		cParms=c(mu0, k0, v0, L0),
-# 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
-# 		draws=niter,burn=nburn,thin=nthin)
-	  
-	  
 	  print(date())
     cat("lpml = ", out$lpml, "\n")
     cat("waic = ", out$waic, "\n\n\n")
 		models.out[[hh]] <-  out
-		names(models.out)[hh] <- paste0("out",h,"_",model)
+		names(models.out)[hh] <- paste0("out",h,"_",s,"_",model)
 
-		# rho <- list()
-		# ccprob <- list()
-		# 
-		# for(k in 1:tps){
-		# 	rho[[k]] <- salso(t(out$Si[k,,]), loss="VI")
-		# }
-		# amn <- round(apply(models.out[[hh]]$alpha,2,mean),2)
-		# print(amn)
+		rho <- list()
+		ccprob <- list()
+
+		for(k in 1:tps){
+			rho[[k]] <- salso(t(out$Si[k,,]), loss="VI")
+		}
+
+		amn <- round(apply(models.out[[hh]]$alpha,2,mean),2)
 
         # If there is desire to produce plot of each fit uncomment this lines
 #		pdf(paste0("PM10_", h,"_",s,"_",model,"_SC",sp,"_2.pdf"),
-		    # height=10, width=12.5)
+		    height=10, width=12.5)
 
-			# pchs <- c(letters, paste0(letters,0:9))
-			# 
-			# par(mfrow=c(3,4))
-			# 
-			# for(jj in 1:tps){
-			# 
-			# 	cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/3
-			# 	plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
-			# 				main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
-			# 				ylab="", xlab="")
-			# }
+			pchs <- c(letters, paste0(letters,0:9))
+
+			par(mfrow=c(3,4))
+
+			for(jj in 1:tps){
+
+				cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/3
+				plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
+							main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
+							ylab="", xlab="")
+			}
 
 #		dev.off()
 		hh <- hh + 1
 	}
 }
-```
 
-# PLOTS
-```{r}
 # My run of output has been saved in an .RData object.
 # It is provided and can be loaded if so desired. 
-# load("./PM10_ALL_SpCo_4_rev.RData")
-```
+# load("PM10_ALL_SpCo_4_rev.RData")
 
-
-```{r}
 # Create table that contains the WAIC and LPML values
 lpml <- lpmlr <-  waic <- numeric()
 amn <- matrix(NA, nrow = length(models.out), ncol=ncol(y))
 for(j in 1:length(models.out)){
 	lpml[j] <- models.out[[j]]$lpml
-  # lpmlr[j] <- lpml.robust(models.out[[j]]$llike)[5]
+  lpmlr[j] <- lpml.robust(models.out[[j]]$llike)[5]
 	waic[j] <- models.out[[j]]$waic
 	amn[j,] <- round(apply(models.out[[j]]$alpha,2,mean),2)
 }
-res <- data.frame(names=names(models.out), lpml=lpml, waic=waic)
+res <- data.frame(names=names(models.out), lpml=lpml,lpmlr=lpmlr, waic=waic)
 res[order(res[,2]),]
-```
 
 
-```{r,warning=F}
 library(xtable)
 # Order as seen in Table 3 that focuses on Temporal models only
 ord <- c(8,7,4,2,7,5,3,1,16,14,12,10,15,13,11,9)
-# xtable(res[8:1,c(3,4)], digits=0)
+xtable(res[8:1,c(3,4)], digits=0)
+
+
 
 
 library(fields)
@@ -279,10 +189,8 @@ for(h in 1:length(models.out)){
 }
 
 pch=as.character(1:nrow(y))
-```
 
-# figure 5
-```{r}
+
 #
 # This is Figure 5 in the paper.  Includes lagged ARI plots for models that include time only (no space)
 #
@@ -301,10 +209,8 @@ ord2 <- c(8,6,4,2,7,5,3,1)
 		mtext(text=c(paste("",1:tps)), side=1, line=0.3, at=seq(0,1,length=12), las=2, cex=0.8)
 	}
 # dev.off()
-```
 
 
-```{r}
 #  This plot is Figure 6 in the paper.
 #  In includes estimated partitions over time for four models.
 #
@@ -345,10 +251,9 @@ ord2 <- c(8,6,4,2,7,5,3,1)
     }
 
 # dev.off()
-```
 
-# figure 7
-```{r}
+
+
 ###########################################
 #
 # Analysis with space in the partition model
@@ -371,10 +276,9 @@ ord2 <- c(16,14,12,10,15,13,11,9)
 		mtext(text=c(paste("",1:tps)), side=1, line=0.3, at=seq(0,1,length=12), las=2, cex=0.8)
 	}
 # dev.off()
-```
 
 
-```{r}
+
 # This is Figure 8 in the paper.
 # It shows spatially refrenced estimated partitions for model 9 (i.e., 111 1 everything turned on)
 # which fits data the best.
@@ -411,10 +315,10 @@ for(k in 1:tps){
 	}
 
 # dev.off()
-```
 
 
-```{r}
+
+
 #######################################################################
 #######################################################################
 #
@@ -441,10 +345,9 @@ xtable(round(adj.rand,2))
 			main= bquote("Lagged ARI values for" ~ hat(rho)[.(k)]))
 	}
 # dev.off()
-```
 
 
-```{r}
+
 #
 # This plot is not included in the Final draft of the paper
 #
@@ -476,7 +379,4 @@ ord <- c(8,6,4,2,7,5,3,1,16,14,12,10,15,13,11,9)
 # dev.off()
 
 
-
-
-```
 

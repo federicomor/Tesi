@@ -54,7 +54,9 @@ function MCMC_fit(;
 	thin::Float64,                        # Thinning interval
 
 	logging::Bool,                        # Wheter to save execution infos to log file
-	seed::Float64                         # Random seed for reproducibility
+	seed::Float64,                        # Random seed for reproducibility
+
+	simple_return = false                 # Return just the partition Si
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -66,7 +68,7 @@ function MCMC_fit(;
 		to = TimerOutput()
 	end
 
-try
+# try
 
 	############# define auxiliary variables #############
 	# missing is for when we dont provide the argument when fitting
@@ -79,6 +81,9 @@ try
 	p_lk = lk_xPPM ? size(Xlk_covariates)[2] : 0
 	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
 	Y_has_NA = any(ismissing.(Y))
+	nout = round(Int64, (draws - burnin)/(thin))
+	beta_update_threshold = round(Int64, burnin/2)
+
 
 	############# check some stuff #############
 	if sPPM
@@ -183,7 +188,7 @@ try
 		@error "Please define draws, thin and burnin in an integer division-friendly way;\ni.e. such that (draws-burnin) % thin = 0." _file=""
 		return
 	end
-	nout = round(Int64, (draws - burnin)/(thin))
+
 	if nout <= 0 
 		@error "Wrong iterations parameters." _file=""
 		return
@@ -230,6 +235,7 @@ try
 	# so with the map we note that if we encounter a 1 when working on [j,t] we have to simulate the Y value
 	# The map is needed since when we simulate it it will no longer be missing, and therefore we could "lose track" of him
 	# debug(@showd missing_map)
+	missing_idxs = Tuple.(findall(missing_map))
 
 	############# allocate output variables #############
 	i_out = 1
@@ -379,10 +385,6 @@ try
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
-	# sleep(1.0) # to let all the prints be printed
-	# println("loading...\r")
-	# sleep(1.0) # to let all the prints be printed
-	# is enough just one, almost certainly no sleep is actually necessary
 
 	t_start = now()
 	progresso = Progress(round(Int64(draws)),
@@ -576,81 +578,49 @@ try
 			end # for j in 1:n
 
 			############# sample the missing values #############
+			# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
+			# so we need now to simulate the values for the data which are missing (from their full conditional)
 			if Y_has_NA
-				for t in 1:T
-					# small performance tweak, iterate first over cols since julia is column-major in storing matrices
-					for j in 1:n
-						# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
-						# so we need now to simulate (from the likelihood) the values for the data which are missing
-						# and we simulate them using as parameters the one sampled at the current iteration
-						if missing_map[j,t] == true
-							# we have to use a missing map to remember which units and at which times had a missing value,
-							# in order to simulate just them and instead use the given value for the other units and times
-							# printlgln("We fix the NA for [j,t]=[$j,$t]")
-							Y[j,t] = rand(Normal(
-										muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
-										sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
-										))
-							# debug(@showd Y)
-							# printlgln("we sampled $(Y[j,t])")
-						end
+				# we have to use the missing_idxs to remember which units and at which times had a missing value,
+				# in order to simulate just them and instead use the given value for the other units and times
+				for (j,t) in missing_idxs
+					c_it = Si_iter[j,t]
+					Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
+					aux1 = eta1_iter[j]^2
+
+					if t==1	
+						c_itp1 = Si_iter[j,t+1]
+						Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
+
+						sig2_post = 1 / (1/sig2h_iter[c_it,t] + aux1/(sig2h_iter[c_itp1,t+1]*(1-aux1)))
+						mu_post = sig2_post * ( 
+							(1/sig2h_iter[c_it,t])*(muh_iter[c_it,t] + Xlk_term_t) +
+							(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+							)
+
+						Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
+
+					elseif 1<t<T
+						c_itp1 = Si_iter[j,t+1]
+						Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
+
+						sig2_post = (1-aux1) / (1/sig2h_iter[c_it,t] + aux1/sig2h_iter[c_itp1,t+1])
+						mu_post = sig2_post * ( 
+							(1/(sig2h_iter[c_it,t]*(1-aux1)))*(muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t) +
+							(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+							)
+
+						Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
+
+					else # t==T
+						Y[j,t] = rand(Normal(
+							muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t,
+							sqrt(sig2h_iter[c_it,t]*(1-aux1))
+							))
 					end
 				end
 			end
 
-			# if Y_has_NA
-			# 	# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
-			# 	# so we need now to simulate (from the likelihood) the values for the data which are missing
-			# 	# and we simulate them using as parameters the one sampled at the current iteration
-			# 	for idx in findall(missing_map)
-			# 		# we have to use a missing map to remember which units and at which times had a missing value,
-			# 		# in order to simulate just them and instead use the given value for the other units and times
-			# 		(j,t) = Tuple(idx)
-			# 		if t == 1
-			# 			Y[j,t] = rand(Normal(
-			# 				muh_iter[Si_iter[j,t],t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
-			# 				sqrt(sig2h_iter[Si_iter[j,t],t])
-			# 				))
-			# 		else
-			# 			Y[j,t] = rand(Normal(
-			# 				muh_iter[Si_iter[j,t],t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
-			# 				sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_iter[j]^2))
-			# 				))
-			# 		end
-			# 	end
-			# end
-
-			# # update, (i guess) more correct method: 
-			# # we sample each of the parameters, that are linked to the Y, from their posterior
-			# # and then we use them to sample from the likelihood f(Y|sampled params)
-			# # wait wasnt this what we were already doing?
-			# if Y_has_NA
-			# 	for idx in findall(missing_map)
-			# 		(j,t) = Tuple(idx)
-			# 		if t==1
-			# 			mu_sampled = 
-			# 			if lk_xPPM 
-			# 				mu_sampled += dot(view(Xlk_covariates,j,:,t), beta_sampled)
-			# 			end
-			# 			sig2_sampled = 
-			# 			Y[idx] = rand(Normal(
-			# 				mu_sampled + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_sampled) : 0),
-			# 				sqrt(sig2_sampled)
-			# 				))
-			# 		else
-			# 			mu_sampled = 
-			# 			if lk_xPPM 
-			# 				mu_sampled += dot(view(Xlk_covariates,j,:,t), beta_sampled)
-			# 			end
-			# 			sig2_sampled = 
-			# 			Y[idx] = rand(Normal(
-			# 				mu_sampled + eta1_iter[j]*Y[j,t-1],
-			# 				sqrt(sig2_sampled *(1-eta1_iter[j]^2))
-			# 				))
-			# 		end
-
-			# 	end
-			# end
 
 			# end # of the @timeit for gamma
 			############# update rho #############
@@ -1004,7 +974,7 @@ try
 			# end # of the @timeit for sigma2h
 			############# update beta #############
 			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
-			if lk_xPPM
+			if lk_xPPM && i>=beta_update_threshold
 				if t==1
 					sum_Y = zeros(p_lk)
 					A_star = I(p_lk)/s2_beta
@@ -1326,15 +1296,18 @@ try
 	end
 	close(log_file)
 
-	return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
-		lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
-		fitted, llike, LPML, WAIC
+	if simple_return
+		return Si_out, LPML, WAIC
+	else
+		return Si_out, Int.(gamma_out), alpha_out, sigma2h_out, muh_out, include_eta1 ? eta1_out : NaN,
+			lk_xPPM ? beta_out : NaN, theta_out, tau2_out, phi0_out, include_phi1 ? phi1_out : NaN, lambda2_out,
+			fitted, llike, LPML, WAIC
+	end
 
-
-catch e
-	println(e)
-	close(log_file)
-end
+# catch e
+# 	println(e)
+# 	close(log_file)
+# end
 
 # global_logger(ConsoleLogger())	
 end
