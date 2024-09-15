@@ -282,3 +282,48 @@ cat(crayon::italic("Try for example spiega(\"wind\").\n\n"))
 
 # rm(h)
 
+##### NAs
+na_summary = function(df){
+	for (c in colnames(df)){
+		cat(sprintf("%28s, #NAs = %f\n",c,sum(as.numeric(is.na(df[,c])))))
+	}
+}
+interpola_NA <- function(obs) {
+	non_na_indices <- which(!is.na(obs))
+	na_indices <- which(is.na(obs))
+	# print(non_na_indices)
+	# print(na_indices)
+	
+	# loop on Na indices
+	for (na_index in na_indices) {
+		# Trova l'indice più vicino a sinistra e quello più vicino a destra
+		left_index <- suppressWarnings(max(non_na_indices[non_na_indices < na_index]))
+		right_index <- suppressWarnings(min(non_na_indices[non_na_indices > na_index]))
+		# cat("NA idx",na_index," - LR values = ",obs[left_index],",",obs[right_index],"\n")
+		
+		# Esegui l'interpolazione se ci sono valori a sinistra e a destra
+		if (!is.na(left_index) && !is.na(right_index)) {
+			left_value <- obs[left_index]
+			right_value <- obs[right_index]
+			
+			# Calcola il valore interpolato
+			interpolated_value <- left_value + 
+				((right_value - left_value) / (right_index - left_index)) * (na_index - left_index)
+			
+			# Sostituisci il valore NA con quello interpolato
+			obs[na_index] <- interpolated_value
+		}
+		if(is.na(obs[na_index])){
+			obs[na_index] = na.omit(c(obs[left_index],obs[right_index]))
+		}
+		# cat(obs[na_index],"\n")
+	}
+	return(obs)
+}
+
+# example
+# test <- c(NA,NA,10, 15, NA, 20, 24, 20, 18, NA, NA, 10, 9, 9, NA)
+# print(test)
+# result <- interpola_NA(test)
+# print(round(result))
+

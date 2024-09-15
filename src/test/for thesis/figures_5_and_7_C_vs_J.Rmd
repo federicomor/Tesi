@@ -187,8 +187,8 @@ seed = 314.0
 cat("seed",seed,"\n")
 
 # niter=50000; nburn=10000; nthin=40 # valori del file originale
-niter=30000; nburn=22000; nthin=8 # secondo i miei test
-# niter=20; nburn=0; nthin=1 # test super veloce
+# niter=30000; nburn=22000; nthin=8 # secondo i miei test
+niter=20; nburn=0; nthin=1 # test super veloce
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -308,19 +308,25 @@ for(s in c("0","1")){
 		# amn <- round(apply(C.models.out[[hh]]$alpha,2,mean),2)
 		# print(amn)
 
-	# pdf(paste0("PM10_", h,"_",s,"_",model,"_SC",sp,"_2.pdf"),
-	# 	    height=10, width=12.5)
-	# 		# pchs <- c(letters, paste0(letters,0:9))
-	# 		par(mfrow=c(3,4))
-	# 		for(jj in 1:tps){
-	# 			cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/3
-	# 			plot(s_std, col=rho[[jj]], pch=19,cex=cex1,
-	# 			# plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
-	# 						# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
-	# 						main=bquote(~~ Time ~ .(jj)),
-	# 						ylab="", xlab="")
-	# 		}
-	# dev.off()
+	pdf(paste0("C_", h,"_sp",s,".pdf"),height=10, width=12)
+			# pchs <- c(letters, paste0(letters,0:9))
+			par(mfrow=c(3,4),mar=c(2.5,2.5,2.5,1),oma=c(1,1,3,1))
+			for(jj in 1:tps){
+				cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/2
+				cex1 = cex1^1.2
+				plot(s_std, col=rho[[jj]], pch=19,cex=cex1,
+				# plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
+							# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
+							main=bquote(~~ Time ~ .(jj)),
+							ylab="", xlab="")
+			}
+			header <- bquote("C | sp" * .(ifelse(s==1,":Yes",":No")) * ", "~
+							 	eta[1]*.(ifelse(m.n[1]==1,":Yes",":No"))*", "~
+	    	             phi[1]*.(ifelse(m.n[2]==1,":Yes",":No"))*", "~
+	        	         alpha[t]*.(ifelse(m.n[3]==1,":Yes",":No")))
+			mtext(header, side = 3, line = 0, outer = TRUE, font=2, cex=1.5)
+	dev.off()
+	
 		hh <- hh + 1
 		
 		# plot stuff
@@ -495,19 +501,24 @@ for(s in c("0","1")){
 		# amn <- round(apply(C.models.out[[hh]]$alpha,2,mean),2)
 		# print(amn)
 
-	# pdf(paste0("PM10_", h,"_",s,"_",model,"_SC",sp,"_2.pdf"),
-	# 	    height=10, width=12.5)
-	# 		# pchs <- c(letters, paste0(letters,0:9))
-	# 		par(mfrow=c(3,4))
-	# 		for(jj in 1:tps){
-	# 			cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/3
-	# 			plot(s_std, col=rho[[jj]], pch=19,cex=cex1,
-	# 			# plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
-	# 						# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
-	# 						main=bquote(~~ Time ~ .(jj)),
-	# 						ylab="", xlab="")
-	# 		}
-	# dev.off()
+	pdf(paste0("J_", h,"_sp",s,".pdf"),height=10, width=12)
+			# pchs <- c(letters, paste0(letters,0:9))
+			par(mfrow=c(3,4),mar=c(2.5,2.5,2.5,1),oma=c(1,1,3,1))
+			for(jj in 1:tps){
+				cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/2
+				cex1 = cex1^1.2
+				plot(s_std, col=rho[[jj]], pch=19,cex=cex1,
+				# plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
+							# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
+							main=bquote(~~ Time ~ .(jj)),
+							ylab="", xlab="")
+			}
+			header <- bquote("J | sp" * .(ifelse(s==1,":Yes",":No")) * ", "~
+							 	eta[1]*.(ifelse(m.n[1]==1,":Yes",":No"))*", "~
+	    	             phi[1]*.(ifelse(m.n[2]==1,":Yes",":No"))*", "~
+	        	         alpha[t]*.(ifelse(m.n[3]==1,":Yes",":No")))
+			mtext(header, side = 3, line = 0, outer = TRUE, font=2, cex=1.5)
+	dev.off()
 		hh <- hh + 1
 		
 		# plot stuff

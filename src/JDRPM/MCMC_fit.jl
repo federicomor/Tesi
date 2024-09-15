@@ -7,7 +7,6 @@ using Dates
 using TimerOutputs
 using ProgressMeter
 
-log_file = open("log.txt", "w+")
 include("debug.jl")
 include("utils.jl")
 
@@ -61,6 +60,7 @@ function MCMC_fit(;
 	Random.seed!(round(Int64,seed))
 
 	if logging
+		log_file = open("log.txt", "w+")
 		println("Logging to file: ", abspath("log.txt"))
 
 		printlgln(replace(string(now()),"T" => "   "))
@@ -354,35 +354,6 @@ function MCMC_fit(;
 	# they are scalars so shouldnt really impact the computational load
 
 
-	############# random initialization for testing? #############
-	# Si_iter = rand(collect(1:n),n,T_star)
-	# gamma_iter = rand((0,1),n,T_star)
-
-	
-	############# some more logging #############
-	if logging
-		function pretty_log(str)
-			if str=="Si_iter" println(log_file,"Si_iter\n",tostr(Si_iter)); return; end
-			if str=="gamma_iter" println(log_file,"gamma_iter\n",tostr(gamma_iter)); return; end
-			if str=="nh" println(log_file,"nh\n",tostr(nh)); return; end
-			if str=="nclus_iter" println(log_file,"nclus_iter\n",tostr(nclus_iter)); return; end
-			if str=="muh_iter" println(log_file,"muh_iter\n",tostr(muh_iter)); return; end
-			if str=="sig2h_iter" println(log_file,"sig2h_iter\n",tostr(sig2h_iter)); return; end
-			if str=="alpha_iter" println(log_file,"alpha_iter\n",tostr(alpha_iter)); return; end
-			if str=="theta_iter" println(log_file,"theta_iter\n",tostr(theta_iter)); return; end
-			if str=="tau2_iter" println(log_file,"tau2_iter\n",tostr(tau2_iter)); return; end
-			if str=="phi0_iter" println(log_file,"phi0_iter\n",tostr(phi0_iter)); return; end
-			if str=="phi1_iter" println(log_file,"phi1_iter\n",tostr(phi1_iter)); return; end
-			if str=="lambda2_iter" println(log_file,"lambda2_iter\n",tostr(lambda2_iter)); return; end
-			if str=="sp_coords" println(log_file,"sp_coords\n",tostr(sp_coords)); return; end
-			if str=="sp1" println(log_file,"sp1\n",tostr(sp1)); return; end
-			if str=="sp2" println(log_file,"sp2\n",tostr(sp2)); return; end
-			if str=="beta_iter" println(log_file,"beta_iter\n",tostr(beta_iter)); return; end
-		end
-	end
-
-
-
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
 
@@ -393,7 +364,6 @@ function MCMC_fit(;
 			dt=1, # every how many seconds update the feedback
 			barlen=0 # no progress bar
 			)
-
 
 	for i in 1:draws
 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
@@ -1302,8 +1272,8 @@ function MCMC_fit(;
 
 	if logging
 		debug(@showd to)
+		close(log_file)
 	end
-	close(log_file)
 
 	if simple_return
 		return Si_out, LPML, WAIC

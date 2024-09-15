@@ -43,17 +43,21 @@ module_JDRPM <- juliaImport(juliaCall("include", module))
 
 # Data
 ```{r}
-load("../data/df_agri.Rdata")
-df_agri_full = df_agri
-rm(df_agri)
+load("../thesis data/df_daily_full.Rdata")
+load("../thesis data/df_daily_full_logtransf.Rdata")
+load("../thesis data/df_daily_withNA_logtransf.Rdata")
+load("../thesis data/df_daily_withNA.Rdata")
+load("../thesis data/df_wsc.Rdata")
+load("../thesis data/Agrimonia_Dataset_v_3_0_0.Rdata")
+```
 
 
-load("../data/Cleaned_data.Rdata")
-df_agri = df_agri_full
+```{r}
+df = AgrImOnIA_Dataset_v_3_0_0
 
-stations = unique(df_agri$IDStations)
+stations = unique(df$IDStations)
 nas = as.data.frame(matrix(nrow=2192,ncol=length(unique(stations))))
-df_stat = create_df_stat(df_agri)
+df_stat = create_df_stat(df)
 for (j in 1:length(unique(stations)) ){
 	nas[,j] = df_stat[[stations[j]]]$AQ_pm10
 }
@@ -103,26 +107,20 @@ text(x = 100, y = 100, labels = "2020", col = "orange", cex = 1.5)
 
 
 ```{r}
-dati = df_agri_full
-# dati = df_2018[,c(2:37)]
-size(dati)
-dati_by_station = create_df_stat(dati)
+dati_by_station = create_df_stat(df)
 
-na_covariate = matrix(NA,nrow = 105 ,ncol = ncol(dati))
-stations_names = unique(dati$IDStations)
+na_covariate = matrix(NA,nrow = 105 ,ncol = ncol(df))
+stations_names = unique(df$IDStations)
 
 for(i in 1:105){
-	for(j in 1:(ncol(dati))){
+	for(j in 1:(ncol(df))){
 		# na_covariate[i,j]=0
 		cur_col = dati_by_station[[stations_names[i]]][,j]
 		na_covariate[i,j]=sum(is.na(cur_col))/lenght(cur_col)*100
 	}
 }
 # na_covariate
-```
 
-
-```{r}
 # pdf("../FIGURES presentation-report/na_covariate_map_df2018.pdf",height = 5,width=6)
 
 par(mar=c(1,8,1,2))
@@ -140,62 +138,25 @@ image.plot(na_covariate,
 	  breaks=brks)
 
 # abline(v=c(366,731,1096,1461,1827)/2192,col=cols[3])
-mtext(text=colnames(dati), side=2, line=0.4,
-	  at=seq(0,1,length=length(colnames(dati))), las=2, cex=0.6)
+mtext(text=colnames(df), side=2, line=0.4,
+	  at=seq(0,1,length=length(colnames(df))), las=2, cex=0.6)
 # mtext(text=c(paste("",1:141)), side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.35)
 
 # dev.off()
 
 ```
 
-Dati:
-df_wsc
-df_agri
-df_agri_full
-df_2018
-
-```{r}
-size(df_wsc) # weekly scaled, full
-count_na(df_wsc)
-
-size(df_agri) # all years, with NA
-count_na(df_agri)
-
-size(df_agri_full) # all years, with NA
-count_na(df_agri_full)
-
-size(df_2018) # daily, with NA
-count_na(df_2018) 
-```
-
 
 # Data prep
 ```{r}
-load("../thesis data/df_daily_full.Rdata")
-load("../thesis data/df_daily_withNA.Rdata")
+data_2019 = read.csv("../thesis data/dataset_2019.csv")
+data_2019
+data_2019$Time <- as.Date(data_2019$Time, "%Y-%m-%d")
+na_summary(data_2019)
+length(unique(data_2019$IDStations))
+
 ```
 
-```{r}
-df_daily_full_logtransf = df_daily_full
-extrema(df_daily_full_logtransf$AQ_pm10)
-
-# df_daily_full_logtransf$AQ_pm10 = scale(df_daily_full_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
-# extrema(df_daily_full_logtransf$AQ_pm10)
-
-df_daily_full_logtransf$AQ_pm10 = df_daily_full_logtransf$AQ_pm10 + abs(min(df_daily_full_logtransf$AQ_pm10)) + 1
-extrema(df_daily_full_logtransf$AQ_pm10)
-
-df_daily_full_logtransf$AQ_pm10 = log(df_daily_full_logtransf$AQ_pm10)
-extrema(df_daily_full_logtransf$AQ_pm10)
-
-df_daily_full_logtransf$AQ_pm10 = scale(df_daily_full_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
-extrema(df_daily_full_logtransf$AQ_pm10)
-
-numerical_covariates_to_scale = c(3,4,6,8:10,12:20,22:37)
-df_daily_full_logtransf[,numerical_covariates_to_scale] = scale(df_daily_full_logtransf[,numerical_covariates_to_scale],center=TRUE,scale=TRUE)
-
-save(df_daily_full_logtransf,file="../thesis data/df_daily_full_logtransf.Rdata")
-```
 
 ```{r}
 df_daily_withNA_logtransf = df_daily_withNA
@@ -221,11 +182,6 @@ numerical_covariates_to_scale = c(3,4,6,8:10,12:20,22:37)
 df_daily_withNA_logtransf[,numerical_covariates_to_scale] = scale(df_daily_withNA_logtransf[,numerical_covariates_to_scale],center=TRUE,scale=TRUE)
 
 save(df_daily_withNA_logtransf,file="../thesis data/df_daily_withNA_logtransf.Rdata")
-```
-
-```{r}
-load("../thesis data/df_daily_full_logtransf.Rdata")
-load("../thesis data/df_daily_withNA_logtransf.Rdata")
 ```
 
 
@@ -276,23 +232,30 @@ for(i in 1:size(yred)[1]){
 
 
 ```{r}
-cols = colora(105,56,show=F)
 chosen_variable_name = "AQ_pm10"
+
+num_stations = 105
+cols = colora(num_stations,56,show=F)
 # df = df_daily_full
 # df = df_daily_withNA
 df = df_daily_full_logtransf
 # df = df_daily_withNA_logtransf
+# df = df_wsc
+
+# num_stations = 141
+# cols = colora(num_stations,56,show=F)
+# df = data_2019 # non ancora sistemato, tanto ci sono gli altri dati
 
 trendYearStation_week <- function(file_name){
 
 	data_from_to = df
-	len_time = size(df)[1]/105
+	len_time = size(df)[1]/num_stations
 	
 	chosen_variable = (data_from_to[,chosen_variable_name])
 
 	# Crea il grafico ggplot
-	station_trend <- ggplot(data_from_to,aes(x = Time, 
-	# station_trend <- ggplot(data_from_to,aes(x = week, 
+	station_trend <- ggplot(data_from_to,aes(x = Time,
+	# station_trend <- ggplot(data_from_to,aes(x = week,
 												 y = AQ_pm10,
 												 group=IDStations, 
 												 color = as.factor(IDStations)))+
@@ -314,6 +277,12 @@ trendYearStation_week("None")
 ```{r}
 df_daily_full_logtransf
 ```
+```{r}
+rm(list=ls())
+load("../thesis data/Agrimonia_Dataset_v_3_0_0.Rdata")
+tail(AgrImOnIA_Dataset_v_3_0_0)
+
+```
 
 
 
@@ -329,6 +298,7 @@ il target è invece solo centrato nella media, non scalato
 _df_daily_full_:
 _df_daily_full_logtransf_: come sopra circa ma pieno anche col pm10
 grazie all'interpola_NA function
+
 
 
 
