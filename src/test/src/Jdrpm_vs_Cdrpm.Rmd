@@ -99,9 +99,10 @@ y_with_na
 ## Fits
 ```{r}
 # niter=40000; nburn=28000; nthin=12
+niter=50000; nburn=38000; nthin=12
 # niter=30000; nburn=22000; nthin=8
 # niter=10000; nburn=2000; nthin=8
-niter=1000; nburn=200; nthin=4
+# niter=1000; nburn=200; nthin=4
 
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
@@ -112,7 +113,7 @@ cat(nout,"valid iterations\n")
 ```{r}
 # params
 m0_phi0 = 0
-s20_phi0 = 1
+s20_phi0 = 2
 A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
@@ -202,8 +203,8 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
-	Y=as.matrix(y),
-	# Y=as.matrix(y_with_na),              
+	# Y=as.matrix(y),
+	Y=as.matrix(y_with_na),
 	sp_coords = NA,
 	M_dp = 1,                     
 	initial_partition = NA,
@@ -235,11 +236,10 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	draws = niter,                    
-	burnin = nburn,                   
-	thin = nthin,                     
+	draws = niter,	burnin = nburn,thin = nthin,
+	# draws = 100000,	burnin = 60000,thin = 40,
 	logging = FALSE,
-	seed = seed
+	seed = 333.0
 )
 ```
 
@@ -300,19 +300,14 @@ rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
 
-```{r}
-plot(drpm1$alpha[,2],type="l",ylim=c(0,1))
-plot(rout$alpha,type="l",ylim=c(0,1))
-```
-
 ## NA/MSE analysis
 
 ```{r}
 y_with_na
 y
-j = 5
-t = 6
-par(mar=c(2,2,3,1))
+j = 3
+t = 3
+size(rout$fitted)
 plot(rout$fitted[t,j,],type="l",main=paste0("trace plot of j=",j," at t=",t))
 abline(h=y[j,t],col="#005500")
 ```
@@ -320,7 +315,7 @@ abline(h=y[j,t],col="#005500")
 ```{r}
 ##### take last sample (maybe not the best choice)
 # for (it in 0:10){
-yredJ=t(rout$fitted[,,size(rout$fitted)[3]-6])
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 
 ##### take the median/mean/mode
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
@@ -363,9 +358,14 @@ for(i in 1:size(yred)[1]){
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
+	text(0.92,yred[i,1],paste(i),col=cols[i])
 }
-legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
 
+```
+
+```{r}
+y_with_na
 ```
 
 
@@ -638,9 +638,9 @@ plot_ARI = function(partition,title){
 ```
 
 ```{r}
-parts = generate_partition(drpm1)
-plot_partition_with_numbers(parts,title="model C")
-plot_ARI(parts,title="model C")
+parts = generate_partition(rout)
+plot_partition_with_numbers(parts,title="model J")
+plot_ARI(parts,title="model J")
 ```
 
 
@@ -995,7 +995,7 @@ cat("seed",seed,"\n")
 # niter=50000; nburn=34000; nthin=8
 niter=30000; nburn=22000; nthin=8
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
-# niter=40000; nburn=22000; nthin=10 # folder section 2 run 40k
+# niter=40000; nburn=32000; nthin=8
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -1130,8 +1130,8 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	draws = 2,burnin = 0, thin = 1,
-	# draws = niter,burnin = nburn, thin = nthin,
+	# draws = 2,burnin = 0, thin = 1,
+	draws = niter,burnin = nburn, thin = nthin,
 	logging = FALSE,
 	seed = seed,
 	simple_return = TRUE

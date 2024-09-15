@@ -196,7 +196,7 @@ cat(nout,"valid iterations\n")
 ```{r}
 # params
 m0_phi0 = 0
-s20_phi0 = 2
+s20_phi0 = 10
 A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5

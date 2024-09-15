@@ -1,0 +1,335 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r,warning=F}
+# Set working directory to folder "JCGS_Codes" folder.
+# setwd("JCGS_Codes")
+# source("Functions.R")
+library(salso)
+library(MCMCpack)
+library(mclust)
+source("../src/include.R")
+setwd("../src/") # will reset after chunk execution since we are in a notebook
+source("plot functions/plotter.R")
+source("include_clusters_functions.R")
+```
+
+
+# LOAD 
+## load C drpm
+```{r}
+devtools::load_all("../../drpm_main/")
+```
+
+## load J drpm
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# juliaEval("using Pkg")
+# juliaEval("Pkg.activate(\"../../JDRPM\")")
+# juliaEval("Pkg.instantiate()")
+
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("using Pkg; Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+```
+
+# Data
+```{r}
+load("../data/df_agri.Rdata")
+df_agri_full = df_agri
+rm(df_agri)
+
+
+load("../data/Cleaned_data.Rdata")
+df_agri = df_agri_full
+
+stations = unique(df_agri$IDStations)
+nas = as.data.frame(matrix(nrow=2192,ncol=length(unique(stations))))
+df_stat = create_df_stat(df_agri)
+for (j in 1:length(unique(stations)) ){
+	nas[,j] = df_stat[[stations[j]]]$AQ_pm10
+}
+nas = matrix(as.integer(!is.na(nas)),nrow = 2192,ncol=length(unique(stations)))
+rownames(nas)=1:nrow(nas)
+colnames(nas) = stations
+```
+
+```{r}
+cols = colora(3,67,show=0)
+cols = cols[c(2,3,1)]
+# pdf("../data_na_time_series.pdf",height = 6,width=10)
+library(fields)
+
+# cols = colora(3,"rand",1)[c(2,3,1)]
+
+par(mar=c(2,1,1,1))
+brks = seq(-1,1,length.out=2+1)
+image(nas,
+		   # main=paste0("PM10 data, missing values (in white) by stations and years"),
+	  axes=FALSE,col=cols[2:1],
+		   breaks=brks)
+
+abline(v=c(366,731,1096,1461,1827)/2192,col=cols[3])
+mtext(text=c(paste("",2016:2021)), side=1, line=0.08,at=seq(0.1,0.9,length=6), las=1, cex=0.7)
+# mtext(text=c(paste("",1:141)), side=4, line=0.1,at=seq(0,1,length=141), las=1, cex=0.4)
+
+# dev.off()
+```
+
+
+```{r}
+# heatmap(t(nas[,1:length(unique(stations))]),Colv=NA, Rowv=NA,col = c("gray", "darkred"), scale='none',xlab="days",ylab="stations",
+# heatmap(t(nas[,1:length(unique(stations))]),Colv=NA, Rowv=NA,col = c("white",cols[1]), scale='none',xlab="days",ylab="stations",
+heatmap(t(nas[,1:length(unique(stations))]),
+		Colv=NA, Rowv=NA,
+		col = c(cols[2],cols[1]),
+		scale='none',xlab="days",ylab="stations",
+		cexRow = 0.3,
+		margins = c(3, 3),
+		# main="NA time series (white are NAs) all data",
+		# add.expr = abline(v=c(366,731,1096,1461,1827),col="#231292",lwd=1))
+		add.expr = abline(v=c(366,731,1096,1461,1827),col=cols[3],lwd=1))
+text(x = 100, y = 100, labels = "2020", col = "orange", cex = 1.5)
+# dev.off()
+```
+
+
+```{r}
+dati = df_agri_full
+# dati = df_2018[,c(2:37)]
+size(dati)
+dati_by_station = create_df_stat(dati)
+
+na_covariate = matrix(NA,nrow = 105 ,ncol = ncol(dati))
+stations_names = unique(dati$IDStations)
+
+for(i in 1:105){
+	for(j in 1:(ncol(dati))){
+		# na_covariate[i,j]=0
+		cur_col = dati_by_station[[stations_names[i]]][,j]
+		na_covariate[i,j]=sum(is.na(cur_col))/lenght(cur_col)*100
+	}
+}
+# na_covariate
+```
+
+
+```{r}
+# pdf("../FIGURES presentation-report/na_covariate_map_df2018.pdf",height = 5,width=6)
+
+par(mar=c(1,8,1,2))
+ncols = 20
+# cols = colora(ncols,74,0)
+cols = colora(ncols,67,0)
+brks = seq(0,100,length.out=ncols+1)
+image.plot(na_covariate,
+	  # main=paste0("PM10 data, missing values (in white) by stations and years"),
+	  axes=FALSE,
+	  legend.line = 2.4,
+	  legend.lab = "% of missing data",
+	  col= cols,
+	  # col= rev(cols),
+	  breaks=brks)
+
+# abline(v=c(366,731,1096,1461,1827)/2192,col=cols[3])
+mtext(text=colnames(dati), side=2, line=0.4,
+	  at=seq(0,1,length=length(colnames(dati))), las=2, cex=0.6)
+# mtext(text=c(paste("",1:141)), side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.35)
+
+# dev.off()
+
+```
+
+Dati:
+df_wsc
+df_agri
+df_agri_full
+df_2018
+
+```{r}
+size(df_wsc) # weekly scaled, full
+count_na(df_wsc)
+
+size(df_agri) # all years, with NA
+count_na(df_agri)
+
+size(df_agri_full) # all years, with NA
+count_na(df_agri_full)
+
+size(df_2018) # daily, with NA
+count_na(df_2018) 
+```
+
+
+# Data prep
+```{r}
+load("../thesis data/df_daily_full.Rdata")
+load("../thesis data/df_daily_withNA.Rdata")
+```
+
+```{r}
+df_daily_full_logtransf = df_daily_full
+extrema(df_daily_full_logtransf$AQ_pm10)
+
+# df_daily_full_logtransf$AQ_pm10 = scale(df_daily_full_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
+# extrema(df_daily_full_logtransf$AQ_pm10)
+
+df_daily_full_logtransf$AQ_pm10 = df_daily_full_logtransf$AQ_pm10 + abs(min(df_daily_full_logtransf$AQ_pm10)) + 1
+extrema(df_daily_full_logtransf$AQ_pm10)
+
+df_daily_full_logtransf$AQ_pm10 = log(df_daily_full_logtransf$AQ_pm10)
+extrema(df_daily_full_logtransf$AQ_pm10)
+
+df_daily_full_logtransf$AQ_pm10 = scale(df_daily_full_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
+extrema(df_daily_full_logtransf$AQ_pm10)
+
+numerical_covariates_to_scale = c(3,4,6,8:10,12:20,22:37)
+df_daily_full_logtransf[,numerical_covariates_to_scale] = scale(df_daily_full_logtransf[,numerical_covariates_to_scale],center=TRUE,scale=TRUE)
+
+save(df_daily_full_logtransf,file="../thesis data/df_daily_full_logtransf.Rdata")
+```
+
+```{r}
+df_daily_withNA_logtransf = df_daily_withNA
+extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
+
+# df_daily_withNA_logtransf$AQ_pm10 = scale(df_daily_withNA_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
+# extrema(df_daily_withNA_logtransf$AQ_pm10)
+
+df_daily_withNA_logtransf$AQ_pm10 = df_daily_withNA_logtransf$AQ_pm10 + abs(min(na.omit(df_daily_withNA_logtransf$AQ_pm10))) + 1
+extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
+
+df_daily_withNA_logtransf$AQ_pm10 = log(df_daily_withNA_logtransf$AQ_pm10)
+extrema(df_daily_withNA_logtransf$AQ_pm10)
+extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
+
+df_daily_withNA_logtransf$AQ_pm10 = scale(df_daily_withNA_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
+extrema(df_daily_withNA_logtransf$AQ_pm10)
+extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
+
+na_summary(df_daily_withNA_logtransf)
+
+numerical_covariates_to_scale = c(3,4,6,8:10,12:20,22:37)
+df_daily_withNA_logtransf[,numerical_covariates_to_scale] = scale(df_daily_withNA_logtransf[,numerical_covariates_to_scale],center=TRUE,scale=TRUE)
+
+save(df_daily_withNA_logtransf,file="../thesis data/df_daily_withNA_logtransf.Rdata")
+```
+
+```{r}
+load("../thesis data/df_daily_full_logtransf.Rdata")
+load("../thesis data/df_daily_withNA_logtransf.Rdata")
+```
+
+
+```{r}
+# df = df_daily_full
+# df = df_daily_withNA
+# df = df_daily_full_logtransf
+df = df_daily_withNA_logtransf
+
+stations = unique(df$IDStations)
+y=data.frame()
+
+for(st in stations){
+  y_we_pm10=cbind(as.data.frame(st),t(df[which(df$IDStations==st),"AQ_pm10"]))
+  y=rbind(y,y_we_pm10)
+}
+
+rownames(y) = NULL
+# colnames(y)<- c("id",paste0("w", 1:53))
+colnames(y)<- c("id",paste0("day", 1:365))
+df
+y
+yred=y[,2:365]
+cols = colora(size(yred)[1],56,0)
+par(mar=c(4,4,3,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(sapply(na.omit(yred), extrema))*1.1,
+     	 main="Year 2018, all stations",
+     	 type='l',
+     	 # xlab='days',
+     	 xlab='weeks',
+     	 # ylab='pm10')
+     	 ylab=bquote(PM[10]))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+```{r}
+# Sys.setlocale("LC_ALL", "English") # to change months names in ggplot plots
+# > Sys.getlocale()
+# [1] "LC_COLLATE=Italian_Italy.utf8;LC_CTYPE=Italian_Italy.utf8;LC_MONETARY=Italian_Italy.utf8;LC_NUMERIC=C;LC_TIME=Italian_Italy.utf8"
+```
+
+
+```{r}
+cols = colora(105,56,show=F)
+chosen_variable_name = "AQ_pm10"
+# df = df_daily_full
+# df = df_daily_withNA
+df = df_daily_full_logtransf
+# df = df_daily_withNA_logtransf
+
+trendYearStation_week <- function(file_name){
+
+	data_from_to = df
+	len_time = size(df)[1]/105
+	
+	chosen_variable = (data_from_to[,chosen_variable_name])
+
+	# Crea il grafico ggplot
+	station_trend <- ggplot(data_from_to,aes(x = Time, 
+	# station_trend <- ggplot(data_from_to,aes(x = week, 
+												 y = AQ_pm10,
+												 group=IDStations, 
+												 color = as.factor(IDStations)))+
+		geom_line(show.legend = FALSE) +
+		labs(y = chosen_variable_name, title = "Year 2018, all stations") +
+		ylim(range(na.omit(chosen_variable))) +
+		scale_color_manual(values = cols) +
+		theme_bw()+
+		theme(panel.grid = element_blank()) +
+		guides(color = guide_legend())+
+		labs(y=bquote(PM[10]))
+		# labs(x="week")
+	
+	len_time = (len_time%/%5)
+	return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
+}
+trendYearStation_week("None")
+```
+```{r}
+df_daily_full_logtransf
+```
+
+
+
+# Final data
+Le covariate sono tutte presenti sempre, solo pm10 è mancante con i suoi NA
+
+_df_wsc_: è quello weekly e full, con covariate scalate
+
+_df_daily_withNA_: daily con NA
+_df_daily_withNA_logtransf_: come sopra ma logtrasformato il pm10 e scalate le covariate
+il target è invece solo centrato nella media, non scalato
+
+_df_daily_full_:
+_df_daily_full_logtransf_: come sopra circa ma pieno anche col pm10
+grazie all'interpola_NA function
+
+
+
+

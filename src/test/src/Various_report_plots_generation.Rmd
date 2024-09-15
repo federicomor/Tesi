@@ -188,7 +188,7 @@ size(df_agri_full)[1] == 2192 *141 # days * stations
 
 ```{r}
 # colnames(df_agri)
-# load("../data/Cleaned_data.Rdata")
+load("../data/Cleaned_data.Rdata")
 df_agri = df_agri_full
 
 stations = unique(df_agri$IDStations)
@@ -215,11 +215,7 @@ cols = cols[c(2,3,1)]
 cols = colora(3,64)
 cols = cols[c(2,3,1)]
 
-```
-
-
-```{r}
-cols = colora(3,"rand",1)
+cols = colora(3,67)
 cols = cols[c(2,3,1)]
 ```
 

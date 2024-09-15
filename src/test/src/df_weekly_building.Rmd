@@ -85,6 +85,128 @@ df_2018[1:30,c(2:5,7,38,39)]
 unique(df_2018$week) # 53, perchè sono 52 complete più la 53esima che inizia lunedì 31 dicembre 2018
 ```
 
+# fill daily dataset
+```{r}
+df_daily_full = df_2018
+na_summary(df_daily_full)
+
+NAcols = c("AQ_pm10","LI_pigs","LI_bovine","LI_pigs_v2","LI_bovine_v2")
+
+stations = unique(df_daily_full$IDStations)
+```
+
+
+```{r}
+problematic_stations = c("STA-CH0011A","STA-CH0033A","STA-CH0043A")
+
+problematic_cols = NAcols
+character_cols = c("WE_mode_wind_direction_10m","WE_mode_wind_direction_100m")
+skippable_cols = c("X","IDStations","Latitude","Longitude","Time","Altitude","day","week")
+
+for (st in stations){
+	cat(crayon::blue("Station",st,"\n"))
+	df_st = df_daily_full[df_daily_full$IDStations==st,] # extract covariates for station st
+	cnames = colnames(df_st)[7:37] # lavora solo sulle colonne necessarie
+	# Time, IDStations, Latitude, Longitude, day, week, ecc sono già a posto
+	
+	for (col in cnames){
+		# cat(crayon::green(col,"... "))
+		df_st_col = df_st[,c(col)]
+		if (any(is.na(df_st_col))){
+		
+		if(col %in% skippable_cols){
+			next
+		}
+		if(col %in% problematic_cols && st %in% problematic_stations){
+			cat("We deal with problematic cols later.\n")
+			next
+		} else{ # numerical cols
+			obs = df_st_col
+			obs_corrected = interpola_NA(obs)
+			# cat(obs,"\n",obs_corrected)
+			df_daily_full[which(df_daily_full$IDStations==st), col] = obs_corrected
+		}
+		}
+	}
+}
+na_summary(df_daily_full)
+```
+```{r}
+df_st = df_daily_full[df_daily_full$IDStations=="STA-CH0033A",]
+col ="AQ_pm10"
+df_st_col = df_st[,c(col)]
+obs = df_st_col
+obs_corrected = interpola_NA(obs)
+is.na(obs_corrected)
+df_daily_full[which(is.na(df_daily_full$AQ_pm10)),]
+df_daily_full[which(df_daily_full$IDStations=="STA-CH0033A"), col] = obs_corrected
+na_summary(df_daily_full)
+
+df_daily_full[which(is.na(df_daily_full$AQ_pm10)),]
+na_summary(df_daily_full)
+```
+
+
+Sistemare pig_v2 e bovine_v2
+```{r}
+pigv2_11A=(df_daily_full$LI_pigs_v2[(which(df_daily_full$IDStations=="STA-CH0011A"))])
+pigv2_43A=(df_daily_full$LI_pigs_v2[(which(df_daily_full$IDStations=="STA-CH0043A"))])
+
+df_daily_full$LI_pigs_v2[(which(df_daily_full$IDStations=="STA-CH0033A"))]=(pigv2_11A+pigv2_43A)/2
+
+
+bovv2_11A=(df_daily_full$LI_bovine_v2[(which(df_daily_full$IDStations=="STA-CH0011A"))])
+bovv2_43A=(df_daily_full$LI_bovine_v2[(which(df_daily_full$IDStations=="STA-CH0043A"))])
+
+df_daily_full$LI_bovine_v2[(which(df_daily_full$IDStations=="STA-CH0033A"))]=(bovv2_11A+bovv2_43A)/2
+
+```
+
+E ora pigs e bovine
+
+```{r}
+pig_1=(df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="STA.IT1510A"))])
+pig_2=(df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="560"))])
+pig_3=(df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="561"))])
+pig_4=(df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="572"))])
+
+pig=(pig_1+pig_2+pig_3+pig_4)/4
+df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="STA-CH0011A"))]=pig
+df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="STA-CH0033A"))]=pig
+df_daily_full$LI_pigs[(which(df_daily_full$IDStations=="STA-CH0043A"))]=pig
+
+
+bov_1=(df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="STA.IT1510A"))])
+bov_2=(df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="560"))])
+bov_3=(df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="561"))])
+bov_4=(df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="572"))])
+
+bov=(bov_1+bov_2+bov_3+bov_4)/4
+df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="STA-CH0011A"))]=bov
+df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="STA-CH0033A"))]=bov
+df_daily_full$LI_bovine[(which(df_daily_full$IDStations=="STA-CH0043A"))]=bov
+```
+
+
+```{r}
+na_summary(df_daily_full)
+```
+
+
+```{r}
+save(df_daily_full, file = "../thesis data/df_daily_full.Rdata")
+```
+
+```{r}
+# df_daily_withNA = df_daily_full
+df_aux = df_daily_full
+df_aux$AQ_pm10 = df_daily_withNA$AQ_pm10
+na_summary(df_aux)
+df_daily_withNA = df_aux 
+na_summary(df_daily_withNA)
+save(df_daily_withNA, file = "../thesis data/df_daily_withNA.Rdata")
+```
+
 
 # UPDATE
 
@@ -135,11 +257,11 @@ assert(size(df_weekly)[1] == 105*53)
 ```
 
 
+
 ```{r}
 df_weekly[1:30,c(2:5,7,38,39)]
 # ora day è sistemato
 ```
-
 
 
 ## fill df_weekly with weekly averages

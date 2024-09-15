@@ -190,7 +190,7 @@ function MCMC_fit(;
 	end
 
 	if nout <= 0 
-		@error "Wrong iterations parameters." _file=""
+		@error "Wrong iterations parameters. Ensure that the number of draws is high enough." _file=""
 		return
 	end
 
@@ -394,6 +394,7 @@ function MCMC_fit(;
 			barlen=0 # no progress bar
 			)
 
+
 	for i in 1:draws
 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 		# there is also the ProgressMeter option, maybe is cooler
@@ -405,6 +406,58 @@ function MCMC_fit(;
 		# pretty_log("muh_iter")
 		# pretty_log("sig2h_iter")
 		# pretty_log("alpha_iter")
+
+		############# sample the missing values #############
+		# from the "update rho" section onwards also the Y[j,t] will be needed (to compute weights, update laws, etc)
+		# so we need now to simulate the values for the data which are missing (from their full conditional)
+		if Y_has_NA
+			# we have to use the missing_idxs to remember which units and at which times had a missing value,
+			# in order to simulate just them and instead use the given value for the other units and times
+			for (j,t) in missing_idxs
+				c_it = Si_iter[j,t]
+				Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
+				aux1 = eta1_iter[j]^2
+
+				# printlgln("########### iteration $i ###########\n")
+				# debug(@showd c_it Si_iter sig2h_iter muh_iter)
+
+				if t==1	
+					c_itp1 = Si_iter[j,t+1]
+					Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
+
+					sig2_post = 1 / (1/sig2h_iter[c_it,t] + aux1/(sig2h_iter[c_itp1,t+1]*(1-aux1)))
+					mu_post = sig2_post * ( 
+						(1/sig2h_iter[c_it,t])*(muh_iter[c_it,t] + Xlk_term_t) +
+						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+						)
+
+					Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
+
+				elseif 1<t<T
+					c_itp1 = Si_iter[j,t+1]
+					Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
+
+					sig2_post = (1-aux1) / (1/sig2h_iter[c_it,t] + aux1/sig2h_iter[c_itp1,t+1])
+					mu_post = sig2_post * ( 
+						(1/(sig2h_iter[c_it,t]*(1-aux1)))*(muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t) +
+						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+						)
+
+					# mu_prior = muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t
+					# sig2_prior = sig2h_iter[c_it,t]*(1-aux1)
+					Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
+					# debug(@showd c_itp1 mu_prior mu_post sig2_prior sig2_post)
+
+				else # t==T
+					Y[j,t] = rand(Normal(
+						muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t,
+						sqrt(sig2h_iter[c_it,t]*(1-aux1))
+						))
+				end
+				# debug(@showd Y[j,t])
+			end
+		end
+
 
 		for t in 1:T
 			# debug("► time $t")
@@ -576,50 +629,6 @@ function MCMC_fit(;
 					# debug(@showd probh gt gamma_iter[:,t])
 				end
 			end # for j in 1:n
-
-			############# sample the missing values #############
-			# from the next section onwards also the Y[j,t] are needed (to compute weights, update laws, etc)
-			# so we need now to simulate the values for the data which are missing (from their full conditional)
-			if Y_has_NA
-				# we have to use the missing_idxs to remember which units and at which times had a missing value,
-				# in order to simulate just them and instead use the given value for the other units and times
-				for (j,t) in missing_idxs
-					c_it = Si_iter[j,t]
-					Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
-					aux1 = eta1_iter[j]^2
-
-					if t==1	
-						c_itp1 = Si_iter[j,t+1]
-						Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
-
-						sig2_post = 1 / (1/sig2h_iter[c_it,t] + aux1/(sig2h_iter[c_itp1,t+1]*(1-aux1)))
-						mu_post = sig2_post * ( 
-							(1/sig2h_iter[c_it,t])*(muh_iter[c_it,t] + Xlk_term_t) +
-							(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
-							)
-
-						Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
-
-					elseif 1<t<T
-						c_itp1 = Si_iter[j,t+1]
-						Xlk_term_tp1 = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t+1), beta_iter[t+1]) : 0)
-
-						sig2_post = (1-aux1) / (1/sig2h_iter[c_it,t] + aux1/sig2h_iter[c_itp1,t+1])
-						mu_post = sig2_post * ( 
-							(1/(sig2h_iter[c_it,t]*(1-aux1)))*(muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t) +
-							(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
-							)
-
-						Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
-
-					else # t==T
-						Y[j,t] = rand(Normal(
-							muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t,
-							sqrt(sig2h_iter[c_it,t]*(1-aux1))
-							))
-					end
-				end
-			end
 
 
 			# end # of the @timeit for gamma
