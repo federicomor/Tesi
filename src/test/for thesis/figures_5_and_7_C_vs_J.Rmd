@@ -187,8 +187,9 @@ seed = 314.0
 cat("seed",seed,"\n")
 
 # niter=50000; nburn=10000; nthin=40 # valori del file originale
+niter=50000; nburn=30000; nthin=20 # scelta intermedia?
 # niter=30000; nburn=22000; nthin=8 # secondo i miei test
-niter=20; nburn=0; nthin=1 # test super veloce
+# niter=20; nburn=0; nthin=1 # test super veloce
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -310,13 +311,16 @@ for(s in c("0","1")){
 
 	pdf(paste0("C_", h,"_sp",s,".pdf"),height=10, width=12)
 			# pchs <- c(letters, paste0(letters,0:9))
+			# pchs = c(1:20)
 			par(mfrow=c(3,4),mar=c(2.5,2.5,2.5,1),oma=c(1,1,3,1))
 			for(jj in 1:tps){
 				cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/2
 				cex1 = cex1^1.2
-				plot(s_std, col=rho[[jj]], pch=19,cex=cex1,
-				# plot(s_std, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
-							# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
+				plot(s_std, col=rho[[jj]],
+					 cex=cex1,
+					 pch=19,
+					 # pch=pchs[rho[[jj]]],
+					 		# main=bquote(alpha==.(amn[jj]) ~~ Time ~ .(jj)),
 							main=bquote(~~ Time ~ .(jj)),
 							ylab="", xlab="")
 			}
@@ -538,16 +542,6 @@ differenza_tempo <- tempo_fine - tempo_inizio
 cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 ```
-
-seed 314
-LPML: -1474.0155769224234 (the higher the better)
-WAIC: 2596.6593009005455 (the lower the better)
-
-LPML: -2037.7808103148377 (the higher the better)
-WAIC: 3012.108243465729 (the lower the better)
-
-LPML: -2105.1022829807366 (the higher the better)
-WAIC: 2868.5795119399577 (the lower the better)
 
 
 ```{r,warning=F}

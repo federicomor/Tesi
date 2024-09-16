@@ -41,6 +41,87 @@ module = normalizePath("../../JDRPM/src/JDRPM.jl")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 ```
 
+
+# Plot functions
+```{r}
+N = size(y)[1]
+Tm = size(y)[2]
+
+generate_partition = function(model){
+	partition = list()
+	for (t in 1:Tm){
+		Si_jt <- model$Si[t, , ]
+		Si_jt <- t(Si_jt) 
+		partition[[t]] <- salso(Si_jt, loss = "binder")
+	}
+	return(partition)
+}
+
+plot_partition_with_numbers = function(partition,title){
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, labels = as.character(unit),
+	         col = partition_matrix[unit, t], cex = 1.5)
+	  }
+	}
+}
+
+plot_ARI = function(partition,title){
+	LEN = Tm
+	df_cluster = data.frame(clusters=c(),Time=c())
+	for(time in 1:Tm){
+		salso_out <- partition[[time]]
+		df_temp = data.frame(
+			clusters = salso_out
+		)
+		df_temp$Time = rep(time,dim(df_temp)[1])
+		df_cluster = rbind(df_cluster,df_temp)
+		# clusters log
+		# clusters_now = df_temp$clusters
+		# n_clusters = unique(clusters_now)
+		# cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	}
+	library(mclust)
+	# build the ARI matrix
+	ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+	rho_ARI <- list()
+	for(k in 1:LEN){
+		rho_ARI[[k]] <- partition[[k]]
+	}
+	for(k in 1: LEN){
+		for(kk in 1: LEN){
+			ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+		}
+	}
+	ncols_ari = 100
+	# if (min(ARImats)<0){
+		# cols_ARI = colora(ncols_ari,79,0)
+		# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# } else {
+		# cols_ARI = colora(ncols_ari,56,0)
+		# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+		cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+		# cols_ARI = colora(ncols_ari,102,0)
+		# brks = seq(0,1,length.out=ncols_ari+1)
+		brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# }
+	# or see ?designer.colors for colors
+	library(fields)
+	image.plot(ARImats,
+			   main=title,axes=FALSE,col=cols_ARI,
+			   # main=paste0("Lagged ARI values - ",title),axes=FALSE,col=cols_ARI,
+			   breaks=brks)
+	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+}
+```
+
+
 # Data
 ```{r}
 load("../thesis data/df_daily_full.Rdata")
@@ -49,19 +130,24 @@ load("../thesis data/df_daily_withNA_logtransf.Rdata")
 load("../thesis data/df_daily_withNA.Rdata")
 load("../thesis data/df_wsc.Rdata")
 load("../thesis data/Agrimonia_Dataset_v_3_0_0.Rdata")
+load("../thesis data/df_2021_full_logtransf.Rdata")
+load("../thesis data/df_2021_withNA_logtransf.Rdata")
 ```
 
-
+# NA analysis
 ```{r}
 df = AgrImOnIA_Dataset_v_3_0_0
 
 stations = unique(df$IDStations)
-nas = as.data.frame(matrix(nrow=2192,ncol=length(unique(stations))))
+n_stations = length(stations)
+
+nas = as.data.frame(matrix(nrow=size(df)[1]/n_stations,ncol=n_stations))
 df_stat = create_df_stat(df)
-for (j in 1:length(unique(stations)) ){
+for (j in 1:n_stations ){
 	nas[,j] = df_stat[[stations[j]]]$AQ_pm10
 }
-nas = matrix(as.integer(!is.na(nas)),nrow = 2192,ncol=length(unique(stations)))
+nas = matrix(as.integer(!is.na(nas)),nrow =  size(df)[1]/n_stations,ncol=n_stations)
+# value 1 if not NA
 rownames(nas)=1:nrow(nas)
 colnames(nas) = stations
 ```
@@ -69,24 +155,36 @@ colnames(nas) = stations
 ```{r}
 cols = colora(3,67,show=0)
 cols = cols[c(2,3,1)]
-# pdf("../data_na_time_series.pdf",height = 6,width=10)
+# pdf("data_na_time_series.pdf",height = 6,width=10)
 library(fields)
 
 # cols = colora(3,"rand",1)[c(2,3,1)]
 
-par(mar=c(2,1,1,1))
+par(mar=c(3,1,1,1))
 brks = seq(-1,1,length.out=2+1)
-image(nas,
+image(t(nas),
 		   # main=paste0("PM10 data, missing values (in white) by stations and years"),
 	  axes=FALSE,col=cols[2:1],
 		   breaks=brks)
 
-abline(v=c(366,731,1096,1461,1827)/2192,col=cols[3])
-mtext(text=c(paste("",2016:2021)), side=1, line=0.08,at=seq(0.1,0.9,length=6), las=1, cex=0.7)
+abline(h=c(366,731,1096,1461,1827)/2192,col=cols[3])
+mtext(text=c(paste("",2016:2021)), side=2, line=0.08,at=seq(0.1,0.9,length=6), las=3, cex=0.7)
 # mtext(text=c(paste("",1:141)), side=4, line=0.1,at=seq(0,1,length=141), las=1, cex=0.4)
+mtext(text=stations, side=1, line=0.1,at=seq(0,1,length=141), las=2, cex=0.3)
 
+box(col=cols[3])
+
+# head(nas)
 # dev.off()
 ```
+```{r}
+matrix = matrix(data=c(1,2,1,4,5,6,7,8,9,1,11,12),nrow=3,ncol=4)
+# matrix = matrix(data=c(rep(1,11),12),nrow=3,ncol=4)
+matrix
+image(t(matrix))
+image.plot(t(matrix))
+```
+
 
 
 ```{r}
@@ -108,25 +206,27 @@ text(x = 100, y = 100, labels = "2020", col = "orange", cex = 1.5)
 
 ```{r}
 dati_by_station = create_df_stat(df)
+n_stations = length(stations)
 
-na_covariate = matrix(NA,nrow = 105 ,ncol = ncol(df))
+na_covariate = matrix(NA,nrow = n_stations ,ncol = ncol(df))
 stations_names = unique(df$IDStations)
 
-for(i in 1:105){
+for(i in 1:n_stations){
 	for(j in 1:(ncol(df))){
 		# na_covariate[i,j]=0
 		cur_col = dati_by_station[[stations_names[i]]][,j]
-		na_covariate[i,j]=sum(is.na(cur_col))/lenght(cur_col)*100
+		na_covariate[i,j]=sum(is.na(cur_col))/size(cur_col)[1]*100
 	}
 }
+size(na_covariate)
 # na_covariate
 
 # pdf("../FIGURES presentation-report/na_covariate_map_df2018.pdf",height = 5,width=6)
 
 par(mar=c(1,8,1,2))
 ncols = 20
-# cols = colora(ncols,74,0)
 cols = colora(ncols,67,0)
+# cols = colora(ncols,109,0)
 brks = seq(0,100,length.out=ncols+1)
 image.plot(na_covariate,
 	  # main=paste0("PM10 data, missing values (in white) by stations and years"),
@@ -140,89 +240,13 @@ image.plot(na_covariate,
 # abline(v=c(366,731,1096,1461,1827)/2192,col=cols[3])
 mtext(text=colnames(df), side=2, line=0.4,
 	  at=seq(0,1,length=length(colnames(df))), las=2, cex=0.6)
-# mtext(text=c(paste("",1:141)), side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.35)
+# mtext(text=c(paste("",1:n_stations)), side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.35)
+mtext(text=stations, side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.25)
 
 # dev.off()
 
 ```
 
-
-# Data prep
-```{r}
-data_2019 = read.csv("../thesis data/dataset_2019.csv")
-data_2019
-data_2019$Time <- as.Date(data_2019$Time, "%Y-%m-%d")
-na_summary(data_2019)
-length(unique(data_2019$IDStations))
-
-```
-
-
-```{r}
-df_daily_withNA_logtransf = df_daily_withNA
-extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
-
-# df_daily_withNA_logtransf$AQ_pm10 = scale(df_daily_withNA_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
-# extrema(df_daily_withNA_logtransf$AQ_pm10)
-
-df_daily_withNA_logtransf$AQ_pm10 = df_daily_withNA_logtransf$AQ_pm10 + abs(min(na.omit(df_daily_withNA_logtransf$AQ_pm10))) + 1
-extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
-
-df_daily_withNA_logtransf$AQ_pm10 = log(df_daily_withNA_logtransf$AQ_pm10)
-extrema(df_daily_withNA_logtransf$AQ_pm10)
-extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
-
-df_daily_withNA_logtransf$AQ_pm10 = scale(df_daily_withNA_logtransf$AQ_pm10,center=TRUE,scale=FALSE)
-extrema(df_daily_withNA_logtransf$AQ_pm10)
-extrema(na.omit(df_daily_withNA_logtransf$AQ_pm10))
-
-na_summary(df_daily_withNA_logtransf)
-
-numerical_covariates_to_scale = c(3,4,6,8:10,12:20,22:37)
-df_daily_withNA_logtransf[,numerical_covariates_to_scale] = scale(df_daily_withNA_logtransf[,numerical_covariates_to_scale],center=TRUE,scale=TRUE)
-
-save(df_daily_withNA_logtransf,file="../thesis data/df_daily_withNA_logtransf.Rdata")
-```
-
-
-```{r}
-# df = df_daily_full
-# df = df_daily_withNA
-# df = df_daily_full_logtransf
-df = df_daily_withNA_logtransf
-
-stations = unique(df$IDStations)
-y=data.frame()
-
-for(st in stations){
-  y_we_pm10=cbind(as.data.frame(st),t(df[which(df$IDStations==st),"AQ_pm10"]))
-  y=rbind(y,y_we_pm10)
-}
-
-rownames(y) = NULL
-# colnames(y)<- c("id",paste0("w", 1:53))
-colnames(y)<- c("id",paste0("day", 1:365))
-df
-y
-yred=y[,2:365]
-cols = colora(size(yred)[1],56,0)
-par(mar=c(4,4,3,1))
-for(i in 1:size(yred)[1]){
-   if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],
-     	 ylim=extrema(sapply(na.omit(yred), extrema))*1.1,
-     	 main="Year 2018, all stations",
-     	 type='l',
-     	 # xlab='days',
-     	 xlab='weeks',
-     	 # ylab='pm10')
-     	 ylab=bquote(PM[10]))
- 	  } 
-	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
-	  }
-}
-```
 
 ```{r}
 # Sys.setlocale("LC_ALL", "English") # to change months names in ggplot plots
@@ -234,17 +258,19 @@ for(i in 1:size(yred)[1]){
 ```{r}
 chosen_variable_name = "AQ_pm10"
 
-num_stations = 105
-cols = colora(num_stations,56,show=F)
 # df = df_daily_full
 # df = df_daily_withNA
 df = df_daily_full_logtransf
 # df = df_daily_withNA_logtransf
 # df = df_wsc
 
-# num_stations = 141
-# cols = colora(num_stations,56,show=F)
 # df = data_2019 # non ancora sistemato, tanto ci sono gli altri dati
+# df = df_2021_full_logtransf
+# df = df_2021_withNA_logtransf
+
+stations = unique(df$IDStations)
+num_stations = length(stations)
+cols = colora(num_stations,56,show=F)
 
 trendYearStation_week <- function(file_name){
 
@@ -257,6 +283,11 @@ trendYearStation_week <- function(file_name){
 	station_trend <- ggplot(data_from_to,aes(x = Time,
 	# station_trend <- ggplot(data_from_to,aes(x = week,
 												 y = AQ_pm10,
+												 # y = AQ_pm25,
+												 # y = AQ_nox,
+												 # y = AQ_no2,
+												 # y = AQ_so2,
+												 # y = WE_solar_radiation,
 												 group=IDStations, 
 												 color = as.factor(IDStations)))+
 		geom_line(show.legend = FALSE) +
@@ -270,18 +301,13 @@ trendYearStation_week <- function(file_name){
 		# labs(x="week")
 	
 	len_time = (len_time%/%5)
-	return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
+	# return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
 }
 trendYearStation_week("None")
 ```
-```{r}
-df_daily_full_logtransf
-```
-```{r}
-rm(list=ls())
-load("../thesis data/Agrimonia_Dataset_v_3_0_0.Rdata")
-tail(AgrImOnIA_Dataset_v_3_0_0)
 
+```{r}
+na_summary(df)
 ```
 
 
@@ -299,6 +325,382 @@ _df_daily_full_:
 _df_daily_full_logtransf_: come sopra circa ma pieno anche col pm10
 grazie all'interpola_NA function
 
+
+
+
+# ======
+
+# NA tests
+the idea is to set randomly some NA in a dataset which is actually full (eg the gstat one)
+and then compare the fitted values for those removed data
+
+# Data
+pensavo a usare gstat che è completo, ma non ha covariate, quindi forse meglio qualcosa
+dal dataset di Agrimonia
+
+Usare solo le righe realmente piene di Agrimonia farebbe rimanere il dataset con 5 stazioni
+quindi usiamo il "full" (finto perché da noi riempito con interpola NA) e basta
+
+
+```{r}
+na_summary(df_daily_withNA_logtransf)
+# 1438 na su un dataset di dimensioni
+size(df_daily_withNA)
+# 1438 : 38325*39 = x : 100
+1438 * 100 / (38325*39) # % of missing data
+# approx to 0.1%
+```
+
+
+## set NA
+```{r}
+# Create a sample dataset
+set.seed(123)  # Setting seed for reproducibility
+data = df_daily_full_logtransf
+
+# Number of elements to set as NA
+na_percentage = 0.1
+n_na <- round(size(data)[1]* na_percentage) # nstations * nday * na%
+
+# Randomly sample positions to be set as NA
+na_indices <- sample(size(data)[1], n_na)
+
+# Set the sampled positions to NA
+data[na_indices,"AQ_pm10"] <- NA
+
+# Check the dataset
+data
+```
+
+
+```{r}
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(data$IDStations)
+n_stations = length(stations)
+
+yfull=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(data[which(data$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("day", 1:53))
+
+time_span = 1:365 # low time span for quick testing, real one will be 1:53
+
+### alcuni a caso:
+# quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
+### alcuni:
+# nsubjects = 1:10
+### tutti:
+nsubjects = 1:n_stations
+
+y_with_NA = yfull[nsubjects,1+time_span]
+
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+# mn <- apply(y,2,mean)
+# sd <- apply(y,2,sd)
+# y <- t(t(y) - mn)
+
+Tm = tps <- ncol(y_with_NA) # time span
+N = size(y_with_NA)[1] # number of units
+num_units = N
+
+sites = sites[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+########################################
+
+yred=y_with_NA[,time_span]
+par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(na.omit(data$AQ_pm10)),
+     	 type='l',xlab='Time',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# -> we have
+y_with_NA
+s_std
+```
+
+
+
+```{r}
+nas = matrix(as.integer(is.na(y_with_NA)),nrow = n_stations,ncol=Tm)
+size(nas)
+cols = colora(100,67,show=0)
+# cols = cols[c(2,3,1)]
+
+pdf("NA_test.pdf",height = 6,width=10)
+
+# cols = colora(3,"rand",1)[c(2,3,1)]
+
+par(mar=c(3,1,1,1))
+brks = seq(-1,1,length.out=length(cols)+1)
+	image(nas,
+			   # main=title,axes=FALSE,col=cols_ARI,
+			   # main=paste0("Lagged ARI values - ",title),
+			   axes=FALSE,
+			   col=cols,
+			   breaks=brks)
+
+# abline(h=c(366,731,1096,1461,1827)/2192,col=cols[3])
+mtext(text=round(seq(from=1,to=364,length.out=52)), side=2, line=0.08,at=seq(0,1,length=52), las=1, cex=0.3)
+# mtext(text=c(1:365), side=2, line=0.08,at=seq(0,1,length=365), las=1, cex=0.2)
+# mtext(text=c(paste("",1:141)), side=4, line=0.1,at=seq(0,1,length=141), las=1, cex=0.4)
+mtext(text=stations, side=1, line=0.1,at=seq(0,1,length=n_stations), las=2, cex=0.3)
+box(col=cols[3])
+
+dev.off()
+y_with_NA
+
+```
+
+
+## full data
+```{r}
+data = df_daily_full_logtransf
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(data$IDStations)
+
+yfull=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(data[which(data$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("day", 1:53))
+
+time_span = 1:365 # low time span for quick testing, real one will be 1:53
+
+### alcuni a caso:
+# quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
+### alcuni:
+# nsubjects = 1:10
+### tutti:
+nsubjects = 1:105
+
+y = yfull[nsubjects,1+time_span]
+
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+# mn <- apply(y,2,mean)
+# sd <- apply(y,2,sd)
+# y <- t(t(y) - mn)
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites = sites[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+########################################
+
+yred=y[,time_span]
+par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(na.omit(data$AQ_pm10)),
+     	 type='l',xlab='Time',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# for (i in 1:N){
+# 	for (t in 2:Tm){
+# 		if (is.na(y_with_NA[i,t])){
+# 			points(t,y[i,t],col="black",cex=0.1,pch=1)
+# 		}
+# 	}
+# }
+# -> we have
+y
+s_std
+```
+
+
+## Fits
+```{r}
+# as.integer(runif(1,0,1000))*1.0
+# seed = 881.0
+seed = 314.0
+cat("seed",seed,"\n")
+
+# niter=50000; nburn=34000; nthin=8
+niter=30000; nburn=22000; nthin=8
+# niter=50000; nburn=10000; nthin=40 # they did this in their tests
+# niter=40000; nburn=32000; nthin=8
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+```
+
+
+```{r}
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+spatial_cohesion = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+
+## drpm J
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y),              
+	sp_coords = s_std,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = update_eta1,                    
+	update_phi1 = update_phi1,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1^2,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	# spatial_cohesion_idx = spatial_cohesion,
+	# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	
+	spatial_cohesion_idx = 1,
+	sp_params = list(0.1),
+	
+	# covariate_similarity_idx = NA,
+	draws = 200,burnin = 100, thin = 1,
+	# draws = niter,burnin = nburn, thin = nthin,
+	logging = FALSE,
+	seed = seed,
+	simple_return = FALSE
+)
+```
+
+# NA/MSE
+```{r}
+##### take last sample (maybe not the best choice)
+# for (it in 0:10){
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+
+##### take the median/mean/mode
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredJ = summary_fitted
+yred=y
+
+par(mar=c(4,4,4,2))
+cols = colora(size(yredJ)[1],56,0)
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yred),type='l',xlab='time',ylab="fitted values",
+     	 # main=paste("model J",it))
+     	 main="model J")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+
+# original real data
+cols = colora(N,seed = 56,show = 0)
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred,yredJ),type='l',
+     	 xlab='time',ylab='values',main="original data")
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+	text(0.92,yred[i,1],paste(i),col=cols[i])
+}
+# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+```
+
+
+
+# ======
+# Longer T
 
 
 

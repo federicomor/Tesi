@@ -285,10 +285,14 @@ cat(crayon::italic("Try for example spiega(\"wind\").\n\n"))
 ##### NAs
 na_summary = function(df){
 	for (c in colnames(df)){
-		cat(sprintf("%28s, #NAs = %f\n",c,sum(as.numeric(is.na(df[,c])))))
+		cat(which(colnames(df)==c),typeof(df[,c][[1]]),sprintf("%28s, #NAs = %f\n",c,sum(as.numeric(is.na(df[,c])))))
 	}
 }
+summary_na = na_summary
 interpola_NA <- function(obs) {
+	if (all(is.na(obs))){
+		return(obs)
+	}
 	non_na_indices <- which(!is.na(obs))
 	na_indices <- which(is.na(obs))
 	# print(non_na_indices)
