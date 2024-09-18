@@ -247,7 +247,7 @@ mtext(text=stations, side=1, line=0.3,at=seq(0,1,length=141), las=2, cex=0.25)
 
 ```
 
-
+## ggplot plot
 ```{r}
 # Sys.setlocale("LC_ALL", "English") # to change months names in ggplot plots
 # > Sys.getlocale()
@@ -334,7 +334,6 @@ grazie all'interpola_NA function
 the idea is to set randomly some NA in a dataset which is actually full (eg the gstat one)
 and then compare the fitted values for those removed data
 
-# Data
 pensavo a usare gstat che è completo, ma non ha covariate, quindi forse meglio qualcosa
 dal dataset di Agrimonia
 
@@ -360,6 +359,7 @@ data = df_daily_full_logtransf
 
 # Number of elements to set as NA
 na_percentage = 0.1
+na_percentage = 0.09620821
 n_na <- round(size(data)[1]* na_percentage) # nstations * nday * na%
 
 # Randomly sample positions to be set as NA
@@ -372,7 +372,7 @@ data[na_indices,"AQ_pm10"] <- NA
 data
 ```
 
-
+# create y
 ```{r}
 sites = data.frame(
 	longitude = unique(df_weekly$Longitude), 
@@ -462,9 +462,8 @@ brks = seq(-1,1,length.out=length(cols)+1)
 			   breaks=brks)
 
 # abline(h=c(366,731,1096,1461,1827)/2192,col=cols[3])
-mtext(text=round(seq(from=1,to=364,length.out=52)), side=2, line=0.08,at=seq(0,1,length=52), las=1, cex=0.3)
-# mtext(text=c(1:365), side=2, line=0.08,at=seq(0,1,length=365), las=1, cex=0.2)
-# mtext(text=c(paste("",1:141)), side=4, line=0.1,at=seq(0,1,length=141), las=1, cex=0.4)
+mtext(text=round(seq(from=1,to=364,length.out=52)), side=2, line=0.08,at=seq(0,1-1/365,length=52), las=1, cex=0.3)
+# mtext(text=c(1:365), side=2, line=0.08,at=seq(0,1,length=365), las=1, cex=0.1)
 mtext(text=stations, side=1, line=0.1,at=seq(0,1,length=n_stations), las=2, cex=0.3)
 box(col=cols[3])
 
@@ -698,9 +697,317 @@ for(i in 1:size(yred)[1]){
 ```
 
 
+```{r}
+# Load libraries
+library(ggplot2)
+library(reshape2)
+
+# Example data frame for performance data
+# Replace this with your actual performance data
+performance_data <- data.frame(
+  units = rep(c(50, 100, 150, 200), each=4),
+  time_instants = rep(c(10, 20, 30, 40), times=4),
+  time_c = runif(16, 5, 10),   # Performance time for the C model
+  time_julia = runif(16, 3, 8) # Performance time for the Julia model
+)
+
+# Plot for performance vs. units
+plot_units <- ggplot(performance_data, aes(x=units)) + 
+  geom_line(aes(y=time_c, color="C model")) + 
+  geom_line(aes(y=time_julia, color="Julia model")) +
+  labs(x = "Number of Units", y = "Execution Time", title = "Performance vs. Units") +
+  scale_color_manual(values = c("C model" = "blue", "Julia model" = "red")) +
+  theme_minimal()
+
+# Plot for performance vs. time instants
+plot_time <- ggplot(performance_data, aes(x=time_instants)) + 
+  geom_line(aes(y=time_c, color="C model")) + 
+  geom_line(aes(y=time_julia, color="Julia model")) +
+  labs(x = "Time Instants", y = "Execution Time", title = "Performance vs. Time Instants") +
+  scale_color_manual(values = c("C model" = "blue", "Julia model" = "red")) +
+  theme_minimal()
+
+# Show the plots
+plot_units
+plot_time
+
+```
+
 
 # ======
 # Longer T
+here we can use df_daily_full_logtransf
+and test both models julia and R
+
+## fit params
+```{r}
+niter=50000; nburn=32000; nthin=18
+niter=1000; nburn=900; nthin=1
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+```
+
+```{r}
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+spatial_cohesion = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+
+
+## data
+```{r}
+df = df_daily_full_logtransf
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df$Longitude), 
+	latitude = unique(df$Latitude))
+
+# plot(sites)
+# plot(std_sites) # same
+
+stations = unique(df$IDStations)
+n_stations = length(stations)
+
+yfull=data.frame()
+
+target = "AQ_pm10"
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df[which(df$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("day", 1:365))
+
+
+################ subset data ################
+time_span = 1:365 # low time span for quick testing, real one will be 1:53
+### alcuni a caso:
+# quanti = 7; nsubjects = sample(1:105, quanti,replace = F)
+### alcuni:
+# nsubjects = 1:10
+### tutti:
+nsubjects = 1:n_stations
+
+y = yfull[nsubjects,1+time_span]
+
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+# target already logtransformed and centered
+# mn <- apply(y,2,mean)
+# sd <- apply(y,2,sd)
+# y <- t(t(y) - mn)
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites = sites[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+# plot(s_std)
+# plot(std_sites) # same
+########################################
+
+yred=y[,time_span]
+par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(na.omit(data$AQ_pm10)),
+     	 type='l',xlab='Time',
+     	 ylab=bquote(PM[10]))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+# -> we have
+y
+s_std
+```
+
+
+## real fit
+```{r}
+# timespan_tests = round(seq(10,364,length.out=7))
+# nunits_tests =   round(seq(10,105,length.out=6))
+
+timespan_tests = round(seq(10,364,length.out=3))
+nunits_tests =   round(seq(10,105,length.out=3))
+
+timespan_tests
+nunits_tests
+
+performance_C <- matrix(NA, nrow = length(nunits_tests), ncol = length(timespan_tests))
+performance_Julia <- matrix(NA, nrow = length(nunits_tests), ncol = length(timespan_tests))
+colnames(performance_C) = c(paste0("T_",timespan_tests))
+rownames(performance_C) = c(paste0("n_",nunits_tests))
+colnames(performance_Julia) = c(paste0("T_",timespan_tests))
+rownames(performance_Julia) = c(paste0("n_",nunits_tests))
+
+performance_C
+performance_Julia
+```
+
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+
+for (i in 1:length(nunits_tests)) {
+  for (j in 1:length(timespan_tests)) {
+  	# set data accordingly
+  	quanti = nunits_tests[i]
+  	nsubjects = sample(1:105, quanti, replace = F)
+  	time_span = 1:timespan_tests[j]
+  	y_now = yfull[nsubjects,1+time_span]
+  	sstd_now = s_std[nsubjects,]
+  	
+  	# fit models
+  	
+	##### C	
+  	set.seed(i+j)
+  	tempo_inizio <- Sys.time()
+	drpm1 <- drpm_fit(
+			y=y_now, 
+			s_coords = sstd_now,
+	        M=1,
+	        initial_partition = NULL,
+	        starting_alpha = 0.5,
+	        unit_specific_alpha = FALSE,
+	        time_specific_alpha = TRUE,
+	        alpha_0=FALSE,
+	        eta1_0=FALSE,
+	        phi1_0=FALSE,
+	        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+	        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+	        simpleModel = 0,
+	        theta_tau2 = c(0, 2), # only used if simpleModel=1
+			SpatialCohesion=3, # auxiliary similarity
+			# SpatialCohesion=4, # double dipper similarity
+			cParms=c(mu0, k0, v0, L0),
+			mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+			verbose=TRUE,
+			draws=niter,burn=nburn,thin=nthin)
+	tempo_fine <- Sys.time()
+	differenza_tempo <- tempo_fine - tempo_inizio
+	cat(crayon::cyan("Fit took:\n"))
+	print(round(differenza_tempo,digits = 4))
+	cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
+	performance_C[i, j] = differenza_tempo
+	
+	##### J
+	seed = (i+j)*1.0
+	tempo_inizio <- Sys.time()
+	out = module_JDRPM$MCMC_fit(
+		Y=as.matrix(y_now),              
+		sp_coords = sstd_now,
+		M_dp = 1,                     
+		initial_partition = NA,
+		Xlk_covariates = NA,
+		Xcl_covariates = NA,
+		
+		starting_alpha = 0.5,         
+		unit_specific_alpha = FALSE,       
+		time_specific_alpha = TRUE,       
+		update_alpha = TRUE,             
+		
+		include_eta1 = TRUE,                    
+		include_phi1 = TRUE,
+		update_eta1 = TRUE,                    
+		update_phi1 = TRUE,
+		
+		sig2h_priors = c(a_sigma,b_sigma),
+		eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+		# beta_priors = c(rep(1,p),2),
+		beta_priors = NA,
+		tau2_priors = c(a_tau,b_tau),
+		phi0_priors = c(m0_phi0,s20_phi0),
+		phi1_priors = sig_mh_phi1^2,
+		lambda2_priors = c(a_lambda,b_lambda),
+		alpha_priors = c(a_alpha,b_alpha),  
+		
+		spatial_cohesion_idx = 3,
+		sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+		# covariate_similarity_idx = NA,
+		# draws = 2,burnin = 0, thin = 1,
+		draws = niter,burnin = nburn, thin = nthin,
+		logging = FALSE,
+		seed = seed,
+		simple_return = TRUE
+	)
+	rout = juliaGet(out)
+	names(rout) = c("Si","lpml","waic")
+	rout$Si = aperm(rout$Si, c(2, 1, 3))
+	tempo_fine <- Sys.time()
+	differenza_tempo <- tempo_fine - tempo_inizio
+	cat(crayon::cyan("Fit took:\n"))
+	print(round(differenza_tempo,digits = 4))
+	cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
+	performance_Julia[i, j] = differenza_tempo
+    
+  }
+}
+```
+```{r}
+performance_C = matrix(c(1:9),nrow=3)^1.5
+performance_Julia = matrix(c(1:9),nrow=3)
+performance_C
+performance_Julia
+```
+
+```{r}
+ccol = "#A71B4B" 
+jcol = "#584B9F"
+plot( timespan_tests,performance_C[1,],type="l",col=ccol,ylab="exec time")
+lines(timespan_tests,performance_C[2,],type="l",col=ccol)
+lines(timespan_tests,performance_C[3,],type="l",col=ccol)
+
+lines(timespan_tests,performance_Julia[1,],type="o",col=jcol,pch=19,cex=0.4)
+lines(timespan_tests,performance_Julia[2,],type="o",col=jcol,pch=19,cex=0.4)
+lines(timespan_tests,performance_Julia[3,],type="o",col=jcol,pch=19,cex=0.4)
+```
+
+
+
+# ======
+# Covariates
+
+
+
+
+
+
 
 
 

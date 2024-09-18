@@ -1,5 +1,11 @@
-using SpecialFunctions
+using SpecialFunctions: logabsgamma
 using Statistics
+using StaticArrays
+using LinearAlgebra
+
+function lgamma(x::Real)
+    first(logabsgamma(x))
+end
 
 logit(x::Real) = log(x / (one(x) - x))
 const logpi = log(π)
@@ -147,7 +153,7 @@ end
 #####################################
 
 # paper 3 section 3.1
-function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)
+function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real; lg::Bool, M::Real=1.0)::Float64
 	sdim = length(s1)
 	if sdim==1 
 		return lg ? log(M) : M
@@ -159,7 +165,10 @@ function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alp
 	cent1 = mean(s1)
 	cent2 = mean(s2)
 	# compute the sum of the distances (the D_h in the paper)
-	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:sdim)
+	sum_dist = 0.0
+	for i in 1:sdim
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
 
 	# decide what to return
 	if sum_dist >= 1
@@ -173,7 +182,7 @@ function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alp
 end
 
 # paper 3 section 3.1
-function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real; lg::Bool, M::Real=1.0)
+function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real; lg::Bool, M::Real=1.0)::Float64
 	sdim = length(s1)
 	# out = log(M) + lgamma(sdim)
 	out = 1.0
@@ -194,14 +203,14 @@ function G2a(a::Real, lg::Bool)
 end
 
 # paper 3 section 3.1
-function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0)
+function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; Cohesion::Int, lg::Bool, M::Real=1.0, S=@MMatrix zeros(2, 2))::Float64
 	sdim = length(s1)
 	sp = [s1 s2]
-	sbar = [mean(s1), mean(s2)]
+	sbar = SVector(mean(s1),mean(s2))
 	# S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # sum is slow
 	# FIXED: sum is slow because i didnt initialize S
 	# S = zeros(2,2); S = sum( (sp[i,:] - sbar)*(sp[i,:] - sbar)' for i in 1:sdim) # this is fast now
-	S = zeros(2,2)
+	# S = @MMatrix zeros(2,2)
 	for i in 1:sdim
 		vtemp1 = sp[i,:] - sbar
 		S += (vtemp1)*(vtemp1)'
@@ -232,129 +241,211 @@ function cohesion3_4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, m
 end
 
 # below there is the one "translated" from C, which is way more efficient
-function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; lg::Bool, M::Real=1.0)
-	sdim = length(s1)
-	# Compute sample means
-	sbar1 = mean(s1)
-	sbar2 = mean(s2)
-	# Compute deviations from the sample mean
-	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
-	@inbounds for i in 1:sdim
-		s_sbar1 = s1[i] - sbar1
-		s_sbar2 = s2[i] - sbar2
+# function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; lg::Bool, M::Real=1.0)::Float64
+# 	sdim = length(s1)
+# 	# Compute sample means
+# 	sbar1 = mean(s1)
+# 	sbar2 = mean(s2)
+# 	# Compute deviations from the sample mean
+# 	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
+# 	@inbounds for i in 1:sdim
+# 		s_sbar1 = s1[i] - sbar1
+# 		s_sbar2 = s2[i] - sbar2
 
-		S1 += s_sbar1 * s_sbar1
-		S4 += s_sbar2 * s_sbar2
-		S2 += s_sbar1 * s_sbar2
-	end
-	S3 = copy(S2) # to avoid repeating computations
-	# Updated parameters for cohesion 3
-	kn = k0 + sdim
-	vn = v0 + sdim
+# 		S1 += s_sbar1 * s_sbar1
+# 		S4 += s_sbar2 * s_sbar2
+# 		S2 += s_sbar1 * s_sbar2
+# 	end
+# 	S3 = copy(S2) # to avoid repeating computations
+# 	# Updated parameters for cohesion 3
+# 	kn = k0 + sdim
+# 	vn = v0 + sdim
 
-	auxvec1_1 = sbar1 - mu_0[1]
-	auxvec1_2 = sbar2 - mu_0[2]
+# 	auxvec1_1 = sbar1 - mu_0[1]
+# 	auxvec1_2 = sbar2 - mu_0[2]
 
-	auxmat1_1 = auxvec1_1^2
-	auxmat1_2 = auxvec1_1 * auxvec1_2
-	auxmat1_3 = copy(auxmat1_2)
-	auxmat1_4 = auxvec1_2^2
+# 	auxmat1_1 = auxvec1_1^2
+# 	auxmat1_2 = auxvec1_1 * auxvec1_2
+# 	auxmat1_3 = copy(auxmat1_2)
+# 	auxmat1_4 = auxvec1_2^2
 
-	auxconst1 = k0 * sdim
-	auxconst2 = k0 + sdim
-	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
-	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
-	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
-	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
+# 	auxconst1 = k0 * sdim
+# 	auxconst2 = k0 + sdim
+# 	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
+# 	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
+# 	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
+# 	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
 
-	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
-	detPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
+# 	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
+# 	detPsi = Psi[1] * Psi[4] - Psi[2] * Psi[3]
 
-	out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(detPsi) - 0.5 * vn * log(detPsi_n) + log(k0) - log(kn)
-	return lg ? out : exp(out)
+# 	out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(detPsi) - 0.5 * vn * log(detPsi_n) + log(k0) - log(kn)
+# 	return lg ? out : exp(out)
+# end
 
+# here the in between version, which is faster
+function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; lg::Bool, M::Real=1.0, S=@MMatrix zeros(2, 2))::Float64
+    sdim = length(s1)
+    # Compute sample means
+    sbar1 = mean(s1)
+    sbar2 = mean(s2)
+    # Compute deviations from the sample mean
+    S .= 0.
+    @inbounds for i in 1:sdim
+        s_sbar1 = s1[i] - sbar1
+        s_sbar2 = s2[i] - sbar2
+
+        S[1, 1] += s_sbar1 * s_sbar1
+        S[2, 2] += s_sbar2 * s_sbar2
+        S[2, 1] += s_sbar1 * s_sbar2
+    end
+    S[1, 2] = S[2, 1] # to avoid repeating computations
+    # Updated parameters for cohesion 3
+    kn = k0 + sdim
+    vn = v0 + sdim
+
+    sbar = SVector((sbar1, sbar2))
+     # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
+    auxvec1 = sbar .- mu_0
+    auxmat1 = auxvec1 * auxvec1'
+
+    auxconst1 = k0 * sdim
+    auxconst2 = k0 + sdim
+    Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
+
+    out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
+    return lg ? out : exp(out)
 end
 
-function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::Matrix{Float64}; lg::Bool, M::Real=1.0)
-	sdim = length(s1)
-	# Compute sample means
-	sbar1 = mean(s1)
-	sbar2 = mean(s2)
-	# Compute deviations from the sample mean
-	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
-	@inbounds for i in 1:sdim
-		s_sbar1 = s1[i] - sbar1
-		s_sbar2 = s2[i] - sbar2
+# scalar old version
+# function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; lg::Bool, M::Real=1.0)::Float64
+# 	sdim = length(s1)
+# 	# Compute sample means
+# 	sbar1 = mean(s1)
+# 	sbar2 = mean(s2)
+# 	# Compute deviations from the sample mean
+# 	S1, S2, S3, S4 = 0.0, 0.0, 0.0, 0.0
+# 	@inbounds for i in 1:sdim
+# 		s_sbar1 = s1[i] - sbar1
+# 		s_sbar2 = s2[i] - sbar2
 
-		S1 += s_sbar1 * s_sbar1
-		S4 += s_sbar2 * s_sbar2
-		S2 += s_sbar1 * s_sbar2
-	end
-	S3 = copy(S2) # to avoid repeating computations
+# 		S1 += s_sbar1 * s_sbar1
+# 		S4 += s_sbar2 * s_sbar2
+# 		S2 += s_sbar1 * s_sbar2
+# 	end
+# 	S3 = copy(S2) # to avoid repeating computations
 
-	# Updated parameters for cohesion 3
-	kn = k0 + sdim
-	vn = v0 + sdim
+# 	# Updated parameters for cohesion 3
+# 	kn = k0 + sdim
+# 	vn = v0 + sdim
 
-	auxvec1_1 = sbar1 - mu_0[1]
-	auxvec1_2 = sbar2 - mu_0[2]
+# 	auxvec1_1 = sbar1 - mu_0[1]
+# 	auxvec1_2 = sbar2 - mu_0[2]
 
-	auxmat1_1 = auxvec1_1^2
-	auxmat1_2 = auxvec1_1 * auxvec1_2
-	auxmat1_3 = copy(auxmat1_2)
-	auxmat1_4 = auxvec1_2^2
+# 	auxmat1_1 = auxvec1_1^2
+# 	auxmat1_2 = auxvec1_1 * auxvec1_2
+# 	auxmat1_3 = copy(auxmat1_2)
+# 	auxmat1_4 = auxvec1_2^2
 
-	auxconst1 = k0 * sdim
-	auxconst2 = k0 + sdim
-	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
-	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
-	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
-	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
-	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
+# 	auxconst1 = k0 * sdim
+# 	auxconst2 = k0 + sdim
+# 	Psi_n_1 = Psi[1] + S1 + auxconst1 / (auxconst2) * auxmat1_1
+# 	Psi_n_2 = Psi[2] + S2 + auxconst1 / (auxconst2) * auxmat1_2
+# 	Psi_n_3 = Psi[3] + S3 + auxconst1 / (auxconst2) * auxmat1_3
+# 	Psi_n_4 = Psi[4] + S4 + auxconst1 / (auxconst2) * auxmat1_4
+# 	detPsi_n = Psi_n_1 * Psi_n_4 - Psi_n_2 * Psi_n_3
 	
+# 	# Updated parameters for cohesion 4
+# 	knn = kn + sdim
+# 	vnn = vn + sdim
+
+# 	mu_n_1 = (k0 * mu_0[1] + sdim * sbar1) / (auxconst2)
+# 	mu_n_2 = (k0 * mu_0[2] + sdim * sbar2) / (auxconst2)
+# 	sbar_mun1 = sbar1 - mu_n_1
+# 	sbar_mun2 = sbar2 - mu_n_2
+
+# 	auxmat2_1 = sbar_mun1^2
+# 	auxmat2_2 = sbar_mun1 * sbar_mun2
+# 	auxmat2_3 = copy(auxmat2_2)
+# 	auxmat2_4 = sbar_mun2^2
+
+# 	auxconst3 = kn * sdim
+# 	auxconst4 = kn + sdim
+# 	Psi_nn_1 = Psi_n_1 + S1 + auxconst3 / (auxconst4) * auxmat2_1
+# 	Psi_nn_2 = Psi_n_2 + S2 + auxconst3 / (auxconst4) * auxmat2_2
+# 	Psi_nn_3 = Psi_n_3 + S3 + auxconst3 / (auxconst4) * auxmat2_3
+# 	Psi_nn_4 = Psi_n_4 + S4 + auxconst3 / (auxconst4) * auxmat2_4
+
+# 	detPsi_nn = Psi_nn_1 * Psi_nn_4 - Psi_nn_2 * Psi_nn_3
+	
+# 	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(detPsi_n) - 0.5 * vnn * log(detPsi_nn) + log(kn) - log(knn)
+# 	return lg ? out : exp(out)
+# end
+
+# new in between one equally faster but tidier
+function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; lg::Bool, M::Real=1.0, S=@MMatrix zeros(2, 2))::Float64
+    sdim = length(s1)
+    # Compute sample means
+    sbar1 = mean(s1)
+    sbar2 = mean(s2)
+    # Compute deviations from the sample mean
+    S .= 0.
+    @inbounds for i in 1:sdim
+        s_sbar1 = s1[i] - sbar1
+        s_sbar2 = s2[i] - sbar2
+
+        S[1, 1] += s_sbar1 * s_sbar1
+        S[2, 2] += s_sbar2 * s_sbar2
+        S[2, 1] += s_sbar1 * s_sbar2
+    end
+    S[1, 2] = S[2, 1] # to avoid repeating computations
+    # Updated parameters for cohesion 3
+    kn = k0 + sdim
+    vn = v0 + sdim
+
+    sbar = SVector((sbar1, sbar2))
+     # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
+    auxvec1 = sbar .- mu_0
+    auxmat1 = auxvec1 * auxvec1'
+
+    auxconst1 = k0 * sdim
+    auxconst2 = k0 + sdim
+    Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
+
 	# Updated parameters for cohesion 4
 	knn = kn + sdim
 	vnn = vn + sdim
 
-	mu_n_1 = (k0 * mu_0[1] + sdim * sbar1) / (auxconst2)
-	mu_n_2 = (k0 * mu_0[2] + sdim * sbar2) / (auxconst2)
-	sbar_mun1 = sbar1 - mu_n_1
-	sbar_mun2 = sbar2 - mu_n_2
-
-	auxmat2_1 = sbar_mun1^2
-	auxmat2_2 = sbar_mun1 * sbar_mun2
-	auxmat2_3 = copy(auxmat2_2)
-	auxmat2_4 = sbar_mun2^2
+	mu_n = (k0 * mu_0 + sdim * sbar) / (auxconst2)
+	sbar_mun = sbar - mu_n
+	auxmat2 = sbar_mun * sbar_mun' 
 
 	auxconst3 = kn * sdim
 	auxconst4 = kn + sdim
-	Psi_nn_1 = Psi_n_1 + S1 + auxconst3 / (auxconst4) * auxmat2_1
-	Psi_nn_2 = Psi_n_2 + S2 + auxconst3 / (auxconst4) * auxmat2_2
-	Psi_nn_3 = Psi_n_3 + S3 + auxconst3 / (auxconst4) * auxmat2_3
-	Psi_nn_4 = Psi_n_4 + S4 + auxconst3 / (auxconst4) * auxmat2_4
+	Psi_nn = Psi_n .+ S .+ auxconst3 / (auxconst4) .* auxmat2
 
-	detPsi_nn = Psi_nn_1 * Psi_nn_4 - Psi_nn_2 * Psi_nn_3
-	
-	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * log(detPsi_n) - 0.5 * vnn * log(detPsi_nn) + log(kn) - log(knn)
+	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 	return lg ? out : exp(out)
 end
 
-
 # paper 6 pag 4, cluster variance/entropy similarity function
-function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
+function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)::Float64
 	sdim = length(s1)
 	# compute the centroids
 	cent1 = mean(s1)
 	cent2 = mean(s2)
 	# compute the sum of the distances
-	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:sdim)
+	sum_dist = 0.0
+	for i in 1:sdim
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
 		
 	out = -phi*sum_dist
 	return lg ? out : exp(out)
 end
 
 # non trovata su nessun paper
-function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)
+function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real; lg::Bool, M::Real=1.0)::Float64
 	sdim = length(s1)
 	if sdim==1
 		return lg ? 0.0 : 1.0
@@ -363,7 +454,10 @@ function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi
 	cent1 = mean(s1)
 	cent2 = mean(s2)
 	# compute the sum of the distances
-	sum_dist = sum(sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2) for i in 1:sdim)
+	sum_dist = 0.0
+	for i in 1:sdim 
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
 	
 	out = -phi*log(sum_dist)
 	return lg ? out : exp(out)
@@ -380,18 +474,20 @@ end
 # Psi = [1. 2.; 2 4]
 # phi=0.5
 
-# cohesion1(s1,s2,alpha,lg=false)
-# cohesion2(s1,s2,a,lg=false)
-# cohesion3(s1, s2, mu_0, k0, v0, Psi,lg=false)
-# cohesion4(s1, s2, mu_0, k0, v0, Psi,lg=false)
-# cohesion5(s1,s2,phi,lg=false)
-# cohesion6(s1,s2,phi,lg=false)
+# @report_opt cohesion1(s1,s2,alpha,lg=false)
+# @report_opt cohesion2(s1,s2,a,lg=false)
+# @timev cohesion3(s1, s2, mu_0, k0, v0, Psi,lg=false)
+# @report_opt cohesion4(s1, s2, mu_0, k0, v0, Psi,lg=false)
+# @report_opt cohesion5(s1,s2,phi,lg=false)
+# @report_opt cohesion6(s1,s2,phi,lg=false)
 
-function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector; lg::Bool, M::Real)
+function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector; lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
 	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg=lg,M=M) 
-	idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	idx==4.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
+	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
+	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
+	idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,S=S) 
+	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,S=S) 
 	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg=lg,M=M) 
 end

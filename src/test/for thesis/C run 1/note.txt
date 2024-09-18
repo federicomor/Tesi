@@ -1,0 +1,457 @@
+# niter=50000; nburn=10000; nthin=40 # valori del file originale
+niter=50000; nburn=30000; nthin=20 # scelta intermedia?
+    
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+sp = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+##############################################################
+
+model is  111 
+space is  0 
+seed is  1 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1607.489 
+waic =  3074.4 
+
+
+Caricamento del pacchetto richiesto: spam
+Spam version 2.10-0 (2023-10-23) is loaded.
+Type 'help( Spam)' or 'demo( spam)' for a short introduction 
+and overview of this package.
+Help for individual functions is also obtained by adding the
+suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
+
+Caricamento pacchetto: ‘spam’
+
+I seguenti oggetti sono mascherati da ‘package:base’:
+
+    backsolve, forwardsolve
+
+Caricamento del pacchetto richiesto: viridisLite
+
+Try help(fields) to get started.
+model is  110 
+space is  0 
+seed is  2 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3356.963 
+
+
+model is  101 
+space is  0 
+seed is  3 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1630.481 
+waic =  3180.967 
+
+
+model is  100 
+space is  0 
+seed is  4 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 1
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3246.28 
+
+
+model is  011 
+space is  0 
+seed is  5 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 0
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1636.042 
+waic =  3256.476 
+
+
+model is  010 
+space is  0 
+seed is  6 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 0
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3217.744 
+
+
+model is  001 
+space is  0 
+seed is  7 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 0
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3085.604 
+
+
+model is  000 
+space is  0 
+seed is  8 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 0
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3253.695 
+
+
+model is  111 
+space is  1 
+seed is  9 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1872.152 
+waic =  3041.029 
+
+
+model is  110 
+space is  1 
+seed is  10 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3217.82 
+
+
+model is  101 
+space is  1 
+seed is  11 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1644.524 
+waic =  3126.725 
+
+
+model is  100 
+space is  1 
+seed is  12 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 1
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -2437.134 
+waic =  3137.767 
+
+
+model is  011 
+space is  1 
+seed is  13 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 0
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1571.589 
+waic =  3053.204 
+
+
+model is  010 
+space is  1 
+seed is  14 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 0
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -2213.529 
+waic =  3213.074 
+
+
+model is  001 
+space is  1 
+seed is  15 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 1
+update_eta1 = 0
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  -1751.397 
+waic =  3071.786 
+
+
+model is  000 
+space is  1 
+seed is  16 
+sPPM =  TRUE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 60
+ntime = 12
+nout = 1000
+update_alpha = 0
+update_eta1 = 0
+update_phi1 = 0
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+ntime =  12 49900
+ntime_out =  12 
+lpml =  NaN 
+waic =  3163.496 
+
+
+Fit took:
+Time difference of 5.5802 hours

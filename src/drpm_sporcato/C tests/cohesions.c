@@ -224,15 +224,15 @@ int main() {
     // Test data
     // double s1[] = {1.0, 2.0, 3.0};
     // double s2[] = {4.0, 5.0, 6.0};
-	double s1[] = {1.0, 1.0, 11};
-    double s2[] = {1.0, 1.1, 1.1};
+	double s1[] = {1.0, 1.0, 1.4};
+    double s2[] = {1.0, 1.1, 1.4};
+    int dim = 3;
     double phi = 0.5;
     double epsilon = 0.1;
     double a = 5.0;
     double mu0[] = {2.0, 1.0};
     double k0 = 0.5, v0 = 0.1;
     double L0[] = {1.0,0.5, 0.5, 1.0};
-    int dim = 3;
     int lg = 0;
 
     // Test Cohesion1
@@ -242,8 +242,8 @@ int main() {
     // Test Cohesion2
     double result2f = Cohesion2(s1, s2, a, dim, 0);
     printf("Cohesion2 result: %f\n", result2f); 
-	double result2t = Cohesion2(s1, s2, a, dim, 1);
-    printf("Cohesion2 result: %f\n", result2t);
+	// double result2t = Cohesion2(s1, s2, a, dim, 1);
+    // printf("Cohesion2 result: %f\n", result2t);
 
 
     // Test Cohesion3_4 for Cohesion3

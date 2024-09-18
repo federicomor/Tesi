@@ -6,6 +6,8 @@ using Logging
 using Dates
 using TimerOutputs
 using ProgressMeter
+using StaticArrays
+using Printf
 
 include("debug.jl")
 include("utils.jl")
@@ -197,11 +199,23 @@ function MCMC_fit(;
 	if sPPM
 		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
 		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
+
+		S=@MMatrix zeros(2, 2)
+		if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
+			sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
+		else 
+			sp_params_real = sp_params
+		end
 	end
+	
+	if update_eta1 acceptance_ratio_eta1 = 0 end
+	if update_phi1 acceptance_ratio_phi1 = 0 end
+
 
 	############# send feedback #############
 	println("- using seed $seed -")
-	println("fitting $(Int(draws)) total iterates (burnin=$(Int(burnin)), thinning=$(Int(thin)))")
+	println("fitting $(Int(draws)) total iterates")
+	println("with burnin=$(Int(burnin)), thinning=$(Int(thin))")
 	println("thus producing $nout valid iterates in the end")
 	println("\non n=$n subjects\nfor T=$T time instants")
 	println("\nwith space? $sPPM")
@@ -310,11 +324,11 @@ function MCMC_fit(;
 	# hierarchy level 2
 	theta_iter = zeros(T_star)
 	theta_iter[1] = rand(Normal(phi0_iter,sqrt(lambda2_iter)))
-	for t in 2:T_star
+	@inbounds for t in 2:T_star
 		theta_iter[t] = rand(Normal((1-phi1_iter)*phi0_iter + phi1_iter*theta_iter[t-1],sqrt(lambda2_iter*(1-phi1_iter^2))))
 	end
 	tau2_iter = zeros(T_star)
-	for t in 1:T_star
+	@inbounds for t in 1:T_star
 		tau2_iter[t] = rand(InverseGamma(tau2_priors...))
 	end
 
@@ -325,7 +339,7 @@ function MCMC_fit(;
 		beta_iter = Vector{Vector{Float64}}(undef,T)
 		beta0 = beta_priors[1:end-1]
 		s2_beta = beta_priors[end]
-		for t in 1:T
+		@inbounds for t in 1:T
 			# beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p_lk)))
 			beta_iter[t] = beta0 # initialize with the mean? maybe it's better
 		end
@@ -334,7 +348,7 @@ function MCMC_fit(;
 
 	eta1_iter = zeros(n)
 	if include_eta1
-		for j in 1:n
+		@inbounds for j in 1:n
 			eta1_iter[j] = rand(Uniform(-1,1))
 		end
 	end
@@ -343,15 +357,6 @@ function MCMC_fit(;
 	# dimension n since at most there are n clusters (all singletons)
 	nh[1,:] .= n
 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
-
-
-	############# pre-allocate auxiliary working variables #############
-	n_red = 0
-	n_red1 = 0
-	nclus_red = 0
-	nclus_red1 = 0
-	j_label = 0
-	# they are scalars so shouldnt really impact the computational load
 
 
 	############# start MCMC algorithm #############
@@ -365,7 +370,7 @@ function MCMC_fit(;
 			barlen=0 # no progress bar
 			)
 
-	for i in 1:draws
+	@inbounds for i in 1:draws
 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 		# there is also the ProgressMeter option, maybe is cooler
 
@@ -511,8 +516,8 @@ function MCMC_fit(;
 							s2o = sp2_red[aux_idxs]
 							s1n = copy(s1o); push!(s1n, sp1[j])
 							s2n = copy(s2o); push!(s2n, sp2[j])
-							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params, lg=true, M=M_dp)
-							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, lg=true, M=M_dp, S=S)
+							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
 						end
 						# debug(@showd lCn lCo)
 						# debug(@showd cl_xPPM)
@@ -537,7 +542,7 @@ function MCMC_fit(;
 					lSn = 0.0 
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
-						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params, lg=true, M=M_dp)
+						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
 					end
 					if cl_xPPM
 						for p in 1:p_cl
@@ -675,7 +680,8 @@ function MCMC_fit(;
 					else
 						# update params for "rho_jt = k" simulation
 						nh_tmp[k] += 1
-						nclus_temp = sum(nh_tmp .> 0) # = number of clusters
+						# nclus_temp = sum(nh_tmp .> 0) # = number of clusters
+						nclus_temp = count(a->(a>0), nh_tmp) # faster
 
 						lpp = 0.0
 						for kk in 1:nclus_temp
@@ -684,7 +690,7 @@ function MCMC_fit(;
 							if sPPM
 								s1n = @view sp1[aux_idxs]
 								s2n = @view sp2[aux_idxs]
-								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
 							end
 							if cl_xPPM
 								# debug(@showd cv_idxs)
@@ -744,7 +750,8 @@ function MCMC_fit(;
 
 					# update params for "rho_jt = k" simulation
 					nh_tmp[k] += 1
-					nclus_temp = sum(nh_tmp .> 0)
+					# nclus_temp = sum(nh_tmp .> 0)
+					nclus_temp = count(a->(a>0), nh_tmp) # faster
 
 					lpp = 0.0
 					for kk in 1:nclus_temp
@@ -753,7 +760,7 @@ function MCMC_fit(;
 						if sPPM
 							s1n = @view sp1[aux_idxs]
 							s2n = @view sp2[aux_idxs]
-							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params, lg=true, M=M_dp)
+							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
 						end
 						if cl_xPPM
 							for p in 1:p_cl
@@ -1064,6 +1071,7 @@ function MCMC_fit(;
 					u = rand(Uniform(0,1))
 					if (ll_ratio > log(u))
 						eta1_iter[j] = eta1_new # accept the candidate
+						acceptance_ratio_eta1 += 1
 					end
 				end
 			end
@@ -1154,6 +1162,7 @@ function MCMC_fit(;
 				u = rand(Uniform(0,1))
 				if (ll_ratio > log(u))
 					phi1_iter = phi1_new # accept the candidate
+					acceptance_ratio_phi1 += 1
 				end
 			end
 		end
@@ -1269,6 +1278,13 @@ function MCMC_fit(;
 	WAIC *= -2
 	println("WAIC: $WAIC (the lower the better)")
 	# println("WAIC: $WAIC - the ↓ the :)")
+
+	println()
+	# println("acceptance ratio for eta1: ", acceptance_ratio_eta1/(n*draws) *100, "%")
+	# println("acceptance ratio for phi1: ", acceptance_ratio_phi1/draws*100, "%")
+
+	@printf "acceptance ratio eta1: %.2f%%\n" acceptance_ratio_eta1/(n*draws) *100
+	@printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100
 
 	if logging
 		debug(@showd to)

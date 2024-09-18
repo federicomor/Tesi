@@ -24,6 +24,7 @@ source("../src/include.R") # just for helper functions morally
 ## load C drpm
 ```{r}
 devtools::load_all("../../drpm_main/")
+# devtools::load_all("../../drpm_sporcato/")
 ```
 
 ## load J drpm
@@ -77,6 +78,18 @@ sd <- apply(ysub2,2,sd)
 # Center the observations
 y <- t(t(ysub2) - mn)
 
+cols = colora(len=size(y)[1],56,0)
+# original real data
+for(i in 1:size(y)[1]){
+   if(i==1){
+     plot(1:size(y)[2],y[i,],col=cols[i],type='l',
+     	 xlab='time',ylab='values',main="original data",
+     	 ylim=extrema(y))
+ 	  } 
+	  else{
+		  lines(1:size(y)[2],y[i,],col=cols[i])
+	  }
+}
 tps <- ncol(y)
 
 s_coords <- (dat@sp@coords)[-c(4,16,25,27,30,43,52,59,69),]
@@ -186,10 +199,10 @@ example
 seed = 314.0
 cat("seed",seed,"\n")
 
-# niter=50000; nburn=10000; nthin=40 # valori del file originale
-niter=50000; nburn=30000; nthin=20 # scelta intermedia?
+niter=50000; nburn=10000; nthin=40 # valori del file originale
+# niter=50000; nburn=30000; nthin=20 # scelta intermedia?
 # niter=30000; nburn=22000; nthin=8 # secondo i miei test
-# niter=20; nburn=0; nthin=1 # test super veloce
+niter=20; nburn=0; nthin=1 # test super veloce
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -205,21 +218,18 @@ A_ub_lambda = 5
 a_sigma  = 2; b_sigma  = 2
 a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
-eta1_scale = 0.9
+eta1_scale = 1
 
-sig_mh_sig2 = 0.1
-sig_mh_tau2 = 0.1
-sig_mh_lambda2 = 0.1
+sig_mh_sig2 = 0.4
+sig_mh_tau2 = 0.4
+sig_mh_lambda2 = 0.4
 sig_mh_eta1 = 0.1
 sig_mh_phi1 = 0.1
-
-update_eta1 = TRUE
-update_phi1 = TRUE
 
 a_alpha = 2; b_alpha = 2
 
 # now space
-sp = 4
+sp = 3
 mu0 = 0 
 k0 = 1
 v0 = 5
@@ -240,7 +250,7 @@ con 30k iterazioni?
 
 ```{r,warning=F}
 tempo_inizio <- Sys.time()
-set.seed(1)
+set.seed(9)
 C.models.out <- list()
 hh <- 1
 # s="1"
@@ -266,12 +276,13 @@ for(s in c("0","1")){
 
 	  cat("model is ", h, "\n")
 	  cat("space is ", s, "\n")
-	  cat("seed is ", 1*hh, "\n")
-	  set.seed(1*hh)
+	  # set.seed(1*hh)
+	  # set.seed(1*(hh+1)^3)
 	  # set.seed(runif(1,0,100))
+	  # cat("seed is ", 1*hh, "\n")
 
-# param_0 = 1 <=> we update it
-# param_0 = 0 <=> we dont update it
+# param_0 = 0 <=> we update it
+# param_0 = 1 <=> we dont update it
 
 	  out = drpm_fit(
 		y=y,
@@ -281,7 +292,9 @@ for(s in c("0","1")){
         starting_alpha = 0.5,
         unit_specific_alpha = FALSE,
         time_specific_alpha = FALSE,
-		alpha_0 = ifelse(alphaUpdate, 0, 1),
+		alpha_0 = ifelse(alphaUpdate, 0, 1), # if true it puts 0
+		# ah the sense should be "do we keep the same paramvalue_0 for all the fitting"?
+		# then we answer no if we want to update it... a bit unclear in the docs
         eta1_0 = ifelse(eta1Update, 0, 1),
         phi1_0 = ifelse(phi1Update, 0, 1),
         modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
@@ -291,6 +304,7 @@ for(s in c("0","1")){
 		cParms=c(mu0, k0, v0, L0),
 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
 		draws=niter,burn=nburn,thin=nthin)
+		# draws=200,burn=100,thin=1)
 	  
 	  
 	  # print(date())
@@ -351,6 +365,59 @@ differenza_tempo <- tempo_fine - tempo_inizio
 cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 ```
+
+
+```{r}
+drpm1 = C.models.out[[3]]
+```
+
+
+```{r}
+for (time in 1:Tm){
+		# par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+plot(drpm1$alpha[,time],type="l",
+	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
+	 ), ylim=c(0,1),
+	 xlab = "MCMC iterations",ylab="values")
+# plot(rout$alpha[,time],type="l",
+# 	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
+# 	 ), ylim=c(0,1),
+# 	 xlab = "MCMC iterations",ylab="values")
+}
+size(drpm1$mu)
+# size(rout$muh)
+unitj = 1
+for (time in 1:Tm){
+		# par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$mu[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,]),max(drpm1$mu[time,unitj,])),
+		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+		 xlab = "MCMC iterations",ylab="values")
+	# plot(rout$muh[time,unitj,],type="l",
+	# 	 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+	# 	 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
+	# 	 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+	# 	 xlab = "MCMC iterations",ylab="values")
+}
+size(drpm1$sig2)
+# size(rout$sigma2h)
+unitj = 1
+for (time in 1:Tm){
+		# par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$sig2[time,unitj,],type="l",
+		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,])),
+		 xlab = "MCMC iterations",ylab="values")
+	# plot(rout$sigma2h[time,unitj,],type="l",
+	# 	 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+	# 	 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
+	# 	 xlab = "MCMC iterations",ylab="values")
+}
+```
+
 
 ```{r,warning=F}
 ##########################

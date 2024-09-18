@@ -1,16 +1,17 @@
-begin
-include("MCMC_fit.jl")
-using ProfileView
-using StatProfilerHTML
+using ProfileCanvas
+using JET
 
-N = 70
-T = 5
+include("../MCMC_fit.jl")
+
+begin
+N = 60
+T = 12
 y = rand(N,T)
 sp = rand(N,2)
 
 # params
 m0_phi0 = 0.
-s20_phi0 = 1.
+s20_phi0 = 10.
 a_sigma  = 2.; b_sigma  = 2.
 a_tau    = 2.; b_tau    = 2.
 a_lambda = 2.; b_lambda = 2.
@@ -19,7 +20,7 @@ sig_mh_eta1 = 0.1
 sig_mh_phi1 = 0.1
 update_eta1 = true
 update_phi1 = true
-a_alpha = 1.; b_alpha = 1.
+a_alpha = 2.; b_alpha = 2.
 time_specific_alpha = true
 # now space
 spatial_cohesion_idx = 3.
@@ -28,13 +29,17 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 10.
-burnin = 0.
+niter = 3000.
+burnin = 200.
 thin = 1.
 seed = 123.0
+end
 
-# ProfileView.@profview out = MCMC_fit(
-# @profilehtml MCMC_fit(
+# ProfileCanvas.@profview MCMC_fit(
+# ProfileCanvas.@profview_allocs MCMC_fit(
+# @code_warntype MCMC_fit(
+# @report_opt MCMC_fit(
+# @timev MCMC_fit(
 out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
@@ -64,6 +69,8 @@ out = MCMC_fit(
 	
 	spatial_cohesion_idx = spatial_cohesion_idx,
 	sp_params = [[mu0,mu0],k0,v0,[L0 0.0; 0.0 L0]],
+	# spatial_cohesion_idx = 1,
+	# sp_params = [0.5],
 	
 	# covariate_similarity_idx = NA,  
 	draws = niter,                    
@@ -72,7 +79,7 @@ out = MCMC_fit(
 	logging = false,
 	seed = seed
 )
-end
+
 
 
 

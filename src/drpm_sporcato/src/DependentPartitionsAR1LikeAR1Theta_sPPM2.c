@@ -352,7 +352,9 @@ void drpm_ar1_sppm_CODE(int *draws, int *burn, int *thin, int *nsubject, int *nt
 			// Rprintf("mcmc iter = %d =========================================== \n", i+1);
 			// Rprintf("%s", ctime(&now));
 		// }
-Rprintf("iteration %d of %d\r",i,*draws);
+	if(i % 100 == 0){
+		Rprintf("mcmc iter = %d\r",i);
+	}
 					// debug_info(i,j,t);
 				    // RprintVecAsMat("theta_iter", theta_iter, 1, *ntime);
 				    // RprintVecAsMat("tau2_iter", tau2_iter, 1, *ntime);
@@ -1410,23 +1412,23 @@ Rprintf("iteration %d of %d\r",i,*draws);
 //			RprintVecAsMat("muh", muh, *nsubject, ntime1);
 //			RprintVecAsMat("sig2h", sig2h, *nsubject, ntime1);
 
-				int valida = 1;
-				for(jj = 0; jj < *nsubject; jj++){
-					if (Si_tmp[jj] != Si_tmp2[jj]){
-						valida=0;
-					}
-				}
-				for(k = 0; k < nclus_iter[t]; k++){
-					if (mu_tmp[k] != muh[k*(ntime1)+t] || sig2_tmp[k] != sig2h[k*(ntime1)+t])
-						valida=0;
-					if (nh[k*(ntime1)+t] != reorder[k] || muh[k*(ntime1)+t] != mu_tmp[(oldLab[k]-1)] || sig2h[k*(ntime1)+t] != sig2_tmp[(oldLab[k]-1)])
-						valida=0;
-				}
-				if (valida==0){
-					// Rprintf("valida? %d, j? %d\n",valida,j);
-					// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
-					// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);
-				}
+				// int valida = 1;
+				// for(jj = 0; jj < *nsubject; jj++){
+				// 	if (Si_tmp[jj] != Si_tmp2[jj]){
+				// 		valida=0;
+				// 	}
+				// }
+				// for(k = 0; k < nclus_iter[t]; k++){
+				// 	if (mu_tmp[k] != muh[k*(ntime1)+t] || sig2_tmp[k] != sig2h[k*(ntime1)+t])
+				// 		valida=0;
+				// 	if (nh[k*(ntime1)+t] != reorder[k] || muh[k*(ntime1)+t] != mu_tmp[(oldLab[k]-1)] || sig2h[k*(ntime1)+t] != sig2_tmp[(oldLab[k]-1)])
+				// 		valida=0;
+				// }
+				// if (valida==0){
+				// 	// Rprintf("valida? %d, j? %d\n",valida,j);
+				// 	// RprintIVecAsMat("Si_tmp", Si_tmp, 1, *nsubject);
+				// 	// RprintIVecAsMat("Si_tmp2", Si_tmp2, 1, *nsubject);
+				// }
 
 			for(j=0; j<*nsubject; j++){
 				Si_iter[j*(ntime1) + t] = Si_tmp2[j];
