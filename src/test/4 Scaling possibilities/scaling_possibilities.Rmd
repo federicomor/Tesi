@@ -1,0 +1,327 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(salso)
+library(RColorBrewer)
+source("../include.R")
+```
+
+
+# LOAD 
+## load C drpm
+```{r}
+devtools::load_all("../../drpm_main/")
+# devtools::load_all("../../drpm_sporcato//")
+```
+
+## load J drpm
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# juliaEval("using Pkg")
+# juliaEval("Pkg.activate(\"../../JDRPM\")")
+# juliaEval("Pkg.instantiate()")
+
+# juliaEval("Pkg.status()")
+
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM/\")")
+juliaEval("using Pkg; Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+```
+
+
+
+# DATA
+```{r}
+load("../thesis data/df_daily_full_logtransf.Rdata")
+df = df_daily_full_logtransf
+
+std_sites = data.frame(
+	longitude = unique(df$Longitude), 
+	latitude = unique(df$Latitude))
+stations = unique(df$IDStations)
+yfull=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df[which(df$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+
+yfull_2years = cbind(yfull,yfull[,2:365])
+rownames(yfull_2years) = NULL
+colnames(yfull_2years)<- c("id",paste0("d", 1:729))
+
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("d", 1:365))
+
+#######################################################
+# reduce data set
+# time_span = 1:365 # up to 365
+time_span = 1:700 # up to 729
+nsubjects = 1:5 # up to 105
+
+# y = yfull[nsubjects,1+time_span]
+y = yfull_2years[nsubjects,1+time_span]
+sites = std_sites[nsubjects,]
+
+yred=y[,time_span]
+par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(as.matrix(yred)),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# -> we have
+y
+sites
+```
+
+
+# Fit params
+```{r}
+niter=100; nburn=0; nthin=1
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.2
+sig_mh_tau2 = 0.2
+sig_mh_lambda2 = 0.2
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+spatial_cohesion = 4
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+
+
+# Fit
+```{r}
+# timespan_tests = round(seq(10,364,length.out=2))
+timespan_tests = round(seq(10,729,length.out=8))
+nunits_tests =   round(seq(10,105,length.out=4))
+
+timespan_tests = c(5,10,50,100,500)
+nunits_tests   = c(5,10,50,100)
+
+timespan_tests
+nunits_tests
+
+cat("size =",length(timespan_tests)*length(nunits_tests),"\n")
+
+performance_C <- matrix(10000, nrow = length(nunits_tests), ncol = length(timespan_tests))
+performance_Julia <- matrix(10000, nrow = length(nunits_tests), ncol = length(timespan_tests))
+colnames(performance_C) = c(paste0("T_",timespan_tests))
+rownames(performance_C) = c(paste0("n_",nunits_tests))
+colnames(performance_Julia) = c(paste0("T_",timespan_tests))
+rownames(performance_Julia) = c(paste0("n_",nunits_tests))
+
+performance_C
+performance_Julia
+```
+
+
+
+
+```{r}
+library(lubridate)
+module_JDRPM <- juliaImport(juliaCall("include", module))
+
+nruns = 5
+seed = 314.0
+set.seed(314.0)
+
+for (i in 1:length(nunits_tests)) {
+  for (j in 1:length(timespan_tests)) {
+  	
+  	##### set data accordingly
+	# reduce data set
+	nsubjects = 1:nunits_tests[i] # up to 105
+	time_span = 1:timespan_tests[j] # up to 365
+	y = yfull_2years[nsubjects,1+time_span]
+	ym = as.matrix(y)
+	sites = std_sites[nsubjects,]
+	sitesm = as.matrix(sites)
+
+  	##### fit models
+		
+	##### J
+	for (run in 1:nruns){
+		tempo_inizio <- proc.time()
+		out = module_JDRPM$MCMC_fit(
+			Y=ym,              
+			sp_coords = sitesm,
+			M_dp = 1,                     
+			initial_partition = NA,
+			Xlk_covariates = NA,
+			Xcl_covariates = NA,
+			starting_alpha = 0.5,         
+			unit_specific_alpha = FALSE,       
+			time_specific_alpha = TRUE,       
+			update_alpha = TRUE,
+			include_eta1 = TRUE,                    
+			include_phi1 = TRUE,
+			update_eta1 = TRUE,                    
+			update_phi1 = TRUE,
+			sig2h_priors = c(a_sigma,b_sigma),
+			eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+			# beta_priors = c(rep(1,p),2),
+			beta_priors = NA,
+			tau2_priors = c(a_tau,b_tau),
+			phi0_priors = c(m0_phi0,s20_phi0),
+			phi1_priors = sig_mh_phi1^2,
+			lambda2_priors = c(a_lambda,b_lambda),
+			alpha_priors = c(a_alpha,b_alpha),
+			spatial_cohesion_idx = spatial_cohesion,
+			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+			# covariate_similarity_idx = NA,
+			# draws = 2,burnin = 0, thin = 1,
+			draws = niter,burnin = nburn, thin = nthin,
+			logging = FALSE,
+			seed = seed,
+			jump_to_execution = TRUE,
+			simple_return = TRUE
+		)
+		tempo_fine <- proc.time()
+		elapsed_time <- tempo_fine - tempo_inizio
+		# Elapsed time in seconds
+		differenza_tempo <- elapsed_time["elapsed"]
+		cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
+		performance_Julia[i, j] = min(performance_Julia[i, j],
+									  as.double(differenza_tempo) / niter)
+	}
+	
+	##### C	
+	for (run in 1:nruns){
+  	tempo_inizio <- proc.time()
+	drpm1 <- drpm_fit(
+			y=y, 
+			s_coords = sites,
+	        M=1,
+	        initial_partition = NULL,
+	        starting_alpha = 0.5,
+	        unit_specific_alpha = FALSE,
+	        time_specific_alpha = TRUE,
+	        alpha_0=FALSE,
+	        eta1_0 =FALSE,
+	        phi1_0 =FALSE,
+	        # modelPriors=c(0,100^2,1,1,1,1), # original default one
+	        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+	        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+	        simpleModel = 0,
+	        theta_tau2 = c(0, 2), # only used if simpleModel=1
+			SpatialCohesion=spatial_cohesion, # auxiliary similarity
+			# SpatialCohesion=4, # double dipper similarity
+			cParms=c(mu0, k0, v0, L0),
+			mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+			verbose=TRUE,
+			# draws=1000,burn=0,thin=1)
+			draws=niter,burn=nburn,thin=nthin)
+	
+		tempo_fine <- proc.time()
+		elapsed_time <- tempo_fine - tempo_inizio
+		# Elapsed time in seconds
+		differenza_tempo <- elapsed_time["elapsed"]
+		cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
+		performance_C[i, j] = min(performance_C[i, j],
+								  as.double(differenza_tempo) / niter)
+	}
+  }
+}
+```
+```{r}
+size(drpm1$phi1)
+plot(drpm1$phi1,type="l")
+
+size(drpm1$eta1)
+plot(drpm1$eta1[,1],type="l")
+```
+
+
+# Analysis
+```{r}
+performance_C
+performance_Julia
+```
+
+```{r}
+
+plot_mat = function(mat,title){
+ncols_ari <- 100
+cols <- rev(colora(ncols_ari, 35,0))
+brks <- seq(0,max(performance_C,performance_Julia)*1000, length.out = ncols_ari + 1)
+
+# Plotting the matrix
+library(fields)
+image.plot(mat*1000, axes = FALSE, col = cols, main=title,breaks = brks)
+
+# Adding text annotations for each cell
+for (i in 1:nrow(mat)) {
+  for (j in 1:ncol(mat)) {
+    text(x = j - 0.9, 
+    	 y = i - 0.9, 
+    	 labels = sprintf("%.2f ms/it", mat[i, j]*1000), cex = 1.0, col = "#aaaaaa")
+  }
+}
+mtext(text=c(paste0("n=",nunits_tests)), 
+	  side=2, line=0.3,at=seq(0,1,length=length(nunits_tests)), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests)),
+	  side=1, line=0.3,at=seq(0,1,length=length(timespan_tests)), las=1, cex=0.8)
+}
+
+
+plot_mat(performance_C,title="C matrix")
+plot_mat(performance_Julia,title="J matrix")
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+

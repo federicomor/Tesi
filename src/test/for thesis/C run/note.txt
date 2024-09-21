@@ -1,0 +1,163 @@
+niter=50000; nburn=30000; nthin=20 # scelta intermedia?
+
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.3
+sig_mh_tau2 = 0.3
+sig_mh_lambda2 = 0.3
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
+
+a_alpha = 2; b_alpha = 2
+
+# now space
+sp = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+
+##############################################################
+
+model is  111 
+space is  0 
+seed is  100 
+sPPM =  FALSE 
+lpml =  -1645.147 
+waic =  3247.23 
+
+
+model is  110 
+space is  0 
+seed is  200 
+sPPM =  FALSE 
+lpml =  -2775.573 
+waic =  3131.934 
+
+
+model is  101 
+space is  0 
+seed is  300 
+sPPM =  FALSE 
+lpml =  -1652.815 
+waic =  3147.513 
+
+
+model is  100 
+space is  0 
+seed is  400 
+sPPM =  FALSE 
+lpml =  -2440.585 
+waic =  3215.355 
+
+
+model is  011 
+space is  0 
+seed is  500 
+sPPM =  FALSE 
+lpml =  -1841.092 
+waic =  3239.125 
+
+
+model is  010 
+space is  0 
+seed is  600 
+sPPM =  FALSE 
+lpml =  -2579.485 
+waic =  3051.672 
+
+
+model is  001 
+space is  0 
+seed is  700 
+sPPM =  FALSE 
+lpml =  -1641.367 
+waic =  3249.564 
+
+
+model is  000 
+space is  0 
+seed is  800 
+sPPM =  FALSE 
+lpml =  -2150.506 
+waic =  3203.79 
+
+
+model is  111 
+space is  1 
+seed is  900 
+sPPM =  TRUE 
+lpml =  -1562.054 
+waic =  3050.787 
+
+
+model is  110 
+space is  1 
+seed is  1000 
+sPPM =  TRUE 
+lpml =  NaN 
+waic =  3215.73 
+
+
+model is  101 
+space is  1 
+seed is  1100 
+sPPM =  TRUE 
+lpml =  -1559.762 
+waic =  3024.959 
+
+
+model is  100 
+space is  1 
+seed is  1200 
+sPPM =  TRUE 
+lpml =  NaN 
+waic =  3398.618 
+
+
+model is  011 
+space is  1 
+seed is  1300 
+sPPM =  TRUE 
+lpml =  -1666.764 
+waic =  3103.374 
+
+
+model is  010 
+space is  1 
+seed is  1400 
+sPPM =  TRUE 
+lpml =  -2644.454 
+waic =  3134.058 
+
+
+model is  001 
+space is  1 
+seed is  1500 
+sPPM =  TRUE 
+lpml =  -1618.461 
+waic =  3040.9 
+
+
+model is  000 
+space is  1 
+seed is  1600 
+sPPM =  TRUE 
+lpml =  -Inf 
+waic =  3161.88 
+
+
+Fit took:
+Time difference of 4.892 hours
+i.e. 4h 53m
+i.e. 5h morally (contando tutto il patema)

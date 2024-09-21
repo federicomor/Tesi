@@ -175,6 +175,29 @@ plot_ARI = function(partition,title){
 	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
 }
+
+plot_ARI_mat = function(ARImat){
+	ncols_ari = 100
+	# if (min(ARImats)<0){
+		# cols_ARI = colora(ncols_ari,79,0)
+		# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# } else {
+		# cols_ARI = colora(ncols_ari,56,0)
+		# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+		cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+		# cols_ARI = colora(ncols_ari,102,0)
+		# brks = seq(0,1,length.out=ncols_ari+1)
+		brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# }
+	# or see ?designer.colors for colors
+	library(fields)
+	image.plot(ARImats,
+			   main=title,axes=FALSE,col=cols_ARI,
+			   # main=paste0("Lagged ARI values - ",title),axes=FALSE,col=cols_ARI,
+			   breaks=brks)
+	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+}
 ```
 
 example
@@ -194,15 +217,10 @@ example
 
 # Params
 ```{r}
-# as.integer(runif(1,0,1000))*1.0
-# seed = 881.0
-seed = 314.0
-cat("seed",seed,"\n")
-
-niter=50000; nburn=10000; nthin=40 # valori del file originale
-# niter=50000; nburn=30000; nthin=20 # scelta intermedia?
+# niter=50000; nburn=10000; nthin=40 # valori del file originale
+niter=50000; nburn=30000; nthin=20 # scelta intermedia?
 # niter=30000; nburn=22000; nthin=8 # secondo i miei test
-niter=20; nburn=0; nthin=1 # test super veloce
+# niter=20; nburn=0; nthin=1 # test super veloce
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -218,13 +236,13 @@ A_ub_lambda = 5
 a_sigma  = 2; b_sigma  = 2
 a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
-eta1_scale = 1
+eta1_scale = 0.9
 
-sig_mh_sig2 = 0.4
-sig_mh_tau2 = 0.4
-sig_mh_lambda2 = 0.4
-sig_mh_eta1 = 0.1
-sig_mh_phi1 = 0.1
+sig_mh_sig2 = 0.3
+sig_mh_tau2 = 0.3
+sig_mh_lambda2 = 0.3
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
 
 a_alpha = 2; b_alpha = 2
 
@@ -249,18 +267,19 @@ con 30k iterazioni?
 => tempo tot stimate = 0.0008958333 * (30k*16) = 430min = 7h :/
 
 ```{r,warning=F}
-tempo_inizio <- Sys.time()
-set.seed(9)
+tempo_inizio_tot <- Sys.time()
+
 C.models.out <- list()
 hh <- 1
-# s="1"
-# h <- "111"; s <- "0";
+
 model <- "C"
 for(s in c("0","1")){
-	pdf(paste0("gstat_test_C_sp",s,".pdf"),height=11.7, width=8.3)
-	par(mfrow=c(4,2),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
+	# pdf(paste0("gstat_test_C_sp",s,".pdf"),height=11.7, width=8.3)
+	pdf(paste0("gstat_test_C_sp",s,".pdf"),height=7, width=12)
+	par(mfrow=c(2,4),mar=c(2,2,2,4.5), mgp=c(1.5,0.5,0.5))
 	
 	for(h in c("111","110","101","100","011","010","001","000")){
+		tempo_inizio <- Sys.time()
 
 	  m.n <- as.numeric(strsplit(h, "")[[1]])
 
@@ -276,10 +295,10 @@ for(s in c("0","1")){
 
 	  cat("model is ", h, "\n")
 	  cat("space is ", s, "\n")
-	  # set.seed(1*hh)
+	  set.seed(100*hh)
 	  # set.seed(1*(hh+1)^3)
 	  # set.seed(runif(1,0,100))
-	  # cat("seed is ", 1*hh, "\n")
+	  cat("seed is ", 100*hh, "\n")
 
 # param_0 = 0 <=> we update it
 # param_0 = 1 <=> we dont update it
@@ -303,6 +322,7 @@ for(s in c("0","1")){
 		SpatialCohesion=sp,
 		cParms=c(mu0, k0, v0, L0),
 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+		verbose=TRUE,
 		draws=niter,burn=nburn,thin=nthin)
 		# draws=200,burn=100,thin=1)
 	  
@@ -357,20 +377,31 @@ for(s in c("0","1")){
 		parts = generate_partition(out)
 		plot_ARI(parts,header)
 		
+		tempo_fine_tot <- Sys.time()
+		differenza_tempo <- tempo_fine - tempo_inizio
+		cat(crayon::cyan("Fit took:\n"))
+		print(round(differenza_tempo,digits = 4))
+		
 	}
 	dev.off()
 }
-tempo_fine <- Sys.time()
-differenza_tempo <- tempo_fine - tempo_inizio
+tempo_fine_tot <- Sys.time()
+differenza_tempo_tot <- tempo_fine_tot - tempo_inizio_tot
 cat(crayon::cyan("Fit took:\n"))
-print(round(differenza_tempo,digits = 4))
+print(round(differenza_tempo_tot,digits = 4))
 ```
-
 
 ```{r}
-drpm1 = C.models.out[[3]]
+save(C.models.out,file="C_models_out.Rdata")
+# load("../Supplementary material/PM10_ALL_SpCo_4_rev.Rdata")
 ```
 
+
+# trace plots C
+```{r}
+names(C.models.out)
+drpm1 = C.models.out[[11]]
+```
 
 ```{r}
 for (time in 1:Tm){
@@ -416,6 +447,94 @@ for (time in 1:Tm){
 	# 	 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
 	# 	 xlab = "MCMC iterations",ylab="values")
 }
+dim(drpm1$eta1)
+# dim(rout$eta1)
+# cat("did we update eta1?", update_eta1)
+# for (unit in 1:N){
+# 	# par(mfrow=c(1,2),mar=c(2,2,4,2))
+# 	plot(drpm1$eta1[,unit],type="l",
+# 		 ylim=c(min(drpm1$eta1[,unit]),
+# 		 	    max(drpm1$eta1[,unit])),
+# 		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
+# 		 xlab = "MCMC iterations",ylab="values")
+# 	# plot(rout$eta1[,unit],type="l",
+# 	# 	 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+# 	# 	 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+# 	# 	 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
+# 	# 	 xlab = "MCMC iterations",ylab="values")
+# }
+for (time in 1:Tm){
+	# par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time]),
+		 	    max(drpm1$theta[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	# plot(rout$theta[,time],type="l",
+	# 	  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+	# 	 	    max(drpm1$theta[,time],rout$theta[,time])),
+	# 	 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
+	# 	 xlab = "MCMC iterations",ylab="values")
+}
+dim(drpm1$tau2)
+# dim(rout$tau2)
+for (time in 1:Tm){
+	# par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of tau2 at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	# plot(rout$tau2[,time],type="l",
+	# 	 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
+	# 	 main=bquote("Model DRPM J\nTrace plot of tau2 at time "*.(time)),
+	# 	 xlab = "MCMC iterations",ylab="values")
+}
+dim(drpm1$phi1)
+# dim(rout$phi1)
+
+# cat("did we update phi1?", update_phi1)
+# par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1]),
+		 	    max(drpm1$phi1[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi1"),
+	 xlab = "MCMC iterations",ylab="values")
+# plot(rout$phi1[,1],type="l",
+# 	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+# 		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
+# 	 main=bquote("Model DRPM J\nTrace plot of phi1"),
+# 	 xlab = "MCMC iterations",ylab="values")
+
+dim(drpm1$phi0)
+# dim(rout$phi0)
+
+# par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1]),
+		 	    max(drpm1$phi0[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi0"),
+	 xlab = "MCMC iterations",ylab="values")
+# plot(rout$phi0[,1],type="l",
+# 	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+# 		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
+# 	 main=bquote("Model DRPM J\nTrace plot of phi0"),
+# 	 xlab = "MCMC iterations",ylab="values")
+
+
+dim(drpm1$lam2)
+# dim(rout$lambda2)
+
+# par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1]),
+		 	    max(drpm1$lam2[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
+	 xlab = "MCMC iterations",ylab="values")
+# plot(rout$lambda2[,1],type="l",
+# 	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+# 		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
+# 	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
+# 	 xlab = "MCMC iterations",ylab="values")
 ```
 
 
@@ -461,26 +580,25 @@ for (time in 1:Tm){
 ```{r,warning=F}
 module_JDRPM <- juliaImport(juliaCall("include", module))
 tempo_inizio <- Sys.time()
-set.seed(1)
+
 J.models.out <- list()
 hh <- 1
-# s="1"
-# h <- "111"; s <- "0";
-# model <- "J"
+
+model = "J"
 for(s in c("0","1")){
-	pdf(paste0("gstat_test_J_sp",s,".pdf"),height=11.7, width=8.3)
-	par(mfrow=c(4,2),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
+	# pdf(paste0("gstat_test_J_sp",s,".pdf"),height=11.7, width=8.3)
+	pdf(paste0("gstat_test_J_sp",s,".pdf"),height=7, width=12)
+	par(mfrow=c(2,4),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
 	
 	for(h in c("111","110","101","100","011","010","001","000")){
 
 	  m.n <- as.numeric(strsplit(h, "")[[1]])
 
-	  eta1Update <- m.n[1]==1
-	  phi1Update <- m.n[2]==1
-	  alphaUpdate <- m.n[3]==1
+	  eta1Update <- m.n[1]!=0
+	  phi1Update <- m.n[2]!=0
+	  alphaUpdate <- m.n[3]!=0
 	  # convention of the C code:
-		# param_0 = 1 <=> we update it
-		# param_0 = 0 <=> we dont update it
+		#param_0 = 0 <=> we update it
 
 	  if(s=="0"){
 		  sc <- NULL
@@ -490,13 +608,52 @@ for(s in c("0","1")){
 
 	  cat("model is ", h, "\n")
 	  cat("space is ", s, "\n")
-	  cat("seed is ", 1*hh, "\n")
+	  # cat("seed is ", 100*hh, "\n")
 	  # set.seed(1*hh)
-	  seed = 1*hh
+	  seed = 100*hh
 
-	  out = module_JDRPM$MCMC_fit(
+	if (s=="0")
+	{
+		out = module_JDRPM$MCMC_fit(
 			Y=as.matrix(y),              
-			sp_coords = sc,
+			# sp_coords = sc,
+			M_dp = 1,                     
+			initial_partition = NA,
+			Xlk_covariates = NA,
+			Xcl_covariates = NA,
+			
+			starting_alpha = 0.5,         
+			unit_specific_alpha = FALSE,       
+			time_specific_alpha = FALSE,       
+			update_alpha = alphaUpdate,             
+			
+			include_eta1 = TRUE,                    
+			include_phi1 = TRUE,
+			update_eta1 = eta1Update,                    
+			update_phi1 = phi1Update,
+			
+			sig2h_priors = c(a_sigma,b_sigma),
+			eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+			# beta_priors = c(rep(1,p),2),
+			beta_priors = NA,
+			tau2_priors = c(a_tau,b_tau),
+			phi0_priors = c(m0_phi0,s20_phi0),
+			phi1_priors = sig_mh_phi1^2,
+			lambda2_priors = c(a_lambda,b_lambda),
+			alpha_priors = c(a_alpha,b_alpha),  
+			
+			# spatial_cohesion_idx = sp,
+			# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+			draws = niter,burnin = nburn, thin = nthin,
+			# draws = 1000,burnin = 200, thin = 1,
+			logging = FALSE,
+			seed = seed,
+			simple_return = TRUE
+		)
+	} else {
+		out = module_JDRPM$MCMC_fit(
+			Y=as.matrix(y),              
+			sp_coords = s_std,
 			M_dp = 1,                     
 			initial_partition = NA,
 			Xlk_covariates = NA,
@@ -525,10 +682,13 @@ for(s in c("0","1")){
 			spatial_cohesion_idx = sp,
 			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 			draws = niter,burnin = nburn, thin = nthin,
+			# draws = 1000,burnin = 200, thin = 1,
 			logging = FALSE,
 			seed = seed,
 			simple_return = TRUE
 		)
+	}
+
 	  
 		# rout = juliaGet(out)
 		# names(rout) = c("Si","gamma","alpha", "sigma2h", "muh", "eta1","beta",
@@ -610,270 +770,240 @@ cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 ```
 
-
-```{r,warning=F}
-par(mfrow=c(2,4),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
-################################
-model_name="\nmodel J"
-model = rout
-parts = generate_partition(rout)
-plot_ARI(parts,model_name)
-################################
-model_name="\nmodel C"
-model = C.models.out[[1]]
-parts = generate_partition(rout)
-plot_ARI(parts,model_name)
+```{r}
+save(J.models.out,file="J_models_out.Rdata")
 ```
+
+
 
 #========
 # Plots
 ```{r}
 # My run of output has been saved in an .RData object.
 # It is provided and can be loaded if so desired. 
-# load("./PM10_ALL_SpCo_4_rev.RData")
+load("../Supplementary material/PM10_ALL_SpCo_4_rev.RData")
+# load("./C run/C_models_out.Rdata")
+C.models.out = models.out
 ```
 
 
 ```{r}
 # Create table that contains the WAIC and LPML values
 lpml <- lpmlr <-  waic <- numeric()
-amn <- matrix(NA, nrow = length(models.out), ncol=ncol(y))
-for(j in 1:length(models.out)){
-	lpml[j] <- models.out[[j]]$lpml
+# amn <- matrix(NA, nrow = length(C.models.out), ncol=ncol(y))
+for(j in 1:length(C.models.out)){
+	lpml[j] <- C.models.out[[j]]$lpml
   # lpmlr[j] <- lpml.robust(models.out[[j]]$llike)[5]
-	waic[j] <- models.out[[j]]$waic
-	amn[j,] <- round(apply(models.out[[j]]$alpha,2,mean),2)
+	waic[j] <- C.models.out[[j]]$waic
+	# amn[j,] <- round(apply(C.models.out[[j]]$alpha,2,mean),2)
 }
-res <- data.frame(names=names(models.out), lpml=lpml, waic=waic)
+res <- data.frame(names=names(C.models.out), lpml=lpml, waic=waic)
+res[order(res[,2]),]
+
+# Create table that contains the WAIC and LPML values
+lpml <- lpmlr <-  waic <- numeric()
+# amn <- matrix(NA, nrow = length(J.models.out), ncol=ncol(y))
+for(j in 1:length(J.models.out)){
+	lpml[j] <- J.models.out[[j]]$lpml
+  # lpmlr[j] <- lpml.robust(models.out[[j]]$llike)[5]
+	waic[j] <- J.models.out[[j]]$waic
+	# amn[j,] <- round(apply(J.models.out[[j]]$alpha,2,mean),2)
+}
+res <- data.frame(names=names(J.models.out), lpml=lpml, waic=waic)
 res[order(res[,2]),]
 ```
 
+# Ari paiwise
+```{r,warning=F}
+LEN = Tm
+compare_ARI = function(Cmod1,Jmod2){
+	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
+	for(k in 1: LEN){
+		rhoC = generate_partition(Cmod1)
+		rhoJ = generate_partition(Jmod2)
+		ARIvec[k] <- adjustedRandIndex(rhoC[[k]][1:N], rhoJ[[k]][1:N])
+	}	
+	ncols_ari = 100
+	cols_ARI = colora(ncols_ari,79,0)
+	# cols_ARI = rev(cols_ARI)
+	brks = seq(-1,1,length.out=ncols_ari+1)
+	# pdf(paste0("./figures/DRPM/ARI/ari.pdf"), height=8, width=10)
+	# svg(paste0("./figures/",base_folder,"/ARI/ari.svg"), height=8, width=10)
+	# png(paste0("./figures/",base_folder,"/ARI/ari.png"),  width=700,height=600)
+	library(fields)
+	plot(1:Tm,ARIvec,type="l",main=paste0("ARI values"),ylim=c(-0.5,1))
+	abline(h=0,col="gray80",lty=3)
+	
+	# image.plot(ARIvec,
+	# 		   main=paste0("ARI values - ",mod1," vs ",mod2),axes=FALSE,col=cols_ARI,
+	# 		   breaks=brks)
+	# mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+
+}
+
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+Cmod1 = C.models.out[[1]]
+Jmod2 = J.models.out[[1]]
+compare_ARI(Cmod1,Jmod2)
+```
+
+
 
 ```{r,warning=F}
-library(xtable)
-# Order as seen in Table 3 that focuses on Temporal models only
-ord <- c(8,7,4,2,7,5,3,1,16,14,12,10,15,13,11,9)
-# xtable(res[8:1,c(3,4)], digits=0)
+ARIvec = list()
+titoli = c()
+col_idx = 1
+# cols = colora(6,"rand",1)
+cols = colora(6,81,0)
 
-
-library(fields)
-# Compute the lagged partitions for all 16 models
-ARImats <- vector("list", length(models.out))
-for (i in 1:length(models.out)) {
-  ARImats[[i]] <- matrix(NA, nrow=tps, ncol=tps)
-}
-
-for(h in 1:length(models.out)){
-	for(k in 1:tps){
-		rho[[k]] <- salso(t(models.out[[h]]$Si[k,,]), loss="binder")
-	}
-
-	for(k in 1: tps){
-		for(kk in 1: tps){
-			ARImats[[h]][k,kk] <- adjustedRandIndex(rho[[k]], rho[[kk]])
+for(i in 1:16){
+	# for(j in (i+1):16){
+		# cat(mods[i],mods[j],"\n")
+		titolo = paste0(names(C.models.out)[i]," - ",names(J.models.out)[i])
+		titoli = c(titoli,titolo)
+		
+		ARIvec[[titolo]] = matrix(NA, nrow=1, ncol=LEN)
+			Cmod1 = generate_partition(C.models.out[[i]])
+			Jmod2 = generate_partition(J.models.out[[i]])
+		for(k in 1:Tm){
+			ARIvec[[titolo]][k] <- adjustedRandIndex(
+				Cmod1[[k]][1:N],Jmod2[[k]][1:N])
+		}	
+		if (i==1){
+			plot(1:Tm,ARIvec[[titolo]],type="l",col=cols[col_idx],
+				 ylim=c(-0.2,0.8),xlim=c(1,80))
+		} else {
+			lines(1:Tm,ARIvec[[titolo]],type="l",col=cols[col_idx])
 		}
-	}
+		abline(h=mean(ARIvec[[titolo]]),col=cols[col_idx])
+		cat(mean(ARIvec[[titolo]]), " ",titolo,"\n")
+		
+		# abline(h=mean(ARIvec[[titolo]]),col="red")
+		col_idx = col_idx +1
+	# }
 }
-
-pch=as.character(1:nrow(y))
+as.numeric(ARIvec[[titoli[1]]])
 ```
 
-# figure 5
-```{r}
-#
-# This is Figure 5 in the paper.  Includes lagged ARI plots for models that include time only (no space)
-#
-ord2 <- c(8,6,4,2,7,5,3,1)
 
-# pdf(paste0("LaggedARI_NoSpace2.pdf"), height=7, width=13)
 
-	par(mfrow=c(2,4),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
-	for(h in ord2){
-		m.n <- as.numeric(do.call(c, strsplit(strsplit(names(models.out)[h], "t|\\_")[[1]][c(2,3)], "")))
-		header <- bquote(eta[1]*.(ifelse(m.n[1]==1,"-Yes","-No"))*","~
-	    	             phi[1]*.(ifelse(m.n[2]==1,"-Yes","-No"))*","~
-	        	         alpha[t]*.(ifelse(m.n[3]==1,"-Yes","-No")))
-		image.plot(ARImats[[h]], main=header, zlim=range(do.call(c,ARImats),na.rm=TRUE), axes=FALSE)
-		mtext(text=c(paste("",1:tps)), side=2, line=0.3, at=seq(0,1,length=12), las=1, cex=0.8)
-		mtext(text=c(paste("",1:tps)), side=1, line=0.3, at=seq(0,1,length=12), las=2, cex=0.8)
-	}
-# dev.off()
-```
 
 
 ```{r}
-#  This plot is Figure 6 in the paper.
-#  In includes estimated partitions over time for four models.
-#
-#  temperal dependence in data model 1-Yes, 0-No (eta parameters)
-#  temperal dependence in atoms 1-Yes, 0-No (phi1 parameter)
-#  temperal dependence in partition 1-Yes, 0-No (alpha parameter)
-#
-#  spatial dependence in partition
-#
-# In the plot I include the following models
-# 000_0, 001_0, 110_0, 111_0
-# pdf("PartitionsOverTime3.pdf", height=15, width=15)
-    par(mfrow=c(2,2))
-    for(kkk in c(8,7, 2, 1)){
+dati = data.frame(x=1:Tm,
+				  y1=ARIvec[[titoli[1]]][1,],
+				  y2=ARIvec[[titoli[2]]][1,],
+				  y3=ARIvec[[titoli[3]]][1,],
+				  y4=ARIvec[[titoli[4]]][1,],
+				  y5=ARIvec[[titoli[5]]][1,],
+				  y6=ARIvec[[titoli[6]]][1,],
+				  y7=ARIvec[[titoli[7]]][1,],
+				  y8=ARIvec[[titoli[8]]][1,],
+				  y9=ARIvec[[titoli[9]]][1,],
+				  y10=ARIvec[[titoli[10]]][1,],
+				  y11=ARIvec[[titoli[11]]][1,],
+				  y12=ARIvec[[titoli[12]]][1,],
+				  y13=ARIvec[[titoli[13]]][1,],
+				  y14=ARIvec[[titoli[14]]][1,],
+				  y15=ARIvec[[titoli[15]]][1,],
+				  y16=ARIvec[[titoli[16]]][1,]
+				  )
 
-      rho <- list()
-      ccprob <- list()
+cols = colora(16,81,0)
+cols = colora(16,56,0)
+# cols = colora(6,114,0)
 
-      for(k in 1:tps){
-	      rho[[k]] <- salso(t(models.out[[kkk]]$Si[k,,]), loss="binder")
-      }
+models_names = c(
+"111 sp0",
+"110 sp0",
+"101 sp0",
+"100 sp0",
+"011 sp0",
+"010 sp0",
+"001 sp0",
+"000 sp0",
+"111 sp1",
+"110 sp1",
+"101 sp1",
+"100 sp1",
+"011 sp1",
+"010 sp1",
+"001 sp1",
+"000 sp1"
+)
 
-      m.n <- as.numeric(do.call(c, strsplit(strsplit(names(models.out)[kkk], "t|\\_")[[1]][c(2,3)], "")))
-      header <- bquote(eta[1]*.(ifelse(m.n[1]==1,"-Yes","-No"))*","~
-	    	       phi[1]*.(ifelse(m.n[2]==1,"-Yes","-No"))*","~
-	        	   alpha[t]*.(ifelse(m.n[3]==1,"-Yes","-No")))
+colors <- c(
+"111 sp0" = cols[1],
+"110 sp0" = cols[2], 
+"101 sp0" = cols[3],
+"100 sp0" = cols[4], 
+"011 sp0" = cols[5],
+"010 sp0" = cols[6], 
+"001 sp0" = cols[7],
+"000 sp0" = cols[8], 
+"111 sp1" = cols[9],
+"110 sp1" = cols[10], 
+"101 sp1" = cols[11],
+"100 sp1" = cols[12], 
+"011 sp1" = cols[13],
+"010 sp1" = cols[14], 
+"001 sp1" = cols[15],
+"000 sp1" = cols[16])
 
-      plot(rep(1:12, each=nrow(y)), rep(1:60, times=ncol(y)), type='n',
-           yaxt="n",ylab="", xlab="time", main=header, cex.main=2, cex.lab=1.75,
-           xaxt="n")
-      axis(side=1, at=1:12, cex.axis=1.5)
-      for(jj in 1:ncol(y)){
-        ord <- order(rho[[jj]])
-        cex1 <- rep(0.8,length(ord))
-        text(rep(jj, each=nrow(y)), 1:60, labels=pch[ord], col=rho[[jj]][ord], cex=cex1[ord])
-        if(jj>1)text(jj-0.5, 61, bquote(alpha[.(jj)]==.(amn[kkk,jj])), cex=0.85)
-      }
-    }
+library(scales)
 
-# dev.off()
-```
-
-# figure 7
-```{r}
-###########################################
-#
-# Analysis with space in the partition model
-#
-#
-# This is Figure 7 in the paper.  Lagged-ARI plots for models that include space in the partition
-#
-ord2 <- c(16,14,12,10,15,13,11,9)
-
-# pdf(paste0("LaggedARI_OnlySpace2.pdf"), height=7, width=13)
-
-	par(mfrow=c(2,4),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
-	for(h in ord2){
-		m.n <- as.numeric(do.call(c, strsplit(strsplit(names(models.out)[h], "t|\\_")[[1]][c(2,3)], "")))
-		header <- bquote(eta[1]*.(ifelse(m.n[1]==1,"-Yes","-No"))*","~
-	    	             phi[1]*.(ifelse(m.n[2]==1,"-Yes","-No"))*","~
-	        	         alpha[t]*.(ifelse(m.n[3]==1,"-Yes","-No")))
-		image.plot(ARImats[[h]], main=header, zlim=range(do.call(c,ARImats),na.rm=TRUE), axes=FALSE)
-		mtext(text=c(paste("",1:tps)), side=2, line=0.3, at=seq(0,1,length=12), las=1, cex=0.8)
-		mtext(text=c(paste("",1:tps)), side=1, line=0.3, at=seq(0,1,length=12), las=2, cex=0.8)
-	}
-# dev.off()
-```
+pari = ggplot(dati,aes(x=x))+	geom_line(aes(y=y1 ,color= "111 sp0" ))+
+	geom_line(aes(y=y2 ,color= "110 sp0" ))+
+	geom_line(aes(y=y3 ,color= "101 sp0" ))+
+	geom_line(aes(y=y4 ,color= "100 sp0" ))+
+	geom_line(aes(y=y5 ,color= "011 sp0" ))+
+	geom_line(aes(y=y6 ,color= "010 sp0" ))+
+	geom_line(aes(y=y7 ,color= "001 sp0" ))+
+	geom_line(aes(y=y8 ,color= "000 sp0" ))+
+	geom_line(aes(y=y9 ,color= "111 sp1" ))+
+	geom_line(aes(y=y10,color= "110 sp1" ))+
+	geom_line(aes(y=y11,color= "101 sp1" ))+
+	geom_line(aes(y=y12,color= "100 sp1" ))+
+	geom_line(aes(y=y13,color= "011 sp1" ))+
+	geom_line(aes(y=y14,color= "010 sp1" ))+
+	geom_line(aes(y=y15,color= "001 sp1" ))+
+	geom_line(aes(y=y16,color= "000 sp1" ))+
+        # ylim(-0.2, 0.8) +
+        # xlim(1, 80) +
+	theme_bw()+ 
+	geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+	# scale_color_identity()+
+	theme(panel.grid = element_blank(),legend.position = "right")+
+	labs(title="ARI(ρ1,ρ2) values",y="",x="",color="",ylim=c(-1,1))+
+	scale_color_manual(values = colors, labels = models_names, breaks = models_names)+
+	scale_x_continuous(breaks = breaks_pretty())+
+	guides(color = guide_legend(override.aes = list(linewidth = 2)))
+		# theme(legend.position = "none")
 
 
-```{r}
-# This is Figure 8 in the paper.
-# It shows spatially refrenced estimated partitions for model 9 (i.e., 111 1 everything turned on)
-# which fits data the best.
-#
-# There are more clusters with sPPM and so I need to create a color vector so that color doesn't
-# get replicated and it is easy to identify the clusters
-
-colors <- c("black","red","green","blue","cyan","purple","yellow","gray",
-            "orange","maroon", "lavender", "magenta","turquoise")
-
-rho <- list()
-
-for(k in 1:tps){
-	rho[[k]] <- salso(t(models.out[[9]]$Si[k,,]), loss="binder")
-}
-adj.rand <- matrix(NA,nrow=tps, ncol=tps)
-for(k in 1:tps){
-	for(kk in 1:tps){
-		adj.rand[k,kk] <- adjustedRandIndex(rho[[k]], rho[[kk]])
-	}
-}
-
-# pdf(paste0("PM10_", 111,"_",1,"_",model,"_SC",sp,"4.pdf"), height=12, width=9)
-
-	par(mfrow=c(4,3),mar=c(3,3,2,1), mgp=c(1.5,0.5,0))
-
-	for(jj in 1:tps){
-      cex1 <- ((y[,jj]-mean(y[,jj]))/sd(y[,jj])+3)/3
-      plot(s_coords, col=rho[[jj]], pch=pchs[rho[[jj]]],cex=cex1,
-				main=bquote(Time~period ~ .(jj)*"," ~~ alpha==.(amn[9,jj])),
-				ylab="", xlab="", yaxt="n", xaxt="n", type='n')
-
-      text(s_coords[,], labels=pch, col=colors[rho[[jj]]], cex=cex1[])
-	}
-
-# dev.off()
+print(pari)
+	# ggsave(file="../FIGURES presentation-report/ARI_models_comparison.png",
+	ggsave(file="../FIGURES presentation-report/ARI_models_comparison.pdf", device=cairo_pdf,
+		   plot=pari,
+		   units="px",width=2500, height=1400, dpi=300) # maybe 1200 is better
+	# dev.off()
 ```
 
 
-```{r}
-#######################################################################
-#######################################################################
-#
-# Table of all adjusted rand index values.  Not included in the paper
-#
-xtable(round(adj.rand,2))
-
-
-#
-# Plot of adjusted rand index values, along with posterior means of alpha, and overall data values
-# This plot was not included in the paper.
-#
-# pdf("LaggedARIvalues.pdf",height=11, width=9)
-	par(mfrow=c(4,3))
-	plot(mn, type='n', xlab="Month", ylab="PM10", main="PM10 for each station",
-			ylim=range(t(t(y) + mn)))
-	for(k in 1:nrow(y)){
-		lines(t(t(y) + mn)[k,], type='b' )
-	}
-	plot(amn[9,], type='b', xlab="Month", ylab=expression(E(alpha[t]*'|'*Y)), main=expression("Posterior mean of" ~ alpha[t]))
-	for(k in 1:(tps-2)){
-		plot(adj.rand[k,((k+1):tps)], col=1, type='b', xlab="Lagged Month", ylab="Adjusted Rand Index",
-#			main= bquote(ARI(hat(rho)[.(k)],.)))
-			main= bquote("Lagged ARI values for" ~ hat(rho)[.(k)]))
-	}
-# dev.off()
-```
-
-
-```{r}
-#
-# This plot is not included in the Final draft of the paper
-#
-# pdf("MeanAlphaPM10.pdf",height=5, width=7)
-	par(mfrow=c(2,1))
-	plot(mn, type='b', xlab="Month", ylab="PM10")
-	plot(amn[9,], type='b', xlab="Month", ylab=expression(E(alpha[t]*'|'*Y)))
-# dev.off()
-
-
-#
-# All lagged plots in one figure.  This plot didn't make it into the final draft of the paper.
-#
-ord <- c(8,6,4,2,7,5,3,1,16,14,12,10,15,13,11,9)
-
-# pdf(paste0("LaggedARI.pdf"), height=10, width=10)
-
-	par(mfrow=c(4,4),mar=c(2,2,2,2), mgp=c(1.5,0.5,0))
-	for(h in ord){
-		m.n <- as.numeric(do.call(c, strsplit(strsplit(names(models.out)[h], "t|\\_")[[1]][c(2,3)], "")))
-		header <- bquote(eta[1]*.(ifelse(m.n[1]==1,"-Yes","-No"))*","~
-	    	             phi[1]*.(ifelse(m.n[2]==1,"-Yes","-No"))*","~
-	        	         alpha[t]*.(ifelse(m.n[3]==1,"-Yes","-No"))*","~
-	            	     "space"*.(ifelse(m.n[4]==1,"-Yes","-No")))
-		image.plot(ARImats[[h]], main=header, zlim=range(do.call(c,ARImats),na.rm=TRUE), axes=FALSE)
-		mtext(text=c(paste("",1:tps)), side=2, line=0.3, at=seq(0,1,length=12), las=1, cex=0.8)
-		mtext(text=c(paste("",1:tps)), side=1, line=0.3, at=seq(0,1,length=12), las=2, cex=0.8)
-	}
-# dev.off()
 
 
 
 
-```
+
+
+
+
+
+
+
+
+
+
+
+
 

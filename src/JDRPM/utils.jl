@@ -312,7 +312,7 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
     auxconst1 = k0 * sdim
     auxconst2 = k0 + sdim
     Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
-
+    
     out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * log(det(Psi)) - 0.5 * vn * log(det(Psi_n)) + log(k0) - log(kn)
     return lg ? out : exp(out)
 end
@@ -485,8 +485,8 @@ function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVe
 	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg=lg,M=M) 
 	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,S=S) 
+	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M,S=S) 
 	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg=lg,M=M) 
 	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg=lg,M=M) 

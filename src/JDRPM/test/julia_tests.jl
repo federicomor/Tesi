@@ -1,8 +1,6 @@
 using ProfileCanvas
 using JET
 
-include("../MCMC_fit.jl")
-
 begin
 N = 60
 T = 12
@@ -29,18 +27,19 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 3000.
+niter = 1000.
 burnin = 200.
 thin = 1.
 seed = 123.0
 end
 
+include("../MCMC_fit.jl")
 # ProfileCanvas.@profview MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
 # @code_warntype MCMC_fit(
 # @report_opt MCMC_fit(
-# @timev MCMC_fit(
-out = MCMC_fit(
+@timev MCMC_fit(
+# out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
 	M_dp = 1.0,                     

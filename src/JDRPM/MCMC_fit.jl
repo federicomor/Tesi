@@ -4,7 +4,7 @@ using LinearAlgebra
 using Random
 using Logging
 using Dates
-using TimerOutputs
+# using TimerOutputs
 using ProgressMeter
 using StaticArrays
 using Printf
@@ -54,23 +54,12 @@ function MCMC_fit(;
 	burnin::Float64,                      # Number of burn-in
 	thin::Float64,                        # Thinning interval
 
-	logging::Bool,                        # Wheter to save execution infos to log file
+	logging = false,                      # Wheter to save execution infos to log file
 	seed::Float64,                        # Random seed for reproducibility
-
+	jump_to_execution = false,            # skip safety checks
 	simple_return = false                 # Return just the partition Si
 	)
 	Random.seed!(round(Int64,seed))
-
-	if logging
-		log_file = open("log.txt", "w+")
-		println("Logging to file: ", abspath("log.txt"))
-
-		printlgln(replace(string(now()),"T" => "   "))
-		debug("current seed = $seed")
-		to = TimerOutput()
-	end
-
-# try
 
 	############# define auxiliary variables #############
 	# missing is for when we dont provide the argument when fitting
@@ -86,6 +75,33 @@ function MCMC_fit(;
 	nout = round(Int64, (draws - burnin)/(thin))
 	beta_update_threshold = round(Int64, burnin/2)
 
+	if sPPM
+		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
+		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
+
+		S=@MMatrix zeros(2, 2)
+		if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
+			sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
+		else 
+			sp_params_real = sp_params
+		end
+	end
+	
+	if update_eta1 acceptance_ratio_eta1 = 0 end
+	if update_phi1 acceptance_ratio_phi1 = 0 end
+
+
+	if jump_to_execution == false
+	if logging
+		log_file = open("log.txt", "w+")
+		println("Logging to file: ", abspath("log.txt"))
+
+		printlgln(replace(string(now()),"T" => "   "))
+		debug("current seed = $seed")
+		# to = TimerOutput()
+	end
+
+# try
 
 	############# check some stuff #############
 	if sPPM
@@ -196,21 +212,6 @@ function MCMC_fit(;
 		return
 	end
 
-	if sPPM
-		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
-		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
-
-		S=@MMatrix zeros(2, 2)
-		if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
-			sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
-		else 
-			sp_params_real = sp_params
-		end
-	end
-	
-	if update_eta1 acceptance_ratio_eta1 = 0 end
-	if update_phi1 acceptance_ratio_phi1 = 0 end
-
 
 	############# send feedback #############
 	println("- using seed $seed -")
@@ -223,7 +224,7 @@ function MCMC_fit(;
 	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
 	println("are there missing data in Y? $Y_has_NA")
 	println()
-
+	end # jump to exeuction
 
 	############# update to handle missing data #############
 	# to remember which units and at which times had a missing value
@@ -366,7 +367,7 @@ function MCMC_fit(;
 	progresso = Progress(round(Int64(draws)),
 			showspeed=true,
 			output=stdout, # default is stderr, which turns out in orange color on R
-			dt=1, # every how many seconds update the feedback
+			dt=5, # every how many seconds update the feedback
 			barlen=0 # no progress bar
 			)
 
@@ -1279,15 +1280,16 @@ function MCMC_fit(;
 	println("WAIC: $WAIC (the lower the better)")
 	# println("WAIC: $WAIC - the ↓ the :)")
 
-	println()
+	# println()
 	# println("acceptance ratio for eta1: ", acceptance_ratio_eta1/(n*draws) *100, "%")
 	# println("acceptance ratio for phi1: ", acceptance_ratio_phi1/draws*100, "%")
-
-	@printf "acceptance ratio eta1: %.2f%%\n" acceptance_ratio_eta1/(n*draws) *100
-	@printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100
+	
+	if update_eta1 @printf "acceptance ratio eta1: %.2f%%\n" acceptance_ratio_eta1/(n*draws) *100 end
+	if update_phi1 @printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100 end
+	println()
 
 	if logging
-		debug(@showd to)
+		# debug(@showd to)
 		close(log_file)
 	end
 
