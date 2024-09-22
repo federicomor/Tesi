@@ -1,9 +1,9 @@
 using ProfileCanvas
-using JET
+# using JET
 
 begin
-N = 60
-T = 12
+N = 50
+T = 200
 y = rand(N,T)
 sp = rand(N,2)
 
@@ -27,8 +27,8 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 1000.
-burnin = 200.
+niter = 10.
+burnin = 0.
 thin = 1.
 seed = 123.0
 end
@@ -77,7 +77,7 @@ include("../MCMC_fit.jl")
 	thin = thin,                     
 	logging = false,
 	seed = seed
-)
+);
 
 
 

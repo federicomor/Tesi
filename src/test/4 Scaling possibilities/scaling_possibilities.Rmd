@@ -179,6 +179,7 @@ for (i in 1:length(nunits_tests)) {
 	ym = as.matrix(y)
 	sites = std_sites[nsubjects,]
 	sitesm = as.matrix(sites)
+	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
 
   	##### fit models
 		
@@ -282,33 +283,60 @@ performance_Julia
 ```
 
 ```{r}
+mat = matrix(1:20,nrow=4,5)
+mat
+plot_mat(mat/1000,title="test",max(mat))
 
-plot_mat = function(mat,title){
-ncols_ari <- 100
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		text(y=yaxis[j],
+			 x=xaxis[i],
+		# text(y=j*(1.2)/(size(mat)[2])-0.3,
+		# 	 x=i*(1.2)/(size(mat)[1])-0.3,
+			 mat[i,j],col="green")
+	}
+}
+```
+
+
+```{r}
+
+plot_mat = function(mat,title,maxk){
+ncols_ari <- 1000
 cols <- rev(colora(ncols_ari, 35,0))
-brks <- seq(0,max(performance_C,performance_Julia)*1000, length.out = ncols_ari + 1)
+brks <- seq(0,maxk, length.out = ncols_ari + 1)
 
 # Plotting the matrix
 library(fields)
 image.plot(mat*1000, axes = FALSE, col = cols, main=title,breaks = brks)
 
 # Adding text annotations for each cell
-for (i in 1:nrow(mat)) {
-  for (j in 1:ncol(mat)) {
-    text(x = j - 0.9, 
-    	 y = i - 0.9, 
-    	 labels = sprintf("%.2f ms/it", mat[i, j]*1000), cex = 1.0, col = "#aaaaaa")
-  }
+
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		text(y=yaxis[j],x=xaxis[i],
+		# labels = sprintf("%.2f ms/it", mat[i, j]*1000),
+		labels = sprintf("%.2f", mat[i, j]*1000),
+		cex = 1.0, col = "#aaaaaa")
+	}
 }
+
 mtext(text=c(paste0("n=",nunits_tests)), 
 	  side=2, line=0.3,at=seq(0,1,length=length(nunits_tests)), las=1, cex=0.8)
 mtext(text=c(paste0("T=",timespan_tests)),
 	  side=1, line=0.3,at=seq(0,1,length=length(timespan_tests)), las=1, cex=0.8)
+
 }
 
-
-plot_mat(performance_C,title="C matrix")
-plot_mat(performance_Julia,title="J matrix")
+maxk = max(performance_C,performance_Julia)*1000
+plot_mat(performance_C,title="C matrix",maxk)
+plot_mat(performance_Julia,title="J matrix",maxk)
 ```
 
 

@@ -14,8 +14,8 @@ include("utils.jl")
 
 function MCMC_fit(;
 	# Y::Matrix{Float64},                   # n*T matrix, the observed values
-	# Y::Matrix{Union{Missing, Float64}},   # n*T matrix, the observed values
-	Y::Matrix,                            # n*T matrix, the observed values
+	Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
+	# Y::Matrix,                            # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
 	Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
 	Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
@@ -56,7 +56,6 @@ function MCMC_fit(;
 
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Float64,                        # Random seed for reproducibility
-	jump_to_execution = false,            # skip safety checks
 	simple_return = false                 # Return just the partition Si
 	)
 	Random.seed!(round(Int64,seed))
@@ -91,7 +90,6 @@ function MCMC_fit(;
 	if update_phi1 acceptance_ratio_phi1 = 0 end
 
 
-	if jump_to_execution == false
 	if logging
 		log_file = open("log.txt", "w+")
 		println("Logging to file: ", abspath("log.txt"))
@@ -215,8 +213,7 @@ function MCMC_fit(;
 
 	############# send feedback #############
 	println("- using seed $seed -")
-	println("fitting $(Int(draws)) total iterates")
-	println("with burnin=$(Int(burnin)), thinning=$(Int(thin))")
+	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")
 	println("\non n=$n subjects\nfor T=$T time instants")
 	println("\nwith space? $sPPM")
@@ -224,7 +221,7 @@ function MCMC_fit(;
 	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
 	println("are there missing data in Y? $Y_has_NA")
 	println()
-	end # jump to exeuction
+
 
 	############# update to handle missing data #############
 	# to remember which units and at which times had a missing value
@@ -367,7 +364,7 @@ function MCMC_fit(;
 	progresso = Progress(round(Int64(draws)),
 			showspeed=true,
 			output=stdout, # default is stderr, which turns out in orange color on R
-			dt=5, # every how many seconds update the feedback
+			dt=1, # every how many seconds update the feedback
 			barlen=0 # no progress bar
 			)
 
@@ -499,7 +496,8 @@ function MCMC_fit(;
 						# @timeit to " sPPM 2 " begin # if logging uncomment this line, and the corresponding "end"
 
 						# filter the covariates of the units of label k
-						aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red)
+						# aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red) # slow
+						aux_idxs = findall(Si_red .== k) # fast
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							# debug(@showd sp_idxs)
@@ -588,7 +586,8 @@ function MCMC_fit(;
 					# compatibility check for gamma transition
 					if gamma_iter[j, t] == 0
 						# we want to find ρ_(t-1)^{R_t(+j)} ...
-						indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n)
+						# indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n) # slow
+						indexes = findall(gamma_iter[:, t] .== 1) # fast
 						union!(indexes,j)
 						Si_comp1 = Si_iter[indexes, t-1]
 						Si_comp2 = Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
@@ -611,7 +610,8 @@ function MCMC_fit(;
 			############# update rho #############
 			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
-			movable_units = findall(j -> gamma_iter[j,t]==0, 1:n)
+			# movable_units = findall(j -> gamma_iter[j,t]==0, 1:n) # slow
+			movable_units = findall(gamma_iter[:,t] .== 0) # fast
 		
 			for j in movable_units
 				# printlgln("working on unit j=$j at t=$t")
@@ -667,10 +667,11 @@ function MCMC_fit(;
 				# we now simulate the unit j to be assigned to one of the existing clusters...
 				for k in 1:nclus_iter[t]
 					rho_tmp[j] = k
-					indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n)
+					# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
+					indexes = findall(gamma_iter[:,t+1] .== 1) # fast
 					# we check the compatibility between ρ_t^{h=k,R_(t+1)} ...
-					Si_comp1 = rho_tmp[indexes]
-					Si_comp2 = Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
+					Si_comp1 = @view rho_tmp[indexes]
+					Si_comp2 = @view Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
 					rho_comp = compatibility(Si_comp1, Si_comp2)
 					# printlgln("Assigning to cluster k=$k :")
 					# pretty_log("gamma_iter"); # pretty_log("Si_iter")
@@ -681,13 +682,14 @@ function MCMC_fit(;
 					else
 						# update params for "rho_jt = k" simulation
 						nh_tmp[k] += 1
-						# nclus_temp = sum(nh_tmp .> 0) # = number of clusters
-						nclus_temp = count(a->(a>0), nh_tmp) # faster
+						nclus_temp = sum(nh_tmp .> 0) # = number of clusters
+						# nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 
 						lpp = 0.0
 						for kk in 1:nclus_temp
 							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
-							aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n)
+							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
+							aux_idxs = findall(rho_tmp .== kk) # fast
 							if sPPM
 								s1n = @view sp1[aux_idxs]
 								s2n = @view sp2[aux_idxs]
@@ -734,7 +736,8 @@ function MCMC_fit(;
 				# declare (for later scope accessibility) the new params here
 				muh_draw = 0.0; sig2h_draw = 0.0
 
-				indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n)
+				# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
+				indexes = findall(gamma_iter[:,t+1] .== 1)
 				Si_comp1 = rho_tmp[indexes]
 				Si_comp2 = Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
@@ -757,7 +760,8 @@ function MCMC_fit(;
 					lpp = 0.0
 					for kk in 1:nclus_temp
 						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
-						aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n)
+						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
+						aux_idxs = findall(rho_tmp .== kk) # fast
 						if sPPM
 							s1n = @view sp1[aux_idxs]
 							s2n = @view sp2[aux_idxs]
@@ -918,7 +922,8 @@ function MCMC_fit(;
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
 					a_star = sig2h_priors[1] + nh[k,t]/2 # should be the same
 					sum_Y = 0.0
-					S_kt = findall(j -> Si_iter[j,t] == k, 1:n)
+					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
+					S_kt = findall(Si_iter[:,t] .== k) # fast
 					# if lk_xPPM
 					# 	for j in S_kt
 					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - dot(Xlk_covariates[j,:,t], beta_iter[t]))^2
@@ -940,7 +945,8 @@ function MCMC_fit(;
 				for k in 1:nclus_iter[t]
 					a_star = sig2h_priors[1] + nh[k,t]/2
 					sum_Y = 0.0
-					S_kt = findall(j -> Si_iter[j,t] == k, 1:n)
+					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
+					S_kt = findall(Si_iter[:,t] .== k) # fast
 					# if lk_xPPM
 					# 	for j in S_kt
 					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
