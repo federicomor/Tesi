@@ -16,3 +16,20 @@ method2(nh_tmp)
 @btime method2(nh_tmp)
 @btime method1(nh_tmp)
 
+using Random
+Random.seed!(1)
+function f()
+lg_weights = rand(10)
+max_ph = maximum(lg_weights)
+sum_ph = 0.0
+# exponentiate...
+@simd for k in eachindex(lg_weights)
+	 # for numerical purposes we subract max_ph
+	lg_weights[k] = exp(lg_weights[k] - max_ph)
+	sum_ph += lg_weights[k]
+end
+# sum_ph
+# lg_weights
+end
+
+@btime f()

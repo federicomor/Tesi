@@ -15,9 +15,6 @@ WAIC: 461.8003711968534 (the lower the better)
 MSE 2.79106
 
 
-
-
-
 C
 Time difference of 20.7618 secs
 LPML = -813.789789252565 

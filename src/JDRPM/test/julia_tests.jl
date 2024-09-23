@@ -3,7 +3,7 @@ using ProfileCanvas
 
 begin
 N = 50
-T = 200
+T = 20
 y = rand(N,T)
 sp = rand(N,2)
 
@@ -27,13 +27,15 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 10.
+niter = 100.
 burnin = 0.
 thin = 1.
 seed = 123.0
 end
 
+
 include("../MCMC_fit.jl")
+
 # ProfileCanvas.@profview MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
 # @code_warntype MCMC_fit(
@@ -78,7 +80,6 @@ include("../MCMC_fit.jl")
 	logging = false,
 	seed = seed
 );
-
 
 
 

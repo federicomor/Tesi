@@ -1,0 +1,21 @@
+using mean
+MSE C 1.671218
+MSE J 1.312863
+
+using median
+MSE C 1.615114
+MSE J 1.262639
+
+fitting 50000 total iterates (with burnin=30000, thinning=20)
+
+C fit
+Time difference of 21.2634 secs
+LPML = -282.352752262481 
+WAIC = 476.691052618887
+
+J fit
+Elapsed time: 18 seconds, 863 milliseconds
+LPML: -242.50264600276023 (the higher the better)
+WAIC: 425.88692345746176 (the lower the better)
+acceptance ratio eta1: 56.65%
+acceptance ratio phi1: 82.01%

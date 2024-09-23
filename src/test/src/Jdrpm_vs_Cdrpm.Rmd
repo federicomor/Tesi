@@ -52,8 +52,11 @@ cat(seed)
 
 source("../Supplementary material/Functions.R")
 # N <- 5; Tm<-6; M<-1;
+# alpha = 0.99
+
 N <- 10; Tm<-12; M<-1;
-alpha = 0.99
+alpha = 0.5
+
 ndata <- 100
 dat <- rtpartition1(N=N,M=M,rho=alpha,ntime=Tm,tau=5,sig=1,
 					Caron=FALSE,FirstPart=NULL,TYPE="Random",
@@ -663,12 +666,16 @@ partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
 
-partition_matrix <- do.call(cbind, partitions)
+# partition_matrix <- do.call(cbind, partitions)
 # pdf(file="partizioni.pdf",width=10,height = 5)
 par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
 plot_partition_with_chars(partitions_drpmc, title="model C")
 plot_partition_with_chars(partitions_drpmj, title="model J")
 # dev.off()
+
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+plot_partition_with_numbers(partitions_drpmc, title="model C")
+plot_partition_with_numbers(partitions_drpmj, title="model J")
 
 # pdf(file="ari.pdf",width=10,height = 5)
 par(mar=c(2,2,3,2),mfrow=c(1,2),oma=c(0.5,0.5,0.5,2))
@@ -684,7 +691,7 @@ yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
 # pdf(file="C_mean_prediction.pdf",height = 6,width=10)
-pdf(file="C_last_iteration.pdf",height = 6,width=10)
+# pdf(file="C_last_iteration.pdf",height = 6,width=10)
 ##### take the median/mean/mode
 summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
@@ -700,7 +707,7 @@ for(j in 1:N){
 }
 yred=summary_fitted
 # take last sample (maybe not the best choice)
-yred=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+# yred=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 
 par(mar=c(2,2,2,1))
 cols = colora(size(yred)[1],56,0)
@@ -715,10 +722,10 @@ for(i in 1:size(yred)[1]){
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
 }
-dev.off()
+# dev.off()
 #################################################################
 # pdf(file="J_mean_prediction.pdf",height = 6,width=10)
-pdf(file="J_last_iteration.pdf",height = 6,width=10)
+# pdf(file="J_last_iteration.pdf",height = 6,width=10)
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
 	for(t in 1:Tm){
@@ -733,7 +740,7 @@ for(j in 1:N){
 }
 yred=summary_fitted
 # take last sample (maybe not the best choice)
-yred=t(rout$fitted[,,size(rout$fitted)[3]])
+# yred=t(rout$fitted[,,size(rout$fitted)[3]])
 
 par(mar=c(2,2,2,1))
 cols = colora(size(yred)[1],56,0)
@@ -748,14 +755,13 @@ for(i in 1:size(yred)[1]){
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
 }
-dev.off()
+# dev.off()
 #################################################################
-```
 
 
-```{r}
 yred=y
-pdf(file="test_1_generated_data.pdf",height = 6,width=10)
+cols = colora(N,"div")
+# pdf(file="test_1_generated_data.pdf",height = 6,width=10)
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
    if(i==1){
@@ -767,17 +773,17 @@ for(i in 1:size(yred)[1]){
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
 	  }
 }
-pchs
-offsets = c(-0.1,-0.2,0,0,0,0.2,0,0,0.1,0.3)
-for(i in 1:N){
-	text(12.1,yred[i,12]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
-}
-offsets = c(-0.2,-0.4,0.1,0.7,0.82,-0.8,0,0,0.2,0.1)
-for(i in 1:N){
-	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
-}
-dev.off()
-# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+# pchs
+# offsets = c(-0.1,-0.2,0,0,0,0.2,0,0,0.1,0.3)
+# for(i in 1:N){
+# 	text(12.1,yred[i,12]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+# offsets = c(-0.2,-0.4,0.1,0.7,0.82,-0.8,0,0,0.2,0.1)
+# for(i in 1:N){
+# 	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+# dev.off()
+legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
 ```
 
 ```{r}

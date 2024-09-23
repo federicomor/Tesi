@@ -357,6 +357,17 @@ function MCMC_fit(;
 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
 
 
+	# ############# even more preallocations (?) #############
+	# j_label = 0
+	# n_red = 0
+	# n_red1 = 0
+	# nclus_red = 0
+	# nclus_red1 = 0
+	# lCo = 0.0; lCn = 0.0
+	# lSo = 0.0; lSn = 0.0
+	# lpp = 0.0
+	# new_label = 0
+
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
 
@@ -387,6 +398,7 @@ function MCMC_fit(;
 			# we have to use the missing_idxs to remember which units and at which times had a missing value,
 			# in order to simulate just them and instead use the given value for the other units and times
 			for (j,t) in missing_idxs
+				# if i==1 println("(j=$j,t=$t)") end
 				c_it = Si_iter[j,t]
 				Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
 				aux1 = eta1_iter[j]^2
@@ -401,7 +413,7 @@ function MCMC_fit(;
 					sig2_post = 1 / (1/sig2h_iter[c_it,t] + aux1/(sig2h_iter[c_itp1,t+1]*(1-aux1)))
 					mu_post = sig2_post * ( 
 						(1/sig2h_iter[c_it,t])*(muh_iter[c_it,t] + Xlk_term_t) +
-						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*((ismissing(Y[j,t+1]) ? 0 : Y[j,t+1]) - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
 						)
 
 					Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
@@ -412,8 +424,8 @@ function MCMC_fit(;
 
 					sig2_post = (1-aux1) / (1/sig2h_iter[c_it,t] + aux1/sig2h_iter[c_itp1,t+1])
 					mu_post = sig2_post * ( 
-						(1/(sig2h_iter[c_it,t]*(1-aux1)))*(muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t) +
-						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*(Y[j,t+1] - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
+						(1/(sig2h_iter[c_it,t]*(1-aux1)))*(muh_iter[c_it,t] + eta1_iter[j]*(ismissing(Y[j,t-1]) ? 0 : Y[j,t-1]) + Xlk_term_t) +
+						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*((ismissing(Y[j,t+1]) ? 0 : Y[j,t+1]) - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
 						)
 
 					# mu_prior = muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t
@@ -423,7 +435,7 @@ function MCMC_fit(;
 
 				else # t==T
 					Y[j,t] = rand(Normal(
-						muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t,
+						muh_iter[c_it,t] + eta1_iter[j]*(ismissing(Y[j,t-1]) ? 0 : Y[j,t-1]) + Xlk_term_t,
 						sqrt(sig2h_iter[c_it,t]*(1-aux1))
 						))
 				end
@@ -589,8 +601,8 @@ function MCMC_fit(;
 						# indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n) # slow
 						indexes = findall(gamma_iter[:, t] .== 1) # fast
 						union!(indexes,j)
-						Si_comp1 = Si_iter[indexes, t-1]
-						Si_comp2 = Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
+						Si_comp1 = @view Si_iter[indexes, t-1]
+						Si_comp2 = @view Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
 
 						rho_comp = compatibility(Si_comp1, Si_comp2)
 						if rho_comp == 0
@@ -738,8 +750,8 @@ function MCMC_fit(;
 
 				# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
 				indexes = findall(gamma_iter[:,t+1] .== 1)
-				Si_comp1 = rho_tmp[indexes]
-				Si_comp2 = Si_iter[indexes,t+1]
+				Si_comp1 = @view rho_tmp[indexes]
+				Si_comp2 = @view Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
 				# printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
 				# pretty_log("gamma_iter"); # pretty_log("Si_iter")
@@ -754,8 +766,8 @@ function MCMC_fit(;
 
 					# update params for "rho_jt = k" simulation
 					nh_tmp[k] += 1
-					# nclus_temp = sum(nh_tmp .> 0)
-					nclus_temp = count(a->(a>0), nh_tmp) # faster
+					nclus_temp = sum(nh_tmp .> 0)
+					# nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 
 					lpp = 0.0
 					for kk in 1:nclus_temp

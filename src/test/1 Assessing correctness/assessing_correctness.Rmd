@@ -1,0 +1,975 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+# setup
+```{r, warning=FALSE}
+library(salso)
+library(RColorBrewer)
+source("include.R")
+```
+
+
+
+# LOAD 
+## load C drpm
+```{r}
+devtools::load_all("../../drpm_main/")
+# devtools::load_all("../../drpm_sporcato//")
+```
+
+## load J drpm
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# juliaEval("using Pkg")
+# juliaEval("Pkg.activate(\"../../JDRPM\")")
+# juliaEval("Pkg.instantiate()")
+
+# juliaEval("Pkg.status()")
+
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("using Pkg; Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+```
+
+
+# ===========
+# 1. PAPER TEST
+## data used in Page paper
+```{r}
+seed = as.integer(runif(1,0,1000))*1.0
+seed = 398.0
+# seed = 881.0
+set.seed(seed)
+cat(seed)
+
+source("../Supplementary material/Functions.R")
+# N <- 5; Tm<-6; M<-1;
+# alpha = 0.99
+
+# N <- 10; Tm<-12; M<-1;
+# alpha = 0.5
+
+N <- 10; Tm<-12; M<-1;
+alpha = 0.9
+
+# N <- 10; Tm<-12; M<-1;
+# set.seed(345233)
+# alpha = 0.9
+
+ndata <- 100
+dat <- rtpartition1(N=N,M=M,rho=alpha,ntime=Tm,tau=5,sig=1,
+					Caron=FALSE,FirstPart=NULL,TYPE="Random",
+				    phi0=0, phi1=1)
+
+y<- t(dat$YMat)
+
+cols = colora(N,seed = 56,show = 0)
+yred=y
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+## introduce NA test
+```{r}
+##### at a new time 7
+# y_with_na = cbind(y,rep(NA,5))
+# y
+# y_with_na
+# module_JDRPM$test_R_to_J_conversion(as.matrix(y_with_na))
+
+##### deleting values at existent time t, to maybe study MSE
+t = 4
+y_with_na = y
+y_with_na[,t] = rep(NA,5)
+
+##### just some NA
+y_with_na = y
+y_with_na[3,3] = NA
+y_with_na[1,2] = NA
+y_with_na[5,5] = NA
+
+y
+y_with_na
+```
+
+
+## Fits
+```{r}
+# niter=40000; nburn=28000; nthin=12
+niter=50000; nburn=30000; nthin=20
+# niter=30000; nburn=20000; nthin=10
+# niter=10000; nburn=2000; nthin=8
+# niter=1000; nburn=200; nthin=4
+
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+
+```
+
+
+```{r}
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+sig_mh_sig2 = 0.3
+sig_mh_tau2 = 0.3
+sig_mh_lambda2 = 0.3
+sig_mh_eta1 = 0.3
+sig_mh_phi1 = 0.3
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+
+a_alpha = 2; b_alpha = 2
+```
+
+## drpm C
+```{r}
+set.seed(1)
+tempo_inizio <- Sys.time()
+drpm1 <- drpm_fit(
+		y=y,
+		# y=y_with_na, 
+		# s_coords = NA,
+        M=1,
+        initial_partition = NULL,
+		
+        starting_alpha = 0.5,
+        unit_specific_alpha = FALSE,
+        time_specific_alpha = TRUE,
+        alpha_0=FALSE,
+		
+        eta1_0=!(update_eta1),
+        phi1_0=!(update_phi1),
+        # modelPriors=c(0,100^2,1,1,1,1), # original default one
+        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+
+        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+        
+        simpleModel = 0,
+        theta_tau2 = c(0, 2), # only used if simpleModel=1
+
+		SpatialCohesion=3, # auxiliary similarity
+		# SpatialCohesion=4, # double dipper similarity
+		cParms=c(mu0, k0, v0, L0),
+		
+		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+		verbose=TRUE,
+		draws=niter,burn=nburn,thin=nthin)
+
+tempo_fine <- Sys.time()
+differenza_tempo <- tempo_fine - tempo_inizio
+cat(crayon::cyan("Fit took:\n"))
+print(round(differenza_tempo,digits = 4))
+
+cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
+```
+```{r}
+names(drpm1)
+
+cat("\nSi     size = ",size(drpm1$Si),"\n")
+cat("gamma  size = ",size(drpm1$gamma),"\n")
+cat("mu     size = ",size(drpm1$mu),"\n")
+cat("sig2   size = ",size(drpm1$sig2),"\n")
+cat("alpha  size = ",size(drpm1$alpha),"\n")
+cat("theta  size = ",size(drpm1$theta),"\n")
+cat("tau2   size = ",size(drpm1$tau2),"\n")
+cat("eta1   size = ",size(drpm1$eta1),"\n")
+cat("phi0   size = ",size(drpm1$phi0),"\n")
+cat("phi1   size = ",size(drpm1$phi1),"\n")
+cat("lam2   size = ",size(drpm1$lam2),"\n")
+cat("llike  size = ",size(drpm1$llike),"\n")
+cat("fitted size = ",size(drpm1$fitted),"\n")
+```
+
+
+
+## drpm J
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y),
+	# Y=as.matrix(y_with_na),
+	sp_coords = NA,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	# initial_partition = c(1,2,1,2,2),
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = update_eta1,                    
+	update_phi1 = update_phi1,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1^2,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	# spatial_cohesion_idx = 4,
+	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
+	
+	# covariate_similarity_idx = NA,  
+	draws = niter,	burnin = nburn,thin = nthin,
+	# draws = 100000,	burnin = 60000,thin = 40,
+	logging = FALSE,
+	seed = 314.0
+)
+```
+
+
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma",
+				 "alpha", 
+				 "sigma2h", 
+				 "muh", 
+				 "eta1",
+				 "beta",
+				 "theta", 
+				 "tau2", 
+				 "phi0", 
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+if (is.null(size(rout$alpha))) {
+	# do nothing
+# } else if size(rout$alpha) == 2 {
+} else {
+	rout$alpha        = aperm(rout$alpha,    c(2, 1))
+}
+rout$theta        = aperm(rout$theta,    c(2, 1))
+rout$tau2         = aperm(rout$tau2,     c(2, 1))
+rout$eta1         = aperm(rout$eta1,    c(2, 1))
+rout$phi0     = matrix(rout$phi0,    ncol = 1)
+rout$phi1     = matrix(rout$phi1,    ncol = 1)
+rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
+```
+
+## NA/MSE analysis
+
+```{r}
+# y_with_na
+y
+j = 3
+t = 3
+size(rout$fitted)
+plot(rout$fitted[t,j,],type="l",main=paste0("trace plot of j=",j," at t=",t))
+abline(h=y[j,t],col="#005500")
+```
+
+```{r}
+##### take last sample (maybe not the best choice)
+# for (it in 0:10){
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+
+##### take the median/mean/mode
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredJ = summary_fitted
+yred=y
+
+par(mar=c(4,4,4,2))
+cols = colora(size(yredJ)[1],56,0)
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yred),type='l',xlab='time',ylab="fitted values",
+     	 # main=paste("model J",it))
+     	 main="model J")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+
+# original real data
+cols = colora(N,seed = 56,show = 0)
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred,yredJ),type='l',
+     	 xlab='time',ylab='values',main="original data")
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+	text(0.92,yred[i,1],paste(i),col=cols[i])
+}
+# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
+
+```
+
+```{r}
+y_with_na
+```
+
+
+```{r}
+names(rout)
+
+cat("Si           size = ",size(rout$Si),"\n")
+cat("gamma        size = ",size(rout$gamma),"\n")
+cat("sigma2h      size = ",size(rout$sigma2h),"\n")
+cat("muh          size = ",size(rout$muh),"\n")
+cat("alpha        size = ",size(rout$alpha),"\n")
+cat("theta        size = ",size(rout$theta),"\n")
+cat("tau2         size = ",size(rout$tau2),"\n")
+cat("eta1         size = ",size(rout$eta1),"\n")
+cat("phi0         size = ",size(rout$phi0),"\n")
+cat("phi1         size = ",size(rout$phi1),"\n")
+cat("lambda2      size = ",size(rout$lambda2),"\n")
+cat("beta         size = ",size(rout$beta),"\n")
+cat("fitted       size = ",size(rout$fitted),"\n")
+cat("llike        size = ",size(rout$llike),"\n")
+
+cat("lpml = ",rout$lpml,"\n")
+cat("waic = ",rout$waic,"\n")
+```
+
+
+## Trace plots
+
+### alpha
+```{r}
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+plot(drpm1$alpha[,time],type="l",
+	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
+	 ), ylim=c(0,1),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$alpha[,time],type="l",
+	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
+	 ), ylim=c(0,1),
+	 xlab = "MCMC iterations",ylab="values")
+}
+```
+### mu
+```{r}
+size(drpm1$mu)
+size(rout$muh)
+unitj = 1
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$mu[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
+		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$muh[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
+		 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### sigma2
+```{r}
+size(drpm1$sig2)
+size(rout$sigma2h)
+unitj = 1
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$sig2[time,unitj,],type="l",
+		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$sigma2h[time,unitj,],type="l",
+		 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### eta1
+```{r}
+dim(drpm1$eta1)
+dim(rout$eta1)
+
+cat("did we update eta1?", update_eta1)
+for (unit in 1:N){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+
+### theta
+```{r}
+for (time in 1:Tm){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
+		 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### tau2
+```{r}
+dim(drpm1$tau2)
+dim(rout$tau2)
+
+for (time in 1:Tm){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of tau2 at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
+		 main=bquote("Model DRPM J\nTrace plot of tau2 at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+
+### layer three
+phi1, phi0, lambda2
+```{r}
+dim(drpm1$phi1)
+dim(rout$phi1)
+
+cat("did we update phi1?", update_phi1)
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi1"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of phi1"),
+	 xlab = "MCMC iterations",ylab="values")
+
+dim(drpm1$phi0)
+dim(rout$phi0)
+
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi0"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of phi0"),
+	 xlab = "MCMC iterations",ylab="values")
+
+
+dim(drpm1$lam2)
+dim(rout$lambda2)
+
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$lambda2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
+	 xlab = "MCMC iterations",ylab="values")
+```
+
+
+# functions
+```{r}
+N = size(y)[1]
+Tm = size(y)[2]
+
+generate_partition = function(model){
+	partition = list()
+	for (t in 1:Tm){
+		Si_jt <- model$Si[t, , ]
+		Si_jt <- t(Si_jt) 
+		partition[[t]] <- salso(Si_jt, loss = "binder")
+	}
+	return(partition)
+}
+
+plot_partition_with_numbers = function(partition,title){
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, labels = as.character(unit),
+	         col = partition_matrix[unit, t], cex = 1.4)
+	  }
+	}
+}
+
+plot_partition_with_chars = function(partition,title){
+	pchs = letters[1:length(partition[[1]])]
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, 
+	    	 # labels = as.character(unit),
+	    	 labels = pchs[unit],
+	         col = partition_matrix[unit, t], cex = 1.5)
+	  }
+	}
+}
+
+plot_ARI = function(partition,title){
+	LEN = Tm
+	df_cluster = data.frame(clusters=c(),Time=c())
+	for(time in 1:Tm){
+		salso_out <- partition[[time]]
+		df_temp = data.frame(
+			clusters = salso_out
+		)
+		df_temp$Time = rep(time,dim(df_temp)[1])
+		df_cluster = rbind(df_cluster,df_temp)
+		# clusters log
+		# clusters_now = df_temp$clusters
+		# n_clusters = unique(clusters_now)
+		# cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	}
+	library(mclust)
+	# build the ARI matrix
+	ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+	rho_ARI <- list()
+	for(k in 1:LEN){
+		rho_ARI[[k]] <- partition[[k]]
+	}
+	for(k in 1: LEN){
+		for(kk in 1: LEN){
+			ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+		}
+	}
+	ncols_ari = 100
+	# if (min(ARImats)<0){
+		# cols_ARI = colora(ncols_ari,79,0)
+		# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# } else {
+		# cols_ARI = colora(ncols_ari,56,0)
+		# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+		cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+		# cols_ARI = colora(ncols_ari,102,0)
+		# brks = seq(0,1,length.out=ncols_ari+1)
+		brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# }
+	# or see ?designer.colors for colors
+	library(fields)
+	image.plot(ARImats,
+			   main=paste0("Lagged ARI values - ",title),axes=FALSE,col=cols_ARI,
+			   breaks=brks)
+	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+}
+```
+
+```{r}
+parts = generate_partition(rout)
+plot_partition_with_numbers(parts,title="model J")
+plot_partition_with_chars(parts,title="model J")
+plot_ARI(parts,title="model J")
+
+parts = generate_partition(drpm1)
+plot_partition_with_numbers(parts,title="model C")
+plot_partition_with_chars(parts,title="model C")
+plot_ARI(parts,title="model C")
+```
+
+
+## Partition plots
+```{r}
+# partition_plots = function(drpm1, rout){ 
+# Initialize a list to store the partitions for each time instant
+partitions_drpmc <- generate_partition(drpm1)
+partitions_drpmj <- generate_partition(rout)
+
+save_plots=T
+
+# partition_matrix <- do.call(cbind, partitions)
+if (save_plots==T){
+	pdf(file="partizioni_chars.pdf",width=10,height = 5)
+}
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+plot_partition_with_chars(partitions_drpmc, title="model C")
+plot_partition_with_chars(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+
+if (save_plots==T){
+	pdf(file="partizioni_nums.pdf",width=10,height = 5)
+}
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+plot_partition_with_numbers(partitions_drpmc, title="model C")
+plot_partition_with_numbers(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+
+if (save_plots==T){
+	pdf(file="ari.pdf",width=10,height = 5)
+}
+par(mar=c(2,2,3,2),mfrow=c(1,2),oma=c(0.5,0.5,0.5,2))
+plot_ARI(partitions_drpmc, title="model C")
+plot_ARI(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+```
+
+# fitted values
+```{r}
+yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+yredORIG=y
+
+save_plots=T
+
+if (save_plots==TRUE) { 
+	# pdf(file="C_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="C_median_prediction.pdf",height = 6,width=10)
+	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
+}
+##### take the median/mean/mode
+summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(drpm1$fitted)[3]){
+			values_j = c(values_j,drpm1$fitted[t,j,it])
+		}
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred=summary_fitted
+# take last sample (maybe not the best choice)
+# yred=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+
+par(mar=c(2,2,2,1))
+cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
+     	 # main="C fitted values - last iteration")
+     	 # main="C fitted values - iterations mean")
+     	 main="C fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off()}
+#################################################################
+if (save_plots==TRUE) { 
+	# pdf(file="J_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="J_median_prediction.pdf",height = 6,width=10)
+	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
+}
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred=summary_fitted
+# take last sample (maybe not the best choice)
+# yred=t(rout$fitted[,,size(rout$fitted)[3]])
+
+par(mar=c(2,2,2,1))
+# cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
+     	 # main="J fitted values - last iteration")
+     	 # main="J fitted values - iterations mean")
+     	 main="J fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off() }
+#################################################################
+
+
+yred=y
+# cols = colora(N,"div",0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+if (save_plots==TRUE) { 
+	pdf(file="test_1_generated_data.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Generated values')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# pchs
+# offsets = c(-0.1,-0.2,0,0,0,0.2,0,0,0.1,0.3)
+# for(i in 1:N){
+# 	text(12.1,yred[i,12]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+# offsets = c(-0.2,-0.4,0.1,0.7,0.82,-0.8,0,0,0.2,0.1)
+# for(i in 1:N){
+# 	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
+	   lty = 1,lwd=2,
+	   cex=0.8, bty="n",
+	   ncol=5)
+if (save_plots==TRUE) { dev.off()}
+```
+
+```{r}
+yred=y
+cols = colora(N,"div",0)
+# cols = colora(N,56,0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+
+save_plots=T
+
+if (save_plots==TRUE) { 
+	pdf(file="clusters_C.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Clusters according to model C-DRPM')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+partition = partitions_drpmc
+# partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		points(t,yred[i,t],col=partition_matrix[i, t],pch=19,cex=1)
+	}
+}
+if (save_plots==TRUE) { dev.off() }
+
+# yred=y
+# cols = colora(N,"div",0)
+if (save_plots==TRUE) { 
+	pdf(file="clusters_J.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Clusters according to model J-DRPM')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+# partition = partitions_drpmc
+partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		points(t,yred[i,t],col=partition_matrix[i, t],
+			   pch=19,cex=1)
+	}
+}
+if (save_plots==TRUE) { dev.off() }
+```
+
+
+# compute mse
+```{r}
+MSE_matrices = function(m1,m2){
+	MSE = 0
+	for (i in 1:size(m1)[1]){
+		for (t in 1:size(m1)[2]){
+			MSE = MSE + (m1[i,t]-m2[i,t])^2
+		}
+	}
+	MSE = MSE/(size(m1)[1]*size(m1)[2])
+	return(MSE)
+}
+
+##### take the median/mean/mode
+summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(drpm1$fitted)[3]){
+			values_j = c(values_j,drpm1$fitted[t,j,it])
+		}
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredC=summary_fitted
+# take last sample (maybe not the best choice)
+# yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+#################################################################
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredJ=summary_fitted
+# take last sample (maybe not the best choice)
+# yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+#################################################################
+yredORIGI=y
+
+#################################################################
+MSE_matrices(yredC,yredORIGI)
+# MSE_matrices(yredC,yredJ)
+MSE_matrices(yredJ,yredORIGI)
+```
+
+
+## ari pairwise
+```{r,warning=F}
+LEN = Tm
+compare_ARI = function(Cmod1,Jmod2){
+	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
+	for(k in 1: LEN){
+		rhoC = generate_partition(Cmod1)
+		rhoJ = generate_partition(Jmod2)
+		ARIvec[k] <- adjustedRandIndex(rhoC[[k]][1:N], rhoJ[[k]][1:N])
+	}	
+	ncols_ari = 100
+	cols_ARI = colora(ncols_ari,79,0)
+	# cols_ARI = rev(cols_ARI)
+	brks = seq(-1,1,length.out=ncols_ari+1)
+	# pdf(paste0("./figures/DRPM/ARI/ari.pdf"), height=8, width=10)
+	# svg(paste0("./figures/",base_folder,"/ARI/ari.svg"), height=8, width=10)
+	# png(paste0("./figures/",base_folder,"/ARI/ari.png"),  width=700,height=600)
+	library(fields)
+	plot(1:Tm,ARIvec,type="l",main=paste0("ARI values"),ylim=c(-0.5,1))
+	abline(h=0,col="gray80",lty=3)
+	
+	# image.plot(ARIvec,
+	# 		   main=paste0("ARI values - ",mod1," vs ",mod2),axes=FALSE,col=cols_ARI,
+	# 		   breaks=brks)
+	# mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+
+}
+
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+Cmod1 = drpm1
+Jmod2 = rout
+compare_ARI(Cmod1,Jmod2)
+```
+
