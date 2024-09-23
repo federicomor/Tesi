@@ -9,7 +9,6 @@ using ProgressMeter
 using StaticArrays
 using Printf
 
-include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -92,6 +91,7 @@ function MCMC_fit(;
 
 	if logging
 		log_file = open("log.txt", "w+")
+		include("debug.jl")
 		println("Logging to file: ", abspath("log.txt"))
 
 		printlgln(replace(string(now()),"T" => "   "))
@@ -288,12 +288,25 @@ function MCMC_fit(;
 	mean_loglikelhd = zeros(n,T)
 
 
+	############# allocate auxiliary working variables #############
+	Sirelab = zeros(Int64,n)
+	Si_relab = zeros(Int,n)
+	nh_reorder = zeros(Int,n)
+	old_lab = zeros(Int,n)
+	nh_red = zeros(Int64,n)
+	nh_red1 = zeros(Int64,n)
+	lg_weights = zeros(n)
+	ph = zeros(n)
+	muh_iter_copy = zeros(n,T_star)
+	sig2h_iter_copy = ones(n,T_star)
+
+
 	############# allocate and initialize working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
 	Si_iter[:,end] .= 0
 	gamma_iter = zeros(Bool,n,T_star)
 	if !ismissing(initial_partition)
-		initp = relabel(initial_partition,n)
+		initp = relabel(initial_partition,n,Sirelab)
 		Si_iter[:,1] = initp
 		gamma_iter[:,1] .= 1
 	end
@@ -398,6 +411,13 @@ function MCMC_fit(;
 			# we have to use the missing_idxs to remember which units and at which times had a missing value,
 			# in order to simulate just them and instead use the given value for the other units and times
 			for (j,t) in missing_idxs
+				# Problem: if when filling a NA we occur in another NA value? eg when we also need Y[j,t±1]
+				# I decided here to set that value to 0, if occurs, since anyway target should be centered
+				# so it seems a reasonable patch
+				# We could have decided to ignore this computation and just use the likelihood as proposal
+				# filling distribution, but this would have just worked in the Y[j,t+1] case so the general
+				# problem would have still been there
+
 				# if i==1 println("(j=$j,t=$t)") end
 				c_it = Si_iter[j,t]
 				Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
@@ -455,7 +475,7 @@ function MCMC_fit(;
 					# at the first time units get reallocated
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
-					indexes = findall(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
+					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
 					Si_red = Si_iter[indexes, t]
 					Si_red1 = copy(Si_red)
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
@@ -489,8 +509,10 @@ function MCMC_fit(;
 					j_label = Si_red1[end]
 
 					# compute also nh_red's
-					nh_red = zeros(Int64,nclus_red)
-					nh_red1 = zeros(Int64,nclus_red1)
+					# nh_red = zeros(Int64,nclus_red)
+					# nh_red1 = zeros(Int64,nclus_red1)
+					nh_red .= 0
+					nh_red1 .= 0
 					for jj in 1:n_red
 						nh_red[Si_red[jj]] += 1 # = numerosities for each cluster label
 						nh_red1[Si_red1[jj]] += 1
@@ -499,7 +521,8 @@ function MCMC_fit(;
 					# debug(@showd Si_red Si_red1 j_label)
 
 					# start computing weights
-					lg_weights = zeros(nclus_red+1)
+					# lg_weights = zeros(nclus_red+1)
+					lg_weights .= 0
 					lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
 					lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
 
@@ -509,7 +532,8 @@ function MCMC_fit(;
 
 						# filter the covariates of the units of label k
 						# aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red) # slow
-						aux_idxs = findall(Si_red .== k) # fast
+						aux_idxs = findall_faster(jj -> Si_red[jj] == k, 1:n_red)
+						# aux_idxs = findall(Si_red .== k) # fast
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							# debug(@showd sp_idxs)
@@ -554,6 +578,7 @@ function MCMC_fit(;
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
+						# lCn = spatial_cohesion(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, lg=true, M=M_dp, S=S)
 					end
 					if cl_xPPM
 						for p in 1:p_cl
@@ -567,11 +592,14 @@ function MCMC_fit(;
 					# debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
-					max_ph = maximum(lg_weights)
+					# max_ph = maximum(lg_weights)
+					max_ph = maximum(lg_weights[1:(nclus_red+1)])
+
 					sum_ph = 0.0
 
 					# exponentiate...
-					for k in eachindex(lg_weights)
+					# for k in eachindex(lg_weights)
+					for k in 1:(nclus_red+1)
 						 # for numerical purposes we subract max_ph
 						lg_weights[k] = exp(lg_weights[k] - max_ph)
 						sum_ph += lg_weights[k]
@@ -599,7 +627,8 @@ function MCMC_fit(;
 					if gamma_iter[j, t] == 0
 						# we want to find ρ_(t-1)^{R_t(+j)} ...
 						# indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n) # slow
-						indexes = findall(gamma_iter[:, t] .== 1) # fast
+						indexes = findall_faster(jj -> gamma_iter[jj, t]==1, 1:n)
+						# indexes = findall(gamma_iter[:, t] .== 1) # fast
 						union!(indexes,j)
 						Si_comp1 = @view Si_iter[indexes, t-1]
 						Si_comp2 = @view Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
@@ -623,7 +652,8 @@ function MCMC_fit(;
 			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			# movable_units = findall(j -> gamma_iter[j,t]==0, 1:n) # slow
-			movable_units = findall(gamma_iter[:,t] .== 0) # fast
+			movable_units = findall_faster(j -> gamma_iter[j,t]==0, 1:n) 
+			# movable_units = findall(gamma_iter[:,t] .== 0) # fast
 		
 			for j in movable_units
 				# printlgln("working on unit j=$j at t=$t")
@@ -665,7 +695,8 @@ function MCMC_fit(;
 				end
 
 				# setup probability weights towards the sampling of rho_jt
-				ph = zeros(nclus_iter[t]+1) 
+				# ph = zeros(nclus_iter[t]+1) 
+				ph .= 0.0
 				rho_tmp = copy(Si_iter[:,t])
 
 				# compute nh_tmp (numerosities for each cluster label)
@@ -680,7 +711,8 @@ function MCMC_fit(;
 				for k in 1:nclus_iter[t]
 					rho_tmp[j] = k
 					# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
-					indexes = findall(gamma_iter[:,t+1] .== 1) # fast
+					indexes = findall_faster(j -> gamma_iter[j,t+1]==1, 1:n)
+					# indexes = findall(gamma_iter[:,t+1] .== 1) # fast
 					# we check the compatibility between ρ_t^{h=k,R_(t+1)} ...
 					Si_comp1 = @view rho_tmp[indexes]
 					Si_comp2 = @view Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
@@ -701,7 +733,8 @@ function MCMC_fit(;
 						for kk in 1:nclus_temp
 							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
 							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
-							aux_idxs = findall(rho_tmp .== kk) # fast
+							aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
+							# aux_idxs = findall(rho_tmp .== kk) # fast
 							if sPPM
 								s1n = @view sp1[aux_idxs]
 								s2n = @view sp2[aux_idxs]
@@ -749,7 +782,8 @@ function MCMC_fit(;
 				muh_draw = 0.0; sig2h_draw = 0.0
 
 				# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
-				indexes = findall(gamma_iter[:,t+1] .== 1)
+				indexes = findall_faster(j -> gamma_iter[j,t+1]==1, 1:n) 
+				# indexes = findall(gamma_iter[:,t+1] .== 1)
 				Si_comp1 = @view rho_tmp[indexes]
 				Si_comp2 = @view Si_iter[indexes,t+1]
 				rho_comp = compatibility(Si_comp1, Si_comp2)
@@ -773,7 +807,8 @@ function MCMC_fit(;
 					for kk in 1:nclus_temp
 						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
 						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
-						aux_idxs = findall(rho_tmp .== kk) # fast
+						aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
+						# aux_idxs = findall(rho_tmp .== kk) # fast
 						if sPPM
 							s1n = @view sp1[aux_idxs]
 							s2n = @view sp2[aux_idxs]
@@ -811,9 +846,10 @@ function MCMC_fit(;
 				# printlgln("Before exp and normalization:")
 				# debug(@showd ph)
 				# now exponentiate the weights...
-				max_ph = maximum(ph)
+				# max_ph = maximum(ph)
+				max_ph = maximum(ph[1:(nclus_iter[t]+1)])
 				sum_ph = 0.0
-				for k in eachindex(ph)
+				for k in 1:(nclus_iter[t]+1)
 					# for numerical purposes we subract max_ph
 					ph[k] = exp(ph[k] - max_ph)
 					sum_ph += ph[k]
@@ -867,7 +903,8 @@ function MCMC_fit(;
 				#    labels 1 1 1 2 2    labels 3 1 1 2 2
 				Si_tmp = @view Si_iter[:,t]
 
-				Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)				
+				# Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)				
+				relabel_full!(Si_tmp,n,Si_relab, nh_reorder, old_lab)				
 				# - Si_relab gives the relabelled partition
 				# - nh_reorder gives the numerosities of the relabelled partition, ie "nh_reorder[k] = #(units of new cluster k)"
 				# - old_lab tells "the index in position i (which before was cluster i) is now called cluster old_lab[i]"
@@ -935,7 +972,8 @@ function MCMC_fit(;
 					a_star = sig2h_priors[1] + nh[k,t]/2 # should be the same
 					sum_Y = 0.0
 					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
-					S_kt = findall(Si_iter[:,t] .== k) # fast
+					S_kt = findall_faster(j -> Si_iter[j,t] == k, 1:n)
+					# S_kt = findall(Si_iter[:,t] .== k) # fast
 					# if lk_xPPM
 					# 	for j in S_kt
 					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - dot(Xlk_covariates[j,:,t], beta_iter[t]))^2
@@ -958,7 +996,8 @@ function MCMC_fit(;
 					a_star = sig2h_priors[1] + nh[k,t]/2
 					sum_Y = 0.0
 					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
-					S_kt = findall(Si_iter[:,t] .== k) # fast
+					S_kt = findall_faster(j -> Si_iter[j,t] == k, 1:n)
+					# S_kt = findall(Si_iter[:,t] .== k) # fast
 					# if lk_xPPM
 					# 	for j in S_kt
 					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
