@@ -7,7 +7,7 @@ output: html_document
 ```{r, warning=FALSE}
 library(salso)
 library(RColorBrewer)
-source("include.R")
+source("../include.R")
 ```
 
 
@@ -29,7 +29,6 @@ juliaSetupOk()
 # juliaEval("Pkg.instantiate()")
 
 # juliaEval("Pkg.status()")
-
 # setup project
 juliaEval("using Pkg; Pkg.status()")
 juliaEval("Pkg.activate(\"../../JDRPM\")")
@@ -111,9 +110,9 @@ y_with_na
 ## Fits
 ```{r}
 # niter=40000; nburn=28000; nthin=12
-niter=50000; nburn=30000; nthin=20
+# niter=50000; nburn=30000; nthin=20
 # niter=30000; nburn=20000; nthin=10
-# niter=10000; nburn=2000; nthin=8
+niter=10000; nburn=2000; nthin=8
 # niter=1000; nburn=200; nthin=4
 
 nout <- (niter-nburn)/nthin
@@ -249,8 +248,8 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
 	
 	# covariate_similarity_idx = NA,  
-	draws = niter,	burnin = nburn,thin = nthin,
-	# draws = 100000,	burnin = 60000,thin = 40,
+	draws = niter, burnin = nburn,thin = nthin,
+	# draws = 100000, burnin = 60000,thin = 40,
 	logging = FALSE,
 	seed = 314.0
 )
@@ -672,7 +671,7 @@ plot_ARI(parts,title="model C")
 partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
-save_plots=T
+save_plots=F
 
 # partition_matrix <- do.call(cbind, partitions)
 if (save_plots==T){
@@ -706,7 +705,7 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	# pdf(file="C_mean_prediction.pdf",height = 6,width=10)
@@ -828,7 +827,7 @@ cols = colora(N,"div",0)
 # cols = colora(N,56,0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=10)
@@ -905,8 +904,8 @@ for(j in 1:N){
 		for (it in 1:size(drpm1$fitted)[3]){
 			values_j = c(values_j,drpm1$fitted[t,j,it])
 		}
-		# summary_fitted[j,t] = mean(values_j)
-		summary_fitted[j,t] = median(values_j)
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -921,8 +920,8 @@ for(j in 1:N){
 		for (it in 1:size(rout$fitted)[3]){
 			values_j = c(values_j,rout$fitted[t,j,it])
 		}
-		# summary_fitted[j,t] = mean(values_j)
-		summary_fitted[j,t] = median(values_j)
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -972,4 +971,1286 @@ Cmod1 = drpm1
 Jmod2 = rout
 compare_ARI(Cmod1,Jmod2)
 ```
+
+# ===========
+# 3. WITH SPACE
+```{r}
+load("../thesis data/df_wsc.Rdata")
+na_summary(df_wsc)
+```
+
+
+## covariates inspection
+```{r}
+numerical_covariates = c(
+	"Altitude"
+	,"WE_temp_2m"
+	,"WE_wind_speed_10m_mean"
+	,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	, "WE_tot_precipitation"
+	# ,"WE_precipitation_t" # t was for type, categorical
+	,"WE_surface_pressure"
+	,"WE_solar_radiation"
+	,"WE_rh_min"
+	,"WE_rh_mean"
+	,"WE_rh_max"
+	,"WE_wind_speed_100m_mean"
+	,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
+	,"WE_blh_layer_min"
+	,"EM_nh3_livestock_mm"
+	,"EM_nh3_agr_soils"
+	,"EM_nh3_agr_waste_burn"
+	,"EM_nh3_sum"
+	,"EM_nox_traffic"
+	,"EM_nox_sum"
+	,"EM_so2_sum"
+	,"LI_pigs"
+	,"LI_bovine"
+	,"LI_pigs_v2"
+	,"LI_bovine_v2"
+	,"LA_hvi"
+	,"LA_lvi"
+	,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+Tm_cor_comp = 53
+
+stations = unique(df_wsc$IDStations)
+yfull=data.frame()
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:53))
+
+time_span = 1:53
+nsubjects = 1:105
+y = yfull[nsubjects,1+time_span]
+
+cor_matrix <- matrix(NA, nrow=length(numerical_covariates), ncol=Tm_cor_comp)
+rownames(cor_matrix) <- numerical_covariates
+colnames(cor_matrix) <- paste("Time", 1:Tm_cor_comp, sep="_")
+
+# Loop over the covariates and time points
+for (t in 1:Tm_cor_comp) {
+	df_at_t = df_wsc[which(df_wsc$Time==unique(df_wsc$Time)[t]),]
+  for (i in 1:length(numerical_covariates)) {
+    covariata <- numerical_covariates[i]
+    cor_matrix[i, t] <- cor(df_at_t[[covariata]], y[, t])
+    # y[,t] represents the PM10 values at time t
+  }
+}
+```
+
+
+```{r}
+size(cor_matrix)
+
+ncols_ari = 100
+cols_ARI = rev(colora(ncols_ari,104,0)) # 104 or 109 or 111
+brks = seq(min(-1,floor(min(cor_matrix))),1,length.out=ncols_ari+1)
+	
+# pdf("cova.pdf",height = 6.3,width = 10)
+par(mar=c(2,9,2,1))
+
+library(fields)
+image.plot(t(cor_matrix),
+		   main="Correlation between Covariates and PM10 values",axes=F,col=cols_ARI,
+		   breaks=brks)
+
+# mtext(text=c(paste("",1:size(cor_matrix)[1])), side=2, 
+mtext(text=numerical_covariates[1:size(cor_matrix)[1]], side=2, 
+	  line=0.3,at=seq(0,1,length=size(cor_matrix)[1]), las=1, cex=0.7)
+mtext(text=c(paste("",1:size(cor_matrix)[2])), side=1, 
+	  line=0.3,at=seq(0,1,length=size(cor_matrix)[2]), las=2, cex=0.8)
+
+# dev.off()
+
+# pdf("heatmap_covariate_cor.pdf",width = 25, height = 20)
+# layout(matrix(c(1,0,0,2), 2, 2, byrow = TRUE),
+# 	   widths = c(1,1,4,4), heights =c(1,1,4,4))
+library(gplots)
+heatmap.2(cor_matrix, 
+          Rowv=NA, Colv=NA, 
+          dendrogram="none", 
+          trace="none", 
+          # col=colorRampPalette(c("blue", "white", "red"))(100),
+		  col = rev(colora(100,seed=104,0)),
+		  key=TRUE,
+		  key.title="Correlation", key.xlab="Value",
+          density.info="none", 
+          margins=c(6, 12),  # Adjust margins to fit labels
+          cellnote=round(cor_matrix, 1),  # Display correlation values in cells
+          notecol="black",  # Color of the text in cells
+          # notecol="white",  # Color of the text in cells
+          xlab="Time", ylab="Covariates",
+          main="Correlation Heatmap",
+		  )
+# dev.off()
+```
+
+
+
+
+## real PM10 data
+```{r}
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+yfull=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:53))
+
+time_span = 1:53 # low time span for quick testing, real one will be 1:53
+
+### alcuni a caso:
+# set.seed(2345)
+set.seed(1)
+quanti = 20; nsubjects = sample(1:105, quanti,replace = F)
+### alcuni:
+# nsubjects = 1:10
+### tutti:
+# nsubjects = 1:20
+
+y = yfull[nsubjects,1+time_span]
+
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+mn <- apply(y,2,mean)
+sd <- apply(y,2,sd)
+
+y <- t(t(y) - mn)
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites = sites[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+########################################
+
+yred=y[,time_span]
+par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# -> we have
+y
+s_std
+```
+
+
+
+## Fits
+```{r}
+# as.integer(runif(1,0,1000))*1.0
+# seed = 881.0
+seed = 314.0
+cat("seed",seed,"\n")
+
+# niter=1000; nburn=500; nthin=2
+# niter=50000; nburn=10000; nthin=40 # they did this in their tests
+# niter=30000; nburn=20000; nthin=10
+niter=50000; nburn=30000; nthin=20
+# niter=80000; nburn=60000; nthin=20
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+```
+
+
+```{r}
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+eta1_scale = 0.9
+
+# mh is the of gaussian standard deviations for metropolis updates
+# So these are not variances!
+sig_mh_sig2 = 0.3
+sig_mh_tau2 = 0.3
+sig_mh_lambda2 = 0.3
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
+
+update_eta1 = TRUE
+update_phi1 = TRUE
+
+a_alpha = 2; b_alpha = 2
+time_specific_alpha = TRUE
+
+# now space
+spatial_cohesion = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+## drpm C
+```{r}
+tempo_inizio <- Sys.time()
+drpm1 <- drpm_fit(
+		y=y, 
+		s_coords = s_std,
+        M=1,
+        initial_partition = NULL,
+		
+        starting_alpha = 0.5,
+        unit_specific_alpha = FALSE,
+        time_specific_alpha = time_specific_alpha,
+        alpha_0=FALSE,
+		
+        eta1_0=!(update_eta1),
+        phi1_0=!(update_phi1),
+        # modelPriors=c(0,100^2,1,1,1,1), # original default one
+        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+
+        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+        
+        simpleModel = 0,
+        theta_tau2 = c(0, 2), # only used if simpleModel=1
+
+		SpatialCohesion=spatial_cohesion, # auxiliary similarity
+		# SpatialCohesion=4, # double dipper similarity
+		cParms=c(mu0, k0, v0, L0),
+		
+		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+		verbose=TRUE,
+		# draws=1000,burn=0,thin=1)
+		draws=niter,burn=nburn,thin=nthin)
+
+tempo_fine <- Sys.time()
+differenza_tempo <- tempo_fine - tempo_inizio
+cat(crayon::cyan("Fit took:\n"))
+print(round(differenza_tempo,digits = 4))
+
+cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
+```
+
+
+```{r}
+names(drpm1)
+
+cat("\nSi     size = ",size(drpm1$Si),"\n")
+cat("gamma  size = ",size(drpm1$gamma),"\n")
+cat("mu     size = ",size(drpm1$mu),"\n")
+cat("sig2   size = ",size(drpm1$sig2),"\n")
+cat("alpha  size = ",size(drpm1$alpha),"\n")
+cat("theta  size = ",size(drpm1$theta),"\n")
+cat("tau2   size = ",size(drpm1$tau2),"\n")
+cat("eta1   size = ",size(drpm1$eta1),"\n")
+cat("phi0   size = ",size(drpm1$phi0),"\n")
+cat("phi1   size = ",size(drpm1$phi1),"\n")
+cat("lam2   size = ",size(drpm1$lam2),"\n")
+cat("llike  size = ",size(drpm1$llike),"\n")
+cat("fitted size = ",size(drpm1$fitted),"\n")
+```
+
+
+
+## clustering covariates
+```{r}
+n = dim(y)[1]
+# Tm
+
+# colnames(df_wsc)
+covariate_scelte = c(
+	"Altitude"
+	# ,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	# "WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	# ,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+p = lenght(covariate_scelte)
+X_cl = array(data = 0, dim = c(n, p, Tm))
+dim(X_cl)
+cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
+
+for(i in 1:n){
+	st = stations[i]
+	for(t in 1:Tm){
+		df_st = df_wsc[which(df_wsc$IDStations == st),]
+		for (pp in 1:p){
+			X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+		}
+	}
+}
+colnames(X_cl) = covariate_scelte
+head(X_cl)
+```
+
+
+
+## likelihood covariates
+```{r}
+n = dim(y)[1]
+# Tm
+
+colnames(df_wsc)
+# penso vadano scelte quelle correlate alla target variable
+# perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
+covariate_scelte = c(
+	# "Altitude"
+	"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	# "WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	# ,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+p = lenght(covariate_scelte)
+X_lk = array(data = 0, dim = c(n, p, Tm))
+dim(X_lk)
+cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
+
+for(i in 1:n){
+	st = stations[i]
+	for(t in 1:Tm){
+		df_st = df_wsc[which(df_wsc$IDStations == st),]
+		for (pp in 1:p){
+			X_lk[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+		}
+	}
+}
+colnames(X_lk) = covariate_scelte
+head(X_lk)
+```
+
+fictitious covariate, just for testing
+```{r}
+p = 1
+X_lk_copy = array(data = 0, dim = c(n, p, Tm))
+
+# X_lk_copy[,1,] = X_lk[,1,]
+X_lk_copy[,1,] = y*2
+
+X_lk = X_lk_copy
+# X_lk[,,] / 2 == y[,1]
+```
+
+## drpm J
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y),              
+	sp_coords = s_std,
+	M_dp = 1,                     
+	initial_partition = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = time_specific_alpha,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = update_eta1,                    
+	update_phi1 = update_phi1,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1^2,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	######## space
+	spatial_cohesion_idx = spatial_cohesion,
+	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	
+	######## likelihood covariates
+	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	# Xlk_covariates = NA, beta_priors = NA,
+	
+	######## clustering covariates
+	# covariate_similarity_idx = 4,
+	# cv_params = list(0,1,2,2),
+	# Xcl_covariates = X_cl,
+
+	draws = niter, burnin = nburn, thin = nthin,
+	# draws = 5, burnin = 0, thin = 1,
+	logging = FALSE,
+	seed = 881.0
+)
+```
+
+
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma",
+				 "alpha", 
+				 "sigma2h", 
+				 "muh", 
+				 "eta1",
+				 "beta",
+				 "theta", 
+				 "tau2", 
+				 "phi0", 
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+rout$alpha        = aperm(rout$alpha,    c(2, 1))
+rout$theta        = aperm(rout$theta,    c(2, 1))
+rout$tau2         = aperm(rout$tau2,     c(2, 1))
+rout$eta1         = aperm(rout$eta1,    c(2, 1))
+rout$phi0     = matrix(rout$phi0,    ncol = 1)
+rout$phi1     = matrix(rout$phi1,    ncol = 1)
+rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
+```
+
+
+```{r}
+names(rout)
+
+cat("Si           size = ",size(rout$Si),"\n")
+cat("gamma        size = ",size(rout$gamma),"\n")
+cat("sigma2h      size = ",size(rout$sigma2h),"\n")
+cat("muh          size = ",size(rout$muh),"\n")
+cat("alpha        size = ",size(rout$alpha),"\n")
+cat("theta        size = ",size(rout$theta),"\n")
+cat("tau2         size = ",size(rout$tau2),"\n")
+cat("eta1         size = ",size(rout$eta1),"\n")
+cat("phi0         size = ",size(rout$phi0),"\n")
+cat("phi1         size = ",size(rout$phi1),"\n")
+cat("lambda2      size = ",size(rout$lambda2),"\n")
+cat("beta         size = ",size(rout$beta),"\n")
+cat("fitted       size = ",size(rout$fitted),"\n")
+cat("llike        size = ",size(rout$llike),"\n")
+
+cat("lpml = ",rout$lpml,"\n")
+cat("waic = ",rout$waic,"\n")
+```
+
+
+## Trace plots
+
+### beta
+```{r}
+for (covariata_idx in 1:length(covariate_scelte)){
+	cols = colora(size(rout$beta)[3],44,0)
+	# verde scuro: iterazioni iniziali
+	# giallo: iterazioni finali
+	par(mar=c(3,3,3,1))
+	for (iter in 1:size(rout$beta)[3]){
+		if(iter==1) {
+			plot(rout$beta[,covariata_idx,iter],
+				 ylim=extrema(rout$beta[,covariata_idx,]),
+				 main=covariate_scelte[covariata_idx],
+				 col = cols[iter],type="l")
+		} else {
+			lines(rout$beta[,covariata_idx,iter],col = cols[iter])
+		}
+	}
+	legend("topleft",legend = c("initial iterates","final iterates"),
+		   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+		   lwd=3,cex=0.6,bty="n"
+		   )
+	# boxplot(rout$beta[,covariata_idx,],
+		# main=covariate_scelte[covariata_idx])
+}
+```
+
+### alpha
+```{r}
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+plot(drpm1$alpha[,time],type="l",
+	 main=bquote("Model DRPM C\nTrace plot of alpha at time "*.(time)
+	 ), ylim=c(0,1),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$alpha[,time],type="l",
+	 main=bquote("Model DRPM J\nTrace plot of alpha at time "*.(time)
+	 ), ylim=c(0,1),
+	 xlab = "MCMC iterations",ylab="values")
+}
+```
+### mu
+```{r}
+size(drpm1$mu)
+size(rout$muh)
+unitj = 1
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$mu[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
+		 main=bquote("Model DRPM C\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$muh[time,unitj,],type="l",
+		 ylim=c(min(drpm1$mu[time,unitj,],rout$muh[time,unitj,]),
+		 	   max(drpm1$mu[time,unitj,],rout$muh[time,unitj,])),
+		 main=bquote("Model DRPM J\nTrace plot of mu at time "*.(time) * " unit " * .(unitj)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### sigma2
+```{r}
+size(drpm1$sig2)
+size(rout$sigma2h)
+unitj = 1
+for (time in 1:Tm){
+		par(mfrow=c(1,2),mar=c(2,2,4,2))
+
+	plot(drpm1$sig2[time,unitj,],type="l",
+		 main=bquote("Model DRPM C\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$sigma2h[time,unitj,],type="l",
+		 main=bquote("Model DRPM J\nTrace plot of sigma2 at time "*.(time) * " unit " * .(unitj)),
+		 ylim=c(0,max(drpm1$sig2[time,unitj,], rout$sigma2h[time,unitj,])),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### eta1
+```{r}
+dim(drpm1$eta1)
+dim(rout$eta1)
+
+cat("did we update eta1?", update_eta1)
+for (unit in 1:N){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM C\nTrace plot of eta1 at unit "*.(unit)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$eta1[,unit],type="l",
+		 ylim=c(min(drpm1$eta1[,unit],rout$eta1[,unit]),
+		 	    max(drpm1$eta1[,unit],rout$eta1[,unit])),
+		 main=bquote("Model DRPM J\nTrace plot of eta1 at unit "*.(unit)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+
+### theta
+```{r}
+for (time in 1:Tm){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of theta at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$theta[,time],type="l",
+		  ylim=c(min(drpm1$theta[,time],rout$theta[,time]),
+		 	    max(drpm1$theta[,time],rout$theta[,time])),
+		 main=bquote("Model DRPM J\nTrace plot of theta at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+### tau2
+```{r}
+dim(drpm1$tau2)
+dim(rout$tau2)
+
+for (time in 1:Tm){
+	par(mfrow=c(1,2),mar=c(2,2,4,2))
+	plot(drpm1$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
+		 main=bquote("Model DRPM C\nTrace plot of tau2 at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+	plot(rout$tau2[,time],type="l",
+		 ylim=c(0,max(drpm1$tau2[,time],rout$tau2[,time])),
+		 main=bquote("Model DRPM J\nTrace plot of tau2 at time "*.(time)),
+		 xlab = "MCMC iterations",ylab="values")
+}
+```
+
+
+### layer three
+phi1, phi0, lambda2
+```{r}
+dim(drpm1$phi1)
+dim(rout$phi1)
+
+cat("did we update phi1?", update_phi1)
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi1"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$phi1[,1],type="l",
+	  ylim=c(min(drpm1$phi1[,1],rout$phi1[,1]),
+		 	    max(drpm1$phi1[,1],rout$phi1[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of phi1"),
+	 xlab = "MCMC iterations",ylab="values")
+
+dim(drpm1$phi0)
+dim(rout$phi0)
+
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of phi0"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$phi0[,1],type="l",
+	 	  ylim=c(min(drpm1$phi0[,1],rout$phi0[,1]),
+		 	    max(drpm1$phi0[,1],rout$phi0[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of phi0"),
+	 xlab = "MCMC iterations",ylab="values")
+
+
+dim(drpm1$lam2)
+dim(rout$lambda2)
+
+par(mfrow=c(1,2),mar=c(2,2,4,2))
+plot(drpm1$lam2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
+	 main=bquote("Model DRPM C\nTrace plot of lambda2"),
+	 xlab = "MCMC iterations",ylab="values")
+plot(rout$lambda2[,1],type="l",
+	 	  ylim=c(min(drpm1$lam2[,1],rout$lambda2[,1]),
+		 	    max(drpm1$lam2[,1],rout$lambda2[,1])),
+	 main=bquote("Model DRPM J\nTrace plot of lambda2"),
+	 xlab = "MCMC iterations",ylab="values")
+```
+
+
+
+## Partition plots
+```{r, warning=F}
+maxNClusters = 3
+
+# partition_plots = function(drpm1, rout){ 
+# Initialize a list to store the partitions for each time instant
+partitions_drpmc <- list()
+partitions_drpmj <- list()
+
+# Loop over each time instant to extract the consensus partition
+for (t in 1:Tm) {
+  Sic_t <- drpm1$Si[t, , ]
+  Sic_t <- t(Sic_t) 
+  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
+  							   , maxNClusters = maxNClusters
+  							   )
+
+  Sij_t <- rout$Si[t, , ]
+  Sij_t <- t(Sij_t) 
+  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
+  							   # , maxNClusters = maxNClusters
+  							   )
+}
+maxk = 0
+cat(crayon::red("DRPM - C\n"))
+for (t in 1:Tm){
+	cat("Time",t,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmc[[t]])),maxk)
+}
+cat("\n")
+cat(crayon::red("DRPM - J\n"))
+for (t in 1:Tm){
+	cat("Time",t,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
+	maxk = max(length(unique(partitions_drpmj[[t]])),maxk)
+}
+```
+
+
+```{r, warning=F}
+# cols=colora(len=maxk, seed=67, show=1)
+# cols=colora(len=maxk, seed=41, show=0) # greens/light-blues
+# cols=colora(len=maxk, seed=73, show=0) # dark blues
+# cols=colora(len=maxk, seed=32, show=0) # viridis
+# cols=colora(len=maxk, seed=22, show=0) # reds/blues
+# cols=colora(len=maxk, seed=44, show=0) # greens
+cols=colora(len=maxk, seed=56, show=0) # la 56
+# cols = colora(len=10,"rand")
+
+heatmap_matrix <- do.call(rbind, partitions_drpmc)
+# Generate the heatmap
+heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
+		main="model C", xlab = "units", ylab = "time instants",
+        # col = terrain.colors(length(unique(as.vector(heatmap_matrix)))))
+		col = cols)
+heatmap_matrix <- do.call(rbind, partitions_drpmj)
+# Generate the heatmap
+heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
+		main="model J",xlab = "units", ylab = "time instants",
+        # col = terrain.colors(length(unique(as.vector(heatmap_matrix)))))
+		col = cols)
+
+####################################################################
+
+partitions = partitions_drpmc
+partition_matrix <- do.call(cbind, partitions)
+num_units <- nrow(partition_matrix)
+Tm <- ncol(partition_matrix)
+# Set up the plot
+par(mar=c(4,4,2,2))
+plot(1:Tm, rep(NA, Tm), type = "n",
+     xlab = "Time Instants", ylab = "clusters", main="model C",
+     ylim = range(partition_matrix)+c(-0.1,0.1), xaxt = "n", yaxt = "n")
+axis(1, at = 1:Tm, labels = 1:Tm)
+axis(2, at = unique(as.vector(partition_matrix)), las = 2)
+# Add grid lines for clarity
+abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted")
+abline(v = 1:Tm, col = "lightgray", lty = "dotted")
+# Plot lines and points for each unit
+for (unit in 1:num_units) {
+  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
+        col = unit, lwd = 1)
+}
+# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
+       # lty = 1, lwd = 2, pch = 19, bty = "n")
+
+
+partitions = partitions_drpmj
+partition_matrix <- do.call(cbind, partitions)
+num_units <- nrow(partition_matrix)
+Tm <- ncol(partition_matrix)
+# Set up the plot
+par(mar=c(4,4,2,2))
+plot(1:Tm, rep(NA, Tm), type = "n",
+     xlab = "Time Instants", ylab = "clusters", main="model J",
+     ylim = range(partition_matrix)+c(-0.1,0.1), xaxt = "n", yaxt = "n")
+axis(1, at = 1:Tm, labels = 1:Tm)
+axis(2, at = unique(as.vector(partition_matrix)), las = 2)
+abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted")
+abline(v = 1:Tm, col = "lightgray", lty = "dotted")
+for (unit in 1:num_units) {
+  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
+        col = unit, lwd = 1)
+}
+# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
+       # lty = 1, lwd = 2, pch = 19, bty = "n")
+
+
+####################################################################
+
+partitions = partitions_drpmc
+partition_matrix <- do.call(cbind, partitions)
+par(mar=c(3.8,1,3,1),mfrow=c(1,2))
+plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, num_units)+c(-0.5,0.5),
+     xlab = "Time Instants", ylab = "Units",
+     xaxt = "n", yaxt = "n", main = "model C")
+axis(1, at = 1:Tm, labels = 1:Tm)
+for (t in 1:Tm) {
+  for (unit in 1:num_units) {
+    text(x = t, y = unit, labels = as.character(unit),
+         col = partition_matrix[unit, t], cex = 0.5)
+  }
+}
+
+partitions = partitions_drpmj
+partition_matrix <- do.call(cbind, partitions)
+plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, num_units)+c(-0.5,0.5),
+     xlab = "Time Instants", ylab = "Units",
+     xaxt = "n", yaxt = "n", main = "model J")
+axis(1, at = 1:Tm, labels = 1:Tm)
+for (t in 1:Tm) {
+  for (unit in 1:num_units) {
+    text(x = t, y = unit, labels = as.character(unit),
+         col = partition_matrix[unit, t], cex = 0.5)
+  }
+}
+```
+
+
+## Ari plot
+```{r warning=FALSE}
+LEN = Tm
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+##########################
+
+df_cluster = data.frame(clusters=c(),Time=c())
+for(time in 1:Tm){
+	salso_out <- partition[[time]]
+	df_temp = data.frame(
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+library(mclust)
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- partition[[k]]
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+# if (min(ARImats)<0){
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# } else {
+	# cols_ARI = colora(ncols_ari,56,0)
+	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
+	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# }
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+
+##########################
+model_name = "model J"
+partition = partitions_drpmj
+##########################
+
+df_cluster = data.frame(clusters=c(),Time=c())
+for(time in 1:Tm){
+	salso_out <- partition[[time]]
+	df_temp = data.frame(
+		clusters = salso_out
+	)
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+library(mclust)
+# build the ARI matrix
+ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+rho_ARI <- list()
+for(k in 1:LEN){
+	rho_ARI[[k]] <- partition[[k]]
+}
+for(k in 1: LEN){
+	for(kk in 1: LEN){
+		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+	}
+}
+ncols_ari = 100
+# if (min(ARImats)<0){
+	# cols_ARI = colora(ncols_ari,79,0)
+	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# } else {
+	# cols_ARI = colora(ncols_ari,56,0)
+	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+	# cols_ARI = colora(ncols_ari,102,0)
+	# brks = seq(0,1,length.out=ncols_ari+1)
+	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+# }
+# or see ?designer.colors for colors
+library(fields)
+image.plot(ARImats,
+		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
+		   breaks=brks)
+mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+
+##########################################################
+
+# take last sample (maybe not the best choice)
+yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+yred=y
+
+cols = colora(size(yred)[1],56,0)
+# cols = colora(size(yred)[1],"div",show = 0)
+
+par(mar=c(4,4,4,2))
+for(i in 1:size(yredC)[1]){
+   if(i==1){
+     plot(1:size(yredC)[2],yredC[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredC),
+     	 type='l',xlab='time',ylab="fitted values",main="model C")
+ 	  } 
+	  else{
+		  lines(1:size(yredC)[2],yredC[i,],col=cols[i])
+	  }
+}
+
+par(mar=c(4,4,4,2))
+for(i in 1:size(yredJ)[1]){
+   if(i==1){
+     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
+     	 ylim=extrema(yred,yredJ,yredC),
+     	 type='l',xlab='time',ylab="fitted values",main="model J")
+ 	  } 
+	  else{
+		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
+	  }
+}
+
+# original real data
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],type='l',
+     	 xlab='time',ylab='values',main="original data",
+     	 ylim=extrema(yred,yredJ,yredC))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+
+## salso plots
+```{r}
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+# model_name = "model J"
+# partition = partitions_drpmj
+##########################
+
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
+}
+
+
+##########################
+# model_name = "model C"
+# partition = partitions_drpmc
+model_name = "model J"
+partition = partitions_drpmj
+##########################
+
+par(mar=c(1,1,1,1))
+for (time in 1:Tm){
+	salso_out = partition[[time]]
+	ssout = summary(salso_out)
+	# plot(ssout,type="heatmap")
+	# plot(ssout,type="mds")
+	plot(ssout,type="pairs",data=s_std)
+	text(0.3,0.91,pos=3,paste0(model_name," - Time ",time))
+	# plot(ssout,type="dendrogram")
+	# dev.off()
+}
+```
+
+
+## PM10 plots
+```{r warning=FALSE}
+# preparation
+source("plot functions/plotter.R")
+source("include_clusters_functions.R")
+```
+
+
+```{r warning=FALSE}
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+
+sites = data.frame(
+	longitude = unique(df_weekly$Longitude), 
+	latitude = unique(df_weekly$Latitude))
+std_sites = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+y=data.frame()
+
+target = "AQ_pm10"
+# target = "WE_tot_precipitation"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+	y=rbind(y,y_we_pm10)
+}
+rownames(y) = NULL
+colnames(y)<- c("id",paste0("w", 1:53))
+
+time_span = 1:Tm # low time span for quick testing, real one will be 1:53
+```
+
+
+```{r,warning=F}
+##########################
+# model_name = "model C"
+# partition = partitions_drpmc
+model_name = "model J"
+partition = partitions_drpmj
+##########################
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span){
+
+	salso_out <- partition[[time]]
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	
+	idxs = which(is.na(df_temp$clusters))
+	# replace(df_temp$clusters, idxs, 3)
+	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+
+clusters_old = NULL
+for(time in time_span){
+	cat(crayon::red("Time",time,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	# q = get_graph_plot(df_cluster_cut,cols)
+	# print(q)
+	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+	
+	cur_num = sprintf("%02d", time)
+	ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+	plot=p, units="px",width=2500, height=1200, dpi=300)
+	dev.off()
+	
+	clusters_old = clusters_now
+}
+```
+
+
+
+
+
+```{r,warning=F}
+##########################
+# model_name = "model C"
+# partition = partitions_drpmc
+model_name = "model J"
+partition = partitions_drpmj
+##########################
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span){
+
+	salso_out <- partition[[time]]
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	idxs = which(is.na(df_temp$clusters))
+	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+
+clusters_old = NULL
+for(time in time_span){
+	cat(crayon::red("Time",time,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	# q = get_graph_plot(df_cluster_cut,cols)
+	# print(q)
+	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+	
+	cur_num = sprintf("%02d", time)
+	ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+		   plot=p, units="px",width=2500, height=1200, dpi=300)
+		   # units="px",width=2500, height=1400, dpi=300)
+	dev.off()
+	
+	clusters_old = clusters_now
+}
+```
+
+```{r}
+#########################################
+# titleJ = "model J - considering Altitude when clustering"
+titleJ = "model J - ignoring covariates when clustering"
+partition = partitions_drpmj
+titleJ = "model C"
+partition = partitions_drpmc
+#########################################
+
+
+pdf(paste0("../../tmp_images/",titleJ,".pdf"),width = 8, height = 5)
+# png(paste0("../../tmp_images/",titleJ,".png"), width = 500, height = 300,units = "px")
+par(mar=c(4,4,2,1))
+time=1
+
+##### if fitted with Xcl
+# mean(X_cl[which(partition[[time]]==1),,1])
+# mean(X_cl[which(partition[[time]]==2),,1])
+# mean(X_cl[which(partition[[time]]==3),,1])
+# plot(X_cl[,,1],pch=19,col=partition[[time]],
+# 	 main=paste0("time=",time," - ",titleJ),xlab="units",ylab="Altitude")
+
+cols = colora(maxk,34,0)
+##### otherwise
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],"Altitude"])
+plot(cova_of_interest[,1],
+	# col=cols[partition[[time]]],
+	col=partition[[time]],
+	pch=19,
+	# cex=pmax(y[, time]*4, rep(0.7, N)),
+	main=paste0("time=",time," - ",titleJ),xlab="units",ylab="Altitude"
+	)
+
+dev.off()
+```
+
+
 

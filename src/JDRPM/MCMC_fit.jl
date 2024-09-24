@@ -289,8 +289,10 @@ function MCMC_fit(;
 
 
 	############# allocate auxiliary working variables #############
-	Sirelab = zeros(Int64,n)
-	Si_relab = zeros(Int,n)
+	aux_relab = zeros(Int64,n)
+	rho1_relab = zeros(Int64,n)
+	rho2_relab = zeros(Int64,n)
+	Si_relab = zeros(Int64,n)
 	nh_reorder = zeros(Int,n)
 	old_lab = zeros(Int,n)
 	nh_red = zeros(Int64,n)
@@ -299,6 +301,7 @@ function MCMC_fit(;
 	ph = zeros(n)
 	muh_iter_copy = zeros(n,T_star)
 	sig2h_iter_copy = ones(n,T_star)
+	log_Mdp = log(M_dp)
 
 
 	############# allocate and initialize working variables #############
@@ -306,8 +309,8 @@ function MCMC_fit(;
 	Si_iter[:,end] .= 0
 	gamma_iter = zeros(Bool,n,T_star)
 	if !ismissing(initial_partition)
-		initp = relabel(initial_partition,n,Sirelab)
-		Si_iter[:,1] = initp
+		relabel!(initial_partition,n,aux_relab)
+		Si_iter[:,1] = initial_partition
 		gamma_iter[:,1] .= 1
 	end
 	if time_specific_alpha==false && unit_specific_alpha==false
@@ -478,6 +481,7 @@ function MCMC_fit(;
 					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
 					Si_red = Si_iter[indexes, t]
 					Si_red1 = copy(Si_red)
+					# Si_red1 = Si_iter[indexes, t]
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
@@ -500,8 +504,8 @@ function MCMC_fit(;
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
 					n_red1 = length(Si_red1)
 					# @assert n_red1 == n_red+1
-					relabel!(Si_red,n_red)
-					relabel!(Si_red1,n_red1)
+					relabel!(Si_red,n_red,aux_relab)
+					relabel!(Si_red1,n_red1,aux_relab)
 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red) # = number of clusters
 					nclus_red1 = maximum(Si_red1)
 
@@ -551,8 +555,10 @@ function MCMC_fit(;
 							s2o = sp2_red[aux_idxs]
 							s1n = copy(s1o); push!(s1n, sp1[j])
 							s2n = copy(s2o); push!(s2n, sp2[j])
-							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, lg=true, M=M_dp, S=S)
-							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, lg=true, M=M_dp, S=S)
+							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
+							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
 						end
 						# debug(@showd lCn lCo)
 						# debug(@showd cl_xPPM)
@@ -577,7 +583,8 @@ function MCMC_fit(;
 					lSn = 0.0 
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
-						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
+						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
+						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S)
 						# lCn = spatial_cohesion(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, lg=true, M=M_dp, S=S)
 					end
 					if cl_xPPM
@@ -586,14 +593,15 @@ function MCMC_fit(;
 						end
 					end
 					# end # of the @timeit for sPPM
-					lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
+					# lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
+					lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
 
 					# printlgln("before exp and normalization:")
 					# debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
 					# max_ph = maximum(lg_weights)
-					max_ph = maximum(lg_weights[1:(nclus_red+1)])
+					max_ph = maximum(@view lg_weights[1:(nclus_red+1)])
 
 					sum_ph = 0.0
 
@@ -633,7 +641,8 @@ function MCMC_fit(;
 						Si_comp1 = @view Si_iter[indexes, t-1]
 						Si_comp2 = @view Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
 
-						rho_comp = compatibility(Si_comp1, Si_comp2)
+						# rho_comp = compatibility(Si_comp1, Si_comp2)
+						rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
 						if rho_comp == 0
 							probh = 0.0
 						end
@@ -698,6 +707,7 @@ function MCMC_fit(;
 				# ph = zeros(nclus_iter[t]+1) 
 				ph .= 0.0
 				rho_tmp = copy(Si_iter[:,t])
+				# rho_tmp = Si_iter[:,t]
 
 				# compute nh_tmp (numerosities for each cluster label)
 				nh_tmp = copy(nh[:,t])
@@ -716,7 +726,8 @@ function MCMC_fit(;
 					# we check the compatibility between ρ_t^{h=k,R_(t+1)} ...
 					Si_comp1 = @view rho_tmp[indexes]
 					Si_comp2 = @view Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
-					rho_comp = compatibility(Si_comp1, Si_comp2)
+					# rho_comp = compatibility(Si_comp1, Si_comp2)
+					rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
 					# printlgln("Assigning to cluster k=$k :")
 					# pretty_log("gamma_iter"); # pretty_log("Si_iter")
 					# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
@@ -726,8 +737,9 @@ function MCMC_fit(;
 					else
 						# update params for "rho_jt = k" simulation
 						nh_tmp[k] += 1
-						nclus_temp = sum(nh_tmp .> 0) # = number of clusters
-						# nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
+						# nclus_temp = sum(nh_tmp .> 0) # = number of clusters
+						nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
+						# count is a bit slower but does not allocate
 
 						lpp = 0.0
 						for kk in 1:nclus_temp
@@ -738,7 +750,8 @@ function MCMC_fit(;
 							if sPPM
 								s1n = @view sp1[aux_idxs]
 								s2n = @view sp2[aux_idxs]
-								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
 							end
 							if cl_xPPM
 								# debug(@showd cv_idxs)
@@ -750,7 +763,8 @@ function MCMC_fit(;
 								end
 							end
 							# end # of the @timeit for sPPM
-							lpp += log(M_dp) + lgamma(nh_tmp[kk])
+							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
+							lpp += log_Mdp + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
 
@@ -786,7 +800,8 @@ function MCMC_fit(;
 				# indexes = findall(gamma_iter[:,t+1] .== 1)
 				Si_comp1 = @view rho_tmp[indexes]
 				Si_comp2 = @view Si_iter[indexes,t+1]
-				rho_comp = compatibility(Si_comp1, Si_comp2)
+				# rho_comp = compatibility(Si_comp1, Si_comp2)
+				rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
 				# printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
 				# pretty_log("gamma_iter"); # pretty_log("Si_iter")
 				# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
@@ -800,8 +815,9 @@ function MCMC_fit(;
 
 					# update params for "rho_jt = k" simulation
 					nh_tmp[k] += 1
-					nclus_temp = sum(nh_tmp .> 0)
-					# nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
+					# nclus_temp = sum(nh_tmp .> 0)
+					nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
+					# count is a bit slower but does not allocate
 
 					lpp = 0.0
 					for kk in 1:nclus_temp
@@ -812,7 +828,8 @@ function MCMC_fit(;
 						if sPPM
 							s1n = @view sp1[aux_idxs]
 							s2n = @view sp2[aux_idxs]
-							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
+							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
 						end
 						if cl_xPPM
 							for p in 1:p_cl
@@ -821,7 +838,8 @@ function MCMC_fit(;
 							end
 						end
 						# end # of the @timeit for sPPM
-						lpp += log(M_dp) + lgamma(nh_tmp[kk])
+						# lpp += log(M_dp) + lgamma(nh_tmp[kk])
+						lpp += log_Mdp + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 					end
 					### debug case
@@ -847,7 +865,7 @@ function MCMC_fit(;
 				# debug(@showd ph)
 				# now exponentiate the weights...
 				# max_ph = maximum(ph)
-				max_ph = maximum(ph[1:(nclus_iter[t]+1)])
+				max_ph = maximum(@view ph[1:(nclus_iter[t]+1)])
 				sum_ph = 0.0
 				for k in 1:(nclus_iter[t]+1)
 					# for numerical purposes we subract max_ph
@@ -1322,7 +1340,8 @@ function MCMC_fit(;
 	LPML -= n*T*log(nout) # scaling factor
 	LPML = -LPML # fix sign
 
-	println("LPML: $LPML (the higher the better)")
+	# println("LPML: $LPML (the higher the better)")
+	println("LPML: ", LPML, " (the higher the better)") # not interpolating with $ is faster
 	# println("LPML: $LPML - the ↑ the :)")
 	
 	# adjust mean variables
@@ -1334,7 +1353,8 @@ function MCMC_fit(;
 		end
 	end
 	WAIC *= -2
-	println("WAIC: $WAIC (the lower the better)")
+	# println("WAIC: $WAIC (the lower the better)")
+	println("WAIC: ", WAIC, " (the lower the better)") # not interpolating with $ is faster
 	# println("WAIC: $WAIC - the ↓ the :)")
 
 	# println()

@@ -14,7 +14,7 @@ LPML = -369.567904259453
 WAIC = 480.615075016689
 
 J fit
-Elapsed time: 3 seconds, 728 milliseconds
+Elapsed time: 3 seconds, 34 milliseconds
 LPML: -239.00521650726978 (the higher the better)
 WAIC: 422.206629519383 (the lower the better)
 acceptance ratio eta1: 56.26%

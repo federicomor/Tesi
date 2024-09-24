@@ -16,15 +16,15 @@ MSE mean 1.532627
 MSE median 1.318956
 
 12 NA presenti
-NAing index ( 2 , 7 )
 NAing index ( 10 , 3 )
-NAing index ( 2 , 3 )
-NAing index ( 9 , 2 )
-NAing index ( 9 , 5 )
-NAing index ( 3 , 2 )
 NAing index ( 2 , 10 )
+NAing index ( 2 , 3 )
 NAing index ( 2 , 5 )
-NAing index ( 5 , 3 )
+NAing index ( 2 , 7 )
+NAing index ( 3 , 2 )
 NAing index ( 4 , 6 )
+NAing index ( 5 , 3 )
 NAing index ( 7 , 2 )
 NAing index ( 8 , 3 )
+NAing index ( 9 , 2 )
+NAing index ( 9 , 5 )
