@@ -1,9 +1,9 @@
 using ProfileCanvas
 # using JET
 
+begin
 using Random
 Random.seed!(1)
-begin
 N = 20
 T = 30
 y = rand(N,T)
@@ -29,31 +29,36 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-niter = 20.
+niter = 1000.
 burnin = 0.
 thin = 1.
 seed = 123.0
 end
 
 
+include("../old/MCMC_fit.jl")
+include("../new/MCMC_fit.jl")
 include("../MCMC_fit.jl")
 
 #=
-Elapsed time: 2 seconds, 919 milliseconds
+Progress: 100% Time: 0:00:03 ( 3.70 ms/it)
+
+done!
+Elapsed time: 3 seconds, 714 milliseconds
 LPML: -917.3774405189342 (the higher the better)
 WAIC: 721.5373974399014 (the lower the better)
 acceptance ratio eta1: 91.17%
 acceptance ratio phi1: 97.50%
-  2.924494 seconds (34.28 M allocations: 4.905 GiB, 9.66% gc time)
-elapsed time (ns):  2924494400
-gc time (ns):       282563400
-bytes allocated:    5266315752
-pool allocs:        33847739
+  3.727008 seconds (37.85 M allocations: 5.039 GiB, 11.23% gc time)
+elapsed time (ns):  3727008100
+gc time (ns):       418414000
+bytes allocated:    5410637032
+pool allocs:        37417311
 non-pool GC allocs: 432200
 malloc() calls:     11
-free() calls:       0
-minor collections:  90
-full collections:   0
+free() calls:       43
+minor collections:  80
+full collections:   1
 =#
 
 # ProfileCanvas.@profview MCMC_fit(

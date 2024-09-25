@@ -334,44 +334,6 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	return lg ? out : exp(out)
 end
 
-function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool,  M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
-	sdim = length(s1)
-	# Compute sample means
-	sbar1 = mean(s1)
-	sbar2 = mean(s2)
-	# Compute deviations from the sample mean
-	S .= 0.
-	@inbounds for i in 1:sdim
-		s_sbar1 = s1[i] - sbar1
-		s_sbar2 = s2[i] - sbar2
-
-		S[1, 1] += s_sbar1 * s_sbar1
-		S[2, 2] += s_sbar2 * s_sbar2
-		S[2, 1] += s_sbar1 * s_sbar2
-	end
-	S[1, 2] = S[2, 1] # to avoid repeating computations
-	# Updated parameters for cohesion 3
-	kn = k0 + sdim
-	vn = v0 + sdim
-
-	sbar = SVector((sbar1, sbar2))
-	 # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
-	auxvec1 = sbar .- mu_0
-	auxmat1 = auxvec1 * auxvec1'
-
-	auxconst1 = k0 * sdim
-	auxconst2 = k0 + sdim
-	Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
-	
-	out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
-
-	if add
-		lC[case] += lg ? out : exp(out)
-	else
-		lC[case] = lg ? out : exp(out)
-	end
-end
-
 # scalar old version
 # function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}; lg::Bool, M::Real=1.0)::Float64
 # 	sdim = length(s1)
@@ -541,24 +503,11 @@ end
 # @report_opt cohesion5(s1,s2,phi,lg=false)
 # @report_opt cohesion6(s1,s2,phi,lg=false)
 
-
 function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
 	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg,M) 
 	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg,M) 
 	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg,M) 
-	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg,M) 
-end
-
-function spatial_cohesion!(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
-	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg,M) 
-	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg,M) 
-	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	idx==3.0 && cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC) 
 	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
 	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg,M) 

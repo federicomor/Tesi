@@ -980,130 +980,9 @@ na_summary(df_wsc)
 ```
 
 
-## covariates inspection
-```{r}
-numerical_covariates = c(
-	"Altitude"
-	,"WE_temp_2m"
-	,"WE_wind_speed_10m_mean"
-	,"WE_wind_speed_10m_max"
-	# ,"WE_mode_wind_direction_10m"
-	, "WE_tot_precipitation"
-	# ,"WE_precipitation_t" # t was for type, categorical
-	,"WE_surface_pressure"
-	,"WE_solar_radiation"
-	,"WE_rh_min"
-	,"WE_rh_mean"
-	,"WE_rh_max"
-	,"WE_wind_speed_100m_mean"
-	,"WE_wind_speed_100m_max"
-	# ,"WE_mode_wind_direction_100m"
-	,"WE_blh_layer_max"
-	,"WE_blh_layer_min"
-	,"EM_nh3_livestock_mm"
-	,"EM_nh3_agr_soils"
-	,"EM_nh3_agr_waste_burn"
-	,"EM_nh3_sum"
-	,"EM_nox_traffic"
-	,"EM_nox_sum"
-	,"EM_so2_sum"
-	,"LI_pigs"
-	,"LI_bovine"
-	,"LI_pigs_v2"
-	,"LI_bovine_v2"
-	,"LA_hvi"
-	,"LA_lvi"
-	,"LA_land_use"
-	# ,"day"
-	# ,"week"
-	)
-
-Tm_cor_comp = 53
-
-stations = unique(df_wsc$IDStations)
-yfull=data.frame()
-for(st in stations){
-	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),"AQ_pm10"]))
-	yfull=rbind(yfull,y_we_pm10)
-}
-rownames(yfull) = NULL
-colnames(yfull)<- c("id",paste0("w", 1:53))
-
-time_span = 1:53
-nsubjects = 1:105
-y = yfull[nsubjects,1+time_span]
-
-cor_matrix <- matrix(NA, nrow=length(numerical_covariates), ncol=Tm_cor_comp)
-rownames(cor_matrix) <- numerical_covariates
-colnames(cor_matrix) <- paste("Time", 1:Tm_cor_comp, sep="_")
-
-# Loop over the covariates and time points
-for (t in 1:Tm_cor_comp) {
-	df_at_t = df_wsc[which(df_wsc$Time==unique(df_wsc$Time)[t]),]
-  for (i in 1:length(numerical_covariates)) {
-    covariata <- numerical_covariates[i]
-    cor_matrix[i, t] <- cor(df_at_t[[covariata]], y[, t])
-    # y[,t] represents the PM10 values at time t
-  }
-}
-```
-
-
-```{r}
-size(cor_matrix)
-
-ncols_ari = 100
-cols_ARI = rev(colora(ncols_ari,104,0)) # 104 or 109 or 111
-brks = seq(min(-1,floor(min(cor_matrix))),1,length.out=ncols_ari+1)
-	
-# pdf("cova.pdf",height = 6.3,width = 10)
-par(mar=c(2,9,2,1))
-
-library(fields)
-image.plot(t(cor_matrix),
-		   main="Correlation between Covariates and PM10 values",axes=F,col=cols_ARI,
-		   breaks=brks)
-
-# mtext(text=c(paste("",1:size(cor_matrix)[1])), side=2, 
-mtext(text=numerical_covariates[1:size(cor_matrix)[1]], side=2, 
-	  line=0.3,at=seq(0,1,length=size(cor_matrix)[1]), las=1, cex=0.7)
-mtext(text=c(paste("",1:size(cor_matrix)[2])), side=1, 
-	  line=0.3,at=seq(0,1,length=size(cor_matrix)[2]), las=2, cex=0.8)
-
-# dev.off()
-
-# pdf("heatmap_covariate_cor.pdf",width = 25, height = 20)
-# layout(matrix(c(1,0,0,2), 2, 2, byrow = TRUE),
-# 	   widths = c(1,1,4,4), heights =c(1,1,4,4))
-library(gplots)
-heatmap.2(cor_matrix, 
-          Rowv=NA, Colv=NA, 
-          dendrogram="none", 
-          trace="none", 
-          # col=colorRampPalette(c("blue", "white", "red"))(100),
-		  col = rev(colora(100,seed=104,0)),
-		  key=TRUE,
-		  key.title="Correlation", key.xlab="Value",
-          density.info="none", 
-          margins=c(6, 12),  # Adjust margins to fit labels
-          cellnote=round(cor_matrix, 1),  # Display correlation values in cells
-          notecol="black",  # Color of the text in cells
-          # notecol="white",  # Color of the text in cells
-          xlab="Time", ylab="Covariates",
-          main="Correlation Heatmap",
-		  )
-# dev.off()
-```
-
-
-
-
 ## real PM10 data
 ```{r}
-sites = data.frame(
-	longitude = unique(df_weekly$Longitude), 
-	latitude = unique(df_weekly$Latitude))
-std_sites = data.frame(
+sites = std_sites = data.frame(
 	longitude = unique(df_wsc$Longitude), 
 	latitude = unique(df_wsc$Latitude))
 stations = unique(df_wsc$IDStations)
@@ -1119,16 +998,16 @@ for(st in stations){
 rownames(yfull) = NULL
 colnames(yfull)<- c("id",paste0("w", 1:53))
 
-time_span = 1:53 # low time span for quick testing, real one will be 1:53
+time_span = 1:10 # low time span for quick testing, real one will be 1:53
 
-### alcuni a caso:
+set.seed(2)
 # set.seed(2345)
-set.seed(1)
-quanti = 20; nsubjects = sample(1:105, quanti,replace = F)
+### alcuni a caso:
+# quanti = 20; nsubjects = sample(1:105, quanti,replace = F)
 ### alcuni:
 # nsubjects = 1:10
 ### tutti:
-# nsubjects = 1:20
+nsubjects = 1:105
 
 y = yfull[nsubjects,1+time_span]
 
@@ -1164,6 +1043,8 @@ for(i in 1:size(yred)[1]){
 # -> we have
 y
 s_std
+plot(s_std)
+rownames(s_std) = NULL
 ```
 
 
@@ -1178,8 +1059,9 @@ cat("seed",seed,"\n")
 # niter=1000; nburn=500; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=30000; nburn=20000; nthin=10
-niter=50000; nburn=30000; nthin=20
-# niter=80000; nburn=60000; nthin=20
+# niter=50000; nburn=30000; nthin=20
+# niter=80000; nburn=50000; nthin=30
+niter=100000; nburn=60000; nthin=40
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 ```
@@ -1193,9 +1075,9 @@ A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
 
-a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
-a_lambda = 2; b_lambda = 2
+a_sigma  = 1; b_sigma  = 2
+a_tau    = 1; b_tau    = 2
+a_lambda = 1; b_lambda = 2
 eta1_scale = 0.9
 
 # mh is the of gaussian standard deviations for metropolis updates
@@ -1203,8 +1085,8 @@ eta1_scale = 0.9
 sig_mh_sig2 = 0.3
 sig_mh_tau2 = 0.3
 sig_mh_lambda2 = 0.3
-sig_mh_eta1 = 0.2
-sig_mh_phi1 = 0.2
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
 update_phi1 = TRUE
@@ -1219,6 +1101,7 @@ k0 = 1
 v0 = 5
 L0 = 1
 ```
+
 
 ## drpm C
 ```{r}
@@ -1281,143 +1164,6 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ```
 
 
-
-## clustering covariates
-```{r}
-n = dim(y)[1]
-# Tm
-
-# colnames(df_wsc)
-covariate_scelte = c(
-	"Altitude"
-	# ,"WE_temp_2m"
-	# ,"WE_wind_speed_10m_mean"
-	# ,"WE_wind_speed_10m_max"
-	# ,"WE_mode_wind_direction_10m"
-	# "WE_tot_precipitation"
-	# ,"WE_precipitation_t"
-	# ,"WE_surface_pressure"
-	# ,"WE_solar_radiation"
-	# ,"WE_rh_min"
-	# ,"WE_rh_mean"
-	# ,"WE_rh_max"
-	# ,"WE_wind_speed_100m_mean"
-	# ,"WE_wind_speed_100m_max"
-	# ,"WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
-	# ,"WE_blh_layer_min"
-	# ,"EM_nh3_livestock_mm"
-	# ,"EM_nh3_agr_soils"
-	# ,"EM_nh3_agr_waste_burn"
-	# ,"EM_nh3_sum"
-	# ,"EM_nox_traffic"
-	# ,"EM_nox_sum"
-	# ,"EM_so2_sum"
-	# ,"LI_pigs"
-	# ,"LI_bovine"
-	# ,"LI_pigs_v2"
-	# ,"LI_bovine_v2"
-	# ,"LA_hvi"
-	# ,"LA_lvi"
-	# ,"LA_land_use"
-	# ,"day"
-	# ,"week"
-	)
-
-p = lenght(covariate_scelte)
-X_cl = array(data = 0, dim = c(n, p, Tm))
-dim(X_cl)
-cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
-
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-		}
-	}
-}
-colnames(X_cl) = covariate_scelte
-head(X_cl)
-```
-
-
-
-## likelihood covariates
-```{r}
-n = dim(y)[1]
-# Tm
-
-colnames(df_wsc)
-# penso vadano scelte quelle correlate alla target variable
-# perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
-covariate_scelte = c(
-	# "Altitude"
-	"WE_temp_2m"
-	# ,"WE_wind_speed_10m_mean"
-	# ,"WE_wind_speed_10m_max"
-	# ,"WE_mode_wind_direction_10m"
-	# "WE_tot_precipitation"
-	# ,"WE_precipitation_t"
-	# ,"WE_surface_pressure"
-	# ,"WE_solar_radiation"
-	# ,"WE_rh_min"
-	# ,"WE_rh_mean"
-	# ,"WE_rh_max"
-	# ,"WE_wind_speed_100m_mean"
-	# ,"WE_wind_speed_100m_max"
-	# ,"WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
-	# ,"WE_blh_layer_min"
-	# ,"EM_nh3_livestock_mm"
-	# ,"EM_nh3_agr_soils"
-	# ,"EM_nh3_agr_waste_burn"
-	# ,"EM_nh3_sum"
-	# ,"EM_nox_traffic"
-	# ,"EM_nox_sum"
-	# ,"EM_so2_sum"
-	# ,"LI_pigs"
-	# ,"LI_bovine"
-	# ,"LI_pigs_v2"
-	# ,"LI_bovine_v2"
-	# ,"LA_hvi"
-	# ,"LA_lvi"
-	# ,"LA_land_use"
-	# ,"day"
-	# ,"week"
-	)
-
-p = lenght(covariate_scelte)
-X_lk = array(data = 0, dim = c(n, p, Tm))
-dim(X_lk)
-cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
-
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			X_lk[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-		}
-	}
-}
-colnames(X_lk) = covariate_scelte
-head(X_lk)
-```
-
-fictitious covariate, just for testing
-```{r}
-p = 1
-X_lk_copy = array(data = 0, dim = c(n, p, Tm))
-
-# X_lk_copy[,1,] = X_lk[,1,]
-X_lk_copy[,1,] = y*2
-
-X_lk = X_lk_copy
-# X_lk[,,] / 2 == y[,1]
-```
-
 ## drpm J
 ```{r}
 module_JDRPM <- juliaImport(juliaCall("include", module))
@@ -1462,7 +1208,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter, burnin = nburn, thin = nthin,
 	# draws = 5, burnin = 0, thin = 1,
 	logging = FALSE,
-	seed = 881.0
+	seed = 123.0
 )
 ```
 
@@ -1720,7 +1466,429 @@ plot(rout$lambda2[,1],type="l",
 ```
 
 
+#-------------
+# functions
+```{r}
+N = size(y)[1]
+Tm = size(y)[2]
 
+generate_partition = function(model,maxncl=0){
+	partition = list()
+	for (t in 1:Tm){
+		Si_jt <- model$Si[t, , ]
+		Si_jt <- t(Si_jt) 
+		partition[[t]] <- salso(Si_jt, loss = "binder",
+								maxNClusters = maxncl)
+	}
+	return(partition)
+}
+
+plot_partition_with_numbers = function(partition,title){
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, labels = as.character(unit),
+	         col = partition_matrix[unit, t], cex = 0.5)
+	  }
+	}
+}
+
+plot_partition_with_chars = function(partition,title){
+	pchs = letters[1:length(partition[[1]])]
+	partition_matrix <- do.call(cbind, partition)
+	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
+	     xlab = "time", ylab = "units",
+	     xaxt = "n", yaxt = "n", main = title)
+	axis(1, at = 1:Tm, labels = 1:Tm)
+	for (t in 1:Tm) {
+	  for (unit in 1:N) {
+	    text(x = t, y = unit, 
+	    	 # labels = as.character(unit),
+	    	 labels = pchs[unit],
+	         col = partition_matrix[unit, t], cex = 1.2)
+	  }
+	}
+}
+
+plot_ARI = function(partition,title){
+	LEN = Tm
+	df_cluster = data.frame(clusters=c(),Time=c())
+	for(time in 1:Tm){
+		salso_out <- partition[[time]]
+		df_temp = data.frame(
+			clusters = salso_out
+		)
+		df_temp$Time = rep(time,dim(df_temp)[1])
+		df_cluster = rbind(df_cluster,df_temp)
+		# clusters log
+		# clusters_now = df_temp$clusters
+		# n_clusters = unique(clusters_now)
+		# cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+	}
+	library(mclust)
+	# build the ARI matrix
+	ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
+	rho_ARI <- list()
+	for(k in 1:LEN){
+		rho_ARI[[k]] <- partition[[k]]
+	}
+	for(k in 1: LEN){
+		for(kk in 1: LEN){
+			ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
+		}
+	}
+	ncols_ari = 100
+	# if (min(ARImats)<0){
+		# cols_ARI = colora(ncols_ari,79,0)
+		# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# } else {
+		# cols_ARI = colora(ncols_ari,56,0)
+		# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
+		cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
+		# cols_ARI = colora(ncols_ari,102,0)
+		# brks = seq(0,1,length.out=ncols_ari+1)
+		brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
+	# }
+	# or see ?designer.colors for colors
+	library(fields)
+	image.plot(ARImats,
+			   main=paste0("Lagged ARI values - ",title),axes=FALSE,col=cols_ARI,
+			   breaks=brks)
+	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
+}
+```
+
+```{r,warning=F}
+parts = generate_partition(rout)
+plot_partition_with_numbers(parts,title="model J")
+plot_partition_with_chars(parts,title="model J")
+plot_ARI(parts,title="model J")
+
+parts = generate_partition(drpm1)
+plot_partition_with_numbers(parts,title="model C")
+plot_partition_with_chars(parts,title="model C")
+plot_ARI(parts,title="model C")
+```
+
+
+## Partition plots
+```{r}
+# partition_plots = function(drpm1, rout){ 
+# Initialize a list to store the partitions for each time instant
+partitions_drpmc <- generate_partition(drpm1,maxncl = 0)
+partitions_drpmj <- generate_partition(rout,maxncl = 0)
+
+save_plots=F
+
+# partition_matrix <- do.call(cbind, partitions)
+if (save_plots==T){
+	pdf(file="partizioni_chars.pdf",width=10,height = 5)
+}
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+plot_partition_with_chars(partitions_drpmc, title="model C")
+plot_partition_with_chars(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+
+if (save_plots==T){
+	pdf(file="partizioni_nums.pdf",width=10,height = 5)
+}
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+plot_partition_with_numbers(partitions_drpmc, title="model C")
+plot_partition_with_numbers(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+
+if (save_plots==T){
+	pdf(file="ari.pdf",width=10,height = 5)
+}
+par(mar=c(2,2,3,2),mfrow=c(1,2),oma=c(0.5,0.5,0.5,2))
+plot_ARI(partitions_drpmc, title="model C")
+plot_ARI(partitions_drpmj, title="model J")
+if (save_plots==T){ dev.off()}
+```
+
+# fitted values
+```{r}
+yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+yredORIG=y
+
+save_plots=F
+
+if (save_plots==TRUE) {
+	pdf(file="C_mean_prediction.pdf",height = 6,width=10)
+	# pdf(file="C_median_prediction.pdf",height = 6,width=10)
+	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
+}
+##### take the median/mean/mode
+summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(drpm1$fitted)[3]){
+			values_j = c(values_j,drpm1$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred=summary_fitted
+# take last sample (maybe not the best choice)
+# yred=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+
+par(mar=c(2,2,2,1))
+# cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+# cols = colora(N,"div",seed_div = "Paired",show = 0)
+cols = colora(N,56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
+     	 # main="C fitted values - last iteration")
+     	 main="C fitted values - iterations mean")
+     	 # main="C fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off()}
+#################################################################
+if (save_plots==TRUE) { 
+	pdf(file="J_mean_prediction.pdf",height = 6,width=10)
+	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
+	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
+}
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred=summary_fitted
+# take last sample (maybe not the best choice)
+# yred=t(rout$fitted[,,size(rout$fitted)[3]])
+
+par(mar=c(2,2,2,1))
+# cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+cols = colora(N,56,0)
+# cols = colora(N,"div",seed_div = "Paired",show = 0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
+     	 # main="J fitted values - last iteration")
+     	 main="J fitted values - iterations mean")
+     	 # main="J fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off() }
+#################################################################
+
+
+yred=y
+# cols = colora(N,"div",0)
+cols = colora(N,56,0)
+# cols = colora(N,"div",seed_div = "Paired",show = 0)
+if (save_plots==TRUE) { 
+	pdf(file="test_1_generated_data.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Generated values')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# pchs
+# offsets = c(-0.1,-0.2,0,0,0,0.2,0,0,0.1,0.3)
+# for(i in 1:N){
+# 	text(12.1,yred[i,12]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+# offsets = c(-0.2,-0.4,0.1,0.7,0.82,-0.8,0,0,0.2,0.1)
+# for(i in 1:N){
+# 	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
+	   lty = 1,lwd=2,
+	   cex=0.8, bty="n",
+	   ncol=5)
+if (save_plots==TRUE) { dev.off()}
+```
+
+```{r}
+yred=y
+# cols = colora(N,"div",0)
+cols = colora(N,56,0)
+# cols = colora(N,"div",seed_div = "Paired",show = 0)
+cexs = 0.8
+
+save_plots=F
+
+if (save_plots==TRUE) { 
+	pdf(file="clusters_C.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Clusters according to model C-DRPM')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+partition = partitions_drpmc
+# partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		points(t,yred[i,t],col=partition_matrix[i, t],pch=19,cex=cexs)
+	}
+}
+if (save_plots==TRUE) { dev.off() }
+
+# yred=y
+# cols = colora(N,"div",0)
+if (save_plots==TRUE) { 
+	pdf(file="clusters_J.pdf",height = 6,width=10)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Clusters according to model J-DRPM')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+# partition = partitions_drpmc
+partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		points(t,yred[i,t],col=partition_matrix[i, t],
+			   pch=19,cex=cexs)
+	}
+}
+if (save_plots==TRUE) { dev.off() }
+```
+
+
+# compute mse
+```{r}
+MSE_matrices = function(m1,m2){
+	MSE = 0
+	for (i in 1:size(m1)[1]){
+		for (t in 1:size(m1)[2]){
+			MSE = MSE + (m1[i,t]-m2[i,t])^2
+		}
+	}
+	MSE = MSE/(size(m1)[1]*size(m1)[2])
+	return(MSE)
+}
+
+##### take the median/mean/mode
+summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(drpm1$fitted)[3]){
+			values_j = c(values_j,drpm1$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredC=summary_fitted
+# take last sample (maybe not the best choice)
+# yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
+#################################################################
+summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout$fitted)[3]){
+			values_j = c(values_j,rout$fitted[t,j,it])
+		}
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yredJ=summary_fitted
+# take last sample (maybe not the best choice)
+# yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+#################################################################
+yredORIGI=y
+
+#################################################################
+MSE_matrices(yredC,yredORIGI)
+# MSE_matrices(yredC,yredJ)
+MSE_matrices(yredJ,yredORIGI)
+```
+
+
+## ari pairwise
+```{r,warning=F}
+LEN = Tm
+compare_ARI = function(Cmod1,Jmod2){
+	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
+	for(k in 1: LEN){
+		rhoC = generate_partition(Cmod1)
+		rhoJ = generate_partition(Jmod2)
+		ARIvec[k] <- adjustedRandIndex(rhoC[[k]][1:N], rhoJ[[k]][1:N])
+	}	
+	ncols_ari = 100
+	cols_ARI = colora(ncols_ari,79,0)
+	# cols_ARI = rev(cols_ARI)
+	brks = seq(-1,1,length.out=ncols_ari+1)
+	# pdf(paste0("./figures/DRPM/ARI/ari.pdf"), height=8, width=10)
+	# svg(paste0("./figures/",base_folder,"/ARI/ari.svg"), height=8, width=10)
+	# png(paste0("./figures/",base_folder,"/ARI/ari.png"),  width=700,height=600)
+	library(fields)
+	plot(1:Tm,ARIvec,type="l",main=paste0("ARI values"),ylim=c(-0.5,1))
+	abline(h=0,col="gray80",lty=3)
+	
+	# image.plot(ARIvec,
+	# 		   main=paste0("ARI values - ",mod1," vs ",mod2),axes=FALSE,col=cols_ARI,
+	# 		   breaks=brks)
+	# mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
+
+}
+
+mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
+Cmod1 = drpm1
+Jmod2 = rout
+compare_ARI(Cmod1,Jmod2)
+```
+
+#-------------
 ## Partition plots
 ```{r, warning=F}
 maxNClusters = 3
@@ -1741,7 +1909,7 @@ for (t in 1:Tm) {
   Sij_t <- rout$Si[t, , ]
   Sij_t <- t(Sij_t) 
   partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
-  							   # , maxNClusters = maxNClusters
+  							   , maxNClusters = maxNClusters
   							   )
 }
 maxk = 0
