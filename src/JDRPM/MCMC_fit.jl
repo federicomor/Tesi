@@ -292,8 +292,8 @@ function MCMC_fit(;
 	aux1_relab = zeros(Int64,n)
 	aux2_relab = zeros(Int64,n)
 	Si_relab = zeros(Int64,n)
-	nh_reorder = zeros(Int,n)
-	old_lab = zeros(Int,n)
+	nh_reorder = zeros(Int64,n)
+	old_lab = zeros(Int64,n)
 	nh_red = zeros(Int64,n)
 	nh_red1 = zeros(Int64,n)
 	lg_weights = zeros(n)
@@ -303,6 +303,13 @@ function MCMC_fit(;
 	log_Mdp = log(M_dp)
 	lC = @MVector zeros(2)
 	lPP = @MVector zeros(1)
+	Si_red1 = zeros(Int64,n)
+	s1n = zeros(n)
+	s1o = zeros(n)
+	s2n = zeros(n)
+	s2o = zeros(n)
+	nh_tmp = zeros(Int64,n)
+	rho_tmp = zeros(Int64,n)
 
 
 	############# allocate and initialize working variables #############
@@ -372,18 +379,7 @@ function MCMC_fit(;
 	# dimension n since at most there are n clusters (all singletons)
 	nh[1,:] .= n
 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
-
-
-	# ############# even more preallocations (?) #############
-	# j_label = 0
-	# n_red = 0
-	# n_red1 = 0
-	# nclus_red = 0
-	# nclus_red1 = 0
-	# lCo = 0.0; lCn = 0.0
-	# lSo = 0.0; lSn = 0.0
-	# lpp = 0.0
-	# new_label = 0
+	
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
@@ -471,7 +467,8 @@ function MCMC_fit(;
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
 					Si_red = Si_iter[indexes, t]
-					Si_red1 = copy(Si_red)
+					# Si_red1 = copy(Si_red)
+					copy!(Si_red1, Si_red)
 					# Si_red1 = Si_iter[indexes, t]
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
@@ -480,6 +477,8 @@ function MCMC_fit(;
 					if sPPM
 						sp1_red = @view sp1[indexes]
 						sp2_red = @view sp2[indexes]
+						# sp1_red = sp1[indexes]
+						# sp2_red = sp2[indexes]
 					end
 					# debug(@showd sp1 sp2 sp1_red sp2_red)
 					# and the reduced covariates info if cl_xPPM model
@@ -543,10 +542,25 @@ function MCMC_fit(;
 
 							# "forse qui qualcosa da poter fare dovrebbe esserci" con le views?
 							# o forse no per via della push, che modificherebbe la view
-							s1o = @view sp1_red[aux_idxs]
-							s2o = @view sp2_red[aux_idxs]
-							s1n = copy(s1o); push!(s1n, sp1[j])
-							s2n = copy(s2o); push!(s2n, sp2[j])
+							# s1o = @view sp1_red[aux_idxs]
+							# s2o = @view sp2_red[aux_idxs]
+							# s1n = copy(s1o); push!(s1n, sp1[j])
+							# s2n = copy(s2o); push!(s2n, sp2[j])
+
+							copy!(s1o, @view sp1_red[aux_idxs])
+							copy!(s2o, @view sp2_red[aux_idxs])
+							copy!(s1n,s1o); push!(s1n, sp1[j])
+							copy!(s2n,s2o); push!(s2n, sp2[j])
+
+							# println(typeof(s1n))
+							# resize!(s1n,length(s1o)+1)
+							# copy!(s1n,s1o)
+							# s1n[end] = sp1[j]
+							# resize!(s2n,length(s2o)+1)
+							# copy!(s2n,s1o)
+							# s2n[end] = sp2[j]
+							# copy!(s1n,s1o); push!(s1n, sp1[j])
+							# copy!(s2n,s2o); push!(s2n, sp2[j])
 							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
 							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
@@ -702,11 +716,13 @@ function MCMC_fit(;
 				# setup probability weights towards the sampling of rho_jt
 				# ph = zeros(nclus_iter[t]+1) 
 				ph .= 0.0
-				rho_tmp = copy(Si_iter[:,t])
+				# rho_tmp = copy(Si_iter[:,t])
+				copy!(rho_tmp, @view Si_iter[:,t])
 				# rho_tmp = Si_iter[:,t]
 
 				# compute nh_tmp (numerosities for each cluster label)
-				nh_tmp = copy(nh[:,t])
+				# nh_tmp = copy(nh[:,t])
+				copy!(nh_tmp, @view nh[:,t])
 				# nh_tmp = zeros(Int,nclus_iter[t]+1)
 				# for jj in setdiff(1:n,j)
 					# nh_tmp[rho_tmp[jj]] += 1
@@ -737,19 +753,24 @@ function MCMC_fit(;
 						nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 						# count is a bit slower but does not allocate
 
-						lpp = 0.0
-						# lPP .= 0.
+						# lpp = 0.0
+						lPP .= 0.
 						for kk in 1:nclus_temp
 							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
 							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
 							aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 							# aux_idxs = findall(rho_tmp .== kk) # fast
 							if sPPM
-								s1n = @view sp1[aux_idxs]
-								s2n = @view sp2[aux_idxs]
+								# s1n = @view sp1[aux_idxs]
+								# s2n = @view sp2[aux_idxs]
+
+								copy!(s1n, @view sp1[aux_idxs])
+								copy!(s2n, @view sp2[aux_idxs])
+
 								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
 								# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
+								spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
 							end
 							if cl_xPPM
 								# debug(@showd cv_idxs)
@@ -762,7 +783,8 @@ function MCMC_fit(;
 							end
 							# end # of the @timeit for sPPM
 							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-							lpp += log_Mdp + lgamma(nh_tmp[kk])
+							# lpp += log_Mdp + lgamma(nh_tmp[kk])
+							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
 
@@ -773,12 +795,14 @@ function MCMC_fit(;
 							ph[k] = loglikelihood(Normal(
 								muh_iter[k,t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t])),
-								Y[j,t]) + lpp
+								# Y[j,t]) + lpp
+								Y[j,t]) + lPP[1]
 						else
 							ph[k] = loglikelihood(Normal(
 								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
-								Y[j,t]) + lpp
+								# Y[j,t]) + lpp
+								Y[j,t]) + lPP[1]
 						end
 
 						# restore params after "rho_jt = k" simulation
@@ -817,17 +841,23 @@ function MCMC_fit(;
 					nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 					# count is a bit slower but does not allocate
 
-					lpp = 0.0
+					# lpp = 0.0
+					lPP .= 0.
 					for kk in 1:nclus_temp
 						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
 						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
 						aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 						# aux_idxs = findall(rho_tmp .== kk) # fast
 						if sPPM
-							s1n = @view sp1[aux_idxs]
-							s2n = @view sp2[aux_idxs]
+							# s1n = @view sp1[aux_idxs]
+							# s2n = @view sp2[aux_idxs]
+
+							copy!(s1n, @view sp1[aux_idxs])
+							copy!(s2n, @view sp2[aux_idxs])
 							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
+							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
 						end
 						if cl_xPPM
 							for p in 1:p_cl
@@ -837,7 +867,8 @@ function MCMC_fit(;
 						end
 						# end # of the @timeit for sPPM
 						# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-						lpp += log_Mdp + lgamma(nh_tmp[kk])
+						# lpp += log_Mdp + lgamma(nh_tmp[kk])
+						lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 					end
 					### debug case
@@ -847,12 +878,14 @@ function MCMC_fit(;
 						ph[k] = loglikelihood(Normal(
 							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw)),
-							Y[j,t]) + lpp
+							# Y[j,t]) + lpp
+							Y[j,t]) + lPP[1]
 					else
 						ph[k] = loglikelihood(Normal(
 							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
-							Y[j,t]) + lpp
+							# Y[j,t]) + lpp
+							Y[j,t]) + lPP[1]
 					end
 
 					# restore params after "rho_jt = k" simulation
@@ -933,8 +966,10 @@ function MCMC_fit(;
 				# now fix everything (morally permute params)
 				Si_iter[:,t] = Si_relab
 				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
-				muh_iter_copy = copy(muh_iter)
-				sig2h_iter_copy = copy(sig2h_iter)
+				# muh_iter_copy = copy(muh_iter)
+				copy!(muh_iter_copy, muh_iter) # copy!(dst,src)
+				# sig2h_iter_copy = copy(sig2h_iter)
+				copy!(sig2h_iter_copy, sig2h_iter) # copy!(dst,src)
 				len = findlast(x -> x != 0, nh_reorder)
 				for k in 1:nclus_iter[t]
 					muh_iter[k,t] = muh_iter_copy[old_lab[k],t]

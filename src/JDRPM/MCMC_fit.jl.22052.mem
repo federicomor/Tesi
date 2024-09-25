@@ -289,12 +289,11 @@
         - 
         - 
         - 	############# allocate auxiliary working variables #############
-      224 	aux_relab = zeros(Int64,n)
-      224 	rho1_relab = zeros(Int64,n)
-      224 	rho2_relab = zeros(Int64,n)
+      224 	aux1_relab = zeros(Int64,n)
+      224 	aux2_relab = zeros(Int64,n)
       224 	Si_relab = zeros(Int64,n)
-      224 	nh_reorder = zeros(Int,n)
-      224 	old_lab = zeros(Int,n)
+      224 	nh_reorder = zeros(Int64,n)
+      224 	old_lab = zeros(Int64,n)
       224 	nh_red = zeros(Int64,n)
       224 	nh_red1 = zeros(Int64,n)
       224 	lg_weights = zeros(n)
@@ -302,6 +301,15 @@
      5120 	muh_iter_copy = zeros(n,T_star)
      5120 	sig2h_iter_copy = ones(n,T_star)
         0 	log_Mdp = log(M_dp)
+       32 	lC = @MVector zeros(2)
+       16 	lPP = @MVector zeros(1)
+      224 	Si_red1 = zeros(Int64,n)
+      224 	s1n = zeros(n)
+      224 	s1o = zeros(n)
+      224 	s2n = zeros(n)
+      224 	s2o = zeros(n)
+      224 	nh_tmp = zeros(Int64,n)
+      224 	rho_tmp = zeros(Int64,n)
         - 
         - 
         - 	############# allocate and initialize working variables #############
@@ -309,7 +317,7 @@
         0 	Si_iter[:,end] .= 0
       672 	gamma_iter = zeros(Bool,n,T_star)
         - 	if !ismissing(initial_partition)
-        - 		relabel!(initial_partition,n,aux_relab)
+        - 		relabel!(initial_partition,n,aux1_relab)
         - 		Si_iter[:,1] = initial_partition
         - 		gamma_iter[:,1] .= 1
         - 	end
@@ -399,14 +407,6 @@
         - 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
         - 		# there is also the ProgressMeter option, maybe is cooler
         - 
-        - 		# debug("\n▶ iteration $i")
-        - 
-        - 		# pretty_log("Si_iter")
-        - 		# pretty_log("gamma_iter")
-        - 		# pretty_log("muh_iter")
-        - 		# pretty_log("sig2h_iter")
-        - 		# pretty_log("alpha_iter")
-        - 
         - 		############# sample the missing values #############
         - 		# from the "update rho" section onwards also the Y[j,t] will be needed (to compute weights, update laws, etc)
         - 		# so we need now to simulate the values for the data which are missing (from their full conditional)
@@ -468,8 +468,6 @@
         - 
         - 
         0 		for t in 1:T
-        - 			# debug("► time $t")
-        - 
         - 			############# update gamma #############
         - 			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
         0 			for j in 1:n
@@ -480,15 +478,18 @@
         - 					# we want to find ρ_t^{R_t(-j)} ...
         0 					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
         0 					Si_red = Si_iter[indexes, t]
-  1506320 					Si_red1 = copy(Si_red)
+        - 					# Si_red1 = copy(Si_red)
+        0 					copy!(Si_red1, Si_red)
         - 					# Si_red1 = Si_iter[indexes, t]
-  3162272 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
+        0 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
         - 
         - 					# get also the reduced spatial info if sPPM model
         - 					# @timeit to " sPPM 1 " begin # if logging uncomment this line, and the corresponding "end"
         0 					if sPPM
         0 						sp1_red = @view sp1[indexes]
         0 						sp2_red = @view sp2[indexes]
+        - 						# sp1_red = sp1[indexes]
+        - 						# sp2_red = sp2[indexes]
         - 					end
         - 					# debug(@showd sp1 sp2 sp1_red sp2_red)
         - 					# and the reduced covariates info if cl_xPPM model
@@ -504,8 +505,8 @@
         0 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
         0 					n_red1 = length(Si_red1)
         - 					# @assert n_red1 == n_red+1
-        0 					relabel!(Si_red,n_red,aux_relab)
-        0 					relabel!(Si_red1,n_red1,aux_relab)
+        0 					relabel!(Si_red,n_red,aux1_relab)
+        0 					relabel!(Si_red1,n_red1,aux1_relab)
         0 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red) # = number of clusters
         0 					nclus_red1 = maximum(Si_red1)
         - 
@@ -527,7 +528,8 @@
         - 					# start computing weights
         - 					# lg_weights = zeros(nclus_red+1)
         0 					lg_weights .= 0
-        - 					lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
+        - 					# lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
+        - 					# lC = @MVector zeros(2)
         - 					lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
         - 
         - 					# unit j can enter an existing cluster...
@@ -551,22 +553,37 @@
         - 
         - 							# "forse qui qualcosa da poter fare dovrebbe esserci" con le views?
         - 							# o forse no per via della push, che modificherebbe la view
-        0 							s1o = sp1_red[aux_idxs]
-        0 							s2o = sp2_red[aux_idxs]
-  4991872 							s1n = copy(s1o); push!(s1n, sp1[j])
-  4991872 							s2n = copy(s2o); push!(s2n, sp2[j])
-        - 							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, lg=true, M=M_dp, S=S)
-        - 							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-   506240 							lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
-   506272 							lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+        - 							# s1o = @view sp1_red[aux_idxs]
+        - 							# s2o = @view sp2_red[aux_idxs]
+        - 							# s1n = copy(s1o); push!(s1n, sp1[j])
+        - 							# s2n = copy(s2o); push!(s2n, sp2[j])
+        - 
+        0 							copy!(s1o,sp1_red[aux_idxs])
+        0 							copy!(s2o,sp2_red[aux_idxs])
+        0 							copy!(s1n,s1o); push!(s1n, sp1[j])
+        0 							copy!(s2n,s2o); push!(s2n, sp2[j])
+        - 
+        - 							# println(typeof(s1n))
+        - 							# resize!(s1n,length(s1o)+1)
+        - 							# copy!(s1n,s1o)
+        - 							# s1n[end] = sp1[j]
+        - 							# resize!(s2n,length(s2o)+1)
+        - 							# copy!(s2n,s1o)
+        - 							# s2n[end] = sp2[j]
+        - 							# copy!(s1n,s1o); push!(s1n, sp1[j])
+        - 							# copy!(s2n,s2o); push!(s2n, sp2[j])
+        - 							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
+        - 							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+   506240 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
+   506240 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,2,false,lC)
         - 						end
         - 						# debug(@showd lCn lCo)
         - 						# debug(@showd cl_xPPM)
         - 
         - 						# Xcl_covariates is a n*p*T matrix
-        0 						if cl_xPPM
+        - 						if cl_xPPM
         - 							for p in 1:p_cl
-        - 								Xo = Xcl_covariates_red[aux_idxs,p]
+        - 								Xo = @view Xcl_covariates_red[aux_idxs,p]
         - 								Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
         - 								lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
         - 								lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
@@ -575,33 +592,37 @@
         - 						# end # of the @timeit for sPPM
         - 						# debug(@showd lCn lCo lSn lSo)
         - 						# printlgln("\n")
-        0 						lg_weights[k] = log(nh_red[k]) + lCn - lCo + lSn - lSo
+        - 						# lg_weights[k] = log(nh_red[k]) + lCn - lCo + lSn - lSo
+        0 						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
         0 					end
         - 					
         - 					# ... or unit j can create a singleton
-        - 					lCn = 0.0
+        - 					# lCn = 0.0
         - 					lSn = 0.0 
         - 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
         0 					if sPPM
         - 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
-  1856000 						lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S)
+        - 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S)
+  1855968 						spatial_cohesion!(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S,2,false,lC)
         - 						# lCn = spatial_cohesion(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, lg=true, M=M_dp, S=S)
         - 					end
-        0 					if cl_xPPM
+        - 					if cl_xPPM
         - 						for p in 1:p_cl
         - 							lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
         - 						end
         - 					end
         - 					# end # of the @timeit for sPPM
         - 					# lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
-        0 					lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
+        - 					# lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
+        0 					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
         - 
         - 					# printlgln("before exp and normalization:")
         - 					# debug(@showd lg_weights)
         - 
         - 					# now use the weights towards sampling the new gamma_jt
         - 					# max_ph = maximum(lg_weights)
-   929568 					max_ph = maximum(lg_weights[1:(nclus_red+1)])
+        0 					max_ph = maximum(@view lg_weights[1:(nclus_red+1)])
+        - 					# max_ph = maximum(lg_weights[1:(nclus_red+1)])
         - 
         - 					sum_ph = 0.0
         - 
@@ -642,7 +663,7 @@
         0 						Si_comp2 = @view Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
         - 
         - 						# rho_comp = compatibility(Si_comp1, Si_comp2)
-        0 						rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
+        0 						rho_comp = compatibility(Si_comp1, Si_comp2,aux1_relab,aux2_relab)
         0 						if rho_comp == 0
         - 							probh = 0.0
         - 						end
@@ -706,11 +727,13 @@
         - 				# setup probability weights towards the sampling of rho_jt
         - 				# ph = zeros(nclus_iter[t]+1) 
         0 				ph .= 0.0
-  2923200 				rho_tmp = copy(Si_iter[:,t])
+        - 				# rho_tmp = copy(Si_iter[:,t])
+  1461600 				copy!(rho_tmp,Si_iter[:,t])
         - 				# rho_tmp = Si_iter[:,t]
         - 
         - 				# compute nh_tmp (numerosities for each cluster label)
-  2923200 				nh_tmp = copy(nh[:,t])
+        - 				# nh_tmp = copy(nh[:,t])
+  1461600 				copy!(nh_tmp,nh[:,t])
         - 				# nh_tmp = zeros(Int,nclus_iter[t]+1)
         - 				# for jj in setdiff(1:n,j)
         - 					# nh_tmp[rho_tmp[jj]] += 1
@@ -727,7 +750,7 @@
         0 					Si_comp1 = @view rho_tmp[indexes]
         0 					Si_comp2 = @view Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
         - 					# rho_comp = compatibility(Si_comp1, Si_comp2)
-        0 					rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
+        0 					rho_comp = compatibility(Si_comp1, Si_comp2,aux1_relab,aux2_relab)
         - 					# printlgln("Assigning to cluster k=$k :")
         - 					# pretty_log("gamma_iter"); # pretty_log("Si_iter")
         - 					# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
@@ -741,19 +764,26 @@
         0 						nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
         - 						# count is a bit slower but does not allocate
         - 
-        - 						lpp = 0.0
+        - 						# lpp = 0.0
+        0 						lPP .= 0.
         0 						for kk in 1:nclus_temp
         - 							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
         - 							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
         0 							aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
         - 							# aux_idxs = findall(rho_tmp .== kk) # fast
         0 							if sPPM
-        0 								s1n = @view sp1[aux_idxs]
-        0 								s2n = @view sp2[aux_idxs]
+        - 								# s1n = @view sp1[aux_idxs]
+        - 								# s2n = @view sp2[aux_idxs]
+        - 
+        0 								copy!(s1n,sp1[aux_idxs])
+        0 								copy!(s2n,sp2[aux_idxs])
+        - 
         - 								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-  2209152 								lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+        - 								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+        - 								# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
+   552288 								spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
         - 							end
-        0 							if cl_xPPM
+        - 							if cl_xPPM
         - 								# debug(@showd cv_idxs)
         - 								for p in 1:p_cl
         - 									# debug(@showd p)
@@ -764,7 +794,8 @@
         - 							end
         - 							# end # of the @timeit for sPPM
         - 							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-        0 							lpp += log_Mdp + lgamma(nh_tmp[kk])
+        - 							# lpp += log_Mdp + lgamma(nh_tmp[kk])
+        0 							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
         - 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
         0 						end
         - 
@@ -775,12 +806,14 @@
         0 							ph[k] = loglikelihood(Normal(
         - 								muh_iter[k,t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
         - 								sqrt(sig2h_iter[k,t])),
-        - 								Y[j,t]) + lpp
+        - 								# Y[j,t]) + lpp
+        - 								Y[j,t]) + lPP[1]
         - 						else
         0 							ph[k] = loglikelihood(Normal(
         - 								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
         - 								sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
-        - 								Y[j,t]) + lpp
+        - 								# Y[j,t]) + lpp
+        - 								Y[j,t]) + lPP[1]
         - 						end
         - 
         - 						# restore params after "rho_jt = k" simulation
@@ -801,7 +834,7 @@
         0 				Si_comp1 = @view rho_tmp[indexes]
         0 				Si_comp2 = @view Si_iter[indexes,t+1]
         - 				# rho_comp = compatibility(Si_comp1, Si_comp2)
-        0 				rho_comp = compatibility(Si_comp1, Si_comp2,rho1_relab,rho2_relab)
+        0 				rho_comp = compatibility(Si_comp1, Si_comp2,aux1_relab,aux2_relab)
         - 				# printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
         - 				# pretty_log("gamma_iter"); # pretty_log("Si_iter")
         - 				# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
@@ -819,19 +852,25 @@
         0 					nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
         - 					# count is a bit slower but does not allocate
         - 
-        - 					lpp = 0.0
+        - 					# lpp = 0.0
+        0 					lPP .= 0.
         0 					for kk in 1:nclus_temp
         - 						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
         - 						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
         0 						aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
         - 						# aux_idxs = findall(rho_tmp .== kk) # fast
         0 						if sPPM
-        0 							s1n = @view sp1[aux_idxs]
-        0 							s2n = @view sp2[aux_idxs]
+        - 							# s1n = @view sp1[aux_idxs]
+        - 							# s2n = @view sp2[aux_idxs]
+        - 
+        0 							copy!(s1n,sp1[aux_idxs])
+        0 							copy!(s2n,sp2[aux_idxs])
         - 							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-  1307008 							lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+        - 							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+        - 							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
+   326752 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
         - 						end
-        0 						if cl_xPPM
+        - 						if cl_xPPM
         - 							for p in 1:p_cl
         - 								Xn = @view Xcl_covariates[aux_idxs,p,t]
         - 								lpp += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
@@ -839,7 +878,8 @@
         - 						end
         - 						# end # of the @timeit for sPPM
         - 						# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-        0 						lpp += log_Mdp + lgamma(nh_tmp[kk])
+        - 						# lpp += log_Mdp + lgamma(nh_tmp[kk])
+        0 						lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
         - 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
         0 					end
         - 					### debug case
@@ -849,12 +889,14 @@
         0 						ph[k] = loglikelihood(Normal(
         - 							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
         - 							sqrt(sig2h_draw)),
-        - 							Y[j,t]) + lpp
+        - 							# Y[j,t]) + lpp
+        - 							Y[j,t]) + lPP[1]
         - 					else
         0 						ph[k] = loglikelihood(Normal(
         - 							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
         - 							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
-        - 							Y[j,t]) + lpp
+        - 							# Y[j,t]) + lpp
+        - 							Y[j,t]) + lPP[1]
         - 					end
         - 
         - 					# restore params after "rho_jt = k" simulation
@@ -865,7 +907,8 @@
         - 				# debug(@showd ph)
         - 				# now exponentiate the weights...
         - 				# max_ph = maximum(ph)
-   533776 				max_ph = maximum(ph[1:(nclus_iter[t]+1)])
+        0 				max_ph = maximum(@view ph[1:(nclus_iter[t]+1)])
+        - 				# max_ph = maximum(ph[1:(nclus_iter[t]+1)])
         - 				sum_ph = 0.0
         0 				for k in 1:(nclus_iter[t]+1)
         - 					# for numerical purposes we subract max_ph
@@ -934,8 +977,10 @@
         - 				# now fix everything (morally permute params)
         0 				Si_iter[:,t] = Si_relab
         - 				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
- 33408000 				muh_iter_copy = copy(muh_iter)
- 33408000 				sig2h_iter_copy = copy(sig2h_iter)
+        - 				# muh_iter_copy = copy(muh_iter)
+        0 				copy!(muh_iter_copy, muh_iter) # copy!(dst,src)
+        - 				# sig2h_iter_copy = copy(sig2h_iter)
+        0 				copy!(sig2h_iter_copy, sig2h_iter) # copy!(dst,src)
         0 				len = findlast(x -> x != 0, nh_reorder)
         0 				for k in 1:nclus_iter[t]
         0 					muh_iter[k,t] = muh_iter_copy[old_lab[k],t]
@@ -1159,7 +1204,7 @@
         0 		if update_alpha
         0 			if time_specific_alpha==false && unit_specific_alpha==false
         - 				# a scalar
-        0 				sumg = sum(gamma_iter[:,1:T])
+        0 				sumg = sum(@view gamma_iter[:,1:T])
         0 				a_star = alpha_priors[1] + sumg
         0 				b_star = alpha_priors[2] + n*T - sumg
         0 				alpha_iter = rand(Beta(a_star, b_star))
@@ -1167,7 +1212,7 @@
         0 			elseif time_specific_alpha==true && unit_specific_alpha==false
         - 				# a vector in time
         0 				for t in 1:T
-    48000 					sumg = sum(gamma_iter[:,t])
+        0 					sumg = sum(@view gamma_iter[:,t])
         0 					a_star = alpha_priors[1] + sumg
         0 					b_star = alpha_priors[2] + n - sumg
         0 					alpha_iter[t] = rand(Beta(a_star, b_star))
@@ -1176,7 +1221,7 @@
         0 			elseif time_specific_alpha==false && unit_specific_alpha==true
         - 				# a vector in units
         0 				for j in 1:n
-        0 					sumg = sum(gamma_iter[j,1:T])
+        0 					sumg = sum(@view gamma_iter[j,1:T])
         0 					a_star = alpha_priors[1,j] + sumg
         0 					b_star = alpha_priors[2,j] + T - sumg
         0 					alpha_iter[j] = rand(Beta(a_star, b_star))
@@ -1327,7 +1372,7 @@
         - 
         0 	end # for i in 1:draws
         - 
-       16 	println("\ndone!")
+       16 	println("done!")
        64 	t_end = now()
        80 	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
         - 

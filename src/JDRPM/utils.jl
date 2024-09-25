@@ -197,6 +197,37 @@ function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alp
 	end
 	return lg ? out : exp(out)
 end
+function cohesion1!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+	sdim = length(s1)
+	if sdim==1 
+		return lg ? log(M) : M
+	end
+	# out = log(M) + lgamma(sdim)
+	out = 0.0
+
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances (the D_h in the paper)
+	sum_dist = 0.0
+	for i in 1:sdim
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
+
+	# decide what to return
+	if sum_dist >= 1
+		out -= lgamma(alpha*sum_dist) # minus since we are at the denominator
+	elseif sum_dist != 0
+		out -= log(sum_dist) # minus since we are at the denominator
+	else
+		out = log(1)
+	end
+	if add
+		lC[case] += lg ? out : exp(out)
+	else
+		lC[case] = lg ? out : exp(out)
+	end
+end
 
 # paper 3 section 3.1
 function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real, lg::Bool, M::Real=1.0)::Float64
@@ -212,6 +243,24 @@ function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::
 		end
 	end
 	return lg ? log(out) : out
+end
+function cohesion2!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+	sdim = length(s1)
+	# out = log(M) + lgamma(sdim)
+	out = 1.0
+	for i in 1:sdim
+		for j in 1:sdim
+			dist = sqrt((s1[i] - s1[j])^2 + (s2[i] - s2[j])^2)
+			if dist > a
+				return lg ? log(0.0) : 0.0 # in this case the rest vanishes
+			end
+		end
+	end
+	if add
+		lC[case] += lg ? log(out) : out
+	else
+		lC[case] = lg ? log(out) : out
+	end
 end
 
 function G2a(a::Real, lg::Bool)
@@ -322,7 +371,6 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	vn = v0 + sdim
 
 	sbar = SVector((sbar1, sbar2))
-	 # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
 	auxvec1 = sbar .- mu_0
 	auxmat1 = auxvec1 * auxvec1'
 
@@ -355,7 +403,6 @@ function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu
 	vn = v0 + sdim
 
 	sbar = SVector((sbar1, sbar2))
-	 # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
 	auxvec1 = sbar .- mu_0
 	auxmat1 = auxvec1 * auxvec1'
 
@@ -364,7 +411,6 @@ function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu
 	Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
 	
 	out = -sdim * logpi + G2a(0.5 * vn, true) - G2a(0.5 * v0, true) + 0.5 * v0 * logdet(Psi) - 0.5 * vn * logdet(Psi_n) + log(k0) - log(kn)
-
 	if add
 		lC[case] += lg ? out : exp(out)
 	else
@@ -459,7 +505,6 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	vn = v0 + sdim
 
 	sbar = SVector((sbar1, sbar2))
-	 # (You could probably also stack s1 and s2 into a matrix, and use row/columnwise mean to get sbar directly.)
 	auxvec1 = sbar .- mu_0
 	auxmat1 = auxvec1 * auxvec1'
 
@@ -482,6 +527,53 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 	return lg ? out : exp(out)
 end
+function cohesion4!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool, M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+	sdim = length(s1)
+	# Compute sample means
+	sbar1 = mean(s1)
+	sbar2 = mean(s2)
+	# Compute deviations from the sample mean
+	S .= 0.
+	@inbounds for i in 1:sdim
+		s_sbar1 = s1[i] - sbar1
+		s_sbar2 = s2[i] - sbar2
+
+		S[1, 1] += s_sbar1 * s_sbar1
+		S[2, 2] += s_sbar2 * s_sbar2
+		S[2, 1] += s_sbar1 * s_sbar2
+	end
+	S[1, 2] = S[2, 1] # to avoid repeating computations
+	# Updated parameters for cohesion 3
+	kn = k0 + sdim
+	vn = v0 + sdim
+
+	sbar = SVector((sbar1, sbar2))
+	auxvec1 = sbar .- mu_0
+	auxmat1 = auxvec1 * auxvec1'
+
+	auxconst1 = k0 * sdim
+	auxconst2 = k0 + sdim
+	Psi_n = Psi .+ S .+ auxconst1 / (auxconst2) .* auxmat1
+
+	# Updated parameters for cohesion 4
+	knn = kn + sdim
+	vnn = vn + sdim
+
+	mu_n = (k0 * mu_0 + sdim * sbar) / (auxconst2)
+	sbar_mun = sbar - mu_n
+	auxmat2 = sbar_mun * sbar_mun' 
+
+	auxconst3 = kn * sdim
+	auxconst4 = kn + sdim
+	Psi_nn = Psi_n .+ S .+ auxconst3 / (auxconst4) .* auxmat2
+
+	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
+	if add
+		lC[case] += lg ? out : exp(out)
+	else
+		lC[case] = lg ? out : exp(out)
+	end
+end
 
 # paper 6 pag 4, cluster variance/entropy similarity function
 function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0)::Float64
@@ -497,6 +589,24 @@ function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi
 		
 	out = -phi*sum_dist
 	return lg ? out : exp(out)
+end
+function cohesion5!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+	sdim = length(s1)
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances
+	sum_dist = 0.0
+	for i in 1:sdim
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
+		
+	out = -phi*sum_dist
+	if add
+		lC[case] += lg ? out : exp(out)
+	else
+		lC[case] = lg ? out : exp(out)
+	end
 end
 
 # non trovata su nessun paper
@@ -516,6 +626,27 @@ function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi
 	
 	out = -phi*log(sum_dist)
 	return lg ? out : exp(out)
+end
+function cohesion6!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+	sdim = length(s1)
+	if sdim==1
+		return lg ? 0.0 : 1.0
+	end
+	# compute the centroids
+	cent1 = mean(s1)
+	cent2 = mean(s2)
+	# compute the sum of the distances
+	sum_dist = 0.0
+	for i in 1:sdim 
+		sum_dist += sqrt((s1[i] - cent1)^2 + (s2[i] - cent2)^2)
+	end
+	
+	out = -phi*log(sum_dist)
+	if add
+		lC[case] += lg ? out : exp(out)
+	else
+		lC[case] = lg ? out : exp(out)
+	end
 end
 
 # n = 20
@@ -554,17 +685,13 @@ function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVe
 end
 
 function spatial_cohesion!(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
-	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg,M) 
-	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg,M) 
-	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	idx==3.0 && cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC) 
-	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg,M) 
-	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg,M) 
+	if idx==1.0 cohesion1!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==2.0 cohesion2!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==3.0 cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
+	if idx==4.0 cohesion4!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
+	if idx==5.0 cohesion5!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==6.0 cohesion6!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 end
-
 
 
 ############################################
