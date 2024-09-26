@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Cthulhu = "f68482b8-f384-11e8-15f7-abe071a5a75f"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"

@@ -1,5 +1,6 @@
 using ProfileCanvas
 # using JET
+using Cthulhu
 
 begin
 using Random
@@ -29,8 +30,9 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-# niter = 1000. # real for these tests
-niter = 20. # for tracking allocs
+# niter = 5000. # profile canvas
+niter = 1000. # real for these tests
+# niter = 20. # for tracking allocs
 burnin = 0.
 thin = 1.
 seed = 123.0
@@ -64,11 +66,13 @@ full collections:   1
 
 # ProfileCanvas.@profview MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
+# @profview_allocs MCMC_fit(
 # @code_warntype MCMC_fit(
 # @report_opt MCMC_fit(
-# @timev MCMC_fit(
+@timev MCMC_fit(
 # @profview_allocs out = MCMC_fit(
-out = MCMC_fit(
+# @descend MCMC_fit(
+# out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
 	M_dp = 1.0,                     
@@ -107,48 +111,6 @@ out = MCMC_fit(
 	logging = false,
 	seed = seed
 );
-out = MCMC_fit(
-	Y=y,              
-	sp_coords = sp,
-	M_dp = 1.0,                     
-	initial_partition = missing,
-	Xlk_covariates = missing,
-	Xcl_covariates = missing,
-	starting_alpha = 0.5,         
-	unit_specific_alpha = false,       
-	time_specific_alpha = time_specific_alpha,     
-
-	update_alpha = true,             
-	include_eta1 = true,                    
-	include_phi1 = true,
-	update_eta1 = update_eta1,                    
-	update_phi1 = update_phi1,
-
-	sig2h_priors = [a_sigma,b_sigma],
-	eta1_priors = [eta1_scale,sig_mh_eta1^2],
-	# beta_priors = c(rep(1,p),2),
-	beta_priors = missing,
-	tau2_priors = [a_tau,b_tau],
-	phi0_priors = [m0_phi0,s20_phi0],
-	phi1_priors = sig_mh_phi1^2,
-	lambda2_priors = [a_lambda,b_lambda],
-	alpha_priors = [a_alpha,b_alpha],
-	
-	spatial_cohesion_idx = spatial_cohesion_idx,
-	sp_params = [[mu0,mu0],k0,v0,[L0 0.0; 0.0 L0]],
-	# spatial_cohesion_idx = 1,
-	# sp_params = [0.5],
-	
-	# covariate_similarity_idx = NA,  
-	draws = niter,                    
-	burnin = burnin,                   
-	thin = thin,                     
-	logging = false,
-	seed = seed
-);
-
-
-
 
 
 

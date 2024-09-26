@@ -381,17 +381,6 @@
       304 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
         - 
         - 
-        - 	# ############# even more preallocations (?) #############
-        - 	# j_label = 0
-        - 	# n_red = 0
-        - 	# n_red1 = 0
-        - 	# nclus_red = 0
-        - 	# nclus_red1 = 0
-        - 	# lCo = 0.0; lCn = 0.0
-        - 	# lSo = 0.0; lSn = 0.0
-        - 	# lpp = 0.0
-        - 	# new_label = 0
-        - 
         - 	############# start MCMC algorithm #############
        16 	println("Starting MCMC algorithm")
         - 
@@ -558,10 +547,14 @@
         - 							# s1n = copy(s1o); push!(s1n, sp1[j])
         - 							# s2n = copy(s2o); push!(s2n, sp2[j])
         - 
-        0 							copy!(s1o,sp1_red[aux_idxs])
-        0 							copy!(s2o,sp2_red[aux_idxs])
-        0 							copy!(s1n,s1o); push!(s1n, sp1[j])
-        0 							copy!(s2n,s2o); push!(s2n, sp2[j])
+        - 							# copy!(s1o, sp1_red[aux_idxs])
+        - 							# copy!(s2o, sp2_red[aux_idxs])
+  1747440 							s1o = @view sp1_red[aux_idxs]
+  1747440 							s2o = @view sp2_red[aux_idxs]
+        - 							# copy!(s1n,s1o); push!(s1n, sp1[j])
+        - 							# copy!(s2n,s2o); push!(s2n, sp2[j])
+        0 							copy!(s1n,sp1_red[aux_idxs]); push!(s1n, sp1[j])
+        0 							copy!(s2n,sp2_red[aux_idxs]); push!(s2n, sp2[j])
         - 
         - 							# println(typeof(s1n))
         - 							# resize!(s1n,length(s1o)+1)
@@ -574,7 +567,7 @@
         - 							# copy!(s2n,s2o); push!(s2n, sp2[j])
         - 							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
         - 							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
-   506240 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
+  2024960 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
    506240 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,2,false,lC)
         - 						end
         - 						# debug(@showd lCn lCo)
@@ -728,12 +721,12 @@
         - 				# ph = zeros(nclus_iter[t]+1) 
         0 				ph .= 0.0
         - 				# rho_tmp = copy(Si_iter[:,t])
-  1461600 				copy!(rho_tmp,Si_iter[:,t])
+        0 				copy!(rho_tmp, @view Si_iter[:,t])
         - 				# rho_tmp = Si_iter[:,t]
         - 
         - 				# compute nh_tmp (numerosities for each cluster label)
         - 				# nh_tmp = copy(nh[:,t])
-  1461600 				copy!(nh_tmp,nh[:,t])
+        0 				copy!(nh_tmp, @view nh[:,t])
         - 				# nh_tmp = zeros(Int,nclus_iter[t]+1)
         - 				# for jj in setdiff(1:n,j)
         - 					# nh_tmp[rho_tmp[jj]] += 1
@@ -775,8 +768,8 @@
         - 								# s1n = @view sp1[aux_idxs]
         - 								# s2n = @view sp2[aux_idxs]
         - 
-        0 								copy!(s1n,sp1[aux_idxs])
-        0 								copy!(s2n,sp2[aux_idxs])
+        0 								copy!(s1n, @view sp1[aux_idxs])
+        0 								copy!(s2n, @view sp2[aux_idxs])
         - 
         - 								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
         - 								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
@@ -863,8 +856,8 @@
         - 							# s1n = @view sp1[aux_idxs]
         - 							# s2n = @view sp2[aux_idxs]
         - 
-        0 							copy!(s1n,sp1[aux_idxs])
-        0 							copy!(s2n,sp2[aux_idxs])
+        0 							copy!(s1n, @view sp1[aux_idxs])
+        0 							copy!(s2n, @view sp2[aux_idxs])
         - 							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
         - 							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
         - 							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
@@ -1372,7 +1365,7 @@
         - 
         0 	end # for i in 1:draws
         - 
-       16 	println("done!")
+       16 	println("\ndone!")
        64 	t_end = now()
        80 	println("Elapsed time: ", Dates.canonicalize(Dates.CompoundPeriod(t_end-t_start)))
         - 
@@ -1408,7 +1401,7 @@
         - 	
        16 	if update_eta1 @printf "acceptance ratio eta1: %.2f%%\n" acceptance_ratio_eta1/(n*draws) *100 end
        16 	if update_phi1 @printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100 end
-       32 	println()
+      336 	println()
         - 
         0 	if logging
         - 		# debug(@showd to)

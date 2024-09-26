@@ -673,24 +673,24 @@ end
 # @report_opt cohesion6(s1,s2,phi,lg=false)
 
 
-function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
-	idx==1.0 && return cohesion1(s1,s2,sp_params[1],lg,M) 
-	idx==2.0 && return cohesion2(s1,s2,sp_params[1],lg,M) 
-	# idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	idx==3.0 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	# idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
-	idx==4.0 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	idx==5.0 && return cohesion5(s1,s2,sp_params[1],lg,M) 
-	idx==6.0 && return cohesion6(s1,s2,sp_params[1],lg,M) 
+function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
+	idx==1 && return cohesion1(s1,s2,sp_params[1],lg,M) 
+	idx==2 && return cohesion2(s1,s2,sp_params[1],lg,M) 
+	# idx==3 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
+	idx==3 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
+	# idx==4 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
+	idx==4 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
+	idx==5 && return cohesion5(s1,s2,sp_params[1],lg,M) 
+	idx==6 && return cohesion6(s1,s2,sp_params[1],lg,M) 
 end
 
-function spatial_cohesion!(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
-	if idx==1.0 cohesion1!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
-	if idx==2.0 cohesion2!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
-	if idx==3.0 cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
-	if idx==4.0 cohesion4!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
-	if idx==5.0 cohesion5!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
-	if idx==6.0 cohesion6!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+	if idx==1 cohesion1!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==2 cohesion2!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==3 cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
+	if idx==4 cohesion4!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
+	if idx==5 cohesion5!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
+	if idx==6 cohesion6!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 end
 
 

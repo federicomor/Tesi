@@ -379,7 +379,7 @@ function MCMC_fit(;
 	# dimension n since at most there are n clusters (all singletons)
 	nh[1,:] .= n
 	nclus_iter = ones(Int,T_star) # how many clusters there are at time t
-	
+
 
 	############# start MCMC algorithm #############
 	println("Starting MCMC algorithm")
@@ -547,10 +547,14 @@ function MCMC_fit(;
 							# s1n = copy(s1o); push!(s1n, sp1[j])
 							# s2n = copy(s2o); push!(s2n, sp2[j])
 
-							copy!(s1o, @view sp1_red[aux_idxs])
-							copy!(s2o, @view sp2_red[aux_idxs])
+							copy!(s1o, sp1_red[aux_idxs])
+							copy!(s2o, sp2_red[aux_idxs])
+							# s1o_v = @view sp1_red[aux_idxs]
+							# s2o_v = @view sp2_red[aux_idxs]
 							copy!(s1n,s1o); push!(s1n, sp1[j])
 							copy!(s2n,s2o); push!(s2n, sp2[j])
+							# copy!(s1n,sp1_red[aux_idxs]); push!(s1n, sp1[j])
+							# copy!(s2n,sp2_red[aux_idxs]); push!(s2n, sp2[j])
 
 							# println(typeof(s1n))
 							# resize!(s1n,length(s1o)+1)
@@ -563,6 +567,7 @@ function MCMC_fit(;
 							# copy!(s2n,s2o); push!(s2n, sp2[j])
 							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
 							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
+							# spatial_cohesion!(spatial_cohesion_idx, s1o_v, s2o_v, sp_params_real, true, M_dp, S,1,false,lC)
 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,2,false,lC)
 						end

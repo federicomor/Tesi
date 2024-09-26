@@ -980,6 +980,13 @@ na_summary(df_wsc)
 ```
 
 
+```{r}
+setwd("../src/")
+# source("include.R") # 
+source("plot functions/plotter.R")
+```
+
+
 ## real PM10 data
 ```{r}
 sites = std_sites = data.frame(
@@ -998,7 +1005,7 @@ for(st in stations){
 rownames(yfull) = NULL
 colnames(yfull)<- c("id",paste0("w", 1:53))
 
-time_span = 1:10 # low time span for quick testing, real one will be 1:53
+time_span = 1:53 # low time span for quick testing, real one will be 1:53
 
 set.seed(2)
 # set.seed(2345)
@@ -1028,13 +1035,21 @@ smn <- apply(sites,2,mean)
 ssd <- apply(sites,2,sd)
 s_std <- t((t(sites) - smn)/ssd)
 ########################################
+mean(s_std[,1])
+mean(s_std[,2])
+var(s_std[,2])
+var(s_std[,1])
+########################################
 
+par(mar=c(2,2,2,1))
 yred=y[,time_span]
-par(mar=c(4,4,2,2))
+# par(mar=c(4,4,2,2))
 cols = colora(size(yred)[1],56,0)
 for(i in 1:size(yred)[1]){
    if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yred),
+     	 type='l',xlab='weeks',ylab='pm10')
  	  } 
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
@@ -1047,6 +1062,34 @@ plot(s_std)
 rownames(s_std) = NULL
 ```
 
+```{r}
+cols = colora(105,56,show=F)
+chosen_variable_name = "AQ_pm10"
+trendYearStation_week <- function(file_name){
+	data_from_to = df_wsc
+	len_time = 53
+	chosen_variable = (data_from_to[,chosen_variable_name])
+	# Crea il grafico ggplot
+	station_trend <- ggplot(data_from_to,aes(x = week, 
+												 y = AQ_pm10,
+												 group=IDStations, 
+												 color = as.factor(IDStations))) +
+		geom_line(show.legend = FALSE) +
+		labs(x = "Stations", y = chosen_variable_name,
+			 # title = bquote(PM[10] * " values - year 2018")) +
+			 title = "PM10 values - year 2018") +
+		ylim(range(na.omit(chosen_variable))) +
+		scale_color_manual(values = cols) +
+		theme_bw()+
+		theme(panel.grid = element_blank()) +
+		guides(color = guide_legend())+
+		labs(x="",y="")
+
+	len_time = (len_time%/%5)
+	return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
+}
+trendYearStation_week("None")
+```
 
 
 ## Fits
@@ -1095,7 +1138,7 @@ a_alpha = 2; b_alpha = 2
 time_specific_alpha = TRUE
 
 # now space
-spatial_cohesion = 3
+spatial_cohesion = as.integer(3)
 mu0 = 0 
 k0 = 1
 v0 = 5
@@ -1205,8 +1248,8 @@ out = module_JDRPM$MCMC_fit(
 	# cv_params = list(0,1,2,2),
 	# Xcl_covariates = X_cl,
 
-	draws = niter, burnin = nburn, thin = nthin,
-	# draws = 5, burnin = 0, thin = 1,
+	# draws = niter, burnin = nburn, thin = nthin,
+	draws = 100, burnin = 0, thin = 1,
 	logging = FALSE,
 	seed = 123.0
 )
@@ -1497,22 +1540,6 @@ plot_partition_with_numbers = function(partition,title){
 	}
 }
 
-plot_partition_with_chars = function(partition,title){
-	pchs = letters[1:length(partition[[1]])]
-	partition_matrix <- do.call(cbind, partition)
-	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
-	     xlab = "time", ylab = "units",
-	     xaxt = "n", yaxt = "n", main = title)
-	axis(1, at = 1:Tm, labels = 1:Tm)
-	for (t in 1:Tm) {
-	  for (unit in 1:N) {
-	    text(x = t, y = unit, 
-	    	 # labels = as.character(unit),
-	    	 labels = pchs[unit],
-	         col = partition_matrix[unit, t], cex = 1.2)
-	  }
-	}
-}
 
 plot_ARI = function(partition,title){
 	LEN = Tm
@@ -1566,12 +1593,10 @@ plot_ARI = function(partition,title){
 ```{r,warning=F}
 parts = generate_partition(rout)
 plot_partition_with_numbers(parts,title="model J")
-plot_partition_with_chars(parts,title="model J")
 plot_ARI(parts,title="model J")
 
 parts = generate_partition(drpm1)
 plot_partition_with_numbers(parts,title="model C")
-plot_partition_with_chars(parts,title="model C")
 plot_ARI(parts,title="model C")
 ```
 
@@ -1586,13 +1611,13 @@ partitions_drpmj <- generate_partition(rout,maxncl = 0)
 save_plots=F
 
 # partition_matrix <- do.call(cbind, partitions)
-if (save_plots==T){
-	pdf(file="partizioni_chars.pdf",width=10,height = 5)
-}
-par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
-plot_partition_with_chars(partitions_drpmc, title="model C")
-plot_partition_with_chars(partitions_drpmj, title="model J")
-if (save_plots==T){ dev.off()}
+# if (save_plots==T){
+# 	pdf(file="partizioni_chars.pdf",width=10,height = 5)
+# }
+# par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+# plot_partition_with_chars(partitions_drpmc, title="model C")
+# plot_partition_with_chars(partitions_drpmj, title="model J")
+# if (save_plots==T){ dev.off()}
 
 if (save_plots==T){
 	pdf(file="partizioni_nums.pdf",width=10,height = 5)
@@ -1729,10 +1754,10 @@ for(i in 1:size(yred)[1]){
 # for(i in 1:N){
 # 	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
 # }
-legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
-	   lty = 1,lwd=2,
-	   cex=0.8, bty="n",
-	   ncol=5)
+# legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
+# 	   lty = 1,lwd=2,
+# 	   cex=0.8, bty="n",
+# 	   ncol=5)
 if (save_plots==TRUE) { dev.off()}
 ```
 
