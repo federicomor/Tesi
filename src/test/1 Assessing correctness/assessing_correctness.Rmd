@@ -59,9 +59,9 @@ source("../Supplementary material/Functions.R")
 N <- 10; Tm<-12; M<-1;
 alpha = 0.9
 
-# N <- 10; Tm<-12; M<-1;
+# N <- 20; Tm<-20; M<-1;
 # set.seed(345233)
-# alpha = 0.9
+# alpha = 0.8
 
 ndata <- 100
 dat <- rtpartition1(N=N,M=M,rho=alpha,ntime=Tm,tau=5,sig=1,
@@ -112,7 +112,8 @@ y_with_na
 # niter=40000; nburn=28000; nthin=12
 # niter=50000; nburn=30000; nthin=20
 # niter=30000; nburn=20000; nthin=10
-niter=10000; nburn=2000; nthin=8
+niter=10000; nburn=5000; nthin=5
+# niter=20000; nburn=12000; nthin=8
 # niter=1000; nburn=200; nthin=4
 
 nout <- (niter-nburn)/nthin
@@ -296,6 +297,10 @@ rout$phi1     = matrix(rout$phi1,    ncol = 1)
 rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
+```{r}
+# save(rout,file="no_space_20k_rout_full.Rdata")
+```
+
 
 ## NA/MSE analysis
 
@@ -651,18 +656,6 @@ plot_ARI = function(partition,title){
 }
 ```
 
-```{r}
-parts = generate_partition(rout)
-plot_partition_with_numbers(parts,title="model J")
-plot_partition_with_chars(parts,title="model J")
-plot_ARI(parts,title="model J")
-
-parts = generate_partition(drpm1)
-plot_partition_with_numbers(parts,title="model C")
-plot_partition_with_chars(parts,title="model C")
-plot_ARI(parts,title="model C")
-```
-
 
 ## Partition plots
 ```{r}
@@ -671,7 +664,7 @@ plot_ARI(parts,title="model C")
 partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
-save_plots=F
+save_plots=T
 
 # partition_matrix <- do.call(cbind, partitions)
 if (save_plots==T){
@@ -705,11 +698,11 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
-	# pdf(file="C_mean_prediction.pdf",height = 6,width=10)
-	pdf(file="C_median_prediction.pdf",height = 6,width=10)
+	pdf(file="C_mean_prediction.pdf",height = 6,width=10)
+	# pdf(file="C_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
 }
 ##### take the median/mean/mode
@@ -720,8 +713,8 @@ for(j in 1:N){
 		for (it in 1:size(drpm1$fitted)[3]){
 			values_j = c(values_j,drpm1$fitted[t,j,it])
 		}
-		# summary_fitted[j,t] = mean(values_j)
-		summary_fitted[j,t] = median(values_j)
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -738,8 +731,8 @@ for(i in 1:size(yred)[1]){
      plot(1:size(yred)[2],yred[i,],col=cols[i],
      	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
      	 # main="C fitted values - last iteration")
-     	 # main="C fitted values - iterations mean")
-     	 main="C fitted values - iterations median")
+     	 main="C fitted values - iterations mean")
+     	 # main="C fitted values - iterations median")
  	  } 
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
@@ -748,8 +741,8 @@ for(i in 1:size(yred)[1]){
 if (save_plots==TRUE) { dev.off()}
 #################################################################
 if (save_plots==TRUE) { 
-	# pdf(file="J_mean_prediction.pdf",height = 6,width=10)
-	pdf(file="J_median_prediction.pdf",height = 6,width=10)
+	pdf(file="J_mean_prediction.pdf",height = 6,width=10)
+	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
 }
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
@@ -759,8 +752,8 @@ for(j in 1:N){
 		for (it in 1:size(rout$fitted)[3]){
 			values_j = c(values_j,rout$fitted[t,j,it])
 		}
-		# summary_fitted[j,t] = mean(values_j)
-		summary_fitted[j,t] = median(values_j)
+		summary_fitted[j,t] = mean(values_j)
+		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -777,8 +770,8 @@ for(i in 1:size(yred)[1]){
      plot(1:size(yred)[2],yred[i,],col=cols[i],
      	 ylim=extrema(yredJ,yredC,yredORIG),type='l',xlab='',ylab="",
      	 # main="J fitted values - last iteration")
-     	 # main="J fitted values - iterations mean")
-     	 main="J fitted values - iterations median")
+     	 main="J fitted values - iterations mean")
+     	 # main="J fitted values - iterations median")
  	  } 
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
@@ -826,8 +819,9 @@ yred=y
 cols = colora(N,"div",0)
 # cols = colora(N,56,0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
+cexs = 0.9
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=10)
@@ -848,7 +842,7 @@ partition = partitions_drpmc
 partition_matrix <- do.call(cbind, partition)
 for(i in 1:N){
 	for (t in 1:Tm){
-		points(t,yred[i,t],col=partition_matrix[i, t],pch=19,cex=1)
+		points(t,yred[i,t],col=partition_matrix[i, t],pch=19,cex=cexs)
 	}
 }
 if (save_plots==TRUE) { dev.off() }
@@ -876,7 +870,7 @@ partition_matrix <- do.call(cbind, partition)
 for(i in 1:N){
 	for (t in 1:Tm){
 		points(t,yred[i,t],col=partition_matrix[i, t],
-			   pch=19,cex=1)
+			   pch=19,cex=cexs)
 	}
 }
 if (save_plots==TRUE) { dev.off() }
@@ -904,8 +898,8 @@ for(j in 1:N){
 		for (it in 1:size(drpm1$fitted)[3]){
 			values_j = c(values_j,drpm1$fitted[t,j,it])
 		}
-		summary_fitted[j,t] = mean(values_j)
-		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -920,8 +914,8 @@ for(j in 1:N){
 		for (it in 1:size(rout$fitted)[3]){
 			values_j = c(values_j,rout$fitted[t,j,it])
 		}
-		summary_fitted[j,t] = mean(values_j)
-		# summary_fitted[j,t] = median(values_j)
+		# summary_fitted[j,t] = mean(values_j)
+		summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -1185,6 +1179,10 @@ cat(crayon::cyan("Fit took:\n"))
 print(round(differenza_tempo,digits = 4))
 
 cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
+```
+
+```{r}
+save(drpm1,file="space_100k_drpm1.Rdata")
 ```
 
 

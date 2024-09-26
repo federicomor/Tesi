@@ -9,6 +9,8 @@ N = 20
 T = 30
 y = rand(N,T)
 sp = rand(N,2)
+p = 2
+X_cl = rand(N,p,T)
 
 # params
 m0_phi0 = 0.
@@ -24,7 +26,7 @@ update_phi1 = true
 a_alpha = 2.; b_alpha = 2.
 time_specific_alpha = true
 # now space
-spatial_cohesion_idx = 3.
+spatial_cohesion_idx = 3
 mu0 = 0.
 k0 = 1.
 v0 = 5.
@@ -41,6 +43,7 @@ end
 
 # include("../old/MCMC_fit.jl")
 # include("../new/MCMC_fit.jl")
+# include("../new/utils.jl")
 include("../MCMC_fit.jl")
 
 #=
@@ -78,7 +81,6 @@ full collections:   1
 	M_dp = 1.0,                     
 	initial_partition = missing,
 	Xlk_covariates = missing,
-	Xcl_covariates = missing,
 	starting_alpha = 0.5,         
 	unit_specific_alpha = false,       
 	time_specific_alpha = time_specific_alpha,     
@@ -103,8 +105,11 @@ full collections:   1
 	sp_params = [[mu0,mu0],k0,v0,[L0 0.0; 0.0 L0]],
 	# spatial_cohesion_idx = 1,
 	# sp_params = [0.5],
-	
-	# covariate_similarity_idx = NA,  
+
+	Xcl_covariates = X_cl,
+	covariate_similarity_idx = 4,
+	cv_params = [0.,2.,1.,2.],  
+
 	draws = niter,                    
 	burnin = burnin,                   
 	thin = thin,                     

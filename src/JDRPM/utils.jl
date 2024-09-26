@@ -705,7 +705,7 @@ end
 # eg X_jt would be X_cl[indexes,covariate_index,t] 
 
 ##### Cluster variance/entropy similarity function - paper 6 pag 4
-function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real; lg::Bool)
+function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
 	if isa(first(X_jt),Real) # numerical case
 		xbar_j = mean(X_jt)
 		card_Sjt = length(X_jt)
@@ -736,6 +736,47 @@ function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 		return lg ? -alpha * Hx : exp(-alpha * Hx) 
 	end
 end
+function similarity1!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+	if isa(first(X_jt),Real) # numerical case
+		xbar_j = mean(X_jt)
+		card_Sjt = length(X_jt)
+		Hx = 0.0
+		@inbounds for i in eachindex(X_jt)
+			Hx += (X_jt[i] - xbar_j)^2 
+		end
+		Hx /= card_Sjt
+		if add
+			lS[case] += lg ? -alpha * Hx : exp(-alpha * Hx) 
+		else
+			lS[case] = lg ? -alpha * Hx : exp(-alpha * Hx) 
+		end
+		return
+
+	else # categorical case
+		# X_jt = ["Old", "Young", "Middle", "Young", "Old", "Old"]
+		unique_keys = unique(X_jt)
+		# @show unique_keys
+		counts = Dict(key => 0.0 for key in unique_keys)
+		for item in X_jt
+			counts[item] += 1
+		end
+		# @show counts
+		total = length(X_jt)
+		for key in keys(counts)
+			counts[key] /= total
+		end
+		Hx = 0.0
+		for r in keys(counts)
+			Hx -= counts[r] * log(counts[r])
+		end
+		if add
+			lS[case] += lg ? -alpha * Hx : exp(-alpha * Hx) 
+		else
+			lS[case] = lg ? -alpha * Hx : exp(-alpha * Hx) 
+		end
+		return
+	end
+end
 # similarity1([repeat(["a"],1000)...,"b"], 5, lg=false)
 
 
@@ -755,7 +796,7 @@ function gower_d(x1::String, x2::String, R::Real) # categorical case
 end
 
 ##### Total Gower dissimilarity - paper 6 pag 4
-function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real; lg::Bool)
+function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
 	H = 0.0
 	if isa(first(X_jt),Real) 
 		R = (maximum(X_jt) - minimum(X_jt))
@@ -770,9 +811,29 @@ function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	out = -alpha * H
 	return lg ? out : exp(out)
 end
+function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+
+	H = 0.0
+	if isa(first(X_jt),Real) 
+		R = (maximum(X_jt) - minimum(X_jt))
+		if R==0.0 R=eps() end
+	else R=0.0 end
+	n_j = length(X_jt)
+	for l in 1:(n_j-1)
+		for k in (l+1):n_j
+			H += gower_d(X_jt[l], X_jt[k], R)
+		end
+	end 
+	out = -alpha * H
+	if add
+		lS[case] += lg ? out : exp(out)
+	else
+		lS[case] = lg ? out : exp(out)
+	end
+end
 
 ##### Average Gower dissimilarity - paper 6 pag 4
-function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real; lg::Bool)
+function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
 	H = 0.0
 	if isa(first(X_jt),Real) 
 		R = (maximum(X_jt) - minimum(X_jt))
@@ -786,6 +847,25 @@ function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	end 
 	out = -2*alpha / (n_j*(n_j-1)) * H
 	return lg ? out : exp(out)
+end
+function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+	H = 0.0
+	if isa(first(X_jt),Real) 
+		R = (maximum(X_jt) - minimum(X_jt))
+		if R==0.0 R=eps() end
+	else R=0.0 end
+	n_j = length(X_jt)
+	for l in 1:(n_j-1)
+		for k in l:n_j
+			H += gower_d(X_jt[l], X_jt[k], R)
+		end
+	end 
+	out = -2*alpha / (n_j*(n_j-1)) * H
+	if add
+		lS[case] += lg ? out : exp(out)
+	else
+		lS[case] = lg ? out : exp(out)
+	end
 end
 
 # # 0 => completely dissimilar
@@ -817,7 +897,7 @@ end
 
 
 ##### auxiliary similarity
-function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real; lg::Bool)
+function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool)::Float64
 	n = length(X_jt)
 	nm = n/2
 	xbar = mean(X_jt)
@@ -830,6 +910,23 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
 	return lg ? out : exp(out)
 end
+function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+	n = length(X_jt)
+	nm = n/2
+	xbar = mean(X_jt)
+	aux2 = 0.0
+	@inbounds @fastmath @simd for i in eachindex(X_jt)
+		aux2 += X_jt[i]^2
+	end
+	# @show aux2
+	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
+	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	if add
+		lS[case] += lg ? out : exp(out)
+	else
+		lS[case] = lg ? out : exp(out)
+	end
+end
 
 
 # 1,2,3 work on both covariate types
@@ -837,20 +934,36 @@ end
 # sim5 removed, double dippery is too much
 
 # numerical covariates specialization
-function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector; lg::Bool)
+function covariate_similarity(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool)
 	# println("numerical")
-	idx==1.0 && return similarity1(X_jt,cv_params[1],lg=lg) 
-	idx==2.0 && return similarity2(X_jt,cv_params[1],lg=lg) 
-	idx==3.0 && return similarity3(X_jt,cv_params[1],lg=lg) 
-	idx==4.0 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg=lg) 
+	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
+	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
+	idx==3 && return similarity3(X_jt,cv_params[1],lg) 
+	idx==4 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg) 
+end
+# categorical covariates specialization
+function covariate_similarity(idx::Int, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool)
+	# println("categorical")
+	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
+	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
+	idx==3 && return similarity3(X_jt,cv_params[1],lg) 
 end
 
+
+# numerical covariates specialization
+function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+	# println("numerical")
+	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==4 similarity4!(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg,case,add,lS); return; end
+end
 # categorical covariates specialization
-function covariate_similarity(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector; lg::Bool)
+function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	# println("categorical")
-	idx==1.0 && return similarity1(X_jt,cv_params[1],lg=lg) 
-	idx==2.0 && return similarity2(X_jt,cv_params[1],lg=lg) 
-	idx==3.0 && return similarity3(X_jt,cv_params[1],lg=lg) 
+	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
 end
 
 # mu_c = 0.0

@@ -1,0 +1,5 @@
+C
+Time difference of 6.5467 hours
+
+LPML = 3450.56740591456 
+WAIC = -7879.91587876541

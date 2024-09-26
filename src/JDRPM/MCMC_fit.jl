@@ -783,7 +783,7 @@ function MCMC_fit(;
 									# debug(@showd p)
 									Xn = @view Xcl_covariates[aux_idxs,p,t]
 									# debug(@showd Xn)
-									lpp += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 								end
 							end
 							# end # of the @timeit for sPPM
@@ -867,7 +867,7 @@ function MCMC_fit(;
 						if cl_xPPM
 							for p in 1:p_cl
 								Xn = @view Xcl_covariates[aux_idxs,p,t]
-								lpp += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 							end
 						end
 						# end # of the @timeit for sPPM

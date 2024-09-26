@@ -73,3 +73,16 @@ function f_test_prealloc(indexes,j)
 end
 f_test(indexes,1)
 f_test_prealloc(indexes,1)
+
+
+
+using BenchmarkTools
+nh_tmp = rand(100)
+@btime sum(nh_tmp .> 0)
+@btime count(x->(x>0), nh_tmp)
+
+
+n = 100; rho_tmp = rand((1:5),n); k = 1
+@btime findall(j -> rho_tmp[j]==k, 1:n) 
+@btime findall(rho_tmp .== k)
+@btime findall_faster(j -> rho_tmp[j]==k, 1:n)
