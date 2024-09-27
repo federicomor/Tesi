@@ -302,6 +302,7 @@ function MCMC_fit(;
 	sig2h_iter_copy = ones(n,T_star)
 	log_Mdp = log(M_dp)
 	lC = @MVector zeros(2)
+	lS = @MVector zeros(2)
 	lPP = @MVector zeros(1)
 	Si_red1 = zeros(Int64,n)
 	s1n = zeros(n)
@@ -310,6 +311,8 @@ function MCMC_fit(;
 	s2o = zeros(n)
 	nh_tmp = zeros(Int64,n)
 	rho_tmp = zeros(Int64,n)
+	Xo = zeros(n)
+	Xn = zeros(n)
 
 
 	############# allocate and initialize working variables #############
@@ -519,7 +522,8 @@ function MCMC_fit(;
 					lg_weights .= 0
 					# lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
 					# lC = @MVector zeros(2)
-					lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
+					# lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
+					lS .= 0.
 
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
@@ -576,23 +580,33 @@ function MCMC_fit(;
 
 						# Xcl_covariates is a n*p*T matrix
 						if cl_xPPM
+							# lS .= 0.
 							for p in 1:p_cl
-								Xo = @view Xcl_covariates_red[aux_idxs,p]
-								Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
-								lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
-								lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								# Xo = @view Xcl_covariates_red[aux_idxs,p]
+								# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
+								# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
+								copy!(Xo, Xcl_covariates_red[aux_idxs,p])
+								copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
+								# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
+								# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
+								# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
+								covariate_similarity!(covariate_similarity_idx, Xo, cv_params, true,1,true,lS)
+								covariate_similarity!(covariate_similarity_idx, Xn, cv_params, true,2,true,lS)
 							end
 						end
 						# end # of the @timeit for sPPM
 						# debug(@showd lCn lCo lSn lSo)
 						# printlgln("\n")
 						# lg_weights[k] = log(nh_red[k]) + lCn - lCo + lSn - lSo
-						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
+						# lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
+						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lS[2] - lS[1]
 					end
 					
 					# ... or unit j can create a singleton
 					# lCn = 0.0
-					lSn = 0.0 
+					# lSn = 0.0 
+					lS .= 0.
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
@@ -601,14 +615,17 @@ function MCMC_fit(;
 						# lCn = spatial_cohesion(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, lg=true, M=M_dp, S=S)
 					end
 					if cl_xPPM
+						# lS .= 0.
 						for p in 1:p_cl
-							lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
+							# lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
+							covariate_similarity!(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, true, 2,true,lS)
 						end
 					end
 					# end # of the @timeit for sPPM
 					# lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
 					# lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
-					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
+					# lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
+					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lS[2]
 
 					# printlgln("before exp and normalization:")
 					# debug(@showd lg_weights)
@@ -781,9 +798,10 @@ function MCMC_fit(;
 								# debug(@showd cv_idxs)
 								for p in 1:p_cl
 									# debug(@showd p)
-									Xn = @view Xcl_covariates[aux_idxs,p,t]
+									Xn_view = @view Xcl_covariates[aux_idxs,p,t]
 									# debug(@showd Xn)
-									lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
 								end
 							end
 							# end # of the @timeit for sPPM
@@ -866,8 +884,9 @@ function MCMC_fit(;
 						end
 						if cl_xPPM
 							for p in 1:p_cl
-								Xn = @view Xcl_covariates[aux_idxs,p,t]
-								lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								Xn_view = @view Xcl_covariates[aux_idxs,p,t]
+								# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
 							end
 						end
 						# end # of the @timeit for sPPM

@@ -4,6 +4,7 @@ using LinearAlgebra
 using Random
 using Logging
 using Dates
+# using TimerOutputs
 using ProgressMeter
 using StaticArrays
 using Printf
@@ -11,7 +12,8 @@ using Printf
 include("utils.jl")
 
 function MCMC_fit(;
-	Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}}, # n*T matrix, the observed values 
+	Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
+	# Y::Matrix,                            # n*T matrix, the observed values
 	sp_coords = missing,                  # n*2 matrix, the spatial coordinates
 	Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
 	Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
@@ -88,11 +90,15 @@ function MCMC_fit(;
 
 	if logging
 		log_file = open("log.txt", "w+")
+		include("debug.jl")
 		println("Logging to file: ", abspath("log.txt"))
 
+		printlgln(replace(string(now()),"T" => "   "))
+		debug("current seed = $seed")
 		# to = TimerOutput()
 	end
 
+# try
 
 	############# check some stuff #############
 	if sPPM
@@ -294,6 +300,7 @@ function MCMC_fit(;
 	sig2h_iter_copy = ones(n,T_star)
 	log_Mdp = log(M_dp)
 	lC = @MVector zeros(2)
+	lS = @MVector zeros(2)
 	lPP = @MVector zeros(1)
 	Si_red1 = zeros(Int64,n)
 	s1n = zeros(n)
@@ -302,6 +309,8 @@ function MCMC_fit(;
 	s2o = zeros(n)
 	nh_tmp = zeros(Int64,n)
 	rho_tmp = zeros(Int64,n)
+	Xo = zeros(n)
+	Xn = zeros(n)
 
 
 	############# allocate and initialize working variables #############
@@ -384,6 +393,9 @@ function MCMC_fit(;
 			)
 
 	@inbounds for i in 1:draws
+		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
+		# there is also the ProgressMeter option, maybe is cooler
+
 		############# sample the missing values #############
 		# from the "update rho" section onwards also the Y[j,t] will be needed (to compute weights, update laws, etc)
 		# so we need now to simulate the values for the data which are missing (from their full conditional)
@@ -391,15 +403,18 @@ function MCMC_fit(;
 			# we have to use the missing_idxs to remember which units and at which times had a missing value,
 			# in order to simulate just them and instead use the given value for the other units and times
 			for (j,t) in missing_idxs
-				# Problem: if when filling a NA we occur into another NA value? eg when we also need Y[j,t±1]
+				# Problem: if when filling a NA we occur in another NA value? eg when we also need Y[j,t±1]
 				# I decided here to set that value to 0, if occurs, since anyway target should be centered
-				# so it seems a reasonable patch. We could have decided to ignore this computation and just 
-				# use the likelihood as proposal filling distribution, but this would have just worked in 
-				# the Y[j,t+1] case so the general problem would have still been there
+				# so it seems a reasonable patch
+				# We could have decided to ignore this computation and just use the likelihood as proposal
+				# filling distribution, but this would have just worked in the Y[j,t+1] case so the general
+				# problem would have still been there
 
+				# if i==1 println("(j=$j,t=$t)") end
 				c_it = Si_iter[j,t]
 				Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
 				aux1 = eta1_iter[j]^2
+
 
 				if t==1	
 					c_itp1 = Si_iter[j,t+1]
@@ -423,6 +438,8 @@ function MCMC_fit(;
 						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*((ismissing(Y[j,t+1]) ? 0 : Y[j,t+1]) - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
 						)
 
+					# mu_prior = muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t
+					# sig2_prior = sig2h_iter[c_it,t]*(1-aux1)
 					Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
 
 				else # t==T
@@ -437,6 +454,7 @@ function MCMC_fit(;
 
 		for t in 1:T
 			############# update gamma #############
+			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
 			for j in 1:n
 				if t==1 
 					gamma_iter[j,t] = 0
@@ -445,10 +463,13 @@ function MCMC_fit(;
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
 					Si_red = Si_iter[indexes, t]
+					# Si_red1 = copy(Si_red)
 					copy!(Si_red1, Si_red)
+					# Si_red1 = Si_iter[indexes, t]
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
+					# @timeit to " sPPM 1 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						sp1_red = @view sp1[indexes]
 						sp2_red = @view sp2[indexes]
@@ -459,10 +480,12 @@ function MCMC_fit(;
 					if cl_xPPM
 						Xcl_covariates_red = @view Xcl_covariates[indexes,:,t]
 					end
+					# end # of the @timeit for sPPM
 
 					# compute n_red's and nclus_red's and relabel
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
 					n_red1 = length(Si_red1)
+					# @assert n_red1 == n_red+1
 					relabel!(Si_red,n_red,aux1_relab)
 					relabel!(Si_red1,n_red1,aux1_relab)
 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red) # = number of clusters
@@ -472,6 +495,8 @@ function MCMC_fit(;
 					j_label = Si_red1[end]
 
 					# compute also nh_red's
+					# nh_red = zeros(Int64,nclus_red)
+					# nh_red1 = zeros(Int64,nclus_red1)
 					nh_red .= 0
 					nh_red1 .= 0
 					for jj in 1:n_red
@@ -481,13 +506,16 @@ function MCMC_fit(;
 					nh_red1[Si_red1[end]] += 1 # account for the last added unit j, not included in the above loop
 
 					# start computing weights
+					# lg_weights = zeros(nclus_red+1)
 					lg_weights .= 0
 					# lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
 					# lC = @MVector zeros(2)
-					lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
+					# lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
+					lS .= 0.
 
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
+						# @timeit to " sPPM 2 " begin # if logging uncomment this line, and the corresponding "end"
 
 						# filter the covariates of the units of label k
 						# aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red) # slow
@@ -531,20 +559,32 @@ function MCMC_fit(;
 
 						# Xcl_covariates is a n*p*T matrix
 						if cl_xPPM
+							# lS .= 0.
 							for p in 1:p_cl
-								Xo = @view Xcl_covariates_red[aux_idxs,p]
-								Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
-								lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
-								lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								# Xo = @view Xcl_covariates_red[aux_idxs,p]
+								# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
+								# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
+								copy!(Xo, Xcl_covariates_red[aux_idxs,p])
+								copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
+								# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
+								# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
+								# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
+								covariate_similarity!(covariate_similarity_idx, Xo, cv_params, true,1,true,lS)
+								covariate_similarity!(covariate_similarity_idx, Xn, cv_params, true,2,true,lS)
 							end
 						end
+						# end # of the @timeit for sPPM
 						# lg_weights[k] = log(nh_red[k]) + lCn - lCo + lSn - lSo
-						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
+						# lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
+						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lS[2] - lS[1]
 					end
 					
 					# ... or unit j can create a singleton
 					# lCn = 0.0
-					lSn = 0.0 
+					# lSn = 0.0 
+					lS .= 0.
+					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S)
@@ -552,13 +592,17 @@ function MCMC_fit(;
 						# lCn = spatial_cohesion(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, lg=true, M=M_dp, S=S)
 					end
 					if cl_xPPM
+						# lS .= 0.
 						for p in 1:p_cl
-							lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
+							# lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
+							covariate_similarity!(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, true, 2,true,lS)
 						end
 					end
+					# end # of the @timeit for sPPM
 					# lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
 					# lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
-					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
+					# lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
+					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lS[2]
 
 
 					# now use the weights towards sampling the new gamma_jt
@@ -614,7 +658,9 @@ function MCMC_fit(;
 			end # for j in 1:n
 
 
+			# end # of the @timeit for gamma
 			############# update rho #############
+			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			# movable_units = findall(j -> gamma_iter[j,t]==0, 1:n) # slow
 			movable_units = findall_faster(j -> gamma_iter[j,t]==0, 1:n) 
@@ -696,6 +742,7 @@ function MCMC_fit(;
 						# lpp = 0.0
 						lPP .= 0.
 						for kk in 1:nclus_temp
+							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
 							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
 							aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 							# aux_idxs = findall(rho_tmp .== kk) # fast
@@ -713,10 +760,12 @@ function MCMC_fit(;
 							end
 							if cl_xPPM
 								for p in 1:p_cl
-									Xn = @view Xcl_covariates[aux_idxs,p,t]
-									lpp += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									Xn_view = @view Xcl_covariates[aux_idxs,p,t]
+									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
 								end
 							end
+							# end # of the @timeit for sPPM
 							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
 							# lpp += log_Mdp + lgamma(nh_tmp[kk])
 							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
@@ -775,6 +824,7 @@ function MCMC_fit(;
 					# lpp = 0.0
 					lPP .= 0.
 					for kk in 1:nclus_temp
+						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
 						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
 						aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 						# aux_idxs = findall(rho_tmp .== kk) # fast
@@ -791,10 +841,12 @@ function MCMC_fit(;
 						end
 						if cl_xPPM
 							for p in 1:p_cl
-								Xn = @view Xcl_covariates[aux_idxs,p,t]
-								lpp += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								Xn_view = @view Xcl_covariates[aux_idxs,p,t]
+								# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
 							end
 						end
+						# end # of the @timeit for sPPM
 						# lpp += log(M_dp) + lgamma(nh_tmp[kk])
 						# lpp += log_Mdp + lgamma(nh_tmp[kk])
 						lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
@@ -900,7 +952,9 @@ function MCMC_fit(;
 
 			end # for j in movable_units
 
+			# end # of the @timeit for rho
 			############# update muh #############
+			# @timeit to " muh " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -933,7 +987,9 @@ function MCMC_fit(;
 				end
 			end
 			
+			# end # of the @timeit for muh
 			############# update sigma2h #############
+			# @timeit to " sigma2h " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
 					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
@@ -983,7 +1039,9 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
 				end
 			end
+			# end # of the @timeit for sigma2h
 			############# update beta #############
+			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
 			if lk_xPPM && i>=beta_update_threshold
 				if t==1
 					sum_Y = zeros(p_lk)
@@ -1017,7 +1075,9 @@ function MCMC_fit(;
 				end
 			end
 						
+			# end # of the @timeit for beta
 			############# update theta #############
+			# @timeit to " theta " begin # if logging uncomment this line, and the corresponding "end"
 			aux1::Float64 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -1044,7 +1104,9 @@ function MCMC_fit(;
 				theta_iter[t] = rand(Normal(mu_post, sqrt(sig2_post)))
 			end 
 			
+			# end # of the @timeit for theta
 			############# update tau2 #############
+			# @timeit to " tau2 " begin # if logging uncomment this line, and the corresponding "end"
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -1053,10 +1115,12 @@ function MCMC_fit(;
 			a_star = tau2_priors[1] + kt/2
 			b_star = tau2_priors[2] + aux1/2
 			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
+			# end # of the @timeit for tau2
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
+		# @timeit to " eta1 " begin # if logging uncomment this line, and the corresponding "end"
 		# eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_eta1
@@ -1095,7 +1159,9 @@ function MCMC_fit(;
 			end
 		end
 
+		# end # of the @timeit for eta1
 		############# update alpha #############
+		# @timeit to " alpha " begin # if logging uncomment this line, and the corresponding "end"
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -1134,7 +1200,9 @@ function MCMC_fit(;
 			end
 		end
 
+		# end # of the @timeit for alpha
 		############# update phi0 #############
+		# @timeit to " phi0 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
 		# i found that looping on t rather than using sum(... for t in ...) seems faster
@@ -1145,7 +1213,9 @@ function MCMC_fit(;
 		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*aux2 )
 		phi0_iter = rand(Normal(mu_post, sqrt(sig2_post)))
 		
+		# end # of the @timeit for phi0
 		############# update phi1 #############
+		# @timeit to " phi1 " begin # if logging uncomment this line, and the corresponding "end"
 		# phi1_priors = sqrt(phi1_priors) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_phi1
@@ -1179,7 +1249,9 @@ function MCMC_fit(;
 			end
 		end
 
+		# end # of the @timeit for phi1
 		############# update lambda2 #############
+		# @timeit to " lambda2 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 0.0
 		# I found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
@@ -1189,6 +1261,7 @@ function MCMC_fit(;
 		b_star = lambda2_priors[2] + ((theta_iter[1] - phi0_iter)^2 + aux1) / 2
 		lambda2_iter = rand(InverseGamma(a_star,b_star))	
 
+		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############
 		if i>burnin && i%thin==0 
 			Si_out[:,:,i_out] = Si_iter[:,1:T]

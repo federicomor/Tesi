@@ -780,29 +780,23 @@ end
 # similarity1([repeat(["a"],1000)...,"b"], 5, lg=false)
 
 
-##### Gower dissimilarity
+##### Gower similarity
 function gower_d(x1::Real, x2::Real, R::Real) # numerical case
-	return abs(x1-x2)/R
+	x1==x2 && return 1
+	return 1-abs(x1-x2)/R
 end
 function gower_d(x1::String, x2::String, R::Real) # categorical case
 	# R is fictitious here, just to allow the same function call later
-	return Int(!(x1 == x2))
-	# add one when values are different => higher values for dissimilar data
-	# so eg fully dissimilar values will give around zero as value returned
-	# which i.e. would be -Inf with the lg=true of our algorithm
-	# which seems right, i.e. is all in a "penalization" perspective now
-	# where we just penalize less the vectors which are similar,
-	# rahter than givine them a positive high value
+	return Int(x1 == x2)
+	# 1 if equal, 0 if different
 end
 
 ##### Total Gower dissimilarity - paper 6 pag 4
 function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
 	H = 0.0
-	if isa(first(X_jt),Real) 
-		R = (maximum(X_jt) - minimum(X_jt))
-		if R==0.0 R=eps() end
-	else R=0.0 end
+	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
+	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
 		for k in (l+1):n_j
 			H += gower_d(X_jt[l], X_jt[k], R)
@@ -812,13 +806,10 @@ function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	return lg ? out : exp(out)
 end
 function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
-
 	H = 0.0
-	if isa(first(X_jt),Real) 
-		R = (maximum(X_jt) - minimum(X_jt))
-		if R==0.0 R=eps() end
-	else R=0.0 end
+	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
+	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
 		for k in (l+1):n_j
 			H += gower_d(X_jt[l], X_jt[k], R)
@@ -835,13 +826,11 @@ end
 ##### Average Gower dissimilarity - paper 6 pag 4
 function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
 	H = 0.0
-	if isa(first(X_jt),Real) 
-		R = (maximum(X_jt) - minimum(X_jt))
-		if R==0.0 R=eps() end
-	else R=0.0 end
+	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
+	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
-		for k in l:n_j
+		for k in (l+1):n_j
 			H += gower_d(X_jt[l], X_jt[k], R)
 		end
 	end 
@@ -850,13 +839,11 @@ function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 end
 function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
 	H = 0.0
-	if isa(first(X_jt),Real) 
-		R = (maximum(X_jt) - minimum(X_jt))
-		if R==0.0 R=eps() end
-	else R=0.0 end
+	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
+	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
-		for k in l:n_j
+		for k in (l+1):n_j
 			H += gower_d(X_jt[l], X_jt[k], R)
 		end
 	end 

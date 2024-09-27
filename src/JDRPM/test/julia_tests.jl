@@ -65,6 +65,26 @@ malloc() calls:     11
 free() calls:       43
 minor collections:  80
 full collections:   1
+
+WITH COVARIATES CL #######################
+Progress: 100% Time: 0:00:03 ( 3.62 ms/it)
+
+done!
+Elapsed time: 3 seconds, 618 milliseconds
+LPML: -876.8522141016783 (the higher the better)
+WAIC: 963.2034600366517 (the lower the better)
+acceptance ratio eta1: 95.30%
+acceptance ratio phi1: 98.60%
+  3.631716 seconds (20.64 M allocations: 1.977 GiB, 18.46% gc time)
+elapsed time (ns):  3631716200
+gc time (ns):       670326900
+bytes allocated:    2122558008
+pool allocs:        20641695
+non-pool GC allocs: 1014
+malloc() calls:     11
+free() calls:       45
+minor collections:  15
+full collections:   1
 =#
 
 # ProfileCanvas.@profview MCMC_fit(
@@ -72,12 +92,18 @@ full collections:   1
 # @profview_allocs MCMC_fit(
 # @code_warntype MCMC_fit(
 # @report_opt MCMC_fit(
+include("../MCMC_fit.jl")
 @timev MCMC_fit(
 # @profview_allocs out = MCMC_fit(
 # @descend MCMC_fit(
 # out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
+
+	Xcl_covariates = X_cl,
+	covariate_similarity_idx = 4,
+	cv_params = [0.,2.,1.,2.],  
+
 	M_dp = 1.0,                     
 	initial_partition = missing,
 	Xlk_covariates = missing,
@@ -105,10 +131,6 @@ full collections:   1
 	sp_params = [[mu0,mu0],k0,v0,[L0 0.0; 0.0 L0]],
 	# spatial_cohesion_idx = 1,
 	# sp_params = [0.5],
-
-	Xcl_covariates = X_cl,
-	covariate_similarity_idx = 4,
-	cv_params = [0.,2.,1.,2.],  
 
 	draws = niter,                    
 	burnin = burnin,                   
