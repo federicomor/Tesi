@@ -82,7 +82,8 @@ nh_tmp = rand(100)
 @btime count(x->(x>0), nh_tmp)
 
 
-n = 100; rho_tmp = rand((1:5),n); k = 1
+n = 50; rho_tmp = rand((1:5),n); k = 1
+include("../utils.jl")
 @btime findall(j -> rho_tmp[j]==k, 1:n) 
 @btime findall(rho_tmp .== k)
 @btime findall_faster(j -> rho_tmp[j]==k, 1:n)
@@ -123,32 +124,47 @@ v = repeat([1],10)
 gower_sim(v)
 
 
-include("../utils.jl")
-lg = true
-X_jt = [1,1,1]
-similarity2(X_jt,1,lg)
-similarity3(X_jt,1,lg)
-XX_jt = [1,1,2]
-similarity2(XX_jt,1,lg)
-similarity3(XX_jt,1,lg)
 
-similarity3([0],2,lg)
+######################################
+using Plots
+using PDFmerger: append_pdf!
+
+# Create a PDF to store all plots
+pdf_filename = "trace_plots.pdf"
+# pdf_backend = pdf(pdf_filename)
+
+# Number of iterations and variables (replace with your settings)
+n_iters = 1000
+n_vars = 5
+
+# To simulate the trace values (you'll use your own variables in the loop)
+variable_traces = zeros(n_iters, n_vars)
+
+# Initialize a plot for each variable
+plots = [plot(title="Variable $i", xlabel="Iteration", ylabel="Value") for i in 1:n_vars]
+
+# Iteratively update the plots and add points
+for iter in 1:n_iters
+    # Simulate updates (you would use your actual variable updates)
+    for i in 1:n_vars
+        variable_traces[iter, i] = randn()*iter/10 # Replace with the actual draw of variable `i`
+
+        # Update the plot for this variable by adding the new point
+        scatter!(plots[i], [iter], [variable_traces[iter, i]], seriestype=:line, color=:blue, label="",markersize=2)
+
+        # Display the current plot (optional, slows down for large n_iters)
+        # display(plots[i])
+    end
+end
+
+p = plot(plots[1:5]...,layout=5)
+savefig(p,"trace_tmp.pdf")
+append_pdf!("all_trace_plots.pdf", "trace_tmp.pdf", cleanup=true)
+
+for i in 1:n_vars
+	savefig(plots[i], "trace_tmp.pdf")
+    append_pdf!("all_trace_plots.pdf", "trace_tmp.pdf", cleanup=true)
+end
 
 
-X_jt = [repeat([1],5)...,2]
-similarity2(X_jt,1,lg)
-similarity3(X_jt,1,lg)
-similarity3(X_jt,2,lg)
-X_jt = collect(1:201)
-similarity2(X_jt,1,lg) # 0 ie completely dissimilar
-similarity3(X_jt,1,lg) # strangely high, better to increase alpha
-similarity3(X_jt,2,lg)
-similarity3(X_jt,10,lg)
-
-XX_jt = [1,1,1,1,1,1,7,8,9,10,11]
-similarity2(XX_jt,1,lg)
-similarity3(XX_jt,3,lg)
-XX_jt = [1,2,3,4,5,6,7,8,9,10,11]
-similarity2(XX_jt,1,lg)
-similarity3(XX_jt,3,lg)
-
+# After the loop, save all plots to the single PDF

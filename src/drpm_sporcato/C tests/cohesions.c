@@ -224,9 +224,12 @@ int main() {
     // Test data
     // double s1[] = {1.0, 2.0, 3.0};
     // double s2[] = {4.0, 5.0, 6.0};
-	double s1[] = {1.0, 1.0, 1.4};
-    double s2[] = {1.0, 1.1, 1.4};
-    int dim = 3;
+	// double s1[] = {1.0, 1.0, 1.4};
+    // double s2[] = {1.0, 1.1, 1.4};
+	double s1[] = {1.0};
+    double s2[] = {1.1};
+	
+    int dim = 1;
     double phi = 0.5;
     double epsilon = 0.1;
     double a = 5.0;

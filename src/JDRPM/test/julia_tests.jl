@@ -5,8 +5,8 @@ using Cthulhu
 begin
 using Random
 Random.seed!(1)
-N = 20
-T = 30
+N = 20; T = 30
+# N = 50; T = 18
 y = rand(N,T)
 sp = rand(N,2)
 p = 2
@@ -33,10 +33,10 @@ v0 = 5.
 L0 = 1.
 
 # niter = 5000. # profile canvas
-niter = 1000. # real for these tests
+niter = 1000 # real for these tests
 # niter = 20. # for tracking allocs
-burnin = 0.
-thin = 1.
+burnin = 0
+thin = 1
 seed = 123.0
 end
 
@@ -44,9 +44,10 @@ end
 # include("../old/MCMC_fit.jl")
 # include("../new/MCMC_fit.jl")
 # include("../new/utils.jl")
-include("../MCMC_fit.jl")
+# include("../MCMC_fit.jl")
 
 #=
+WITH SPACE ONLY #####################
 Progress: 100% Time: 0:00:03 ( 3.70 ms/it)
 
 done!
@@ -85,24 +86,47 @@ malloc() calls:     11
 free() calls:       45
 minor collections:  15
 full collections:   1
+
+LONGER TEST SIMILAR TO DFWSC #################
+Progress: 100% Time: 0:00:05 (59.28 ms/it)
+
+done!
+Elapsed time: 5 seconds, 928 milliseconds
+LPML: -7113.988241311792 (the higher the better)
+WAIC: 8972.726015254577 (the lower the better)
+acceptance ratio eta1: 94.61%
+acceptance ratio phi1: 99.00%
+  5.955901 seconds (22.60 M allocations: 4.815 GiB, 2.54% gc time)
+elapsed time (ns):  5955901300
+gc time (ns):       151102600
+bytes allocated:    5169721376
+pool allocs:        22589818
+non-pool GC allocs: 9822
+malloc() calls:     120
+free() calls:       100
+minor collections:  113
+full collections:   0
 =#
 
+include("../prelease/MCMC_fit.jl")
+include("../MCMC_fit.jl")
 # ProfileCanvas.@profview MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
 # @profview_allocs MCMC_fit(
 # @code_warntype MCMC_fit(
 # @report_opt MCMC_fit(
-include("../MCMC_fit.jl")
-@timev MCMC_fit(
 # @profview_allocs out = MCMC_fit(
 # @descend MCMC_fit(
+
+@timev MCMC_fit(
 # out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
 
-	Xcl_covariates = X_cl,
-	covariate_similarity_idx = 4,
-	cv_params = [0.,2.,1.,2.],  
+	# Xcl_covariates = X_cl,
+	# covariate_similarity_idx = 4,
+	# cv_params = [0.,2.,1.,2.],  
+	# cv_params = missing,  
 
 	M_dp = 1.0,                     
 	initial_partition = missing,
@@ -135,7 +159,7 @@ include("../MCMC_fit.jl")
 	draws = niter,                    
 	burnin = burnin,                   
 	thin = thin,                     
-	logging = false,
+	logging = true,
 	seed = seed
 );
 

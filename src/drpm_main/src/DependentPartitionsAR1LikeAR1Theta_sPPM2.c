@@ -333,6 +333,14 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	GetRNGstate();
 	// PutRNGstate();
 
+	// int feedback_rate = 0;
+	// if (*draws < 1000) {
+	// 	feedback_rate = 100;
+	// }
+	// else {
+	// 	feedback_rate = int((*draws)/1000);
+	// }
+
 
 	// ===================================================================================
 	//
@@ -340,6 +348,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	//
 	// ===================================================================================
 	
+
 	for(i = 0; i < *draws; i++){
 
 	if(i % 100 == 0){

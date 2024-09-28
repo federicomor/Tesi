@@ -21,6 +21,7 @@ function findall_faster(f, a::AbstractArray{T, N}) where {T, N}
 	return b
 end
 
+aux_logit(x::Real) = log((1+x)/(1-x))
 logit(x::Real) = log(x / (one(x) - x))
 const logpi = log(π)
 const log2pi = log(2*π)
@@ -30,9 +31,8 @@ const log2pi = log(2*π)
 ##################
 
 # dont overwrite Si, ignore corollary variables
-function relabel(Si::AbstractVector{<:Real}, n::Int,Sirelab::Vector{Int})
-	# Sirelab = zeros(Int,n)
-	Sirelab .= 0
+function relabel(Si::AbstractVector{<:Real}, n::Int)
+	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
 	lab = 1 # new label index
@@ -49,12 +49,11 @@ function relabel(Si::AbstractVector{<:Real}, n::Int,Sirelab::Vector{Int})
 	end
 	return Sirelab
 end
-relabel(Si::AbstractVector{<:Real},Sirelab::Vector{Int}) = relabel(Si,length(Si),Sirelab)
+relabel(Si::AbstractVector{<:Real}) = relabel(Si,length(Si))
 
 # overwrite Si, ignore the corollary variables
-function relabel!(Si::AbstractVector{<:Real}, n::Int, Sirelab::Vector{Int})
-	# Sirelab = zeros(Int,n)
-	Sirelab .= 0
+function relabel!(Si::AbstractVector{<:Real}, n::Int)
+	Sirelab = zeros(Int,n)
 	shuffle = n
 	loc = 1
 	lab = 1 # new label index
@@ -73,7 +72,7 @@ function relabel!(Si::AbstractVector{<:Real}, n::Int, Sirelab::Vector{Int})
 		Si[j] = Sirelab[j]
 	end
 end
-relabel!(Si::AbstractVector{<:Real},Sirelab::Vector{Int}) = relabel!(Si,length(Si),Sirelab)
+relabel!(Si::AbstractVector{<:Real}) = relabel!(Si,length(Si))
 
 # dont overwrite Si, consider corollary variables
 function relabel_full(Si::AbstractVector{<:Real}, n::Int)
@@ -144,11 +143,11 @@ end
 ##   COMPATIBILITY    ##
 ########################
 
-function compatibility(rho1::AbstractVector{Int}, rho2::AbstractVector{Int},rho1_relab::Vector{Int},rho2_relab::Vector{Int})
+function compatibility(rho1::AbstractVector{Int}, rho2::AbstractVector{Int})
 # function compatibility(rho1::Vector{Int}, rho2::Vector{Int})
 	n = length(rho1)
-	scr1 = relabel(rho1, n, rho1_relab)
-	scr2 = relabel(rho2, n, rho2_relab)
+	scr1 = relabel(rho1, n)
+	scr2 = relabel(rho2, n)
 	# check
 	for i in 1:n
 		if scr1[i] != scr2[i]
@@ -693,6 +692,15 @@ function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVe
 	if idx==6 cohesion6!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 end
 
+function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+	if idx==1 cohesion1!(s1,s2,sp_params.alpha,lg,M,case,add,lC); return; end
+	if idx==2 cohesion2!(s1,s2,sp_params.a,lg,M,case,add,lC); return; end
+	if idx==3 cohesion3!(s1,s2,sp_params.mu_0,sp_params.k0,sp_params.v0,sp_params.Psi,lg,M,S,case,add,lC); return; end
+	if idx==4 cohesion4!(s1,s2,sp_params.mu_0,sp_params.k0,sp_params.v0,sp_params.Psi,lg,M,S,case,add,lC); return; end
+	if idx==5 cohesion5!(s1,s2,sp_params.phi,lg,M,case,add,lC); return; end
+	if idx==6 cohesion6!(s1,s2,sp_params.phi,lg,M,case,add,lC); return; end
+end
+
 
 ############################################
 ##   SIMILARITY FUNCTIONS (covariates)    ##
@@ -951,6 +959,22 @@ function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
 	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
 	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
+end
+
+# numerical covariates specialization
+function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+	# println("numerical")
+	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+	if idx==4 similarity4!(X_jt,cv_params.mu_c,cv_params.lambda_c,cv_params.a_c,cv_params.b_c,lg,case,add,lS); return; end
+end
+# categorical covariates specialization
+function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+	# println("categorical")
+	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
 end
 
 # mu_c = 0.0
