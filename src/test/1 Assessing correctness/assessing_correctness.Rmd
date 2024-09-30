@@ -719,6 +719,26 @@ plot_ARI = function(partition,title){
 	mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 	mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
 }
+
+overlay_clusters = function(y_data,partition,title="",cexs=0.8){
+par(mar=c(2,2,2,1))
+for(i in 1:size(y_data)[1]){
+   if(i==1){
+     plot(1:size(y_data)[2],y_data[i,],col=cols[i],ylim=extrema(y_data),type='l',
+     	 xlab='time',main=title)
+ 	  } 
+	  else{
+		  lines(1:size(y_data)[2],y_data[i,],col=cols[i])
+	  }
+}
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		points(t,y_data[i,t],col=partition_matrix[i, t],
+			   pch=19,cex=cexs)
+	}
+}
+}
 ```
 
 
@@ -945,6 +965,7 @@ if (save_plots==TRUE) { dev.off() }
 
 # compute mse
 ```{r}
+yredORIGI=y
 MSE_matrices = function(m1,m2){
 	MSE = 0
 	for (i in 1:size(m1)[1]){
@@ -957,44 +978,44 @@ MSE_matrices = function(m1,m2){
 }
 
 ##### take the median/mean/mode
-summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+summary_fitted_mean = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+summary_fitted_median = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
 	for(t in 1:Tm){
 		values_j = c()
 		for (it in 1:size(drpm1$fitted)[3]){
 			values_j = c(values_j,drpm1$fitted[t,j,it])
 		}
-		summary_fitted[j,t] = mean(values_j)
-		# summary_fitted[j,t] = median(values_j)
+		summary_fitted_mean[j,t] = mean(values_j)
+		summary_fitted_median[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
-yredC=summary_fitted
+cat("C MSE\n")
+cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
+cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 # take last sample (maybe not the best choice)
 # yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 #################################################################
-summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
+summary_fitted_mean = t(rout$fitted[,,size(rout$fitted)[3]])*0
+summary_fitted_median = t(rout$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
 	for(t in 1:Tm){
 		values_j = c()
 		for (it in 1:size(rout$fitted)[3]){
 			values_j = c(values_j,rout$fitted[t,j,it])
 		}
-		summary_fitted[j,t] = mean(values_j)
-		# summary_fitted[j,t] = median(values_j)
+		summary_fitted_mean[j,t] = mean(values_j)
+		summary_fitted_median[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
-yredJ=summary_fitted
 # take last sample (maybe not the best choice)
 # yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 #################################################################
-yredORIGI=y
-
-#################################################################
-MSE_matrices(yredC,yredORIGI)
-# MSE_matrices(yredC,yredJ)
-MSE_matrices(yredJ,yredORIGI)
+cat("J MSE\n")
+cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
+cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 ```
 
 

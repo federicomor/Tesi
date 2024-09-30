@@ -95,9 +95,9 @@ full collections:   1
 	Y=y,              
 	sp_coords = sp,
 
-	Xcl_covariates = X_cl,
-	covariate_similarity_idx = 4,
-	cv_params = [0.,2.,1.,2.],  
+	# Xcl_covariates = X_cl,
+	# covariate_similarity_idx = 4,
+	# cv_params = [0.,2.,1.,2.],  
 	# cv_params = missing,  
 
 	M_dp = 1.0,                     
@@ -207,3 +207,4 @@ full collections:   1
 # end
 # println("(after the loop) x=$x")
 # end
+

@@ -1,0 +1,165 @@
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+a_sigma  = 1; b_sigma  = 0.4
+a_tau    = 1; b_tau    = 0.4
+a_lambda = 1; b_lambda = 0.4
+eta1_scale = 0.9
+
+- using seed 814.0 -
+fitting 20000 total iterates (with burnin=15000, thinning=5)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:09 ( 0.45 ms/it)
+
+done!
+Elapsed time: 9 seconds, 42 milliseconds
+LPML: 29.725846134455878 (the higher the better)
+WAIC: -109.38974623475411 (the lower the better)
+acceptance ratio eta1: 77.75%
+acceptance ratio phi1: 68.52%
+
+#################################################################
+
+# params
+m0_phi0 = 0
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+a_sigma  = 0.1; b_sigma  = 0.1
+a_tau    = 0.1; b_tau    = 0.1
+a_lambda = 0.1; b_lambda = 0.1
+eta1_scale = 0.9
+- using seed 814.0 -
+fitting 20000 total iterates (with burnin=15000, thinning=5)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:07 ( 0.38 ms/it)
+
+done!
+Elapsed time: 7 seconds, 683 milliseconds
+LPML: 63.8168995383769 (the higher the better)
+WAIC: -176.5729415476546 (the lower the better)
+acceptance ratio eta1: 77.90%
+acceptance ratio phi1: 76.07%
+
+- using seed 814.0 -
+fitting 50000 total iterates (with burnin=30000, thinning=20)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:21 ( 0.43 ms/it)
+
+done!
+Elapsed time: 21 seconds, 412 milliseconds
+LPML: 67.28215108039853 (the higher the better)
+WAIC: -177.47901487363896 (the lower the better)
+acceptance ratio eta1: 77.98%
+acceptance ratio phi1: 76.02%
+
+###########################################################
+
+a_sigma  = 0.01; b_sigma  = 0.01
+a_tau    = 0.1; b_tau    = 0.1
+a_lambda = 0.1; b_lambda = 0.1
+eta1_scale = 0.9
+
+- using seed 814.0 -
+fitting 20000 total iterates (with burnin=15000, thinning=5)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:08 ( 0.41 ms/it)
+
+done!
+Elapsed time: 8 seconds, 120 milliseconds
+LPML: 84.16960736687838 (the higher the better)
+WAIC: -227.54288899510865 (the lower the better)
+acceptance ratio eta1: 68.84%
+acceptance ratio phi1: 76.42%
+
+fitting 50000 total iterates (with burnin=30000, thinning=20)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:23 ( 0.47 ms/it)
+
+done!
+Elapsed time: 23 seconds, 466 milliseconds
+LPML: 81.92030043586237 (the higher the better)
+WAIC: -226.86593968131638 (the lower the better)
+acceptance ratio eta1: 68.81%
+acceptance ratio phi1: 76.35%
+
+################################################################
+
+a_sigma  = 0.01; b_sigma  = 0.01
+a_tau    = 1; b_tau    = 2
+a_lambda = 1; b_lambda = 2
+
+- using seed 814.0 -
+fitting 50000 total iterates (with burnin=30000, thinning=20)
+thus producing 1000 valid iterates in the end
+
+on n=20 subjects
+for T=10 time instants
+
+with space? false
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:19 ( 0.39 ms/it)
+
+done!
+Elapsed time: 19 seconds, 714 milliseconds
+LPML: 95.19551901060186 (the higher the better)
+WAIC: -225.5437867050398 (the lower the better)
+acceptance ratio eta1: 69.48%
+acceptance ratio phi1: 68.62%

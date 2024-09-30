@@ -713,7 +713,7 @@ end
 # @report_opt cohesion6(s1,s2,phi,lg=false)
 
 
-function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
+function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
 	# println("cohes vec")
 	# @show sp_params
 	idx==1 && return cohesion1(s1,s2,sp_params[1],lg,M) 
@@ -724,7 +724,7 @@ function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVec
 	idx==6 && return cohesion6(s1,s2,sp_params[1],lg,M) 
 end
 
-function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
+function spatial_cohesion(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
 	# println("cohes struct")
 	# @show sp_params
 	idx==1 && return cohesion1(s1,s2,sp_params.alpha,lg,M) 
@@ -735,7 +735,7 @@ function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVec
 	idx==6 && return cohesion6(s1,s2,sp_params.phi,lg,M) 
 end
 
-function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+function spatial_cohesion!(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
 	if idx==1 cohesion1!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 	if idx==2 cohesion2!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 	if idx==3 cohesion3!(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S,case,add,lC); return; end
@@ -744,7 +744,7 @@ function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVe
 	if idx==6 cohesion6!(s1,s2,sp_params[1],lg,M,case,add,lC); return; end
 end
 
-function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+function spatial_cohesion!(idx::Real, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
 	if idx==1 cohesion1!(s1,s2,sp_params.alpha,lg,M,case,add,lC); return; end
 	if idx==2 cohesion2!(s1,s2,sp_params.a,lg,M,case,add,lC); return; end
 	if idx==3 cohesion3!(s1,s2,sp_params.mu_0,sp_params.k0,sp_params.v0,sp_params.Psi,lg,M,S,case,add,lC); return; end
@@ -984,7 +984,7 @@ end
 # sim5 removed, double dippery is too much
 
 # numerical covariates specialization
-function covariate_similarity(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool)
+function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool)
 	# println("numerical")
 	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
 	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
@@ -992,7 +992,7 @@ function covariate_similarity(idx::Int, X_jt::AbstractVector{<:Real}, cv_params:
 	idx==4 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg) 
 end
 # categorical covariates specialization
-function covariate_similarity(idx::Int, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool)
+function covariate_similarity(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool)
 	# println("categorical")
 	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
 	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
@@ -1001,7 +1001,7 @@ end
 
 
 # numerical covariates specialization
-function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	# println("numerical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
 	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
@@ -1009,7 +1009,7 @@ function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params
 	if idx==4 similarity4!(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg,case,add,lS); return; end
 end
 # categorical covariates specialization
-function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function covariate_similarity!(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	# println("categorical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
 	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
@@ -1017,7 +1017,7 @@ function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params
 end
 
 # # numerical covariates specialization
-# function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+# function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 # 	# println("numerical")
 # 	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
 # 	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end

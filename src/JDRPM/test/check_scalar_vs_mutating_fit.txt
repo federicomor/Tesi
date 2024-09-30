@@ -1,0 +1,40 @@
+all 2nd runs
+##############
+##   NEW    ##
+##############
+############# space only #############
+Elapsed time: 2 seconds, 51 milliseconds
+LPML: -573.5247999716885 (the higher the better)
+WAIC: 647.080357797959 (the lower the better)
+acceptance ratio eta1: 95.18%
+acceptance ratio phi1: 97.90%
+  2.069845 seconds (18.96 M allocations: 1.525 GiB, 6.79% gc time)
+
+############# space+Xcl #############
+Elapsed time: 3 seconds, 31 milliseconds
+LPML: -671.051438358897 (the higher the better)
+WAIC: 653.5956953772563 (the lower the better)
+acceptance ratio eta1: 95.83%
+acceptance ratio phi1: 97.40%
+  3.033944 seconds (21.04 M allocations: 1.723 GiB, 6.58% gc time)
+
+##############
+##   OFF    ##
+##############
+############# space only #############
+Elapsed time: 2 seconds, 493 milliseconds
+LPML: -573.5247999716885 (the higher the better)
+WAIC: 647.080357797959 (the lower the better)
+acceptance ratio eta1: 95.18%
+acceptance ratio phi1: 97.90%
+  2.507185 seconds (18.96 M allocations: 1.473 GiB, 7.66% gc time)
+  
+############# space+Xcl #############
+Elapsed time: 2 seconds, 805 milliseconds
+LPML: -671.051438358897 (the higher the better)
+WAIC: 653.5956953772563 (the lower the better)
+acceptance ratio eta1: 95.83%
+acceptance ratio phi1: 97.40%
+  2.814842 seconds (19.88 M allocations: 1.602 GiB, 3.61% gc time)
+
+

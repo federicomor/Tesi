@@ -17,7 +17,7 @@ function test_spatial_cohesion()
 
     # Collect results for each function
 	for i in 1:6
-		println("\n[cohesion $i]")
+		# println("\n[cohesion $i]")
 		results_vector = 0
 		results_struct = 0
 		if i in [1,2,5,6]
@@ -27,8 +27,9 @@ function test_spatial_cohesion()
 			results_vector = spatial_cohesion(i, s1, s2, sp_params_vector34, lg, M, S) 
 			results_struct = spatial_cohesion(i, s1, s2, sp_params_struct, lg, M, S)
 		end
-		println("\nvec: $(results_vector)\nstr: $(results_struct)")
-        @test isapprox(results_vector, results_struct, atol=1e-6)
+		# println("\nvec: $(results_vector)\nstr: $(results_struct)")
+        # @test isapprox(results_vector, results_struct, atol=1e-6)
+        @test isequal(results_vector, results_struct)
     end
     println("All tests passed!")
 end
@@ -53,7 +54,7 @@ function test_spatial_cohesion_mutating()
 
     # Collect results for each function
 	for i in 1:6
-		println("\n[cohesion $i]")
+		# println("\n[cohesion $i]")
 		results_vector = 0
 		results_struct = 0
 		if i in [1,2,5,6]
@@ -67,8 +68,9 @@ function test_spatial_cohesion_mutating()
 			spatial_cohesion!(i, s1, s2, sp_params_struct, lg, M, S, case,add,lC_s)
 			results_struct = lC_s
 		end
-		println("\nvec: $(results_vector)\nstr: $(results_struct)")
-        @test isapprox(results_vector, results_struct, atol=1e-6)
+		# println("\nvec: $(results_vector)\nstr: $(results_struct)")
+        # @test isapprox(results_vector, results_struct, atol=1e-6)
+        @test isequal(results_vector, results_struct)
     end
 	print("All tests passed!")
 end
@@ -94,7 +96,8 @@ function test_covariate_similarity_numerical()
         covariate_similarity!(idx, X_jt_num, cv_params_num, lg, 1, false, lS)
         
         # Compare the results
-        @test isapprox(results_non_mutating[idx], lS[1], atol=1e-6)
+        # @test isapprox(results_non_mutating[idx], lS[1], atol=1e-6)
+        @test isequal(results_non_mutating[idx], lS[1])
         println("Numerical test passed for idx=$idx")
     end
 end
@@ -118,7 +121,8 @@ function test_covariate_similarity_categorical()
         covariate_similarity!(idx, X_jt_cat, cv_params_cat, lg, 1, false, lS)
         
         # Compare the results
-        @test isapprox(results_non_mutating[idx], lS[1], atol=1e-6)
+        # @test isapprox(results_non_mutating[idx], lS[1], atol=1e-6)
+        @test isequal(results_non_mutating[idx], lS[1])
         println("Categorical test passed for idx=$idx")
     end
 end
