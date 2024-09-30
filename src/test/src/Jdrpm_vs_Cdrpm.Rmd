@@ -104,7 +104,8 @@ y_with_na
 ## Fits
 ```{r}
 # niter=40000; nburn=28000; nthin=12
-niter=50000; nburn=30000; nthin=20
+# niter=50000; nburn=30000; nthin=20
+niter=20000; nburn=12000; nthin=8
 # niter=30000; nburn=20000; nthin=10
 # niter=10000; nburn=2000; nthin=8
 # niter=1000; nburn=200; nthin=4
@@ -130,8 +131,8 @@ eta1_scale = 0.9
 sig_mh_sig2 = 0.3
 sig_mh_tau2 = 0.3
 sig_mh_lambda2 = 0.3
-sig_mh_eta1 = 0.3
-sig_mh_phi1 = 0.3
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
 
 update_eta1 = TRUE
 update_phi1 = TRUE
@@ -229,12 +230,12 @@ out = module_JDRPM$MCMC_fit(
 	update_phi1 = update_phi1,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
-	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
 	# beta_priors = c(rep(1,p),2),
 	beta_priors = NA,
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
-	phi1_priors = sig_mh_phi1^2,
+	phi1_priors = sig_mh_phi1,
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	
@@ -1924,10 +1925,10 @@ s_std
 seed = 314.0
 cat("seed",seed,"\n")
 
-# niter=1000; nburn=500; nthin=2
+niter=1000; nburn=800; nthin=2
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
 # niter=30000; nburn=20000; nthin=10
-niter=50000; nburn=40000; nthin=10
+# niter=50000; nburn=40000; nthin=10
 # niter=80000; nburn=60000; nthin=20
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")

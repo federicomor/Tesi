@@ -47,69 +47,16 @@ end
 # include("../MCMC_fit.jl")
 
 #=
-WITH SPACE ONLY #####################
-Progress: 100% Time: 0:00:03 ( 3.70 ms/it)
 
-done!
-Elapsed time: 3 seconds, 714 milliseconds
-LPML: -917.3774405189342 (the higher the better)
-WAIC: 721.5373974399014 (the lower the better)
-acceptance ratio eta1: 91.17%
-acceptance ratio phi1: 97.50%
-  3.727008 seconds (37.85 M allocations: 5.039 GiB, 11.23% gc time)
-elapsed time (ns):  3727008100
-gc time (ns):       418414000
-bytes allocated:    5410637032
-pool allocs:        37417311
-non-pool GC allocs: 432200
-malloc() calls:     11
-free() calls:       43
-minor collections:  80
-full collections:   1
-
-WITH COVARIATES CL #######################
-Progress: 100% Time: 0:00:03 ( 3.62 ms/it)
-
-done!
-Elapsed time: 3 seconds, 618 milliseconds
-LPML: -876.8522141016783 (the higher the better)
-WAIC: 963.2034600366517 (the lower the better)
-acceptance ratio eta1: 95.30%
-acceptance ratio phi1: 98.60%
-  3.631716 seconds (20.64 M allocations: 1.977 GiB, 18.46% gc time)
-elapsed time (ns):  3631716200
-gc time (ns):       670326900
-bytes allocated:    2122558008
-pool allocs:        20641695
-non-pool GC allocs: 1014
-malloc() calls:     11
-free() calls:       45
-minor collections:  15
-full collections:   1
-
-LONGER TEST SIMILAR TO DFWSC #################
-Progress: 100% Time: 0:00:05 (59.28 ms/it)
-
-done!
-Elapsed time: 5 seconds, 928 milliseconds
-LPML: -7113.988241311792 (the higher the better)
-WAIC: 8972.726015254577 (the lower the better)
-acceptance ratio eta1: 94.61%
-acceptance ratio phi1: 99.00%
-  5.955901 seconds (22.60 M allocations: 4.815 GiB, 2.54% gc time)
-elapsed time (ns):  5955901300
-gc time (ns):       151102600
-bytes allocated:    5169721376
-pool allocs:        22589818
-non-pool GC allocs: 9822
-malloc() calls:     120
-free() calls:       100
-minor collections:  113
-full collections:   0
 =#
 
-include("../prelease/MCMC_fit.jl")
+# include("../old/MCMC_fit.jl")
+# include("../prelease/MCMC_fit.jl")
+
+include("../new/MCMC_fit.jl")
+
 include("../MCMC_fit.jl")
+
 # ProfileCanvas.@profview MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
 # @profview_allocs MCMC_fit(
@@ -118,15 +65,40 @@ include("../MCMC_fit.jl")
 # @profview_allocs out = MCMC_fit(
 # @descend MCMC_fit(
 
+#=
+# LPML: -573.5247999716885 (the higher the better)
+# WAIC: 647.080357797959 (the lower the better)
+# acceptance ratio eta1: 95.18%
+# acceptance ratio phi1: 97.90%
+# space+cova
+Elapsed time: 2 seconds, 680 milliseconds
+LPML: -694.8307767293472 (the higher the better)
+WAIC: 672.4901618487447 (the lower the better)
+acceptance ratio eta1: 94.94%
+acceptance ratio phi1: 97.20%
+  2.686072 seconds (22.53 M allocations: 1.715 GiB, 6.53% gc time)
+elapsed time (ns):  2686072100
+gc time (ns):       175324000
+bytes allocated:    1841554000
+pool allocs:        22524595
+non-pool GC allocs: 1014
+malloc() calls:     11
+free() calls:       11
+minor collections:  39
+full collections:   1
+=#
+
+niter = 2
 @timev MCMC_fit(
 # out = MCMC_fit(
+	log_file_name = "new.txt",
 	Y=y,              
 	sp_coords = sp,
 
 	# Xcl_covariates = X_cl,
 	# covariate_similarity_idx = 4,
 	# cv_params = [0.,2.,1.,2.],  
-	# cv_params = missing,  
+	cv_params = missing,  
 
 	M_dp = 1.0,                     
 	initial_partition = missing,

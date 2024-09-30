@@ -3,6 +3,34 @@ using Statistics
 using StaticArrays
 using LinearAlgebra
 
+@kwdef struct SpParams
+	# cohesion 1
+	alpha::Real
+	# cohesion 2
+	a::Real
+	# cohesion 3 and 4
+	mu_0::AbstractVector{Float64}
+	k0::Real
+	v0::Real
+	Psi::AbstractMatrix{Float64}
+	# cohesion 5 and 6
+	phi::Real
+end
+
+#### the version without CvParams struct seems faster
+@kwdef struct CvParams
+	# cohesion 1
+	alpha::Real
+	# cohesion 2 and 3 (Gower)
+	alpha_g::Real
+	# cohesion 4
+	mu_c::Real
+	lambda_c::Real
+	a_c::Real
+	b_c::Real
+end
+
+
 function lgamma(x::Real)
 	first(logabsgamma(x))
 end
@@ -170,6 +198,7 @@ end
 
 # paper 3 section 3.1
 function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real, lg::Bool, M::Real=1.0)::Float64
+	# println("cohesion 1 classic")
 	sdim = length(s1)
 	if sdim==1 
 		return lg ? log(M) : M
@@ -196,7 +225,8 @@ function cohesion1(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alp
 	end
 	return lg ? out : exp(out)
 end
-function cohesion1!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion1!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, alpha::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+	# println("cohesion 1 mutating")
 	sdim = length(s1)
 	if sdim==1 
 		return lg ? log(M) : M
@@ -226,10 +256,12 @@ function cohesion1!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, al
 	else
 		lC[case] = lg ? out : exp(out)
 	end
+	return 
 end
 
 # paper 3 section 3.1
 function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real, lg::Bool, M::Real=1.0)::Float64
+	# println("cohesion 2 classic")
 	sdim = length(s1)
 	# out = log(M) + lgamma(sdim)
 	out = 1.0
@@ -243,7 +275,8 @@ function cohesion2(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::
 	end
 	return lg ? log(out) : out
 end
-function cohesion2!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion2!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+	# println("cohesion 2 mutating")
 	sdim = length(s1)
 	# out = log(M) + lgamma(sdim)
 	out = 1.0
@@ -260,6 +293,7 @@ function cohesion2!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, a:
 	else
 		lC[case] = lg ? log(out) : out
 	end
+	return
 end
 
 function G2a(a::Real, lg::Bool)
@@ -350,6 +384,8 @@ end
 
 # here the in between version, which is faster
 function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool, M::Real=1.0, S=@MMatrix zeros(2, 2))::Float64
+	# println("cohesion 3 classic")
+	# @show mu_0 k0 v0 Psi
 	sdim = length(s1)
 	# Compute sample means
 	sbar1 = mean(s1)
@@ -381,7 +417,8 @@ function cohesion3(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	return lg ? out : exp(out)
 end
 
-function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool,  M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool,  M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
+	# println("cohesion 3 mutating")
 	sdim = length(s1)
 	# Compute sample means
 	sbar1 = mean(s1)
@@ -415,6 +452,7 @@ function cohesion3!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu
 	else
 		lC[case] = lg ? out : exp(out)
 	end
+	return 
 end
 
 # scalar old version
@@ -526,7 +564,7 @@ function cohesion4(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_
 	out = -sdim * logpi + G2a(0.5 * vnn, true) - G2a(0.5 * vn, true) + 0.5 * vn * logdet(Psi_n) - 0.5 * vnn * logdet(Psi_nn) + log(kn) - log(knn)
 	return lg ? out : exp(out)
 end
-function cohesion4!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool, M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion4!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu_0::AbstractVector{Float64}, k0::Real, v0::Real, Psi::AbstractMatrix{Float64}, lg::Bool, M::Real=1.0, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
 	sdim = length(s1)
 	# Compute sample means
 	sbar1 = mean(s1)
@@ -572,6 +610,7 @@ function cohesion4!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, mu
 	else
 		lC[case] = lg ? out : exp(out)
 	end
+	return 
 end
 
 # paper 6 pag 4, cluster variance/entropy similarity function
@@ -589,7 +628,7 @@ function cohesion5(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi
 	out = -phi*sum_dist
 	return lg ? out : exp(out)
 end
-function cohesion5!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion5!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
 	sdim = length(s1)
 	# compute the centroids
 	cent1 = mean(s1)
@@ -606,6 +645,7 @@ function cohesion5!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, ph
 	else
 		lC[case] = lg ? out : exp(out)
 	end
+	return 
 end
 
 # non trovata su nessun paper
@@ -626,7 +666,7 @@ function cohesion6(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi
 	out = -phi*log(sum_dist)
 	return lg ? out : exp(out)
 end
-function cohesion6!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))::Float64
+function cohesion6!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, phi::Real, lg::Bool, M::Real=1.0, case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
 	sdim = length(s1)
 	if sdim==1
 		return lg ? 0.0 : 1.0
@@ -646,6 +686,7 @@ function cohesion6!(s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, ph
 	else
 		lC[case] = lg ? out : exp(out)
 	end
+	return
 end
 
 # n = 20
@@ -673,14 +714,25 @@ end
 
 
 function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
+	# println("cohes vec")
+	# @show sp_params
 	idx==1 && return cohesion1(s1,s2,sp_params[1],lg,M) 
 	idx==2 && return cohesion2(s1,s2,sp_params[1],lg,M) 
-	# idx==3 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==3 && return cohesion3(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
-	# idx==4 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg=lg,M=M) 
 	idx==4 && return cohesion4(s1,s2,sp_params[1],sp_params[2],sp_params[3],sp_params[4],lg,M,S) 
 	idx==5 && return cohesion5(s1,s2,sp_params[1],lg,M) 
 	idx==6 && return cohesion6(s1,s2,sp_params[1],lg,M) 
+end
+
+function spatial_cohesion(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::SpParams, lg::Bool, M::Real, S=@MMatrix zeros(2, 2))
+	# println("cohes struct")
+	# @show sp_params
+	idx==1 && return cohesion1(s1,s2,sp_params.alpha,lg,M) 
+	idx==2 && return cohesion2(s1,s2,sp_params.a,lg,M) 
+	idx==3 && return cohesion3(s1,s2,sp_params.mu_0,sp_params.k0,sp_params.v0,sp_params.Psi,lg,M,S) 
+	idx==4 && return cohesion4(s1,s2,sp_params.mu_0,sp_params.k0,sp_params.v0,sp_params.Psi,lg,M,S) 
+	idx==5 && return cohesion5(s1,s2,sp_params.phi,lg,M) 
+	idx==6 && return cohesion6(s1,s2,sp_params.phi,lg,M) 
 end
 
 function spatial_cohesion!(idx::Int, s1::AbstractVector{Float64}, s2::AbstractVector{Float64}, sp_params::Vector, lg::Bool, M::Real, S=@MMatrix(zeros(2, 2)), case::Int=1, add::Bool=false, lC=@MVector(zeros(2)))
@@ -744,7 +796,7 @@ function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 		return lg ? -alpha * Hx : exp(-alpha * Hx) 
 	end
 end
-function similarity1!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+function similarity1!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	if isa(first(X_jt),Real) # numerical case
 		xbar_j = mean(X_jt)
 		card_Sjt = length(X_jt)
@@ -813,7 +865,7 @@ function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	out = -alpha * H
 	return lg ? out : exp(out)
 end
-function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	H = 0.0
 	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
@@ -829,6 +881,7 @@ function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}
 	else
 		lS[case] = lg ? out : exp(out)
 	end
+	return
 end
 
 ##### Average Gower dissimilarity - paper 6 pag 4
@@ -845,7 +898,7 @@ function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 	out = -2*alpha / (n_j*(n_j-1)) * H
 	return lg ? out : exp(out)
 end
-function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	H = 0.0
 	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
@@ -861,6 +914,7 @@ function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}
 	else
 		lS[case] = lg ? out : exp(out)
 	end
+	return
 end
 
 # # 0 => completely dissimilar
@@ -905,7 +959,7 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
 	return lg ? out : exp(out)
 end
-function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))::Float64
+function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	n = length(X_jt)
 	nm = n/2
 	xbar = mean(X_jt)
@@ -921,6 +975,7 @@ function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, 
 	else
 		lS[case] = lg ? out : exp(out)
 	end
+	return 
 end
 
 
@@ -961,21 +1016,21 @@ function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params
 	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
 end
 
-# numerical covariates specialization
-function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
-	# println("numerical")
-	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
-	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
-	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
-	if idx==4 similarity4!(X_jt,cv_params.mu_c,cv_params.lambda_c,cv_params.a_c,cv_params.b_c,lg,case,add,lS); return; end
-end
-# categorical covariates specialization
-function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
-	# println("categorical")
-	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
-	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
-	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
-end
+# # numerical covariates specialization
+# function covariate_similarity!(idx::Int, X_jt::AbstractVector{<:Real}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+# 	# println("numerical")
+# 	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
+# 	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+# 	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+# 	if idx==4 similarity4!(X_jt,cv_params.mu_c,cv_params.lambda_c,cv_params.a_c,cv_params.b_c,lg,case,add,lS); return; end
+# end
+# # categorical covariates specialization
+# function covariate_similarity!(idx::Int, X_jt::AbstractVector{String}, cv_params::CvParams, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+# 	# println("categorical")
+# 	if idx==1 similarity1!(X_jt,cv_params.alpha,lg,case,add,lS); return; end
+# 	if idx==2 similarity2!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+# 	if idx==3 similarity3!(X_jt,cv_params.alpha_g,lg,case,add,lS); return; end
+# end
 
 # mu_c = 0.0
 # lambda_c = 1.0

@@ -11,6 +11,7 @@ using Printf
 
 include("debug.jl")
 include("utils.jl")
+log_file = open("log.txt", "w+")
 
 function MCMC_fit(;
 	# Y::Matrix{Float64},                   # n*T matrix, the observed values
@@ -50,12 +51,12 @@ function MCMC_fit(;
 	covariate_similarity_idx = missing,   # similarity choice
 	cv_params = missing,                  # Parameters for covariates similarity functions
 
-	draws::Float64,                       # Number of MCMC draws
-	burnin::Float64,                      # Number of burn-in
-	thin::Float64,                        # Thinning interval
+	draws::Real,                       # Number of MCMC draws
+	burnin::Real,                      # Number of burn-in
+	thin::Real,                        # Thinning interval
 
 	logging = false,                      # Wheter to save execution infos to log file
-	seed::Float64,                        # Random seed for reproducibility
+	seed::Real,                        # Random seed for reproducibility
 	simple_return = false                 # Return just the partition Si
 	)
 	Random.seed!(round(Int64,seed))
@@ -91,7 +92,6 @@ function MCMC_fit(;
 
 
 	if logging
-		log_file = open("log.txt", "w+")
 		println("Logging to file: ", abspath("log.txt"))
 
 		printlgln(replace(string(now()),"T" => "   "))
@@ -1294,10 +1294,10 @@ function MCMC_fit(;
 	if update_phi1 @printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100 end
 	println()
 
-	if logging
+	# if logging
 		# debug(@showd to)
 		close(log_file)
-	end
+	# end
 
 	if simple_return
 		return Si_out, LPML, WAIC

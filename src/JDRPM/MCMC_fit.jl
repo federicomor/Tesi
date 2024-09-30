@@ -11,7 +11,6 @@ using Printf
 
 log_file = open("log.txt", "w+")
 include("debug.jl")
-include("types.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -52,9 +51,9 @@ function MCMC_fit(;
 	covariate_similarity_idx = missing,   # similarity choice
 	cv_params = missing,                  # Parameters for covariates similarity functions
 
-	draws::Int64,                         # Number of MCMC draws
-	burnin::Int64,                        # Number of burn-in
-	thin::Int64,                          # Thinning interval
+	draws::Real,                         # Number of MCMC draws
+	burnin::Real,                        # Number of burn-in
+	thin::Real,                          # Thinning interval
 
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Real,                           # Random seed for reproducibility
@@ -82,11 +81,11 @@ function MCMC_fit(;
 		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
 
 		S=@MMatrix zeros(2, 2)
-		if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
-			sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
-		else 
-			sp_params_real = sp_params
-		end
+		# if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
+		# 	sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
+		# else 
+		# 	sp_params_real = sp_params
+		# end
 		sp_params_struct = SpParams(
 			alpha = spatial_cohesion_idx==1 ? sp_params[1] : 1.,
 			a = spatial_cohesion_idx==2 ? sp_params[1] : 1.,
@@ -96,6 +95,7 @@ function MCMC_fit(;
 			Psi = (spatial_cohesion_idx==3 || spatial_cohesion_idx==4) ? SMatrix{2,2}(sp_params[4]...) : @SMatrix(zeros(2,2)),
 			phi = (spatial_cohesion_idx==5 || spatial_cohesion_idx==6) ? sp_params[1] : 1.
 		)
+		@show sp_params sp_params_struct
 	end
 
 	# if cl_xPPM
@@ -571,7 +571,6 @@ try
 					# lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
 					# lC = @MVector zeros(2)
 					# lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
-					lS .= 0.
 					# debug(@showd Si_iter nclus_red)
 
 					# unit j can enter an existing cluster...
@@ -582,6 +581,7 @@ try
 						# aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red) # slow
 						# aux_idxs = findall_faster(jj -> Si_red[jj] == k, 1:n_red)
 						aux_idxs = findall(Si_red .== k) # fast
+						lC .= 0.
 						if sPPM
 							# filter the spatial coordinates of the units of label k
 							# debug(@showd sp_idxs)
@@ -628,9 +628,12 @@ try
 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_struct, true, M_dp, S,1,false,lC)
 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,2,false,lC)
 						end
+						# printlgln("i=$i j=$j t=$t")
+						# debug(@showd spatial_cohesion_idx sp_params_struct aux_idxs lC)
 						# debug(@showd lCn lCo)
 						# debug(@showd cl_xPPM)
 
+						lS .= 0.
 						# Xcl_covariates is a n*p*T matrix
 						if cl_xPPM
 							# lS .= 0.
@@ -661,7 +664,7 @@ try
 					# ... or unit j can create a singleton
 					# lCn = 0.0
 					# lSn = 0.0 
-					lS .= 0.
+					lC .= 0.
 					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
@@ -670,6 +673,7 @@ try
 						# spatial_cohesion!(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, true, M_dp, S,2,false,lC)
 						spatial_cohesion!(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_struct, true, M_dp, S,2,false,lC)
 					end
+					lS .= 0.
 					if cl_xPPM
 						# lS .= 0.
 						for p in 1:p_cl
@@ -689,6 +693,8 @@ try
 
 					# now use the weights towards sampling the new gamma_jt
 					# max_ph = maximum(lg_weights)
+					# printlgln("i=$i j=$j t=$t")
+					# debug(@showd lg_weights)
 					max_ph = maximum(@view lg_weights[1:(nclus_red+1)])
 					# max_ph = maximum(lg_weights[1:(nclus_red+1)])
 
@@ -868,6 +874,7 @@ try
 									# debug(@showd p)
 									Xn_view = @view Xcl_covariates[aux_idxs,p,t]
 									# debug(@showd Xn)
+									# debug(@showd kk lPP)
 									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
 									# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
@@ -876,6 +883,7 @@ try
 							# end # of the @timeit for sPPM
 							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
 							# lpp += log_Mdp + lgamma(nh_tmp[kk])
+
 							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
@@ -901,7 +909,6 @@ try
 						nh_tmp[k] -= 1
 					end
 				end
-					
 				# print(@showd ph, "before k+1")
 				# ... plus the case of being assigned to a new (singleton for now) cluster 
 				k = nclus_iter[t]+1
@@ -1520,10 +1527,10 @@ try
 	println()
 
 	close(log_file)
-	if !logging
+	# if !logging
 		# debug(@showd to)
-		rm("log.txt",force=true)	
-	end
+		# rm("log.txt",force=true)	
+	# end
 
 	if simple_return
 		return Si_out, LPML, WAIC
