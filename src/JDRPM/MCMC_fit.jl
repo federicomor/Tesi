@@ -95,7 +95,7 @@ function MCMC_fit(;
 			Psi = (spatial_cohesion_idx==3 || spatial_cohesion_idx==4) ? SMatrix{2,2}(sp_params[4]...) : @SMatrix(zeros(2,2)),
 			phi = (spatial_cohesion_idx==5 || spatial_cohesion_idx==6) ? sp_params[1] : 1.
 		)
-		@show sp_params sp_params_struct
+		# @show sp_params sp_params_struct
 	end
 
 	# if cl_xPPM
@@ -239,6 +239,7 @@ try
 
 
 	############# send feedback #############
+	println(replace(string(now()),"T" => " ")[1:end-4])
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")

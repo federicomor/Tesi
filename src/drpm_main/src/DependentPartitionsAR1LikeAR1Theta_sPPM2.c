@@ -348,7 +348,9 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	//
 	// ===================================================================================
 	
-
+	time_t now;
+	time(&now);
+	Rprintf("%s", ctime(&now));
 	for(i = 0; i < *draws; i++){
 
 	if(i % 100 == 0){

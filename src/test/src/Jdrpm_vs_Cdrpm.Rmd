@@ -897,6 +897,9 @@ compare_ARI(Cmod1,Jmod2)
 
 
 # ==========
+# with NA
+
+# ==========
 
 # 2. SPACE DATA
 Spatio-temporal data set with rural background PM10 concentrations in Germany 2005

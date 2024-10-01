@@ -133,6 +133,9 @@ A_ub_lambda = 5
 a_sigma  = 2; b_sigma  = 2
 a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
+# a_sigma  = 1.3; b_sigma  = 1.9
+# a_tau    = 1.3; b_tau    = 1.9
+# a_lambda = 1.3; b_lambda = 1.9
 # a_sigma  = 1; b_sigma  = 2
 # a_tau    = 1; b_tau    = 2
 # a_lambda = 1; b_lambda = 2
@@ -144,7 +147,7 @@ eta1_scale = 0.9
 sig_mh_sig2 = 0.3
 sig_mh_tau2 = 0.3
 sig_mh_lambda2 = 0.3
-sig_mh_eta1 = 0.2
+sig_mh_eta1 = 0.1
 sig_mh_phi1 = 0.2
 
 update_eta1 = TRUE
@@ -243,12 +246,12 @@ out = module_JDRPM$MCMC_fit(
 	update_phi1 = update_phi1,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
-	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
 	# beta_priors = c(rep(1,p),2),
 	beta_priors = NA,
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
-	phi1_priors = sig_mh_phi1^2,
+	phi1_priors = sig_mh_phi1,
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	
@@ -259,7 +262,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = as.integer(niter), burnin = as.integer(nburn),thin = as.integer(nthin),
 	# draws = 100000, burnin = 60000,thin = 40,
 	logging = FALSE,
-	seed = 314.0
+	seed = 111.0
 )
 ```
 
@@ -305,7 +308,7 @@ rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
 ```{r}
-# save(rout,file="no_space_20k_rout_full.Rdata")
+save(rout,drpm1,file="space_full_CJ.Rdata")
 ```
 
 
@@ -314,7 +317,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # y_with_na
 # y
-j = round(runif(1,1,N))
+j = max(1,min(round(runif(1,1,N)),N))
 t = round(runif(1,1,Tm))
 # size(rout$fitted)
 par(mfrow=c(2,1),mar=c(1,2,3,1))
@@ -326,61 +329,6 @@ plot(drpm1$fitted[t,j,],type="l",main=paste0("C trace plot of j=",j," at t=",t),
 abline(h=y[j,t],col="#005500")
 ```
 
-```{r}
-##### take last sample (maybe not the best choice)
-# for (it in 0:10){
-yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
-
-##### take the median/mean/mode
-summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
-for(j in 1:N){
-	for(t in 1:Tm){
-		values_j = c()
-		for (it in 1:size(rout$fitted)[3]){
-			values_j = c(values_j,rout$fitted[t,j,it])
-		}
-		summary_fitted[j,t] = mean(values_j)
-		# summary_fitted[j,t] = median(values_j)
-		# summary_fitted[j,t] = Mode(values_j) # function from include.R
-	}
-}
-yredJ = summary_fitted
-yred=y
-
-par(mar=c(4,4,4,2))
-cols = colora(size(yredJ)[1],56,0)
-for(i in 1:size(yredJ)[1]){
-   if(i==1){
-     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
-     	 ylim=extrema(yredJ,yred),type='l',xlab='time',ylab="fitted values",
-     	 # main=paste("model J",it))
-     	 main="model J")
- 	  } 
-	  else{
-		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
-	  }
-}
-
-# original real data
-cols = colora(N,seed = 56,show = 0)
-cols = colora(size(yred)[1],56,0)
-for(i in 1:size(yred)[1]){
-   if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred,yredJ),type='l',
-     	 xlab='time',ylab='values',main="original data")
- 	  }
-	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
-	  }
-	text(0.92,yred[i,1],paste(i),col=cols[i])
-}
-# legend("topleft", legend = paste("Unit", 1:size(yred)[1]), col = cols, lty = 1,cex=0.5)
-
-```
-
-```{r}
-y_with_na
-```
 
 
 ```{r}
@@ -428,7 +376,7 @@ plot(rout$alpha[,time],type="l",
 ```{r}
 size(drpm1$mu)
 size(rout$muh)
-unitj = round(runif(1,0,N))
+unitj = max(1,min(round(runif(1,0,N)),N))
 for (time in 1:Tm){
 		par(mfrow=c(2,2),mar=c(2,2,4,2))
 
@@ -458,7 +406,7 @@ for (time in 1:Tm){
 ```{r}
 size(drpm1$sig2)
 size(rout$sigma2h)
-unitj = round(runif(1,0,N))
+unitj = max(1,min(round(runif(1,0,N)),N))
 for (time in 1:Tm){
 		par(mfrow=c(2,2),mar=c(2,2,4,2))
 
@@ -641,10 +589,10 @@ generate_partition = function(model){
 	return(partition)
 }
 
-plot_partition_with_numbers = function(partition,title,cex=1.5){
+plot_partition_with_numbers = function(partition,title,cex=1.5,line=1.2){
 	partition_matrix <- do.call(cbind, partition)
 	plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, N)+c(-0.5,0.5),
-	     xlab = "time", ylab = "units",
+	     xlab = "", ylab = "units",
 	     xaxt = "n", yaxt = "n", main = title)
 	axis(1, at = 1:Tm, labels = 1:Tm)
 	for (t in 1:Tm) {
@@ -653,6 +601,7 @@ plot_partition_with_numbers = function(partition,title,cex=1.5){
 	         col = partition_matrix[unit, t], cex = cex)
 	  }
 	}
+	title(xlab="time",line=line)
 }
 
 plot_partition_with_chars = function(partition,title,cex=1.5){
@@ -749,34 +698,37 @@ for(i in 1:N){
 partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
-save_plots=F
+save_plots=T
 
 # partition_matrix <- do.call(cbind, partitions)
-if (save_plots==T){
-	pdf(file="partizioni_chars.pdf",width=10,height = 5)
-}
-par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
-plot_partition_with_chars(partitions_drpmc, title="model C")
-plot_partition_with_chars(partitions_drpmj, title="model J")
-if (save_plots==T){ dev.off()}
+# if (save_plots==T){
+# 	pdf(file="partizioni_chars.pdf",width=12,height = 6)
+# }
+# par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+# plot_partition_with_chars(partitions_drpmc, title="model C")
+# plot_partition_with_chars(partitions_drpmj, title="model J")
+# if (save_plots==T){ dev.off()}
 
 if (save_plots==T){
-	pdf(file="ari.pdf",width=12,height = 6)
+	pdf(file="ari.pdf",width=10,height = 5)
 }
-par(mar=c(2,2,3,2),mfrow=c(1,2),oma=c(0.5,0.5,0.5,2))
+par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
 plot_ARI(partitions_drpmc, title="model C")
 plot_ARI(partitions_drpmj, title="model J")
 if (save_plots==T){ dev.off()}
 
 
 if (save_plots==T){
-	pdf(file="partizioni_nums.pdf",width=12,height = 6)
+	# pdf(file="partizioni_nums.pdf",width=10,height = 4)
+	pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
 }
-par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(0.5,0.1,0.1,0.1))
-plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.4)
-plot_partition_with_numbers(partitions_drpmj, title="model J",cex=1.4)
+par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
+plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.5,line=2.1)
+plot_partition_with_numbers(partitions_drpmj, title="model J",cex=1.5,line=2.1)
 if (save_plots==T){ dev.off()}
 ```
+
+
 
 # fitted values
 ```{r}
@@ -784,10 +736,10 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
-	pdf(file="C_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
 	# pdf(file="C_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
 }
@@ -827,7 +779,7 @@ for(i in 1:size(yred)[1]){
 if (save_plots==TRUE) { dev.off()}
 #################################################################
 if (save_plots==TRUE) { 
-	pdf(file="J_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="J_mean_prediction.pdf",height = 6,width=11)
 	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
 }
@@ -871,7 +823,7 @@ yred=y
 # cols = colora(N,"div",0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
 if (save_plots==TRUE) { 
-	pdf(file="test_1_generated_data.pdf",height = 6,width=10)
+	pdf(file="test_1_generated_data.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -901,16 +853,25 @@ if (save_plots==TRUE) { dev.off()}
 ```
 
 ```{r}
+overlay_clusters(y,partitions_drpmc,title="C",cexs=0.8)
+overlay_clusters(y,partitions_drpmj,title="J",cexs=0.8)
+par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(0.5,0.1,0.1,0.1))
+plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.4)
+plot_partition_with_numbers(partitions_drpmj, title="model J",cex=1.4)
+```
+
+
+```{r}
 yred=y
 cols = colora(N,"div",0)
 # cols = colora(N,56,0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
-cexs = 0.9
+cexs = 1
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
-	pdf(file="clusters_C.pdf",height = 6,width=10)
+	pdf(file="clusters_C.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -936,7 +897,7 @@ if (save_plots==TRUE) { dev.off() }
 # yred=y
 # cols = colora(N,"div",0)
 if (save_plots==TRUE) { 
-	pdf(file="clusters_J.pdf",height = 6,width=10)
+	pdf(file="clusters_J.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -1052,6 +1013,386 @@ Cmod1 = drpm1
 Jmod2 = rout
 compare_ARI(Cmod1,Jmod2)
 ```
+
+# ===========
+# with NA
+## setting NA
+```{r}
+# Number of elements to set as NA
+y_NA = y
+
+ndata = size(y)[1] * size(y)[2]
+
+na_percentage = 0.1
+na_percentage = 0.09620821
+n_na <- round(ndata * na_percentage) # nstations * nday * na%
+cat(n_na,"\n")
+
+# Randomly sample positions to be set as NA
+na_indices_j <- sample(size(y)[1], n_na,replace = T)
+na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (k in 1:n_na){
+	cat("NAing index (",na_indices_j[k],",",na_indices_t[k],")\n")
+	y_NA[na_indices_j[k], na_indices_t[k]] = NA
+}
+
+# Check the dataset
+cat(sum(is.na(y_NA)))
+# y_NA
+```
+
+
+
+## drpm J
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+out_NA = module_JDRPM$MCMC_fit(
+	# Y=as.matrix(y),
+	Y=as.matrix(y_NA),
+	sp_coords = NA,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	# initial_partition = c(1,2,1,2,2),
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = TRUE,
+	update_eta1 = update_eta1,                    
+	update_phi1 = update_phi1,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	# spatial_cohesion_idx = 4,
+	# sp_params = list(c(1,2),1,2,matrix(c(1,2,2,4),nrow=2)),
+	
+	# covariate_similarity_idx = NA,  
+	draws = as.integer(niter), burnin = as.integer(nburn),thin = as.integer(nthin),
+	# draws = 100000, burnin = 60000,thin = 40,
+	logging = FALSE,
+	seed = 113.0
+)
+```
+
+
+```{r}
+rout_NA = juliaGet(out_NA)
+names(rout_NA)  = c("Si",
+				 "gamma",
+				 "alpha", 
+				 "sigma2h", 
+				 "muh", 
+				 "eta1",
+				 "beta",
+				 "theta", 
+				 "tau2", 
+				 "phi0", 
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout_NA$Si           = aperm(rout_NA$Si,       c(2, 1, 3))
+rout_NA$gamma        = aperm(rout_NA$gamma,    c(2, 1, 3))
+rout_NA$sigma2h      = aperm(rout_NA$sigma2h,  c(2, 1, 3))
+rout_NA$muh          = aperm(rout_NA$muh,      c(2, 1, 3))
+rout_NA$fitted       = aperm(rout_NA$fitted,   c(2, 1, 3))
+rout_NA$llike        = aperm(rout_NA$llike,    c(2, 1, 3))
+if (is.null(size(rout_NA$alpha))) {
+	# do nothing
+# } else if size(rout_NA$alpha) == 2 {
+} else {
+	rout_NA$alpha        = aperm(rout_NA$alpha,    c(2, 1))
+}
+rout_NA$theta        = aperm(rout_NA$theta,    c(2, 1))
+rout_NA$tau2         = aperm(rout_NA$tau2,     c(2, 1))
+rout_NA$eta1         = aperm(rout_NA$eta1,    c(2, 1))
+rout_NA$phi0     = matrix(rout_NA$phi0,    ncol = 1)
+rout_NA$phi1     = matrix(rout_NA$phi1,    ncol = 1)
+rout_NA$lambda2  = matrix(rout_NA$lambda2, ncol = 1)
+cat(crayon::red("\nLPML =",rout_NA$lpml, "\nWAIC =",rout_NA$waic))
+```
+
+```{r}
+# save(rout_NA,file="no_space_NAJ.Rdata")
+```
+
+## Partition plots
+```{r}
+# partition_plots = function(drpm1, rout){ 
+# Initialize a list to store the partitions for each time instant
+partitions_drpmj_NA <- generate_partition(rout_NA)
+partitions_drpmj_FL <- generate_partition(rout_FULL)
+
+save_plots=F
+
+# partition_matrix <- do.call(cbind, partitions)
+# if (save_plots==T){
+# 	pdf(file="partizioni_chars.pdf",width=12,height = 6)
+# }
+# par(mar=c(4,1,3,1),mfrow=c(1,2),oma=c(1,0.5,0.5,0.5))
+# plot_partition_with_chars(partitions_drpmc, title="model C")
+# plot_partition_with_chars(partitions_drpmj, title="model J")
+# if (save_plots==T){ dev.off()}
+
+if (save_plots==T){
+	pdf(file="ari.pdf",width=10,height = 5)
+}
+par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
+plot_ARI(partitions_drpmj_NA, title="model J (NA data)")
+plot_ARI(partitions_drpmj_FL, title="model J (full data)")
+if (save_plots==T){ dev.off()}
+
+
+if (save_plots==T){
+	pdf(file="partizioni_nums.pdf",width=10,height = 4)
+	# pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
+}
+par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
+plot_partition_with_numbers(partitions_drpmj_NA, title="model J (NA data)",cex=1.5,line=2.1)
+plot_partition_with_numbers(partitions_drpmj_FL, title="model J (full data)",cex=1.5,line=2.1)
+if (save_plots==T){ dev.off()}
+```
+
+
+
+
+
+# fitted values
+```{r}
+# rout_FULL = rout
+```
+
+
+```{r}
+yredORIG=y
+save_plots=F
+
+#################################################################
+if (save_plots==TRUE) { 
+	pdf(file="J_mean_prediction.pdf",height = 6,width=11)
+	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
+	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
+}
+summary_fitted_NA = t(rout_NA$fitted[,,size(rout_NA$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout_NA$fitted)[3]){
+			values_j = c(values_j,rout_NA$fitted[t,j,it])
+		}
+		summary_fitted_NA[j,t] = mean(values_j)
+		# summary_fitted_NA[j,t] = median(values_j)
+		# summary_fitted_NA[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred_NA=summary_fitted_NA
+# take last sample (maybe not the best choice)
+# yred=t(rout$fitted[,,size(rout$fitted)[3]])
+
+#########################
+summary_fitted_FULL= t(rout_FULL$fitted[,,size(rout_FULL$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout_FULL$fitted)[3]){
+			values_j = c(values_j,rout_FULL$fitted[t,j,it])
+		}
+		summary_fitted_FULL[j,t] = mean(values_j)
+		# summary_fitted_FULL[j,t] = median(values_j)
+		# summary_fitted_FULL[j,t] = Mode(values_j) # function from include.R
+	}
+}
+yred_FULL=summary_fitted_FULL
+#########################
+
+par(mar=c(2,2,2,1))
+# cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+for(i in 1:size(yred_NA)[1]){
+   if(i==1){
+     plot(1:size(yred_NA)[2],yred_NA[i,],col=cols[i],
+     	 ylim=extrema(yredORIG,yred_FULL,yred_NA),type='l',xlab='',ylab="",
+     	 # main="J fitted values - last iteration")
+     	 main="J fitted values (NA data) - iterations mean")
+     	 # main="J fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred_NA)[2],yred_NA[i,],col=cols[i])
+	  }
+}
+pch_diff = 18
+for (k in 1:n_na){
+		lines(c(na_indices_t[k],na_indices_t[k]),
+		  # c(y[na_indices_j[k], na_indices_t[k]],yred[na_indices_j[k], na_indices_t[k]]),
+		  c(yred_FULL[na_indices_j[k], na_indices_t[k]],
+		    yred_NA[na_indices_j[k], na_indices_t[k]]),
+		  col="#aaaaaa",lty=2)
+	# points(na_indices_t[k],y[na_indices_j[k], na_indices_t[k]], col="#33aa33",pch=4)
+	points(na_indices_t[k],yred_FULL[na_indices_j[k], na_indices_t[k]],
+		   col="#009900",pch=pch_diff,cex=1.2)
+	points(na_indices_t[k],yred_NA[na_indices_j[k], na_indices_t[k]],
+		   col="#990000",pch=pch_diff,cex=1.2)
+
+}
+legend("bottom",legend=c("fitted with NA data","fitted with full data"),
+	   col=c("#990000","#009900"),
+	   pch=pch_diff,cex=1.2, bty="n")
+if (save_plots==TRUE) { dev.off() }
+#################################################################
+
+
+yred=y
+# cols = colora(N,"div",0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+if (save_plots==TRUE) { 
+	pdf(file="test_1_generated_data.pdf",height = 6,width=11)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredORIG,yred_FULL,yred_NA)
+     	 ,type='l',
+     	 xlab='time',
+     	 main='Generated values')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# pchs
+# offsets = c(-0.1,-0.2,0,0,0,0.2,0,0,0.1,0.3)
+# for(i in 1:N){
+# 	text(12.1,yred[i,12]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+# offsets = c(-0.2,-0.4,0.1,0.7,0.82,-0.8,0,0,0.2,0.1)
+# for(i in 1:N){
+# 	text(0.92,yred[i,1]+offsets[i],label=pchs[i],col=cols[i],cex=0.8)
+# }
+legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
+	   lty = 1,lwd=2,
+	   cex=0.8, bty="n",
+	   ncol=5)
+if (save_plots==TRUE) { dev.off()}
+```
+
+# clusters
+```{r}
+yred=y
+cols = colora(N,"div",0)
+# cols = colora(N,56,0)
+cols = colora(N,"div",seed_div = "Paired",show = 0)
+
+save_plots=F
+
+# yred=y
+# cols = colora(N,"div",0)
+if (save_plots==TRUE) { 
+	pdf(file="clusters_J.pdf",height = 6,width=11)
+}
+par(mar=c(2,2,2,1))
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred_NA,yredORIG),type='l',
+     	 xlab='time',
+     	 main='Clusters according to model J-DRPM (NA data)')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+# partition = partitions_drpmc
+partition = partitions_drpmj_NA
+partition_matrix <- do.call(cbind, partition)
+for(i in 1:N){
+	for (t in 1:Tm){
+		pchh = 19
+		if (is.na(y_NA[i,t])){
+			pchh = 8
+			cexs = 1.2
+		}
+		else {
+			pchh = 19
+			cexs = 1
+		}
+		points(t,yred[i,t],col=partition_matrix[i, t],
+			   pch=pchh,cex=cexs)
+	}
+}
+if (save_plots==TRUE) { dev.off() }
+```
+
+# compute mse
+```{r}
+yredORIGI=y
+MSE_matrices = function(m1,m2){
+	MSE = 0
+	for (i in 1:size(m1)[1]){
+		for (t in 1:size(m1)[2]){
+			MSE = MSE + (m1[i,t]-m2[i,t])^2
+		}
+	}
+	MSE = MSE/(size(m1)[1]*size(m1)[2])
+	return(MSE)
+}
+
+#################################################################
+summary_fitted_mean = t(rout_NA$fitted[,,size(rout_NA$fitted)[3]])*0
+summary_fitted_median = t(rout_NA$fitted[,,size(rout_NA$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		values_j = c()
+		for (it in 1:size(rout_NA$fitted)[3]){
+			values_j = c(values_j,rout_NA$fitted[t,j,it])
+		}
+		summary_fitted_mean[j,t] = mean(values_j)
+		summary_fitted_median[j,t] = median(values_j)
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+# take last sample (maybe not the best choice)
+# yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+#################################################################
+cat("J NA MSE\n")
+cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
+cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ===========
 # 3. WITH SPACE
