@@ -58,7 +58,7 @@ function MCMC_fit(;
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Real,                           # Random seed for reproducibility
 	simple_return = false,                # Return just the partition Si
-	save_trace_plots = false              # save all trace plots directly from julia to a pdf
+	verbose = false                       # if to print additional info
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -239,6 +239,19 @@ try
 
 
 	############# send feedback #############
+	if verbose
+		println("Parameters:")
+		println("sig2h ∼ invGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
+		println("Logit(1/2(eta1+1)) ∼ Laplace(0, $(eta1_priors[1]))")
+		if lk_xPPM println("beta ∼ MvNormal(μ=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)") end
+		println("tau2 ∼ invGamma($(tau2_priors[1]), $(tau2_priors[2]))")
+		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
+		println("lambda2 ∼ invGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
+		println("alpha ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
+		println()
+	end
+
+	# ✓ and ✗
 	println(replace(string(now()),"T" => " ")[1:end-4])
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
