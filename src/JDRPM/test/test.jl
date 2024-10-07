@@ -171,15 +171,11 @@ end
 
 ################################
 
-function fun!(v::Vector{Float64},aux_array::Vector{Float64})
-	aux_array .= 0
-	aux_array = rand(10)
-	v = aux_array
+using Plots
+using Distributions
+begin
+# vals = rand(truncated(InverseGamma(0.1,0.1),0,10),2000)
+# vals = rand(truncated(InverseGamma(0.7,0.5),0,10),2000)
+vals = rand(truncated(InverseGamma(0.01,0.3),0,10),2000)
+histogram(vals)
 end
-v = zeros(10)
-w = zeros(10)
-aux_array = zeros(10)
-fun!(v,aux_array);
-@show v w aux_array
-fun!(w,aux_array)
-@show v w aux_array

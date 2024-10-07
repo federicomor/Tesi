@@ -73,3 +73,169 @@ Elapsed time: 4 minutes, 48 seconds, 483 milliseconds
 LPML: 103.97298501548039 (the higher the better)
 WAIC: -312.19890568038744 (the lower the better)
 acceptance ratio eta1: 85.55%
+
+
+################## 1 1 
+a = 0.01  b = 0.01 
+Elapsed time: 42 seconds, 695 milliseconds
+LPML: 82.22927771296008 (the higher the better)
+WAIC: -245.74706376413565 (the lower the better)
+acceptance ratio eta1: 67.58%
+
+################## 1 2 
+a = 0.01  b = 0.1 
+Elapsed time: 45 seconds, 409 milliseconds
+LPML: 95.18161598810934 (the higher the better)
+WAIC: -248.90119464964334 (the lower the better)
+acceptance ratio eta1: 67.77%
+
+################## 1 3 
+a = 0.01  b = 0.3 
+Elapsed time: 52 seconds, 853 milliseconds
+LPML: 94.23189158533432 (the higher the better)
+WAIC: -250.21874025815362 (the lower the better)
+acceptance ratio eta1: 67.79%
+
+################## 1 4 
+a = 0.01  b = 0.5 
+Elapsed time: 48 seconds, 249 milliseconds
+LPML: 90.35465796474728 (the higher the better)
+WAIC: -249.77328171464677 (the lower the better)
+acceptance ratio eta1: 67.92%
+
+################## 1 5 
+a = 0.01  b = 1 
+Elapsed time: 43 seconds, 59 milliseconds
+LPML: 86.04261242464418 (the higher the better)
+WAIC: -248.1664728679669 (the lower the better)
+acceptance ratio eta1: 67.94%
+
+################## 1 6 
+a = 0.01  b = 1.5 
+Elapsed time: 45 seconds, 553 milliseconds
+LPML: 96.03799509460805 (the higher the better)
+WAIC: -249.36935359284917 (the lower the better)
+acceptance ratio eta1: 68.14%
+
+################## 2 2 
+a = 0.1  b = 0.1 
+Elapsed time: 47 seconds, 848 milliseconds
+LPML: 92.75497326490881 (the higher the better)
+WAIC: -251.09961037128167 (the lower the better)
+acceptance ratio eta1: 67.67%
+
+################## 2 3 
+a = 0.1  b = 0.3 
+Elapsed time: 45 seconds, 788 milliseconds
+LPML: 92.01856332998 (the higher the better)
+WAIC: -249.82812567734052 (the lower the better)
+acceptance ratio eta1: 67.96%
+
+################## 2 4 
+a = 0.1  b = 0.5 
+Elapsed time: 47 seconds, 60 milliseconds
+LPML: 95.20956406992332 (the higher the better)
+WAIC: -249.01663886720706 (the lower the better)
+acceptance ratio eta1: 67.80%
+
+################## 2 5 
+a = 0.1  b = 1 
+Elapsed time: 45 seconds, 143 milliseconds
+LPML: 94.23318567221213 (the higher the better)
+WAIC: -248.56827195668998 (the lower the better)
+acceptance ratio eta1: 68.00%
+
+################## 2 6 
+a = 0.1  b = 1.5 
+Elapsed time: 45 seconds, 411 milliseconds
+LPML: 97.15689193264029 (the higher the better)
+WAIC: -249.46195943556492 (the lower the better)
+acceptance ratio eta1: 67.88%
+
+################## 3 4 
+a = 0.3  b = 0.5 
+Elapsed time: 45 seconds, 347 milliseconds
+LPML: 96.66616806267803 (the higher the better)
+WAIC: -249.71322863850742 (the lower the better)
+acceptance ratio eta1: 67.88%
+
+################## 4 4 
+a = 0.5  b = 0.5 
+Elapsed time: 46 seconds, 253 milliseconds
+LPML: 97.06672025174521 (the higher the better)
+WAIC: -249.22960607499715 (the lower the better)
+acceptance ratio eta1: 67.73%
+
+################## 5 3 
+a = 1  b = 0.3 
+Elapsed time: 48 seconds, 10 milliseconds
+LPML: 94.01879966025263 (the higher the better)
+WAIC: -250.93076312689706 (the lower the better)
+acceptance ratio eta1: 67.70%
+
+################## 5 4 
+a = 1  b = 0.5 
+Elapsed time: 48 seconds, 259 milliseconds
+LPML: 91.23284282264876 (the higher the better)
+WAIC: -251.23407617277653 (the lower the better)
+acceptance ratio eta1: 67.78%
+
+################## 5 5 
+a = 1  b = 1 
+Elapsed time: 47 seconds, 10 milliseconds
+LPML: 90.7834458143027 (the higher the better)
+WAIC: -250.04987920738532 (the lower the better)
+acceptance ratio eta1: 68.04%
+
+################## 6 3 
+a = 1.5  b = 0.3 
+Elapsed time: 49 seconds, 650 milliseconds
+LPML: 92.56219557920303 (the higher the better)
+WAIC: -248.79419163430765 (the lower the better)
+acceptance ratio eta1: 67.69%
+
+################## 6 4 
+a = 1.5  b = 0.5 
+Elapsed time: 1 minute, 1 second, 512 milliseconds
+LPML: 94.25428478839558 (the higher the better)
+WAIC: -252.7708004304279 (the lower the better)
+acceptance ratio eta1: 67.78%
+
+################## 6 5 
+a = 1.5  b = 1 
+Elapsed time: 49 seconds, 974 milliseconds
+LPML: 89.38213941473714 (the higher the better)
+WAIC: -248.89524975461876 (the lower the better)
+acceptance ratio eta1: 67.63%
+
+################## 6 6 
+a = 1.5  b = 1.5 
+Elapsed time: 54 seconds, 281 milliseconds
+LPML: 97.42370258952383 (the higher the better)
+WAIC: -250.23647339274186 (the lower the better)
+acceptance ratio eta1: 67.81%
+
+
+
+
+################## 3 3 
+a = 0.3  b = 0.3 
+Elapsed time: 45 seconds, 459 milliseconds
+LPML: 101.92576829398558 (the higher the better)
+WAIC: -251.69950259467035 (the lower the better)
+acceptance ratio eta1: 67.90%
+
+################## 4 6 
+a = 0.5  b = 1.5 
+Elapsed time: 45 seconds, 581 milliseconds
+LPML: 100.43806322552405 (the higher the better)
+WAIC: -249.61905296422117 (the lower the better)
+acceptance ratio eta1: 67.86%
+
+################## 5 6 
+a = 1  b = 1.5 
+Elapsed time: 50 seconds, 371 milliseconds
+LPML: 100.6952308854843 (the higher the better)
+WAIC: -251.65159939525373 (the lower the better)
+acceptance ratio eta1: 67.74%
+

@@ -131,7 +131,7 @@ A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
 a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
+a_tau    = 2; b_tau    = 1
 a_lambda = 2; b_lambda = 2
 # a_sigma  = 1.3; b_sigma  = 1.9
 # a_tau    = 1.3; b_tau    = 1.9
@@ -224,6 +224,10 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 
 ## drpm J
 ```{r}
+a_sigma  = 2; b_sigma  = 2
+a_tau    = 2; b_tau    = 2
+a_lambda = 2; b_lambda = 2
+
 module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),
@@ -308,7 +312,11 @@ rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
 ```{r}
-save(rout,drpm1,file="space_full_CJ.Rdata")
+# save(rout,drpm1,file="space_full_CJ.Rdata")
+```
+
+```{r}
+load("space_drpm1_run2.Rdata")
 ```
 
 
@@ -698,7 +706,7 @@ for(i in 1:N){
 partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
-save_plots=T
+save_plots=F
 
 # partition_matrix <- do.call(cbind, partitions)
 # if (save_plots==T){
@@ -736,7 +744,7 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
@@ -860,7 +868,7 @@ plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.4)
 plot_partition_with_numbers(partitions_drpmj, title="model J",cex=1.4)
 ```
 
-
+# clusters
 ```{r}
 yred=y
 cols = colora(N,"div",0)
@@ -868,7 +876,7 @@ cols = colora(N,"div",0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
 cexs = 1
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=11)
@@ -1046,7 +1054,7 @@ cat(sum(is.na(y_NA)))
 
 ## drpm J
 ```{r}
-module_JDRPM <- juliaImport(juliaCall("include", module))
+# module_JDRPM <- juliaImport(juliaCall("include", module))
 out_NA = module_JDRPM$MCMC_fit(
 	# Y=as.matrix(y),
 	Y=as.matrix(y_NA),
@@ -1398,8 +1406,8 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 # 3. WITH SPACE
 ```{r}
 load("../thesis data/df_wsc.Rdata")
-# load("../thesis data/df_daily_full_logtransf.Rdata")
-# df_wsc = df_daily_full_logtransf
+# load("../thesis data/df_daily_full.Rdata")
+# df_wsc = df_daily_full
 na_summary(df_wsc)
 ```
 
@@ -1427,15 +1435,16 @@ for(st in stations){
 	yfull=rbind(yfull,y_we_pm10)
 }
 rownames(yfull) = NULL
-colnames(yfull)<- c("id",paste0("w", 1:53))
+colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
 # time_span = 1:14 # GOOD
+time_span = 1:4
 # time_span = 1:12
-time_span = 1:12
 
-set.seed(14)
-# quanti = 50; nsubjects = sample(1:105, quanti,replace = F)
-# quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
-nsubjects = 1:105
+set.seed(110)
+# quanti = 80; nsubjects = sample(1:105, quanti,replace = F)
+quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
+# quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
+# nsubjects = 1:105
 
 y = yfull[nsubjects,1+time_span]
 #############################################
@@ -1462,8 +1471,8 @@ s_std <- t((t(sites) - smn)/ssd)
 # var(s_std[,1])
 ######################################
 
-# yred=(y[,time_span]+0.5)*5
-yred=y[,time_span]
+# yred=(y[,time_span]+0.5)*2
+yred=y
 
 par(mar=c(2,2,2,1))
 # par(mar=c(4,4,2,2))
@@ -1471,7 +1480,8 @@ cols = colora(size(yred)[1],56,0)
 for(i in 1:size(yred)[1]){
    if(i==1){
      plot(1:size(yred)[2],yred[i,],col=cols[i],
-     	 ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
      	 type='l',xlab='weeks',ylab='pm10')
  	  } 
 	  else{
@@ -1533,8 +1543,8 @@ cat("seed",seed,"\n")
 # niter=20000; nburn=15000; nthin=5
 # niter=50000; nburn=30000; nthin=20 # GOOD
 # niter=80000; nburn=60000; nthin=20
+niter=120000; nburn=80000; nthin=40
 # niter=100000; nburn=60000; nthin=40
-niter=100000; nburn=60000; nthin=40
 # niter=100; nburn=0; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
@@ -1548,8 +1558,10 @@ nthin = as.integer(nthin)
 ```{r}
 # params
 m0_phi0 = 0
+# s20_phi0 = 8
+# A_ub_sigma = 7
 s20_phi0 = 10
-A_ub_sigma = 5
+A_ub_sigma = 7
 A_ub_tau = 5
 A_ub_lambda = 5
 
@@ -1575,20 +1587,20 @@ eta1_scale = 0.9
 
 # mh is the of gaussian standard deviations for metropolis updates
 # So these are not variances!
-sig_mh_sig2 = 0.2
-sig_mh_tau2 = 0.2
-sig_mh_lambda2 = 0.3
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
 sig_mh_eta1 = 0.1
 sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
-update_phi1 = TRUE
+update_phi1 = F
 
 a_alpha = 2; b_alpha = 2
 time_specific_alpha = TRUE
 
 # now space
-spatial_cohesion = as.integer(3)
+spatial_cohesion = 3
 mu0 = 0 
 k0 = 1
 v0 = 5
@@ -1626,8 +1638,8 @@ drpm1 <- drpm_fit(
 		
 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
 		verbose=TRUE,
-		# draws=4,burn=0,thin=1)
-		draws=niter,burn=nburn,thin=nthin)
+		draws=4000,burn=2000,thin=2)
+		# draws=niter,burn=nburn,thin=nthin)
 
 tempo_fine <- Sys.time()
 differenza_tempo <- tempo_fine - tempo_inizio
@@ -1640,7 +1652,7 @@ cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 
 ```{r}
 # load(file="space_80k_drpm1.Rdata")
-# save(drpm1,file="space_100k_drpm1.Rdata")
+save(drpm1,file="space_drpm1_new.Rdata")
 ```
 
 
@@ -1793,23 +1805,14 @@ head(X_lk)
 
 ## drpm J
 ```{r}
-# ym = as.matrix(y)
-# sm = as.matrix(s_std)
-# as = c(0.01, 0.1,0.3,0.5, 1, 1.5, 2)
-# bs = c(0.01, 0.1,0.3,0.5, 1, 1.5, 2)
-# for (i in 1:length(as)){
-# 	for (j in 1:length(bs)){
-# 	# a_sigma  = as[i]; b_sigma  = bs[i]
-# 	a_tau    = as[i]; b_tau    = bs[j]
-# 	# a_lambda = as[i]; b_lambda = bs[i]
-# 	cat(crayon::red("##################",i,j,"\n"))
-# 	cat(crayon::red("a =",as[i]," b =",bs[j],"\n"))
+a_sigma  = 0.01; b_sigma = 0.01
+# a_tau    = 2.1; b_tau   = 0.9
+# a_tau    = 1.7; b_tau   = 0.4
+a_tau    = 1.9; b_tau   = 0.4
+# a_lambda = 0.1; b_lambda = 0.1
+a_lambda = 1.9; b_lambda = 0.4
 
-# a_tau    = 1; b_tau    = 1.5
-a_tau    = 0.1; b_tau    = 0.1
-# a_tau    = 3; b_tau    = 26
-
-# module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
 	sp_coords = s_std,
@@ -1824,9 +1827,9 @@ out = module_JDRPM$MCMC_fit(
 	update_alpha = TRUE,             
 	
 	include_eta1 = TRUE,                    
-	include_phi1 = TRUE,
+	include_phi1 = F,
 	update_eta1 = update_eta1,                    
-	update_phi1 = update_phi1,
+	update_phi1 = F,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1),
@@ -1855,18 +1858,20 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	draws = niter,burnin = nburn, thin = nthin,
-	# draws = 100,burnin = 20, thin = 4,
+	# draws = niter,burnin = nburn, thin = nthin,
+	# draws = 80000,burnin = 60000, thin = 5,
+	draws = 10000,burnin = 5000, thin = 5,
+	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
-	seed = 111,
+	seed = 113.0,
 	simple_return = FALSE,
-	verbose = T
+	verbose = T,
+	perform_diagnostics = TRUE
 )
-	# }
-# }
+
 ```
 
-
+## rout
 ```{r}
 rout = juliaGet(out)
 names(rout)  = c("Si",
@@ -1903,8 +1908,12 @@ rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
 
+
 ```{r}
-save(drpm1,rout,file="space_full_100k_run2.Rdata")
+# getwd()
+# load(file="space_drpm1_run2.Rdata")
+save(rout,file="space_rout_new1.Rdata")
+# load("space_rout_run5.Rdata")
 ```
 
 
@@ -1929,13 +1938,16 @@ cat("llike        size = ",size(rout$llike),"\n")
 cat("lpml = ",rout$lpml,"\n")
 cat("waic = ",rout$waic,"\n")
 ```
-## MSE analysis
 
+## MSE analysis
 ```{r}
 # y_with_na
 # y
 j = round(runif(1,1,N))
-t = round(runif(1,1,Tm))
+# t = round(runif(1,1,Tm))
+# j = 17
+j =96
+t = 4
 size(rout$fitted)
 par(mfrow=c(2,1),mar=c(1,2,3,1))
 plot(rout$fitted[t,j,],type="l",main=paste0("J trace plot of j=",j," at t=",t),
@@ -1947,6 +1959,10 @@ abline(h=y[j,t],col="#005500")
 ```
 
 ## Trace plots
+```{r}
+load("space_drpm1_new.Rdata")
+# load("space_rout_new_test1.Rdata")
+```
 
 ### beta
 ```{r}
@@ -1996,6 +2012,7 @@ plot(rout$alpha[,time],type="l",
 size(drpm1$mu)
 size(rout$muh)
 unitj = round(runif(1,1,N))
+# unitj = 17
 for (time in 1:Tm){
 		par(mfrow=c(2,2),mar=c(2,2,4,2))
 
@@ -2025,7 +2042,7 @@ for (time in 1:Tm){
 ```{r}
 size(drpm1$sig2)
 size(rout$sigma2h)
-unitj = round(runif(1,1,N))
+# unitj = round(runif(1,1,N))
 for (time in 1:Tm){
 		par(mfrow=c(2,2),mar=c(2,2,4,2))
 
@@ -2312,6 +2329,12 @@ for(i in 1:N){
 
 
 ## Partition plots
+
+```{r}
+# load("space_rout_run5.Rdata")
+# load("space_full_100k_run2.Rdata")
+```
+
 ```{r,warning=F}
 # partition_plots = function(drpm1, rout){ 
 # Initialize a list to store the partitions for each time instant
@@ -2343,8 +2366,8 @@ if (save_plots==T){
 	pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
 }
 par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
-plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.5,line=2.1)
-plot_partition_with_numbers(partitions_drpmj, title="model J",cex=1.5,line=2.1)
+plot_partition_with_numbers(partitions_drpmc, title="model C",cex=0.9,line=2.1)
+plot_partition_with_numbers(partitions_drpmj, title="model J",cex=0.9,line=2.1)
 if (save_plots==T){ dev.off()}
 ```
 
@@ -2359,7 +2382,7 @@ yredORIG=y
 save_plots=F
 
 if (save_plots==TRUE) {
-	pdf(file="C_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
 	# pdf(file="C_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
 }
@@ -2400,7 +2423,7 @@ for(i in 1:size(yred)[1]){
 if (save_plots==TRUE) { dev.off()}
 #################################################################
 if (save_plots==TRUE) { 
-	pdf(file="J_mean_prediction.pdf",height = 6,width=10)
+	pdf(file="J_mean_prediction.pdf",height = 6,width=11)
 	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
 }
@@ -2446,7 +2469,7 @@ yred=y
 cols = colora(N,56,0)
 # cols = colora(N,"div",seed_div = "Paired",show = 0)
 if (save_plots==TRUE) { 
-	pdf(file="test_1_generated_data.pdf",height = 6,width=10)
+	pdf(file="test_1_generated_data.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -2486,7 +2509,7 @@ cexs = 0.6
 save_plots=F
 
 if (save_plots==TRUE) { 
-	pdf(file="clusters_C.pdf",height = 6,width=10)
+	pdf(file="clusters_C.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -2512,7 +2535,7 @@ if (save_plots==TRUE) { dev.off() }
 # yred=y
 # cols = colora(N,"div",0)
 if (save_plots==TRUE) { 
-	pdf(file="clusters_J.pdf",height = 6,width=10)
+	pdf(file="clusters_J.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
@@ -2540,8 +2563,13 @@ if (save_plots==TRUE) { dev.off() }
 
 ```{r}
 scala_cex_y = function(y_curr,y_all){
-	scala = 
-	return((y_curr+abs(min(y_all)))/(extrema(y_all)+abs(min(y_all)))[2]*2+0.5)
+	# scala =
+	# out = log(y_curr + 4) + 0.3
+	# out = 1 + 2 * sqrt(y_curr - min(y_all)) / sqrt(max(y_all) - min(y_all))
+	# out = exp(y_curr +2.2 - min(y_all)) / exp(max(y_all) - min(y_all))
+	# return((y_curr+abs(min(y_all)))/(extrema(y_all)+abs(min(y_all)))[2]*2+0.5)
+	out = (y_curr-min(y_all))/(max(y_all)-min(y_all)) # in [0,1] now
+	return(out+1)
 }
 
 for(t in 1:Tm){
@@ -2642,6 +2670,7 @@ LEN = Tm
 compare_ARI = function(Cmod1,Jmod2){
 	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
 	for(k in 1: LEN){
+		cat(k,"\r")
 		rhoC = generate_partition(Cmod1)
 		rhoJ = generate_partition(Jmod2)
 		ARIvec[k] <- adjustedRandIndex(rhoC[[k]][1:N], rhoJ[[k]][1:N])
@@ -2654,8 +2683,12 @@ compare_ARI = function(Cmod1,Jmod2){
 	# svg(paste0("./figures/",base_folder,"/ARI/ari.svg"), height=8, width=10)
 	# png(paste0("./figures/",base_folder,"/ARI/ari.png"),  width=700,height=600)
 	library(fields)
-	plot(1:Tm,ARIvec,type="l",main=paste0("ARI values"),ylim=c(-0.5,1))
-	abline(h=0,col="gray80",lty=3)
+	# plot(1:Tm,ARIvec,type="l",main=paste0("ARI values"),ylim=c(-0.5,1))
+	par(mar=c(2,2,2,1))
+	plot(1:Tm,ARIvec,type="l",
+		 main=bquote("ARI values " * rho[J] * "(t) vs " * rho[C] * "(t)"),ylim=c(-0.5,1))
+	abline(h=0,  col="#888888",lty=3,lwd=2)
+	abline(h=0.5,col="#dddddd",lty=3,lwd=2)
 	
 	# image.plot(ARIvec,
 	# 		   main=paste0("ARI values - ",mod1," vs ",mod2),axes=FALSE,col=cols_ARI,

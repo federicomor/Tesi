@@ -8,6 +8,9 @@ using Dates
 using ProgressMeter
 using StaticArrays
 using Printf
+using MCMCChains
+using DataFrames
+using CSV
 
 log_file = open("log.txt", "w+")
 include("debug.jl")
@@ -37,7 +40,7 @@ function MCMC_fit(;
 	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
 	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
 										  # plus the std dev for the Metropolis update trough N(μ=eta1_old,σ=mhsig_eta1)
-	beta_priors = missing,                # Prior parameters for beta ∼ 
+	beta_priors = missing,                # Prior parameters for beta ∼ the mean vector and the s^2 param in fron of the Id matrix
 	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
 	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(μ=m0,σ^2=s0^2)
 	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
@@ -51,14 +54,15 @@ function MCMC_fit(;
 	covariate_similarity_idx = missing,   # similarity choice
 	cv_params = missing,                  # Parameters for covariates similarity functions
 
-	draws::Real,                         # Number of MCMC draws
-	burnin::Real,                        # Number of burn-in
-	thin::Real,                          # Thinning interval
+	draws::Real,                          # Number of MCMC draws
+	burnin::Real,                         # Number of burn-in
+	thin::Real,                           # Thinning interval
 
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Real,                           # Random seed for reproducibility
 	simple_return = false,                # Return just the partition Si
-	verbose = false                       # if to print additional info
+	verbose = false,                      # if to print additional info
+	perform_diagnostics = false           # if to perform diagnostics on the fit
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -114,7 +118,7 @@ function MCMC_fit(;
 
 
 	if logging
-		println("Logging to file: ", abspath("log.txt"))
+		println("Logging to file:\n", abspath("log.txt"),"\n")
 		printlgln(replace(string(now()),"T" => "   "))
 		debug("current seed = $seed")
 		# to = TimerOutput()
@@ -241,18 +245,29 @@ try
 	############# send feedback #############
 	if verbose
 		println("Parameters:")
-		println("sig2h ∼ invGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
+		println("sig2h ∼ InverseGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
 		println("Logit(1/2(eta1+1)) ∼ Laplace(0, $(eta1_priors[1]))")
 		if lk_xPPM println("beta ∼ MvNormal(μ=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)") end
-		println("tau2 ∼ invGamma($(tau2_priors[1]), $(tau2_priors[2]))")
+		println("tau2 ∼ InverseGamma($(tau2_priors[1]), $(tau2_priors[2]))")
 		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
-		println("lambda2 ∼ invGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
+		println("lambda2 ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
 		println("alpha ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
 		println()
 	end
+	# if verbose
+	# 	println("Parameters:")
+	# 	println("σ²ₕ ∼ InverseGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
+	# 	println("Logit(1/2(η₁+1)) ∼ Laplace(0, $(eta1_priors[1]))")
+	# 	if lk_xPPM println("β⃗∼ MvNormal(μ⃗=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)") end
+	# 	println("τ² ∼ InverseGamma($(tau2_priors[1]), $(tau2_priors[2]))")
+	# 	println("ϕ₀ ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
+	# 	println("λ² ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
+	# 	println("α ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
+	# 	println()
+	# end
 
 	# ✓ and ✗
-	println(replace(string(now()),"T" => " ")[1:end-4])
+	# println(replace(string(now()),"T" => " ")[1:end-4])
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end")
@@ -358,6 +373,11 @@ try
 	Xo = zeros(n)
 	Xn = zeros(n)
 
+	a_star_tau = 0
+	b_star_tau = 0
+	a_star_lambda2 = 0
+	b_star_lambda2 = 0
+
 
 	############# allocate and initialize working variables #############
 	Si_iter = ones(Int64,n,T_star) # label assignements for units j at time t
@@ -388,7 +408,8 @@ try
 	if include_phi1
 		phi1_iter = rand(Uniform(-1,1))
 	end
-	lambda2_iter = rand(InverseGamma(lambda2_priors...))
+	# lambda2_iter = rand(InverseGamma(lambda2_priors...))
+	lambda2_iter = 1
 
 	# hierarchy level 2
 	theta_iter = zeros(T_star)
@@ -398,7 +419,8 @@ try
 	end
 	tau2_iter = zeros(T_star)
 	@inbounds for t in 1:T_star
-		tau2_iter[t] = rand(InverseGamma(tau2_priors...))
+		# tau2_iter[t] = rand(InverseGamma(tau2_priors...))
+		tau2_iter[t] = 1
 	end
 
 	# hierarchy level 1
@@ -440,6 +462,7 @@ try
 
 
 	############# start MCMC algorithm #############
+	println(replace(string(now()),"T" => " ")[1:end-4])
 	println("Starting MCMC algorithm")
 
 	t_start = now()
@@ -1265,9 +1288,10 @@ try
 			for k in 1:kt
 				aux1 += (muh_iter[k,t] - theta_iter[t])^2 
 			end
-			a_star = tau2_priors[1] + kt/2
-			b_star = tau2_priors[2] + aux1/2
-			tau2_iter[t] = rand(InverseGamma(a_star, b_star))
+			a_star_tau = tau2_priors[1] + kt/2
+			b_star_tau = tau2_priors[2] + aux1/2
+			tau2_iter[t] = rand(InverseGamma(a_star_tau, b_star_tau))
+			# tau2_iter[t] = rand(truncated(InverseGamma(a_star_tau, b_star_tau),0,20))
 			# end # of the @timeit for tau2
 
 		end # for t in 1:T
@@ -1421,9 +1445,10 @@ try
 		for t in 2:T
 			aux1 += (theta_iter[t] - (1-phi1_iter)*phi0_iter - phi1_iter*theta_iter[t-1])^2
 		end
-		a_star = lambda2_priors[1] + T/2
-		b_star = lambda2_priors[2] + ((theta_iter[1] - phi0_iter)^2 + aux1) / 2
-		lambda2_iter = rand(InverseGamma(a_star,b_star))	
+		a_star_lambda2 = lambda2_priors[1] + T/2
+		b_star_lambda2 = lambda2_priors[2] + ((theta_iter[1] - phi0_iter)^2 + aux1) / 2
+		lambda2_iter = rand(InverseGamma(a_star_lambda2,b_star_lambda2))	
+		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,a_star_lambda2),0,20))	
 
 		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############
@@ -1494,7 +1519,14 @@ try
 		end
 
 	next!(progresso)
-		# showvalues = [("iteration",i)])
+	# next!(progresso,
+		# showvalues = [
+		# # ("iteration",i),
+		# ("a_star_tau",a_star_tau),
+		# ("b_star_tau",b_star_tau),
+		# ("a_star_lambda2",a_star_lambda2),
+		# ("b_star_lambda2",b_star_lambda2)
+		# ])
 
 	# if save_trace_plots
 	# 	# ecc
@@ -1540,11 +1572,27 @@ try
 	if update_phi1 @printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100 end
 	println()
 
-	close(log_file)
 	# if !logging
 		# debug(@showd to)
 		# rm("log.txt",force=true)	
 	# end
+
+	if perform_diagnostics
+		chn = Chains(
+			hcat(lambda2_out,phi0_out,tau2_out',theta_out',eta1_out',alpha_out'),
+			["lambda2","phi0",
+			[string("tau2_t", i) for i in 1:T]...,
+			[string("theta_t", i) for i in 1:T]...,
+			[string("eta1_j", i) for i in 1:n]...,
+			[string("alpha_t", i) for i in 1:T]...,
+			]
+		)
+		ss = DataFrame(summarystats(chn))
+		@show ss[!,[1,4,5,6,7]];
+		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
+	end
+
+	close(log_file)
 
 	if simple_return
 		return Si_out, LPML, WAIC

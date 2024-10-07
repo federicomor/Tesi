@@ -951,7 +951,8 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 	nm = n/2
 	xbar = mean(X_jt)
 	aux2 = 0.0
-	@inbounds @fastmath @simd for i in eachindex(X_jt)
+	# @inbounds @fastmath @simd for i in eachindex(X_jt)
+	@inbounds @simd for i in eachindex(X_jt)
 		aux2 += X_jt[i]^2
 	end
 	# @show aux2
@@ -964,7 +965,8 @@ function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, 
 	nm = n/2
 	xbar = mean(X_jt)
 	aux2 = 0.0
-	@inbounds @fastmath @simd for i in eachindex(X_jt)
+	# @inbounds @fastmath @simd for i in eachindex(X_jt)
+	@inbounds @simd for i in eachindex(X_jt)
 		aux2 += X_jt[i]^2
 	end
 	# @show aux2

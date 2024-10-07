@@ -89,9 +89,9 @@ minor collections:  39
 full collections:   1
 =#
 
-niter = 3
-@timev MCMC_fit(
-# out = MCMC_fit(
+# niter = 30
+# @timev MCMC_fit(
+out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
 

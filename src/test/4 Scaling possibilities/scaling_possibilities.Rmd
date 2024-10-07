@@ -303,10 +303,12 @@ for (i in 1:size(mat)[1]){
 
 
 ```{r}
-
+library(shades)
 plot_mat = function(mat,title,maxk){
 ncols_ari <- 1000
 cols <- rev(colora(ncols_ari, 35,0))
+ncol_writings = 1000
+cols_writings <- rev(colora(ncol_writings, 35,0))
 brks <- seq(0,maxk, length.out = ncols_ari + 1)
 
 # Plotting the matrix
@@ -320,10 +322,16 @@ yaxis = seq(0,1,length.out = size(mat)[2])
 
 for (i in 1:size(mat)[1]){
 	for (j in 1:size(mat)[2]){
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*ncol_writings)+1)
+		# col_chosen = floor(abs(mat[i,j]/(maxk/1000)*ncol_writings))
+		cat(col_chosen,"\n")
+		
 		text(y=yaxis[j],x=xaxis[i],
 		# labels = sprintf("%.2f ms/it", mat[i, j]*1000),
 		labels = sprintf("%.2f", mat[i, j]*1000),
-		cex = 1.0, col = "#aaaaaa")
+		# cex = 1.0, col = "#aaaaaa")
+		cex = 1.0, col = cols_writings[col_chosen])
+		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
 	}
 }
 
@@ -341,7 +349,8 @@ plot_mat(performance_Julia,title="J matrix",maxk)
 
 
 ```{r}
-
+performance_C =     matrix(data=c(1:20),nrow=4,ncol=5)
+performance_Julia = matrix(data=c(1:20),nrow=4,ncol=5)
 ```
 
 
