@@ -5,7 +5,8 @@ using Cthulhu
 begin
 using Random
 Random.seed!(1)
-N = 20; T = 30
+# N = 20; T = 30
+N = 50; T = 500
 # N = 50; T = 18
 y = rand(N,T)
 sp = rand(N,2)
@@ -32,11 +33,6 @@ k0 = 1.
 v0 = 5.
 L0 = 1.
 
-# niter = 5000. # profile canvas
-niter = 1000 # real for these tests
-# niter = 20. # for tracking allocs
-burnin = 0
-thin = 1
 seed = 123.0
 end
 
@@ -52,8 +48,8 @@ end
 
 # include("../old/MCMC_fit.jl")
 # include("../prelease/MCMC_fit.jl")
-pwd()
-include("new/MCMC_fit.jl")
+# pwd()
+# include("new/MCMC_fit.jl")
 
 include("MCMC_fit.jl")
 pwd()
@@ -88,9 +84,13 @@ minor collections:  39
 full collections:   1
 =#
 
-# niter = 3
-@timev MCMC_fit(
-# out = MCMC_fit(
+# niter = 5000. # profile canvas
+# niter = 1000 # real for these tests
+niter = 20. # for tracking allocs
+burnin = 18
+thin = 1
+# @timev MCMC_fit(
+out = MCMC_fit(
 	# log_file_name = "new.txt",
 	Y=y,              
 	sp_coords = sp,
@@ -131,7 +131,7 @@ full collections:   1
 	draws = niter,                    
 	burnin = burnin,                   
 	thin = thin,                     
-	logging = true,
+	logging = false,
 	seed = seed
 );
 

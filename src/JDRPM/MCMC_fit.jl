@@ -12,8 +12,8 @@ using MCMCChains
 using DataFrames
 using CSV
 
-log_file = open("log.txt", "w+")
-include("debug.jl")
+# log_file = open("log.txt", "w+")
+# include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -63,6 +63,7 @@ function MCMC_fit(;
 	simple_return = false,                # Return just the partition Si
 	verbose = false,                      # if to print additional info
 	perform_diagnostics = false           # if to perform diagnostics on the fit
+	# perform_checks = true                 # if to perform all the pre-fitting args checks
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -130,7 +131,7 @@ function MCMC_fit(;
 	# 	plot(title="mu @ t=$t, j=1",xlabel="Iteration",ylabel="")]
 	# end
 
-try
+# try
 
 	############# check some stuff #############
 	if sPPM
@@ -473,8 +474,8 @@ try
 			barlen=0 # no progress bar
 			)
 
-	# @inbounds for i in 1:draws
-	for i in 1:draws
+	@inbounds for i in 1:draws
+	# for i in 1:draws
 		# print("iteration $i of $draws\r") # use only this when all finished, for a shorter feedback
 		# there is also the ProgressMeter option, maybe is cooler
 
@@ -1592,7 +1593,7 @@ try
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end
 
-	close(log_file)
+	# close(log_file)
 
 	if simple_return
 		return Si_out, LPML, WAIC
@@ -1602,10 +1603,10 @@ try
 			fitted, llike, LPML, WAIC
 	end
 
-catch e
-	println(e)
-	close(log_file)
-end
+# catch e
+# 	println(e)
+# 	close(log_file)
+# end
 
 # global_logger(ConsoleLogger())	
 end

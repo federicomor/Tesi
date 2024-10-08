@@ -3,11 +3,14 @@ title: "Untitled"
 output: html_document
 ---
 
-```{r}
+
+# setup
+```{r, warning=FALSE}
 library(salso)
 library(RColorBrewer)
 source("../include.R")
 ```
+
 
 
 # LOAD 
@@ -27,19 +30,18 @@ juliaSetupOk()
 # juliaEval("Pkg.instantiate()")
 
 # juliaEval("Pkg.status()")
-
 # setup project
 juliaEval("using Pkg; Pkg.status()")
-juliaEval("Pkg.activate(\"../../JDRPM/\")")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
 juliaEval("using Pkg; Pkg.status()")
 
 module = normalizePath("../../JDRPM/src/JDRPM.jl")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 ```
 
+# ===========
 
-
-# DATA
+# real DATA
 ```{r}
 load("../thesis data/df_daily_full_logtransf.Rdata")
 df = df_daily_full_logtransf
@@ -92,17 +94,29 @@ y
 sites
 ```
 
+# synth DATA
+```{r}
+create_data = function(N,Tm,p_cl=1, p_lk=1){
+	y = matrix(data=runif(N*Tm),nrow = N,ncol = Tm)
+	sp_coords = matrix(data=runif(N*2),nrow=N)
+	X_cl = array(data = runif(N*p_cl*Tm), dim = c(N, p_cl, Tm))
+	X_lk = array(data = runif(N*p_lk*Tm), dim = c(N, p_lk, Tm))
+	return(list(y,sp_coords,X_cl, X_lk))
+}
+out = create_data(10,3)
+y = out[[1]]
+sp_coords = out[[2]]
+X_cl = out[[3]]
+X_lk = out[[4]]
+```
+
 
 # Fit params
 ```{r}
-niter=100; nburn=0; nthin=1
-nout <- (niter-nburn)/nthin
-cat(nout,"valid iterations\n")
-
 # params
 m0_phi0 = 0
 s20_phi0 = 10
-A_ub_sigma = 5
+A_ub_sigma = 7
 A_ub_tau = 5
 A_ub_lambda = 5
 
@@ -111,11 +125,11 @@ a_tau    = 2; b_tau    = 2
 a_lambda = 2; b_lambda = 2
 eta1_scale = 0.9
 
-sig_mh_sig2 = 0.2
-sig_mh_tau2 = 0.2
-sig_mh_lambda2 = 0.2
-sig_mh_eta1 = 0.2
-sig_mh_phi1 = 0.2
+sig_mh_sig2 = 0.1
+sig_mh_tau2 = 0.1
+sig_mh_lambda2 = 0.1
+sig_mh_eta1 = 0.1
+sig_mh_phi1 = 0.1
 
 update_eta1 = TRUE
 update_phi1 = TRUE
@@ -123,7 +137,7 @@ update_phi1 = TRUE
 a_alpha = 2; b_alpha = 2
 
 # now space
-spatial_cohesion = 4
+spatial_cohesion = 3
 mu0 = 0 
 k0 = 1
 v0 = 5
@@ -135,19 +149,33 @@ L0 = 1
 # Fit
 ```{r}
 # timespan_tests = round(seq(10,364,length.out=2))
-timespan_tests = round(seq(10,729,length.out=8))
 nunits_tests =   round(seq(10,105,length.out=4))
+timespan_tests = round(seq(10,729,length.out=8))
 
+nruns_tests    = c(3,3,3,3,3)
+nunits_tests   = c(5,10,50,100,500)
 timespan_tests = c(5,10,50,100,500)
-nunits_tests   = c(5,10,50,100)
 
+niter_tests = matrix(data=
+					 	c(5000,4000,3000,2000,500,
+					 	  4000,3000,2000,1000,250,
+					 	  1000,500,300,200,50,
+					 	  400,300,200,100,25,
+					 	  40,30,20,10,5),nrow=5,ncol=5,byrow = T)
+
+for (i in 1:length(nunits_tests)) {
+	for (j in 1:length(timespan_tests)) {
+		niter_tests[i,j] = 10000/(nunits_tests[i]*timespan_tests[j])*50
+	}
+}
+niter_tests
 timespan_tests
 nunits_tests
 
 cat("size =",length(timespan_tests)*length(nunits_tests),"\n")
 
-performance_C <- matrix(10000, nrow = length(nunits_tests), ncol = length(timespan_tests))
-performance_Julia <- matrix(10000, nrow = length(nunits_tests), ncol = length(timespan_tests))
+performance_C <- matrix(1e5, nrow = length(nunits_tests), ncol = length(timespan_tests))
+performance_Julia <- matrix(1e5, nrow = length(nunits_tests), ncol = length(timespan_tests))
 colnames(performance_C) = c(paste0("T_",timespan_tests))
 rownames(performance_C) = c(paste0("n_",nunits_tests))
 colnames(performance_Julia) = c(paste0("T_",timespan_tests))
@@ -158,37 +186,51 @@ performance_Julia
 ```
 
 
+```{r}
+# load("performance_C_ext1.Rdata")
+# load("performance_Julia_ext1.Rdata")
+```
 
 
 ```{r}
 library(lubridate)
-module_JDRPM <- juliaImport(juliaCall("include", module))
+# module_JDRPM <- juliaImport(juliaCall("include", module))
 
-nruns = 5
-seed = 314.0
-set.seed(314.0)
+seed = 4.0
+set.seed(4.0)
 
 for (i in 1:length(nunits_tests)) {
   for (j in 1:length(timespan_tests)) {
   	
   	##### set data accordingly
 	# reduce data set
-	nsubjects = 1:nunits_tests[i] # up to 105
-	time_span = 1:timespan_tests[j] # up to 365
-	y = yfull_2years[nsubjects,1+time_span]
-	ym = as.matrix(y)
-	sites = std_sites[nsubjects,]
-	sitesm = as.matrix(sites)
-	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
+	# nsubjects = 1:nunits_tests[i] # up to 105
+	# time_span = 1:timespan_tests[j] # up to 365
+	# y = yfull_2years[nsubjects,1+time_span]
+	# ym = as.matrix(y)
+	# sites = std_sites[nsubjects,]
+	# sitesm = as.matrix(sites)
+	
+	out = create_data(nunits_tests[i],timespan_tests[j])
+	y = out[[1]]
+	sites = out[[2]]
+	X_cl = out[[3]]
+	X_lk = out[[4]]
 
+	niter = niter_tests[i,j]
+	nruns = nruns_tests[i]
+	
+	cat(crayon::green("##########",niter,"iterations\n"))
+	nburn = niter-1
+	nthin = 1
   	##### fit models
 		
 	##### J
 	for (run in 1:nruns){
 		tempo_inizio <- proc.time()
 		out = module_JDRPM$MCMC_fit(
-			Y=ym,              
-			sp_coords = sitesm,
+			Y=y,              
+			sp_coords = sites,
 			M_dp = 1,                     
 			initial_partition = NA,
 			Xlk_covariates = NA,
@@ -202,12 +244,12 @@ for (i in 1:length(nunits_tests)) {
 			update_eta1 = TRUE,                    
 			update_phi1 = TRUE,
 			sig2h_priors = c(a_sigma,b_sigma),
-			eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+			eta1_priors = c(eta1_scale,sig_mh_eta1),
 			# beta_priors = c(rep(1,p),2),
 			beta_priors = NA,
 			tau2_priors = c(a_tau,b_tau),
 			phi0_priors = c(m0_phi0,s20_phi0),
-			phi1_priors = sig_mh_phi1^2,
+			phi1_priors = sig_mh_phi1,
 			lambda2_priors = c(a_lambda,b_lambda),
 			alpha_priors = c(a_alpha,b_alpha),
 			spatial_cohesion_idx = spatial_cohesion,
@@ -217,20 +259,19 @@ for (i in 1:length(nunits_tests)) {
 			draws = niter,burnin = nburn, thin = nthin,
 			logging = FALSE,
 			seed = seed,
-			jump_to_execution = TRUE,
 			simple_return = TRUE
 		)
 		tempo_fine <- proc.time()
 		elapsed_time <- tempo_fine - tempo_inizio
 		# Elapsed time in seconds
 		differenza_tempo <- elapsed_time["elapsed"]
-		cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
+		cat(crayon::red(paste0("J case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
 		performance_Julia[i, j] = min(performance_Julia[i, j],
 									  as.double(differenza_tempo) / niter)
-	}
+	# }
 	
 	##### C	
-	for (run in 1:nruns){
+	# for (run in 1:nruns){
   	tempo_inizio <- proc.time()
 	drpm1 <- drpm_fit(
 			y=y, 
@@ -255,50 +296,151 @@ for (i in 1:length(nunits_tests)) {
 			verbose=TRUE,
 			# draws=1000,burn=0,thin=1)
 			draws=niter,burn=nburn,thin=nthin)
-	
+		cat("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic,"\n")
+
 		tempo_fine <- proc.time()
 		elapsed_time <- tempo_fine - tempo_inizio
 		# Elapsed time in seconds
 		differenza_tempo <- elapsed_time["elapsed"]
-		cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s")))
+		cat(crayon::red(paste0("C case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
 		performance_C[i, j] = min(performance_C[i, j],
 								  as.double(differenza_tempo) / niter)
 	}
   }
 }
 ```
+# refine cases
 ```{r}
-size(drpm1$phi1)
-plot(drpm1$phi1,type="l")
+# module_JDRPM <- juliaImport(juliaCall("include", module))
+i=4
+j=5
+nruns=1
+seed = 111.0
+	
+##### set data accordingly
+# reduce data set
+# nsubjects = 1:nunits_tests[i] # up to 105
+# time_span = 1:timespan_tests[j] # up to 365
+# y = yfull_2years[nsubjects,1+time_span]
+# ym = as.matrix(y)
+# sites = std_sites[nsubjects,]
+# sitesm = as.matrix(sites)
 
-size(drpm1$eta1)
-plot(drpm1$eta1[,1],type="l")
+out = create_data(nunits_tests[i],timespan_tests[j])
+y = out[[1]]
+sites = out[[2]]
+X_cl = out[[3]]
+X_lk = out[[4]]
+
+niter = niter_tests[i,j]
+cat(crayon::green("##########",niter,"iterations\n"))
+nburn = niter-2
+nthin = 1
+ ##### fit models
+	
+##### J
+for (run in 1:nruns){
+	tempo_inizio <- proc.time()
+	out = module_JDRPM$MCMC_fit(
+		Y=y,              
+		sp_coords = sites,
+		M_dp = 1,                     
+		initial_partition = NA,
+		Xlk_covariates = NA,
+		Xcl_covariates = NA,
+		starting_alpha = 0.5,         
+		unit_specific_alpha = FALSE,       
+		time_specific_alpha = TRUE,       
+		update_alpha = TRUE,
+		include_eta1 = TRUE,                    
+		include_phi1 = TRUE,
+		update_eta1 = TRUE,                    
+		update_phi1 = TRUE,
+		sig2h_priors = c(a_sigma,b_sigma),
+		eta1_priors = c(eta1_scale,sig_mh_eta1),
+		# beta_priors = c(rep(1,p),2),
+		beta_priors = NA,
+		tau2_priors = c(a_tau,b_tau),
+		phi0_priors = c(m0_phi0,s20_phi0),
+		phi1_priors = sig_mh_phi1,
+		lambda2_priors = c(a_lambda,b_lambda),
+		alpha_priors = c(a_alpha,b_alpha),
+		spatial_cohesion_idx = spatial_cohesion,
+		sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+		# covariate_similarity_idx = NA,
+		# draws = 2,burnin = 0, thin = 1,
+		draws = niter,burnin = nburn, thin = nthin,
+		logging = FALSE,
+		seed = seed,
+		simple_return = TRUE
+	)
+	tempo_fine <- proc.time()
+	elapsed_time <- tempo_fine - tempo_inizio
+	# Elapsed time in seconds
+	differenza_tempo <- elapsed_time["elapsed"]
+	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+	performance_Julia[i, j] = min(performance_Julia[i, j],
+								  as.double(differenza_tempo) / niter)
+}
+
+##### C	
+# for (run in 1:nruns){
+#   tempo_inizio <- proc.time()
+# drpm1 <- drpm_fit(
+# 		y=y, 
+# 		s_coords = sites,
+#         M=1,
+#         initial_partition = NULL,
+#         starting_alpha = 0.5,
+#         unit_specific_alpha = FALSE,
+#         time_specific_alpha = TRUE,
+#         alpha_0=FALSE,
+#         eta1_0 =FALSE,
+#         phi1_0 =FALSE,
+#         # modelPriors=c(0,100^2,1,1,1,1), # original default one
+#         modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+#         alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+#         simpleModel = 0,
+#         theta_tau2 = c(0, 2), # only used if simpleModel=1
+# 		SpatialCohesion=spatial_cohesion, # auxiliary similarity
+# 		# SpatialCohesion=4, # double dipper similarity
+# 		cParms=c(mu0, k0, v0, L0),
+# 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+# 		verbose=TRUE,
+# 		# draws=1000,burn=0,thin=1)
+# 		draws=niter,burn=nburn,thin=nthin)
+# 	cat("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic,"\n")
+# 
+# 	tempo_fine <- proc.time()
+# 	elapsed_time <- tempo_fine - tempo_inizio
+# 	# Elapsed time in seconds
+# 	differenza_tempo <- elapsed_time["elapsed"]
+# 	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+# 	performance_C[i, j] = min(performance_C[i, j],
+# 							  as.double(differenza_tempo) / niter)
+# }
 ```
 
 
 # Analysis
+```{r}
+load("performance_C_v4_full.Rdata")
+load("performance_Julia_v4_full.Rdata")
+```
+
+
 ```{r}
 performance_C
 performance_Julia
 ```
 
 ```{r}
-mat = matrix(1:20,nrow=4,5)
-mat
-plot_mat(mat/1000,title="test",max(mat))
-
-xaxis = seq(0,1,length.out = size(mat)[1])
-yaxis = seq(0,1,length.out = size(mat)[2])
-
-for (i in 1:size(mat)[1]){
-	for (j in 1:size(mat)[2]){
-		text(y=yaxis[j],
-			 x=xaxis[i],
-		# text(y=j*(1.2)/(size(mat)[2])-0.3,
-		# 	 x=i*(1.2)/(size(mat)[1])-0.3,
-			 mat[i,j],col="green")
-	}
-}
+outC = performance_C[1:4,1:5]
+outJ = performance_Julia[1:4,1:5]
+# outC = performance_C
+# outJ = performance_Julia
+outC
+outJ
 ```
 
 
@@ -306,15 +448,18 @@ for (i in 1:size(mat)[1]){
 library(shades)
 plot_mat = function(mat,title,maxk){
 ncols_ari <- 1000
-cols <- rev(colora(ncols_ari, 35,0))
-ncol_writings = 1000
-cols_writings <- rev(colora(ncol_writings, 35,0))
+cols <- colora(ncols_ari, 35,0)
+cols = rev(cols)
+ncol_writings = 4
+cols_writings <- colora(ncol_writings, 35,0)
+cols_writings <- rev(cols_writings)
 brks <- seq(0,maxk, length.out = ncols_ari + 1)
 
 # Plotting the matrix
 library(fields)
-image.plot(mat*1000, axes = FALSE, col = cols, main=title,breaks = brks)
-
+image(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+# image.plot(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+		  
 # Adding text annotations for each cell
 
 xaxis = seq(0,1,length.out = size(mat)[1])
@@ -322,37 +467,111 @@ yaxis = seq(0,1,length.out = size(mat)[2])
 
 for (i in 1:size(mat)[1]){
 	for (j in 1:size(mat)[2]){
-		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*ncol_writings)+1)
-		# col_chosen = floor(abs(mat[i,j]/(maxk/1000)*ncol_writings))
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
 		cat(col_chosen,"\n")
 		
 		text(y=yaxis[j],x=xaxis[i],
-		# labels = sprintf("%.2f ms/it", mat[i, j]*1000),
+			 # font=2,
+		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
 		labels = sprintf("%.2f", mat[i, j]*1000),
 		# cex = 1.0, col = "#aaaaaa")
-		cex = 1.0, col = cols_writings[col_chosen])
+		cex = 0.8, col = cols_writings[col_chosen])
+		# cex = mat[i, j], col = cols_writings[col_chosen])
 		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
-	}
+		}
 }
 
-mtext(text=c(paste0("n=",nunits_tests)), 
-	  side=2, line=0.3,at=seq(0,1,length=length(nunits_tests)), las=1, cex=0.8)
-mtext(text=c(paste0("T=",timespan_tests)),
-	  side=1, line=0.3,at=seq(0,1,length=length(timespan_tests)), las=1, cex=0.8)
+mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+
+}
+imgplot_mat = function(mat,title,maxk){
+ncols_ari <- 1000
+cols <- colora(ncols_ari, 35,0)
+cols = rev(cols)
+ncol_writings = 4
+cols_writings <- colora(ncol_writings, 35,0)
+cols_writings <- rev(cols_writings)
+brks <- seq(0,maxk, length.out = ncols_ari + 1)
+
+# Plotting the matrix
+library(fields)
+# image(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+image.plot(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks,legend.width = 1.2)
+		  
+# Adding text annotations for each cell
+
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
+		# cat(col_chosen,"\n")
+		
+		text(y=yaxis[j],x=xaxis[i],
+			 # font=2,
+		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
+		labels = sprintf("%.2f", mat[i, j]*1000),
+		# cex = 1.0, col = "#aaaaaa")
+		cex = 0.8, col = cols_writings[col_chosen])
+		# cex = mat[i, j], col = cols_writings[col_chosen])
+		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
+		}
+}
+
+mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
 
 }
 
-maxk = max(performance_C,performance_Julia)*1000
-plot_mat(performance_C,title="C matrix",maxk)
-plot_mat(performance_Julia,title="J matrix",maxk)
+# outC[5,5] = -1
+# outJ[5,5] = -1
+save_plots = T
+if (save_plots==T){
+	pdf(file="target_space.pdf",width=10,height = 5)
+}
+maxk = max(outC,outJ)*1000
+par(mar=c(2.1,2.3,2,1),mfrow=c(1,2),oma=c(0.2,0.2,0.1,1.5))
+plot_mat(outC,title="C: target + space",maxk)
+imgplot_mat(outJ,title="J: target + space",maxk)
+# mtext("Scaling performance comparison", side = 3, line = 0.1, outer = T)
+if (save_plots==T){ dev.off() }
 ```
 
+
+```{r}
+# save(outC,file="performance_C_v4_full.Rdata")
+# save(outJ,file="performance_Julia_v4_full.Rdata")
+```
 
 ```{r}
 performance_C =     matrix(data=c(1:20),nrow=4,ncol=5)
 performance_Julia = matrix(data=c(1:20),nrow=4,ncol=5)
 ```
 
+# other plots
+```{r}
+cols = colora(8,"div",seed_div = "Paired",show=1)
+
+plot( timespan_tests,outC[1,],type="o",pch=19,cex=0.8,col=cols[1])
+	  # ylim=extrema(outC[1:4,],outJ[1:4,]))
+lines(timespan_tests,outJ[1,],type="o",pch=19,cex=0.8,col=cols[2])
+
+lines(timespan_tests,outC[2,],type="o",pch=19,cex=0.8,col=cols[3])
+lines(timespan_tests,outJ[2,],type="o",pch=19,cex=0.8,col=cols[4])
+legend("bottomright",legend = c("C T=5","C T=10","J T=5","J T=10"),pch=19,lty = 1,
+	   col=c(cols[1],cols[3],cols[2],cols[4]),ncol=2)
+
+# legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
+# 	   lty = 1,lwd=2,
+# 	   cex=0.8, bty="n",
+# 	   ncol=5)
+```
 
 
 

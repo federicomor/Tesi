@@ -338,7 +338,7 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	// 	feedback_rate = 100;
 	// }
 	// else {
-	// 	feedback_rate = int((*draws)/1000);
+		// feedback_rate = int((*draws)/1000);
 	// }
 
 
@@ -353,9 +353,9 @@ void drpm_ar1_sppm(int *draws, int *burn, int *thin, int *nsubject, int *ntime,
 	Rprintf("%s", ctime(&now));
 	for(i = 0; i < *draws; i++){
 
-	if(i % 100 == 0){
-		Rprintf("mcmc iter = %d\r",i);
-	}
+	// if(i % feedback_rate == 0){
+		// Rprintf("mcmc iter = %d\r",i);
+	// }
 // 		if((i+1) % 10000 == 0){
 // 			time_t now;
 // 			time(&now);

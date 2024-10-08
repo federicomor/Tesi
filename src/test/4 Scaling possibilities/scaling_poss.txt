@@ -1,0 +1,3335 @@
+Caricamento pacchetto: ‘lubridate’
+
+I seguenti oggetti sono mascherati da ‘package:base’:
+
+    date, intersect, setdiff, union
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:42
+Starting MCMC algorithm
+
+done!
+Elapsed time: 433 milliseconds
+LPML: -2.5625494208468176 (the higher the better)
+WAIC: 5.125098841693632 (the lower the better)
+acceptance ratio eta1: 83.59%
+acceptance ratio phi1: 82.70%
+!case i=1 j=1 elapsed: 0.610000000000014 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:42
+Starting MCMC algorithm
+
+done!
+Elapsed time: 404 milliseconds
+LPML: -2.5625494208468176 (the higher the better)
+WAIC: 5.125098841693632 (the lower the better)
+acceptance ratio eta1: 83.59%
+acceptance ratio phi1: 82.70%
+!case i=1 j=1 elapsed: 0.419999999999987 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:43
+Starting MCMC algorithm
+
+done!
+Elapsed time: 398 milliseconds
+LPML: -2.5625494208468176 (the higher the better)
+WAIC: 5.125098841693632 (the lower the better)
+acceptance ratio eta1: 83.59%
+acceptance ratio phi1: 82.70%
+!case i=1 j=1 elapsed: 0.430000000000007 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 5
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:43 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = 0.9361385 
+WAIC = -1.872277 
+!case i=1 j=1 elapsed: 0.759999999999991 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 5
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:44 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -2.140832 
+WAIC = 4.281664 
+!case i=1 j=1 elapsed: 0.629999999999995 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 5
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:44 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -4.219481 
+WAIC = 8.438963 
+!case i=1 j=1 elapsed: 0.650000000000006 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:45
+Starting MCMC algorithm
+
+done!
+Elapsed time: 625 milliseconds
+LPML: -12.633938216964793 (the higher the better)
+WAIC: 25.267876433929604 (the lower the better)
+acceptance ratio eta1: 76.83%
+acceptance ratio phi1: 74.88%
+!case i=1 j=2 elapsed: 0.620000000000005 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:46
+Starting MCMC algorithm
+
+done!
+Elapsed time: 627 milliseconds
+LPML: -12.633938216964793 (the higher the better)
+WAIC: 25.267876433929604 (the lower the better)
+acceptance ratio eta1: 76.83%
+acceptance ratio phi1: 74.88%
+!case i=1 j=2 elapsed: 0.639999999999986 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:46
+Starting MCMC algorithm
+
+done!
+Elapsed time: 615 milliseconds
+LPML: -12.633938216964793 (the higher the better)
+WAIC: 25.267876433929604 (the lower the better)
+acceptance ratio eta1: 76.83%
+acceptance ratio phi1: 74.88%
+!case i=1 j=2 elapsed: 0.620000000000005 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 5
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:47 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -9.699445 
+WAIC = 19.39889 
+!case i=1 j=2 elapsed: 1.20999999999998 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 5
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:48 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -22.48837 
+WAIC = 44.97675 
+!case i=1 j=2 elapsed: 1.26999999999998 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 5
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:49 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -17.82969 
+WAIC = 35.65939 
+!case i=1 j=2 elapsed: 1.29999999999998 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:51
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.63 ms/it)
+
+done!
+Elapsed time: 1 second, 265 milliseconds
+LPML: -50.38196119050784 (the higher the better)
+WAIC: 100.76392238101586 (the lower the better)
+acceptance ratio eta1: 52.98%
+acceptance ratio phi1: 73.70%
+!case i=1 j=3 elapsed: 1.28 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:52
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.64 ms/it)
+
+done!
+Elapsed time: 1 second, 295 milliseconds
+LPML: -50.38196119050784 (the higher the better)
+WAIC: 100.76392238101586 (the lower the better)
+acceptance ratio eta1: 52.98%
+acceptance ratio phi1: 73.70%
+!case i=1 j=3 elapsed: 1.30000000000001 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:01:53
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.65 ms/it)
+
+done!
+Elapsed time: 1 second, 303 milliseconds
+LPML: -50.38196119050784 (the higher the better)
+WAIC: 100.76392238101586 (the lower the better)
+acceptance ratio eta1: 52.98%
+acceptance ratio phi1: 73.70%
+!case i=1 j=3 elapsed: 1.31 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 5
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:55 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -73.07318 
+WAIC = 146.1464 
+!case i=1 j=3 elapsed: 2.48999999999998 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 5
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:01:57 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -49.9117 
+WAIC = 99.82341 
+!case i=1 j=3 elapsed: 2.70000000000002 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 5
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:00 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -50.03092 
+WAIC = 100.0618 
+!case i=1 j=3 elapsed: 2.59 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:02
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 1.31 ms/it)
+
+done!
+Elapsed time: 1 second, 307 milliseconds
+LPML: -147.78718119961314 (the higher the better)
+WAIC: 295.57436239922635 (the lower the better)
+acceptance ratio eta1: 43.06%
+acceptance ratio phi1: 66.40%
+!case i=1 j=4 elapsed: 1.32999999999998 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:04
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 1.43 ms/it)
+
+done!
+Elapsed time: 1 second, 433 milliseconds
+LPML: -147.78718119961314 (the higher the better)
+WAIC: 295.57436239922635 (the lower the better)
+acceptance ratio eta1: 43.06%
+acceptance ratio phi1: 66.40%
+!case i=1 j=4 elapsed: 1.45000000000002 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:05
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 1.36 ms/it)
+
+done!
+Elapsed time: 1 second, 363 milliseconds
+LPML: -147.78718119961314 (the higher the better)
+WAIC: 295.57436239922635 (the lower the better)
+acceptance ratio eta1: 43.06%
+acceptance ratio phi1: 66.40%
+!case i=1 j=4 elapsed: 1.35999999999999 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 5
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:07 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -156.9715 
+WAIC = 313.9429 
+!case i=1 j=4 elapsed: 2.53 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 5
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:09 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -301.5412 
+WAIC = 603.0824 
+!case i=1 j=4 elapsed: 2.5 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 5
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:12 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -136.9622 
+WAIC = 273.9244 
+!case i=1 j=4 elapsed: 2.58000000000001 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:14
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:04 ( 8.08 ms/it)
+
+done!
+Elapsed time: 4 seconds, 42 milliseconds
+LPML: -712.0229167168236 (the higher the better)
+WAIC: 1424.0458334336429 (the lower the better)
+acceptance ratio eta1: 23.80%
+acceptance ratio phi1: 43.00%
+!case i=1 j=5 elapsed: 4.06999999999999 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:18
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:04 ( 8.32 ms/it)
+
+done!
+Elapsed time: 4 seconds, 162 milliseconds
+LPML: -712.0229167168236 (the higher the better)
+WAIC: 1424.0458334336429 (the lower the better)
+acceptance ratio eta1: 23.80%
+acceptance ratio phi1: 43.00%
+!case i=1 j=5 elapsed: 4.18000000000001 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=5 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:22
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:03 ( 7.92 ms/it)
+
+done!
+Elapsed time: 3 seconds, 960 milliseconds
+LPML: -712.0229167168236 (the higher the better)
+WAIC: 1424.0458334336429 (the lower the better)
+acceptance ratio eta1: 23.80%
+acceptance ratio phi1: 43.00%
+!case i=1 j=5 elapsed: 3.98999999999998 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 5
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:26 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1427.779 
+WAIC = 2855.558 
+!case i=1 j=5 elapsed: 5.98000000000002 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 5
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:32 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1452.601 
+WAIC = 2905.203 
+!case i=1 j=5 elapsed: 5.79999999999998 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 5
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:38 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1408.763 
+WAIC = 2817.526 
+!case i=1 j=5 elapsed: 6.03 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:44
+Starting MCMC algorithm
+
+done!
+Elapsed time: 692 milliseconds
+LPML: 3.2978295187875055 (the higher the better)
+WAIC: -6.595659037574992 (the lower the better)
+acceptance ratio eta1: 80.71%
+acceptance ratio phi1: 79.80%
+!case i=2 j=1 elapsed: 0.700000000000017 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:45
+Starting MCMC algorithm
+
+done!
+Elapsed time: 733 milliseconds
+LPML: 3.2978295187875055 (the higher the better)
+WAIC: -6.595659037574992 (the lower the better)
+acceptance ratio eta1: 80.71%
+acceptance ratio phi1: 79.80%
+!case i=2 j=1 elapsed: 0.769999999999982 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:46
+Starting MCMC algorithm
+
+done!
+Elapsed time: 757 milliseconds
+LPML: 3.2978295187875055 (the higher the better)
+WAIC: -6.595659037574992 (the lower the better)
+acceptance ratio eta1: 80.71%
+acceptance ratio phi1: 79.80%
+!case i=2 j=1 elapsed: 0.760000000000019 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 10
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:46 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -4.068226 
+WAIC = 8.136452 
+!case i=2 j=1 elapsed: 1.72 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 10
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:48 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = 3.734681 
+WAIC = -7.469361 
+!case i=2 j=1 elapsed: 1.72 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 10
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:50 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -3.720623 
+WAIC = 7.441246 
+!case i=2 j=1 elapsed: 1.72 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:52
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.30 ms/it)
+
+done!
+Elapsed time: 1 second, 515 milliseconds
+LPML: -23.35510684912917 (the higher the better)
+WAIC: 46.71021369825835 (the lower the better)
+acceptance ratio eta1: 77.40%
+acceptance ratio phi1: 66.64%
+!case i=2 j=2 elapsed: 1.51999999999998 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:53
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.31 ms/it)
+
+done!
+Elapsed time: 1 second, 535 milliseconds
+LPML: -23.35510684912917 (the higher the better)
+WAIC: 46.71021369825835 (the lower the better)
+acceptance ratio eta1: 77.40%
+acceptance ratio phi1: 66.64%
+!case i=2 j=2 elapsed: 1.54000000000002 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:02:55
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:01 ( 0.31 ms/it)
+
+done!
+Elapsed time: 1 second, 566 milliseconds
+LPML: -23.35510684912917 (the higher the better)
+WAIC: 46.71021369825835 (the lower the better)
+acceptance ratio eta1: 77.40%
+acceptance ratio phi1: 66.64%
+!case i=2 j=2 elapsed: 1.57999999999998 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 10
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:56 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -16.7681 
+WAIC = 33.53621 
+!case i=2 j=2 elapsed: 3.08000000000001 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 10
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:02:59 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -11.10091 
+WAIC = 22.20181 
+!case i=2 j=2 elapsed: 3.34 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 10
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:03 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -16.84111 
+WAIC = 33.68222 
+!case i=2 j=2 elapsed: 3.06999999999999 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:06
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:03 ( 1.51 ms/it)
+
+done!
+Elapsed time: 3 seconds, 17 milliseconds
+LPML: -151.2884678554566 (the higher the better)
+WAIC: 302.57693571091306 (the lower the better)
+acceptance ratio eta1: 59.04%
+acceptance ratio phi1: 35.60%
+!case i=2 j=3 elapsed: 3.00999999999999 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:09
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:02 ( 1.46 ms/it)
+
+done!
+Elapsed time: 2 seconds, 928 milliseconds
+LPML: -151.2884678554566 (the higher the better)
+WAIC: 302.57693571091306 (the lower the better)
+acceptance ratio eta1: 59.04%
+acceptance ratio phi1: 35.60%
+!case i=2 j=3 elapsed: 2.94 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:12
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:02 ( 1.45 ms/it)
+
+done!
+Elapsed time: 2 seconds, 898 milliseconds
+LPML: -151.2884678554566 (the higher the better)
+WAIC: 302.57693571091306 (the lower the better)
+acceptance ratio eta1: 59.04%
+acceptance ratio phi1: 35.60%
+!case i=2 j=3 elapsed: 2.92000000000002 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 10
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:15 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -145.9037 
+WAIC = 291.8074 
+!case i=2 j=3 elapsed: 5.34 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 10
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:20 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -147.0357 
+WAIC = 294.0713 
+!case i=2 j=3 elapsed: 5.28999999999999 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 10
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:25 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -148.7522 
+WAIC = 297.5044 
+!case i=2 j=3 elapsed: 5.42000000000002 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:31
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:02 ( 2.98 ms/it)
+
+done!
+Elapsed time: 2 seconds, 979 milliseconds
+LPML: -240.32109828943794 (the higher the better)
+WAIC: 480.64219657887764 (the lower the better)
+acceptance ratio eta1: 48.44%
+acceptance ratio phi1: 54.10%
+!case i=2 j=4 elapsed: 3 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:34
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:02 ( 3.00 ms/it)
+
+done!
+Elapsed time: 2 seconds, 999 milliseconds
+LPML: -240.32109828943794 (the higher the better)
+WAIC: 480.64219657887764 (the lower the better)
+acceptance ratio eta1: 48.44%
+acceptance ratio phi1: 54.10%
+!case i=2 j=4 elapsed: 3 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:37
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:02 ( 2.92 ms/it)
+
+done!
+Elapsed time: 2 seconds, 917 milliseconds
+LPML: -240.32109828943794 (the higher the better)
+WAIC: 480.64219657887764 (the lower the better)
+acceptance ratio eta1: 48.44%
+acceptance ratio phi1: 54.10%
+!case i=2 j=4 elapsed: 2.93000000000001 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 10
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:40 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -240.5078 
+WAIC = 481.0155 
+!case i=2 j=4 elapsed: 5.31999999999999 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 10
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:45 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -233.5136 
+WAIC = 467.0272 
+!case i=2 j=4 elapsed: 5.22999999999996 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 10
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:03:50 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -211.518 
+WAIC = 423.036 
+!case i=2 j=4 elapsed: 5.36000000000001 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:03:56
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:09 (19.23 ms/it)
+
+done!
+Elapsed time: 9 seconds, 617 milliseconds
+LPML: -1185.0977062485345 (the higher the better)
+WAIC: 2370.1954124970625 (the lower the better)
+acceptance ratio eta1: 27.62%
+acceptance ratio phi1: 35.60%
+!case i=2 j=5 elapsed: 9.62 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:04:05
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:09 (18.90 ms/it)
+
+done!
+Elapsed time: 9 seconds, 449 milliseconds
+LPML: -1185.0977062485345 (the higher the better)
+WAIC: 2370.1954124970625 (the lower the better)
+acceptance ratio eta1: 27.62%
+acceptance ratio phi1: 35.60%
+!case i=2 j=5 elapsed: 9.45000000000005 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=10 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:04:15
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:09 (19.22 ms/it)
+
+done!
+Elapsed time: 9 seconds, 626 milliseconds
+LPML: -1185.0977062485345 (the higher the better)
+WAIC: 2370.1954124970625 (the lower the better)
+acceptance ratio eta1: 27.62%
+acceptance ratio phi1: 35.60%
+!case i=2 j=5 elapsed: 9.64999999999998 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 10
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:04:24 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1159.032 
+WAIC = 2318.063 
+!case i=2 j=5 elapsed: 13.43 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 10
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:04:38 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1177.932 
+WAIC = 2355.864 
+!case i=2 j=5 elapsed: 13.17 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 10
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:04:51 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -1230.317 
+WAIC = 2460.634 
+!case i=2 j=5 elapsed: 13.15 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:05:04
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:05 ( 1.06 ms/it)
+
+done!
+Elapsed time: 5 seconds, 293 milliseconds
+LPML: -38.437319628525586 (the higher the better)
+WAIC: 76.87463925705094 (the lower the better)
+acceptance ratio eta1: 83.11%
+acceptance ratio phi1: 82.98%
+!case i=3 j=1 elapsed: 5.31999999999999 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:05:09
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:05 ( 1.07 ms/it)
+
+done!
+Elapsed time: 5 seconds, 332 milliseconds
+LPML: -38.437319628525586 (the higher the better)
+WAIC: 76.87463925705094 (the lower the better)
+acceptance ratio eta1: 83.11%
+acceptance ratio phi1: 82.98%
+!case i=3 j=1 elapsed: 5.35000000000002 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:05:15
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:05 ( 1.06 ms/it)
+
+done!
+Elapsed time: 5 seconds, 310 milliseconds
+LPML: -38.437319628525586 (the higher the better)
+WAIC: 76.87463925705094 (the lower the better)
+acceptance ratio eta1: 83.11%
+acceptance ratio phi1: 82.98%
+!case i=3 j=1 elapsed: 5.32999999999998 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 50
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:05:20 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -45.26176 
+WAIC = 90.52351 
+!case i=3 j=1 elapsed: 11.53 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 50
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:05:32 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -43.18375 
+WAIC = 86.3675 
+!case i=3 j=1 elapsed: 11.48 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 50
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:05:43 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -37.99216 
+WAIC = 75.98433 
+!case i=3 j=1 elapsed: 11.56 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:05:55
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:11 ( 2.20 ms/it)
+
+done!
+Elapsed time: 11 seconds, 13 milliseconds
+LPML: -66.32743585915432 (the higher the better)
+WAIC: 132.65487171830853 (the lower the better)
+acceptance ratio eta1: 78.19%
+acceptance ratio phi1: 76.64%
+!case i=3 j=2 elapsed: 11.05 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:06:06
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:10 ( 2.19 ms/it)
+
+done!
+Elapsed time: 10 seconds, 975 milliseconds
+LPML: -66.32743585915432 (the higher the better)
+WAIC: 132.65487171830853 (the lower the better)
+acceptance ratio eta1: 78.19%
+acceptance ratio phi1: 76.64%
+!case i=3 j=2 elapsed: 11 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:06:17
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:11 ( 2.20 ms/it)
+
+done!
+Elapsed time: 11 seconds, 19 milliseconds
+LPML: -66.32743585915432 (the higher the better)
+WAIC: 132.65487171830853 (the lower the better)
+acceptance ratio eta1: 78.19%
+acceptance ratio phi1: 76.64%
+!case i=3 j=2 elapsed: 11.03 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 50
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:06:28 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -76.70641 
+WAIC = 153.4128 
+!case i=3 j=2 elapsed: 23.51 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 50
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:06:51 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -67.12195 
+WAIC = 134.2439 
+!case i=3 j=2 elapsed: 23.71 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 50
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:07:15 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -69.69941 
+WAIC = 139.3988 
+!case i=3 j=2 elapsed: 23.7 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:07:39
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:24 (12.44 ms/it)
+
+done!
+Elapsed time: 24 seconds, 874 milliseconds
+LPML: -492.7718563550752 (the higher the better)
+WAIC: 985.5437127101449 (the lower the better)
+acceptance ratio eta1: 58.92%
+acceptance ratio phi1: 58.10%
+!case i=3 j=3 elapsed: 24.92 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:08:04
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:25 (12.63 ms/it)
+
+done!
+Elapsed time: 25 seconds, 252 milliseconds
+LPML: -492.7718563550752 (the higher the better)
+WAIC: 985.5437127101449 (the lower the better)
+acceptance ratio eta1: 58.92%
+acceptance ratio phi1: 58.10%
+!case i=3 j=3 elapsed: 25.25 s
+
+- using seed 111.0 -
+fitting 2000 total iterates (with burnin=1998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:08:29
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:24 (12.36 ms/it)
+
+done!
+Elapsed time: 24 seconds, 717 milliseconds
+LPML: -492.7718563550752 (the higher the better)
+WAIC: 985.5437127101449 (the lower the better)
+acceptance ratio eta1: 58.92%
+acceptance ratio phi1: 58.10%
+!case i=3 j=3 elapsed: 24.73 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 50
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:08:54 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -485.1354 
+WAIC = 970.2707 
+!case i=3 j=3 elapsed: 48.61 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 50
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:09:42 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -501.4742 
+WAIC = 1002.948 
+!case i=3 j=3 elapsed: 48.08 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 50
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:10:30 2024
+ntime =  50 1900
+ntime_out =  50 
+
+LPML = -491.2241 
+WAIC = 982.4483 
+!case i=3 j=3 elapsed: 48.14 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:11:18
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:14 (29.59 ms/it)
+
+done!
+Elapsed time: 14 seconds, 796 milliseconds
+LPML: -941.6810126834625 (the higher the better)
+WAIC: 1883.3620253669176 (the lower the better)
+acceptance ratio eta1: 49.23%
+acceptance ratio phi1: 45.60%
+!case i=3 j=4 elapsed: 14.8 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:11:33
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:15 (30.12 ms/it)
+
+done!
+Elapsed time: 15 seconds, 59 milliseconds
+LPML: -941.6810126834625 (the higher the better)
+WAIC: 1883.3620253669176 (the lower the better)
+acceptance ratio eta1: 49.23%
+acceptance ratio phi1: 45.60%
+!case i=3 j=4 elapsed: 15.1 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:11:48
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:14 (29.70 ms/it)
+
+done!
+Elapsed time: 14 seconds, 852 milliseconds
+LPML: -941.6810126834625 (the higher the better)
+WAIC: 1883.3620253669176 (the lower the better)
+acceptance ratio eta1: 49.23%
+acceptance ratio phi1: 45.60%
+!case i=3 j=4 elapsed: 14.86 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 50
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:12:03 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -946.2377 
+WAIC = 1892.475 
+!case i=3 j=4 elapsed: 24.42 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 50
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:12:28 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -940.5756 
+WAIC = 1881.151 
+!case i=3 j=4 elapsed: 24.1 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 50
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:12:52 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -936.8813 
+WAIC = 1873.763 
+!case i=3 j=4 elapsed: 24.1700000000001 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:13:16
+Starting MCMC algorithm
+Progress: 100% Time: 0:02:36 ( 0.31  s/it)
+
+done!
+Elapsed time: 2 minutes, 36 seconds, 111 milliseconds
+LPML: -4876.240632430869 (the higher the better)
+WAIC: 9752.481264861923 (the lower the better)
+acceptance ratio eta1: 26.98%
+acceptance ratio phi1: 33.60%
+!case i=3 j=5 elapsed: 156.17 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:15:52
+Starting MCMC algorithm
+Progress: 100% Time: 0:02:30 ( 0.30  s/it)
+
+done!
+Elapsed time: 2 minutes, 30 seconds, 589 milliseconds
+LPML: -4876.240632430869 (the higher the better)
+WAIC: 9752.481264861923 (the lower the better)
+acceptance ratio eta1: 26.98%
+acceptance ratio phi1: 33.60%
+!case i=3 j=5 elapsed: 150.59 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=50 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:18:23
+Starting MCMC algorithm
+Progress: 100% Time: 0:02:29 ( 0.30  s/it)
+
+done!
+Elapsed time: 2 minutes, 29 seconds, 692 milliseconds
+LPML: -4876.240632430869 (the higher the better)
+WAIC: 9752.481264861923 (the lower the better)
+acceptance ratio eta1: 26.98%
+acceptance ratio phi1: 33.60%
+!case i=3 j=5 elapsed: 149.72 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 50
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:20:52 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -4875.741 
+WAIC = 9751.482 
+!case i=3 j=5 elapsed: 122.47 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 50
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:22:55 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -4925.196 
+WAIC = 9850.391 
+!case i=3 j=5 elapsed: 121.17 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 50
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:24:56 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -4847.98 
+WAIC = 9695.96 
+!case i=3 j=5 elapsed: 121.32 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:26:57
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:14 ( 3.00 ms/it)
+
+done!
+Elapsed time: 14 seconds, 982 milliseconds
+LPML: -65.0877150287402 (the higher the better)
+WAIC: 130.17543005748004 (the lower the better)
+acceptance ratio eta1: 83.39%
+acceptance ratio phi1: 81.74%
+!case i=4 j=1 elapsed: 14.98 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:27:12
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:15 ( 3.02 ms/it)
+
+done!
+Elapsed time: 15 seconds, 82 milliseconds
+LPML: -65.0877150287402 (the higher the better)
+WAIC: 130.17543005748004 (the lower the better)
+acceptance ratio eta1: 83.39%
+acceptance ratio phi1: 81.74%
+!case i=4 j=1 elapsed: 15.0899999999999 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:27:27
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:15 ( 3.04 ms/it)
+
+done!
+Elapsed time: 15 seconds, 199 milliseconds
+LPML: -65.0877150287402 (the higher the better)
+WAIC: 130.17543005748004 (the lower the better)
+acceptance ratio eta1: 83.39%
+acceptance ratio phi1: 81.74%
+!case i=4 j=1 elapsed: 15.22 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 100
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:27:43 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -81.29036 
+WAIC = 162.5807 
+!case i=4 j=1 elapsed: 36.22 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 100
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:28:19 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -64.92609 
+WAIC = 129.8522 
+!case i=4 j=1 elapsed: 36.1200000000001 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 100
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:28:55 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -57.58244 
+WAIC = 115.1649 
+!case i=4 j=1 elapsed: 35.9399999999998 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:29:31
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:31 ( 6.24 ms/it)
+
+done!
+Elapsed time: 31 seconds, 227 milliseconds
+LPML: -189.80425820757864 (the higher the better)
+WAIC: 379.6085164151564 (the lower the better)
+acceptance ratio eta1: 78.09%
+acceptance ratio phi1: 75.24%
+!case i=4 j=2 elapsed: 31.22 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:30:02
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:31 ( 6.31 ms/it)
+
+done!
+Elapsed time: 31 seconds, 563 milliseconds
+LPML: -189.80425820757864 (the higher the better)
+WAIC: 379.6085164151564 (the lower the better)
+acceptance ratio eta1: 78.09%
+acceptance ratio phi1: 75.24%
+!case i=4 j=2 elapsed: 31.5600000000002 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=10 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:30:34
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:31 ( 6.37 ms/it)
+
+done!
+Elapsed time: 31 seconds, 859 milliseconds
+LPML: -189.80425820757864 (the higher the better)
+WAIC: 379.6085164151564 (the lower the better)
+acceptance ratio eta1: 78.09%
+acceptance ratio phi1: 75.24%
+!case i=4 j=2 elapsed: 31.8899999999999 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 100
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:31:06 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -183.2995 
+WAIC = 366.599 
+!case i=4 j=2 elapsed: 75.02 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 100
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:32:21 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -181.1385 
+WAIC = 362.277 
+!case i=4 j=2 elapsed: 74.3600000000001 s
+
+sPPM =  TRUE 
+ntime =  10 
+ntime_out =  10 
+nsubject = 100
+ntime = 10
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:33:35 2024
+ntime =  10 4900
+ntime_out =  10 
+
+LPML = -191.243 
+WAIC = 382.4861 
+!case i=4 j=2 elapsed: 74.0299999999997 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:34:49
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:38 (38.70 ms/it)
+
+done!
+Elapsed time: 38 seconds, 703 milliseconds
+LPML: -970.2145382244662 (the higher the better)
+WAIC: 1940.4290764489074 (the lower the better)
+acceptance ratio eta1: 59.36%
+acceptance ratio phi1: 56.40%
+!case i=4 j=3 elapsed: 38.7199999999998 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:35:28
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:39 (39.27 ms/it)
+
+done!
+Elapsed time: 39 seconds, 274 milliseconds
+LPML: -970.2145382244662 (the higher the better)
+WAIC: 1940.4290764489074 (the lower the better)
+acceptance ratio eta1: 59.36%
+acceptance ratio phi1: 56.40%
+!case i=4 j=3 elapsed: 39.3200000000002 s
+
+- using seed 111.0 -
+fitting 1000 total iterates (with burnin=998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=50 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:36:07
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:39 (39.38 ms/it)
+
+done!
+Elapsed time: 39 seconds, 381 milliseconds
+LPML: -970.2145382244662 (the higher the better)
+WAIC: 1940.4290764489074 (the lower the better)
+acceptance ratio eta1: 59.36%
+acceptance ratio phi1: 56.40%
+!case i=4 j=3 elapsed: 39.4000000000001 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 100
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:36:46 2024
+ntime =  50 900
+ntime_out =  50 
+
+LPML = -952.1791 
+WAIC = 1904.358 
+!case i=4 j=3 elapsed: 76.1399999999999 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 100
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:38:03 2024
+ntime =  50 900
+ntime_out =  50 
+
+LPML = -935.5044 
+WAIC = 1871.009 
+!case i=4 j=3 elapsed: 75.6700000000001 s
+
+sPPM =  TRUE 
+ntime =  50 
+ntime_out =  50 
+nsubject = 100
+ntime = 50
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:39:18 2024
+ntime =  50 900
+ntime_out =  50 
+
+LPML = -960.1722 
+WAIC = 1920.344 
+!case i=4 j=3 elapsed: 75.52 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:40:34
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:46 (93.51 ms/it)
+
+done!
+Elapsed time: 46 seconds, 762 milliseconds
+LPML: -1814.7906674841743 (the higher the better)
+WAIC: 3629.5813349683617 (the lower the better)
+acceptance ratio eta1: 48.83%
+acceptance ratio phi1: 58.40%
+!case i=4 j=4 elapsed: 46.7800000000002 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:41:21
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:47 (95.24 ms/it)
+
+done!
+Elapsed time: 47 seconds, 621 milliseconds
+LPML: -1814.7906674841743 (the higher the better)
+WAIC: 3629.5813349683617 (the lower the better)
+acceptance ratio eta1: 48.83%
+acceptance ratio phi1: 58.40%
+!case i=4 j=4 elapsed: 47.6499999999996 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=100 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:42:08
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:47 (94.88 ms/it)
+
+done!
+Elapsed time: 47 seconds, 438 milliseconds
+LPML: -1814.7906674841743 (the higher the better)
+WAIC: 3629.5813349683617 (the lower the better)
+acceptance ratio eta1: 48.83%
+acceptance ratio phi1: 58.40%
+!case i=4 j=4 elapsed: 47.46 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 100
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:42:56 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -1821.09 
+WAIC = 3642.18 
+!case i=4 j=4 elapsed: 76.9099999999999 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 100
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:44:13 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -1801.147 
+WAIC = 3602.293 
+!case i=4 j=4 elapsed: 76.1199999999999 s
+
+sPPM =  TRUE 
+ntime =  100 
+ntime_out =  100 
+nsubject = 100
+ntime = 100
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 18:45:29 2024
+ntime =  100 00
+ntime_out =  100 
+
+LPML = -1822.078 
+WAIC = 3644.156 
+!case i=4 j=4 elapsed: 75.6900000000001 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:46:44
+Starting MCMC algorithm
+Progress: 100% Time: 0:09:38 ( 1.16  s/it)
+
+done!
+Elapsed time: 9 minutes, 38 seconds, 856 milliseconds
+LPML: -8437.344156832412 (the higher the better)
+WAIC: 16874.688313664567 (the lower the better)
+acceptance ratio eta1: 25.84%
+acceptance ratio phi1: 42.60%
+!case i=4 j=5 elapsed: 578.82 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 18:56:23
+Starting MCMC algorithm
+Progress: 100% Time: 0:09:43 ( 1.17  s/it)
+
+done!
+Elapsed time: 9 minutes, 43 seconds, 661 milliseconds
+LPML: -8437.344156832412 (the higher the better)
+WAIC: 16874.688313664567 (the lower the better)
+acceptance ratio eta1: 25.84%
+acceptance ratio phi1: 42.60%
+!case i=4 j=5 elapsed: 583.66 s
+
+- using seed 111.0 -
+fitting 500 total iterates (with burnin=498, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=100 subjects
+for T=500 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 19:06:07
+Starting MCMC algorithm
+Progress: 100% Time: 0:09:55 ( 1.19  s/it)
+
+done!
+Elapsed time: 9 minutes, 55 seconds, 527 milliseconds
+LPML: -8437.344156832412 (the higher the better)
+WAIC: 16874.688313664567 (the lower the better)
+acceptance ratio eta1: 25.84%
+acceptance ratio phi1: 42.60%
+!case i=4 j=5 elapsed: 595.48 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 100
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 19:16:03 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -8969.493 
+WAIC = 17938.99 
+!case i=4 j=5 elapsed: 400.16 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 100
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 19:22:43 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -8912.921 
+WAIC = 17825.84 
+!case i=4 j=5 elapsed: 384.49 s
+
+sPPM =  TRUE 
+ntime =  500 
+ntime_out =  500 
+nsubject = 100
+ntime = 500
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 19:29:07 2024
+ntime =  500 00
+ntime_out =  500 
+
+LPML = -8985.953 
+WAIC = 17971.91 
+!case i=4 j=5 elapsed: 382.59 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=500 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 19:35:30
+Starting MCMC algorithm
+Progress: 100% Time: 0:07:15 (87.13 ms/it)
+
+done!
+Elapsed time: 7 minutes, 15 seconds, 647 milliseconds
+LPML: 1273.9949217558224 (the higher the better)
+WAIC: -2547.989843511645 (the lower the better)
+acceptance ratio eta1: 73.16%
+acceptance ratio phi1: 75.86%
+!case i=5 j=1 elapsed: 435.66 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=500 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 19:42:46
+Starting MCMC algorithm
+Progress: 100% Time: 0:07:03 (84.74 ms/it)
+
+done!
+Elapsed time: 7 minutes, 3 seconds, 730 milliseconds
+LPML: 1273.9949217558224 (the higher the better)
+WAIC: -2547.989843511645 (the lower the better)
+acceptance ratio eta1: 73.16%
+acceptance ratio phi1: 75.86%
+!case i=5 j=1 elapsed: 423.73 s
+
+- using seed 111.0 -
+fitting 5000 total iterates (with burnin=4998, thinning=1)
+thus producing 2 valid iterates in the end
+
+on n=500 subjects
+for T=5 time instants
+
+with space? true
+with covariates in the likelihood? false
+with covariates in the clustering process? false
+are there missing data in Y? false
+
+2024-10-07 19:49:49
+Starting MCMC algorithm
+Progress: 100% Time: 0:07:04 (84.85 ms/it)
+
+done!
+Elapsed time: 7 minutes, 4 seconds, 235 milliseconds
+LPML: 1273.9949217558224 (the higher the better)
+WAIC: -2547.989843511645 (the lower the better)
+acceptance ratio eta1: 73.16%
+acceptance ratio phi1: 75.86%
+!case i=5 j=1 elapsed: 424.23 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 500
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 19:56:54 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -349.9083 
+WAIC = 699.8167 
+!case i=5 j=1 elapsed: 693.33 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 500
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 20:08:27 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -328.7408 
+WAIC = 657.4816 
+!case i=5 j=1 elapsed: 707.990000000001 s
+
+sPPM =  TRUE 
+ntime =  5 
+ntime_out =  5 
+nsubject = 500
+ntime = 5
+nout = 2
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 7.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+mu0
+0.000000 0.000000 
+
+k0 = 1.000000
+v0 = 5.000000
+L0
+1.000000 0.000000 
+0.000000 1.000000 
+
+Mon Oct  7 20:20:15 2024
+ntime =  5  4900
+ntime_out =  5 
+
+LPML = -317.6016 
+WAIC = 635.2032 
+!case i=5 j=1 elapsed: 680.77 s
