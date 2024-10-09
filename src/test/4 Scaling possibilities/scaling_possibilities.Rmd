@@ -620,10 +620,566 @@ legend("bottomright",title="C          Julia",
 ```
 
 
+# ==========
+# WITH COVARIATES
+```{r}
+load("performance_Julia_target_space_lim250.Rdata")
+performance_J_base = performance_Julia # target + space
+```
+
+# Fit
+```{r}
+# timespan_tests = round(seq(10,364,length.out=2))
+nunits_tests =   round(seq(10,105,length.out=4))
+timespan_tests = round(seq(10,729,length.out=8))
+
+nruns_tests    = rep(4,5)
+#### target & space
+# nunits_tests   = c(5,10,50,100,250)
+# timespan_tests = c(5,10,50,100,250)
+
+#### target 
+nunits_tests   = c(10,50,100,250)
+timespan_tests = c(10,50,100,250)
+p = 5
+
+niter_tests = matrix(0,nrow=length(nunits_tests),ncol=lenght(timespan_tests))
+for (i in 1:length(nunits_tests)) {
+	for (j in 1:length(timespan_tests)) {
+		niter_tests[i,j] = 10000/(nunits_tests[i]*timespan_tests[j])*50
+		# niter_tests[i,j] = 10000/(min(nunits_tests[i],timespan_tests[j]))*100
+	}
+}
+nruns_tests
+niter_tests
+timespan_tests
+nunits_tests
+
+cat("size =",length(timespan_tests)*length(nunits_tests),"\n")
+
+performance_J_Xcl <- matrix(1e5, nrow = length(nunits_tests), ncol = length(timespan_tests))
+performance_J_Xcl_Xlk <- matrix(1e5, nrow = length(nunits_tests), ncol = length(timespan_tests))
+colnames(performance_J_Xcl) = c(paste0("T_",timespan_tests))
+rownames(performance_J_Xcl) = c(paste0("n_",nunits_tests))
+colnames(performance_J_Xcl_Xlk) = c(paste0("T_",timespan_tests))
+rownames(performance_J_Xcl_Xlk) = c(paste0("n_",nunits_tests))
+
+performance_J_Xcl
+performance_J_Xcl_Xlk
+```
+
+
+```{r}
+library(lubridate)
+module_JDRPM <- juliaImport(juliaCall("include", module))
+
+seed = 2.0
+set.seed(2.0)
+
+for (i in 1:length(nunits_tests)) {
+  for (j in 1:length(timespan_tests)) {
+  	
+  	##### set data accordingly
+	# reduce data set
+	# nsubjects = 1:nunits_tests[i] # up to 105
+	# time_span = 1:timespan_tests[j] # up to 365
+	# y = yfull_2years[nsubjects,1+time_span]
+	# ym = as.matrix(y)
+	# sites = std_sites[nsubjects,]
+	# sitesm = as.matrix(sites)
+	
+	out = create_data(nunits_tests[i],timespan_tests[j],p_cl = p, p_lk = p)
+	y = out[[1]]
+	sites = out[[2]]
+	X_cl = out[[3]]
+	X_lk = out[[4]]
+
+	niter = niter_tests[i,j]
+	nruns = nruns_tests[i]
+	
+	cat(crayon::green("##########",niter,"iterations\n"))
+	nburn = niter-1
+	nthin = 1
+  	##### fit models
+		
+	##### J Xcl
+	for (run in 1:nruns){
+		tempo_inizio <- proc.time()
+		out = module_JDRPM$MCMC_fit(
+			Y=y,
+			sp_coords = sites,
+			M_dp = 1,
+			initial_partition = NA,
+			starting_alpha = 0.5,
+			unit_specific_alpha = FALSE,
+			time_specific_alpha = TRUE,
+			update_alpha = TRUE,
+			include_eta1 = TRUE,
+			include_phi1 = TRUE,
+			update_eta1 = TRUE,
+			update_phi1 = TRUE,
+			sig2h_priors = c(a_sigma,b_sigma),
+			eta1_priors = c(eta1_scale,sig_mh_eta1),
+			# beta_priors = c(rep(1,p),2),
+			beta_priors = NA,
+			tau2_priors = c(a_tau,b_tau),
+			phi0_priors = c(m0_phi0,s20_phi0),
+			phi1_priors = sig_mh_phi1,
+			lambda2_priors = c(a_lambda,b_lambda),
+			alpha_priors = c(a_alpha,b_alpha),
+
+			####### space
+			spatial_cohesion_idx = spatial_cohesion,
+			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+			######## likelihood covariates
+			# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+			Xlk_covariates = NA, beta_priors = NA,
+			######## clustering covariates
+			covariate_similarity_idx = 4,
+			cv_params = list(0,1,2,2),
+			Xcl_covariates = X_cl,
+
+			draws = niter,burnin = nburn, thin = nthin,
+			logging = FALSE,
+			seed = seed,
+			simple_return = TRUE
+		)
+		tempo_fine <- proc.time()
+		elapsed_time <- tempo_fine - tempo_inizio
+		# Elapsed time in seconds
+		differenza_tempo <- elapsed_time["elapsed"]
+		cat(crayon::red(paste0("J Xcl case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+		performance_J_Xcl[i, j] = min(performance_J_Xcl[i, j],
+									  as.double(differenza_tempo) / niter)
+	# }
+	
+	##### J Xall
+	# for (run in 1:nruns){
+#   	tempo_inizio <- proc.time()
+# 		out = module_JDRPM$MCMC_fit(
+# 			Y=y,              
+# 			sp_coords = sites,
+# 			M_dp = 1,                     
+# 			initial_partition = NA,
+# 			starting_alpha = 0.5,         
+# 			unit_specific_alpha = FALSE,       
+# 			time_specific_alpha = TRUE,       
+# 			update_alpha = TRUE,
+# 			include_eta1 = TRUE,                    
+# 			include_phi1 = TRUE,
+# 			update_eta1 = TRUE,                    
+# 			update_phi1 = TRUE,
+# 			sig2h_priors = c(a_sigma,b_sigma),
+# 			eta1_priors = c(eta1_scale,sig_mh_eta1),
+# 			# beta_priors = c(rep(1,p),2),
+# 			beta_priors = NA,
+# 			tau2_priors = c(a_tau,b_tau),
+# 			phi0_priors = c(m0_phi0,s20_phi0),
+# 			phi1_priors = sig_mh_phi1,
+# 			lambda2_priors = c(a_lambda,b_lambda),
+# 			alpha_priors = c(a_alpha,b_alpha),
+# 			
+# 			####### space
+# 			spatial_cohesion_idx = spatial_cohesion,
+# 			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+# 			######## likelihood covariates
+# 			Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+# 			# Xlk_covariates = NA, beta_priors = NA,
+# 			######## clustering covariates
+# 			covariate_similarity_idx = 4,
+# 			cv_params = list(0,1,2,2),
+# 			Xcl_covariates = X_cl,
+# 			
+# 			draws = niter,burnin = nburn, thin = nthin,
+# 			logging = FALSE,
+# 			seed = seed,
+# 			simple_return = TRUE
+# 		)
+# 
+# 		tempo_fine <- proc.time()
+# 		elapsed_time <- tempo_fine - tempo_inizio
+# 		# Elapsed time in seconds
+# 		differenza_tempo <- elapsed_time["elapsed"]
+# 		cat(crayon::red(paste0("J Xall case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+# 		performance_J_Xcl_Xlk[i, j] = min(performance_J_Xcl_Xlk[i, j],
+# 								  as.double(differenza_tempo) / niter)
+	}
+  }
+}
+```
+
+# refine cases
+```{r}
+i = 4
+j = 3
+nruns = 2
+# niter = niter_tests[i,j]
+niter = 10
+
+out = create_data(nunits_tests[i],timespan_tests[j],p_cl = p, p_lk = p)
+y = out[[1]]
+sites = out[[2]]
+X_cl = out[[3]]
+X_lk = out[[4]]
+
+nburn = niter-1
+nthin = 1
+
+fit_Xcl = TRUE
+fit_Xall = FALSE
+
+##### J Xcl
+for (run in 1:nruns){
+	if (fit_Xcl==T){
+	tempo_inizio <- proc.time()
+	out = module_JDRPM$MCMC_fit(
+		Y=y,              
+		sp_coords = sites,
+		M_dp = 1,                     
+		initial_partition = NA,
+		starting_alpha = 0.5,         
+		unit_specific_alpha = FALSE,       
+		time_specific_alpha = TRUE,       
+		update_alpha = TRUE,
+		include_eta1 = TRUE,                    
+		include_phi1 = TRUE,
+		update_eta1 = TRUE,                    
+		update_phi1 = TRUE,
+		sig2h_priors = c(a_sigma,b_sigma),
+		eta1_priors = c(eta1_scale,sig_mh_eta1),
+		# beta_priors = c(rep(1,p),2),
+		beta_priors = NA,
+		tau2_priors = c(a_tau,b_tau),
+		phi0_priors = c(m0_phi0,s20_phi0),
+		phi1_priors = sig_mh_phi1,
+		lambda2_priors = c(a_lambda,b_lambda),
+		alpha_priors = c(a_alpha,b_alpha),
+		
+		####### space
+		spatial_cohesion_idx = spatial_cohesion,
+		sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+		######## likelihood covariates
+		# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+		Xlk_covariates = NA, beta_priors = NA,
+		######## clustering covariates
+		covariate_similarity_idx = 4,
+		cv_params = list(0,1,2,2),
+		Xcl_covariates = X_cl,
+		
+		draws = niter,burnin = nburn, thin = nthin,
+		logging = FALSE,
+		seed = seed,
+		simple_return = TRUE
+	)
+	tempo_fine <- proc.time()
+	elapsed_time <- tempo_fine - tempo_inizio
+	# Elapsed time in seconds
+	differenza_tempo <- elapsed_time["elapsed"]
+	cat(crayon::red(paste0("J Xcl case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+	performance_J_Xcl[i, j] = min(performance_J_Xcl[i, j],
+								  as.double(differenza_tempo) / niter)
+	}
+
+##### J Xall
+	if (fit_Xall == T){
+  tempo_inizio <- proc.time()
+	out = module_JDRPM$MCMC_fit(
+		Y=y,              
+		sp_coords = sites,
+		M_dp = 1,                     
+		initial_partition = NA,
+		starting_alpha = 0.5,         
+		unit_specific_alpha = FALSE,       
+		time_specific_alpha = TRUE,       
+		update_alpha = TRUE,
+		include_eta1 = TRUE,                    
+		include_phi1 = TRUE,
+		update_eta1 = TRUE,                    
+		update_phi1 = TRUE,
+		sig2h_priors = c(a_sigma,b_sigma),
+		eta1_priors = c(eta1_scale,sig_mh_eta1),
+		# beta_priors = c(rep(1,p),2),
+		beta_priors = NA,
+		tau2_priors = c(a_tau,b_tau),
+		phi0_priors = c(m0_phi0,s20_phi0),
+		phi1_priors = sig_mh_phi1,
+		lambda2_priors = c(a_lambda,b_lambda),
+		alpha_priors = c(a_alpha,b_alpha),
+		
+		####### space
+		spatial_cohesion_idx = spatial_cohesion,
+		sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+		######## likelihood covariates
+		Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+		# Xlk_covariates = NA, beta_priors = NA,
+		######## clustering covariates
+		covariate_similarity_idx = 4,
+		cv_params = list(0,1,2,2),
+		Xcl_covariates = X_cl,
+		
+		draws = niter,burnin = nburn, thin = nthin,
+		logging = FALSE,
+		seed = seed,
+		simple_return = TRUE
+	)
+
+	tempo_fine <- proc.time()
+	elapsed_time <- tempo_fine - tempo_inizio
+	# Elapsed time in seconds
+	differenza_tempo <- elapsed_time["elapsed"]
+	cat(crayon::red(paste0("J Xall case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+	performance_J_Xcl_Xlk[i, j] = min(performance_J_Xcl_Xlk[i, j],
+							  as.double(differenza_tempo) / niter)
+	}
+}
+```
+
+
+# Analysis
+```{r}
+# save(performance_J_Xcl,file="performance_J_Xcl.Rdata")
+# save(performance_J_Xcl_Xlk,file="performance_J_Xcl_Xlk.Rdata")
+# load(file="performance_J_Xcl.Rdata")
+# load(file="performance_J_Xcl_Xlk.Rdata")
+```
+
+
+```{r}
+outJ_base = performance_J_base[2:5,2:5]
+t(outJ_base)
+t(performance_J_Xcl)
+t(performance_J_Xcl_Xlk)
+performance_J_Xcl > outJ_base
+performance_J_Xcl_Xlk > outJ_base
+performance_J_Xcl < performance_J_Xcl_Xlk
+```
+
+
+```{r}
+# time on slow / time on fast
+# OR
+# time old / time new
+# time base model / time upgraded model
+speedup_cl = outJ_base / performance_J_Xcl
+speedup_cllk = outJ_base / performance_J_Xcl_Xlk
+t(speedup_cl)
+t(speedup_cllk)
+speedup_cllk < speedup_cl
+```
+
+
+# plots
+```{r}
+library(shades)
+JXcl_plot_mat = function(mat,title,maxk){
+ncols_ari <- 1000
+cols <- colora(ncols_ari, 35,0)
+cols = rev(cols)
+ncol_writings = 5
+cols_writings <- colora(ncol_writings, 35,0)
+cols_writings <- rev(cols_writings)
+brks <- seq(0,maxk, length.out = ncols_ari + 1)
+
+# Plotting the matrix
+library(fields)
+image(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+# image.plot(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+		  
+# Adding text annotations for each cell
+
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
+		# cat(col_chosen,"\n")
+		
+		text(y=yaxis[j],x=xaxis[i],
+			 # font=2,
+		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
+		# labels = sprintf("%.2f", mat[i, j]*1000),
+		labels = paste0(round(mat[i, j]*1000,digits=2),
+						"\n(",round(speedup_cl[i,j],digits=2),"x)"),
+		# cex = 1.0, col = "#aaaaaa")
+		cex = 1, col = cols_writings[col_chosen])
+		# cex = mat[i, j], col = cols_writings[col_chosen])
+		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
+		}
+}
+
+mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
+	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+
+}
+#############################################################
+Jall_plot_mat = function(mat,title,maxk){
+ncols_ari <- 1000
+cols <- colora(ncols_ari, 35,0)
+cols = rev(cols)
+ncol_writings = 5
+cols_writings <- colora(ncol_writings, 35,0)
+cols_writings <- rev(cols_writings)
+brks <- seq(0,maxk, length.out = ncols_ari + 1)
+
+# Plotting the matrix
+library(fields)
+# image(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+image.plot(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks,legend.width = 1.2)
+		  
+# Adding text annotations for each cell
+
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
+		# cat(col_chosen,"\n")
+		
+		text(y=yaxis[j],x=xaxis[i],
+			 # font=2,
+		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
+		# labels = sprintf("%.2f", mat[i, j]*1000),
+		# labels = sprintf("%.2f\n(%.1fx)", mat[i, j]*1000,speedup_matrix[i,j]),
+		labels = paste0(round(mat[i, j]*1000,digits=2),
+						"\n(",round(speedup_cllk[i,j],digits=2),"x)"),
+		# cex = 1.0, col = "#aaaaaa")
+		cex = 1, col = cols_writings[col_chosen])
+		# cex = mat[i, j], col = cols_writings[col_chosen])
+		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
+		}
+}
+
+mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
+	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+
+}
+```
+
+
+```{r}
+save_plots = T
+if (save_plots==T){
+	pdf(file="target_space_covariates.pdf",width=10,height = 5)
+	# pdf(file="target_space.pdf",width=10,height = 5)
+}
+maxk = max(performance_J_Xcl,performance_J_Xcl_Xlk)*1000
+par(mar=c(2.1,2.3,2,1),mfrow=c(1,2),oma=c(0.2,0.2,0.1,1.5))
+JXcl_plot_mat(performance_J_Xcl,title="fit J - target + space + Xcl (p=5)",maxk)
+Jall_plot_mat(performance_J_Xcl_Xlk,title="fit J - target + space + Xcl + Xlk (p=5)",maxk)
+# Cplot_mat(outC,title="fit C - target + space",maxk)
+# Jplot_mat(outJ,title="fit J - target + space",maxk)
+
+# Jplot_mat(outJ,title="fit J | target + space + Xlk + Xcl",maxk)
+# mtext("(p=5)",side=3,line=-21,at=1.24,cex=0.9)
+# mtext("(p=5)",side=3,line=-0.1,at=1.24,cex=0.9)
+mtext("ms/it",side=3,line=-0.8,at=1.24,cex=0.9)
+# mtext("Scaling performance comparison", side = 3, line = 0.1, outer = T)
+if (save_plots==T){ dev.off() }
+```
+	
+
+
+# ==========
+# SUMMARY COMPARISON
 
 
 
+```{r}
+load("performance_C_target_lim250.Rdata")
+Ct = performance_C
+load("performance_C_target_space_lim250.Rdata")
+Cts = performance_C[2:5,2:5]
 
+load("performance_Julia_target_lim250.Rdata")
+Jt = performance_Julia
+load("performance_Julia_target_space_lim250.Rdata")
+Jts = performance_Julia[2:5,2:5]
+load("performance_J_Xcl.Rdata")
+Jtsc = performance_J_Xcl
+load("performance_J_Xcl_Xlk.Rdata")
+Jtscl = performance_J_Xcl_Xlk
+
+nunits_tests   = c(10,50,100,250)
+timespan_tests = c(10,50,100,250)
+p = 5
+```
+
+
+```{r}
+cat(crayon::red("Ct\n"))
+Ct
+cat(crayon::red("Cts\n"))
+Cts
+cat(crayon::red("Jt\n"))
+Jt
+cat(crayon::red("Jts\n"))
+Jts
+cat(crayon::red("Jtsc\n"))
+Jtsc
+cat(crayon::red("Jtscl\n"))
+Jtscl
+```
+
+
+# speedups
+```{r}
+# time on slow / time on fast
+# OR
+# time old / time new
+# time base model / time upgraded model
+scaling_perf = Jts
+spCt = Ct / scaling_perf
+spCts = Cts / scaling_perf
+spJt = Jt / scaling_perf
+spJts = Jts / scaling_perf
+spJtsc = Jtsc / scaling_perf
+spJtscl = Jtscl / scaling_perf
+
+spCt
+spCts
+spJt
+spJts
+spJtsc
+spJtscl
+```
+
+# plots
+```{r}
+timespan_plots = c(1,2,3,4)
+nunits_plots = c(1,2,3,4)
+dxJ = 0
+dxC = 0.12
+dx = max(dxJ, dxC)
+
+plot(1, type = "n", xlab = "", ylab = "",
+	 xlim = c(1-dx,4+dx), axes=F,
+     ylim = c(0, 2.5), xaxt="n")
+
+# Changing x axis
+xtick<-paste0("T=",as.character(timespan_tests))
+axis(side=1, at=timespan_plots, labels = xtick)
+axis(2)
+
+abline(h=1,col="#eeeeee",lty=1)
+abline(h=0.5,col="#dddddd",lty=2)
+abline(h=1.75,col="#dddddd",lty=2)
+
+title(main="n=10",line=-0.1)
+cols = colora(8,"div",seed_div = "Paired",show = 0)
+cexs = 1.8
+points(x=timespan_plots + dxC,y = spCt[1,],   pch=15, cex=cexs, col=cols[1])
+points(x=timespan_plots + dxC,y = spCts[1,],  pch=16, cex=cexs, col=cols[3])
+points(x=timespan_plots + dxJ,y = spJt[1,],   pch=0, cex=cexs, col=cols[2], lwd=1.2)
+points(x=timespan_plots + dxJ,y = spJts[1,],  pch=1, cex=cexs, col=cols[4], lwd=1.2)
+points(x=timespan_plots + dxJ,y = spJtsc[1,] ,pch=2, cex=cexs, col=cols[5], lwd=1.2)
+points(x=timespan_plots + dxJ,y = spJtscl[1,],pch=5, cex=cexs, col=cols[7], lwd=1.2)
+```
 
 
 

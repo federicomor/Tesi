@@ -79,7 +79,8 @@ function MCMC_fit(;
 	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
 	Y_has_NA = any(ismissing.(Y))
 	nout = round(Int64, (draws - burnin)/(thin))
-	beta_update_threshold = round(Int64, burnin/2)
+	# beta_update_threshold = round(Int64, burnin/2)
+	beta_update_threshold = 0
 
 	if sPPM
 		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
