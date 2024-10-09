@@ -62,8 +62,8 @@ function MCMC_fit(;
 	seed::Real,                           # Random seed for reproducibility
 	simple_return = false,                # Return just the partition Si
 	verbose = false,                      # if to print additional info
-	perform_diagnostics = false           # if to perform diagnostics on the fit
-	# perform_checks = true                 # if to perform all the pre-fitting args checks
+	perform_diagnostics = false,          # if to perform diagnostics on the fit
+	skip_checks = false                   # if to perform all the pre-fitting args checks
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -117,7 +117,7 @@ function MCMC_fit(;
 	if update_eta1 acceptance_ratio_eta1 = 0 end
 	if update_phi1 acceptance_ratio_phi1 = 0 end
 
-
+	if !skip_checks
 	if logging
 		println("Logging to file:\n", abspath("log.txt"),"\n")
 		printlgln(replace(string(now()),"T" => "   "))
@@ -280,7 +280,7 @@ function MCMC_fit(;
 	# if cl_xPPM println("- params: ", cv_params) end
 	println("are there missing data in Y? $Y_has_NA")
 	println()
-
+	end # skip_checks
 
 	############# update to handle missing data #############
 	# printlgln("############# update to handle missing data #############\n")

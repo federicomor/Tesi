@@ -6,7 +6,7 @@ begin
 using Random
 Random.seed!(1)
 # N = 20; T = 30
-N = 50; T = 500
+N = 250; T = 100
 # N = 50; T = 18
 y = rand(N,T)
 sp = rand(N,2)
@@ -86,8 +86,8 @@ full collections:   1
 
 # niter = 5000. # profile canvas
 # niter = 1000 # real for these tests
-niter = 20. # for tracking allocs
-burnin = 18
+niter = 10. # for tracking allocs
+burnin = 9
 thin = 1
 # @timev MCMC_fit(
 out = MCMC_fit(

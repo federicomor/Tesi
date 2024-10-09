@@ -120,9 +120,9 @@ A_ub_sigma = 7
 A_ub_tau = 5
 A_ub_lambda = 5
 
-a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
-a_lambda = 2; b_lambda = 2
+a_sigma  = 3; b_sigma  = 1
+a_tau    = 3; b_tau    = 1
+a_lambda = 3; b_lambda = 1
 eta1_scale = 0.9
 
 sig_mh_sig2 = 0.1
@@ -152,22 +152,23 @@ L0 = 1
 nunits_tests =   round(seq(10,105,length.out=4))
 timespan_tests = round(seq(10,729,length.out=8))
 
-nruns_tests    = c(3,3,3,3,3)
-nunits_tests   = c(5,10,50,100,500)
-timespan_tests = c(5,10,50,100,500)
+nruns_tests    = rep(3,5)
+#### target & space
+# nunits_tests   = c(5,10,50,100,250)
+# timespan_tests = c(5,10,50,100,250)
 
-niter_tests = matrix(data=
-					 	c(5000,4000,3000,2000,500,
-					 	  4000,3000,2000,1000,250,
-					 	  1000,500,300,200,50,
-					 	  400,300,200,100,25,
-					 	  40,30,20,10,5),nrow=5,ncol=5,byrow = T)
+#### target 
+nunits_tests   = c(10,50,100,250)
+timespan_tests = c(10,50,100,250)
 
+niter_tests = matrix(0,nrow=length(nunits_tests),ncol=lenght(timespan_tests))
 for (i in 1:length(nunits_tests)) {
 	for (j in 1:length(timespan_tests)) {
-		niter_tests[i,j] = 10000/(nunits_tests[i]*timespan_tests[j])*50
+		niter_tests[i,j] = 10000/(nunits_tests[i]*timespan_tests[j])*100
+		# niter_tests[i,j] = 10000/(min(nunits_tests[i],timespan_tests[j]))*100
 	}
 }
+nruns_tests
 niter_tests
 timespan_tests
 nunits_tests
@@ -194,10 +195,10 @@ performance_Julia
 
 ```{r}
 library(lubridate)
-# module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM <- juliaImport(juliaCall("include", module))
 
-seed = 4.0
-set.seed(4.0)
+seed = 2.0
+set.seed(2.0)
 
 for (i in 1:length(nunits_tests)) {
   for (j in 1:length(timespan_tests)) {
@@ -230,7 +231,7 @@ for (i in 1:length(nunits_tests)) {
 		tempo_inizio <- proc.time()
 		out = module_JDRPM$MCMC_fit(
 			Y=y,              
-			sp_coords = sites,
+			# sp_coords = sites,
 			M_dp = 1,                     
 			initial_partition = NA,
 			Xlk_covariates = NA,
@@ -275,7 +276,7 @@ for (i in 1:length(nunits_tests)) {
   	tempo_inizio <- proc.time()
 	drpm1 <- drpm_fit(
 			y=y, 
-			s_coords = sites,
+			# s_coords = sites,
 	        M=1,
 	        initial_partition = NULL,
 	        starting_alpha = 0.5,
@@ -312,10 +313,11 @@ for (i in 1:length(nunits_tests)) {
 # refine cases
 ```{r}
 # module_JDRPM <- juliaImport(juliaCall("include", module))
-i=4
-j=5
-nruns=1
-seed = 111.0
+i=3
+j=4
+nruns=2
+fit_also_C = F
+seed = 3.0
 	
 ##### set data accordingly
 # reduce data set
@@ -332,7 +334,9 @@ sites = out[[2]]
 X_cl = out[[3]]
 X_lk = out[[4]]
 
-niter = niter_tests[i,j]
+# niter = niter_tests[i,j]
+niter = 8
+cat(crayon::green("N",nunits_tests[i],"T",timespan_tests[j],"\n"))
 cat(crayon::green("##########",niter,"iterations\n"))
 nburn = niter-2
 nthin = 1
@@ -343,7 +347,7 @@ for (run in 1:nruns){
 	tempo_inizio <- proc.time()
 	out = module_JDRPM$MCMC_fit(
 		Y=y,              
-		sp_coords = sites,
+		# sp_coords = sites,
 		M_dp = 1,                     
 		initial_partition = NA,
 		Xlk_covariates = NA,
@@ -372,85 +376,94 @@ for (run in 1:nruns){
 		draws = niter,burnin = nburn, thin = nthin,
 		logging = FALSE,
 		seed = seed,
-		simple_return = TRUE
+		simple_return = TRUE,
+		skip_checks = T
 	)
 	tempo_fine <- proc.time()
 	elapsed_time <- tempo_fine - tempo_inizio
 	# Elapsed time in seconds
 	differenza_tempo <- elapsed_time["elapsed"]
-	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+	cat(crayon::red(paste0("J case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
 	performance_Julia[i, j] = min(performance_Julia[i, j],
 								  as.double(differenza_tempo) / niter)
-}
 
-##### C	
-# for (run in 1:nruns){
-#   tempo_inizio <- proc.time()
-# drpm1 <- drpm_fit(
-# 		y=y, 
-# 		s_coords = sites,
-#         M=1,
-#         initial_partition = NULL,
-#         starting_alpha = 0.5,
-#         unit_specific_alpha = FALSE,
-#         time_specific_alpha = TRUE,
-#         alpha_0=FALSE,
-#         eta1_0 =FALSE,
-#         phi1_0 =FALSE,
-#         # modelPriors=c(0,100^2,1,1,1,1), # original default one
-#         modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
-#         alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
-#         simpleModel = 0,
-#         theta_tau2 = c(0, 2), # only used if simpleModel=1
-# 		SpatialCohesion=spatial_cohesion, # auxiliary similarity
-# 		# SpatialCohesion=4, # double dipper similarity
-# 		cParms=c(mu0, k0, v0, L0),
-# 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
-# 		verbose=TRUE,
-# 		# draws=1000,burn=0,thin=1)
-# 		draws=niter,burn=nburn,thin=nthin)
-# 	cat("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic,"\n")
-# 
-# 	tempo_fine <- proc.time()
-# 	elapsed_time <- tempo_fine - tempo_inizio
-# 	# Elapsed time in seconds
-# 	differenza_tempo <- elapsed_time["elapsed"]
-# 	cat(crayon::red(paste0("case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
-# 	performance_C[i, j] = min(performance_C[i, j],
-# 							  as.double(differenza_tempo) / niter)
-# }
+#### C
+if (fit_also_C==T){
+tempo_inizio <- proc.time()
+drpm1 <- drpm_fit(
+		y=y,
+		s_coords = sites,
+        M=1,
+        initial_partition = NULL,
+        starting_alpha = 0.5,
+        unit_specific_alpha = FALSE,
+        time_specific_alpha = TRUE,
+        alpha_0=FALSE,
+        eta1_0 =FALSE,
+        phi1_0 =FALSE,
+        # modelPriors=c(0,100^2,1,1,1,1), # original default one
+        modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
+        alphaPriors=rbind(c(a_alpha,b_alpha)), # if time_specific_alpha == TRUE
+        simpleModel = 0,
+        theta_tau2 = c(0, 2), # only used if simpleModel=1
+		SpatialCohesion=spatial_cohesion, # auxiliary similarity
+		# SpatialCohesion=4, # double dipper similarity
+		cParms=c(mu0, k0, v0, L0),
+		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
+		verbose=TRUE,
+		# draws=1000,burn=0,thin=1)
+		draws=niter,burn=nburn,thin=nthin)
+	cat("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic,"\n")
+
+	tempo_fine <- proc.time()
+	elapsed_time <- tempo_fine - tempo_inizio
+	# Elapsed time in seconds
+	differenza_tempo <- elapsed_time["elapsed"]
+	cat(crayon::red(paste0("C case i=",i," j=",j," elapsed: ",differenza_tempo," s\n\n")))
+	performance_C[i, j] = min(performance_C[i, j],
+							  as.double(differenza_tempo) / niter)
+}
+}
 ```
 
 
 # Analysis
 ```{r}
-load("performance_C_v4_full.Rdata")
-load("performance_Julia_v4_full.Rdata")
+# they bring the outs
+load("performance_C_target_lim250.Rdata")
+load("performance_Julia_target_lim250.Rdata")
+# load("performance_C_target_space_lim250.Rdata")
+# load("performance_Julia_target_space_lim250.Rdata")
 ```
 
 
 ```{r}
 performance_C
 performance_Julia
+# save(performance_C,file="performance_C_target_lim250.Rdata")
+# save(performance_Julia,file="performance_Julia_target_lim250.Rdata")
 ```
 
+
 ```{r}
-outC = performance_C[1:4,1:5]
-outJ = performance_Julia[1:4,1:5]
-# outC = performance_C
-# outJ = performance_Julia
+# outC = performance_C[2:5,2:5]
+# outJ = performance_Julia[2:5,2:5]
+outC = performance_C
+outJ = performance_Julia
 outC
 outJ
+speedup_matrix = outC/outJ # time on slow / time on fast
+speedup_matrix
 ```
 
 
 ```{r}
 library(shades)
-plot_mat = function(mat,title,maxk){
+Cplot_mat = function(mat,title,maxk){
 ncols_ari <- 1000
 cols <- colora(ncols_ari, 35,0)
 cols = rev(cols)
-ncol_writings = 4
+ncol_writings = 5
 cols_writings <- colora(ncol_writings, 35,0)
 cols_writings <- rev(cols_writings)
 brks <- seq(0,maxk, length.out = ncols_ari + 1)
@@ -468,30 +481,32 @@ yaxis = seq(0,1,length.out = size(mat)[2])
 for (i in 1:size(mat)[1]){
 	for (j in 1:size(mat)[2]){
 		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
-		cat(col_chosen,"\n")
+		# cat(col_chosen,"\n")
 		
 		text(y=yaxis[j],x=xaxis[i],
 			 # font=2,
 		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
-		labels = sprintf("%.2f", mat[i, j]*1000),
+		# labels = sprintf("%.2f", mat[i, j]*1000),
+		labels = paste0(round(mat[i, j]*1000,digits=2)),
 		# cex = 1.0, col = "#aaaaaa")
-		cex = 0.8, col = cols_writings[col_chosen])
+		cex = 1, col = cols_writings[col_chosen])
 		# cex = mat[i, j], col = cols_writings[col_chosen])
 		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
 		}
 }
 
 mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
-	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
-mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
 	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
 
 }
-imgplot_mat = function(mat,title,maxk){
+#############################################################
+Jplot_mat = function(mat,title,maxk){
 ncols_ari <- 1000
 cols <- colora(ncols_ari, 35,0)
 cols = rev(cols)
-ncol_writings = 4
+ncol_writings = 5
 cols_writings <- colora(ncol_writings, 35,0)
 cols_writings <- rev(cols_writings)
 brks <- seq(0,maxk, length.out = ncols_ari + 1)
@@ -514,58 +529,89 @@ for (i in 1:size(mat)[1]){
 		text(y=yaxis[j],x=xaxis[i],
 			 # font=2,
 		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
-		labels = sprintf("%.2f", mat[i, j]*1000),
+		# labels = sprintf("%.2f", mat[i, j]*1000),
+		# labels = sprintf("%.2f\n(%.1fx)", mat[i, j]*1000,speedup_matrix[i,j]),
+		labels = paste0(round(mat[i, j]*1000,digits=2),
+						"\n(",round(speedup_matrix[i,j],digits=2),"x)"),
 		# cex = 1.0, col = "#aaaaaa")
-		cex = 0.8, col = cols_writings[col_chosen])
+		cex = 1, col = cols_writings[col_chosen])
 		# cex = mat[i, j], col = cols_writings[col_chosen])
 		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
 		}
 }
 
 mtext(text=c(paste0("n=",nunits_tests[1:size(mat)[1]])),
-	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
-mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
 	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("T=",timespan_tests[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
 
 }
+```
 
-# outC[5,5] = -1
-# outJ[5,5] = -1
+
+```{r}
 save_plots = T
 if (save_plots==T){
-	pdf(file="target_space.pdf",width=10,height = 5)
+	# pdf(file="target.pdf",width=10,height = 5)
+	# pdf(file="target_space.pdf",width=10,height = 5)
 }
 maxk = max(outC,outJ)*1000
 par(mar=c(2.1,2.3,2,1),mfrow=c(1,2),oma=c(0.2,0.2,0.1,1.5))
-plot_mat(outC,title="C: target + space",maxk)
-imgplot_mat(outJ,title="J: target + space",maxk)
+Cplot_mat(outC,title="fit C - target only",maxk)
+Jplot_mat(outJ,title="fit J - target only",maxk)
+# Cplot_mat(outC,title="fit C - target + space",maxk)
+# Jplot_mat(outJ,title="fit J - target + space",maxk)
+
+# Jplot_mat(outJ,title="fit J | target + space + Xlk + Xcl",maxk)
+# mtext("ms/it",side=3,line=-0.8,at=1.235,cex=0.9)
+mtext("ms/it",side=3,line=-0.8,at=1.24,cex=0.9)
 # mtext("Scaling performance comparison", side = 3, line = 0.1, outer = T)
 if (save_plots==T){ dev.off() }
 ```
 
 
-```{r}
-# save(outC,file="performance_C_v4_full.Rdata")
-# save(outJ,file="performance_Julia_v4_full.Rdata")
-```
 
 ```{r}
-performance_C =     matrix(data=c(1:20),nrow=4,ncol=5)
-performance_Julia = matrix(data=c(1:20),nrow=4,ncol=5)
+t(outC)
+t(outJ)
+t(speedup_matrix)
 ```
+
 
 # other plots
 ```{r}
 cols = colora(8,"div",seed_div = "Paired",show=1)
 
-plot( timespan_tests,outC[1,],type="o",pch=19,cex=0.8,col=cols[1])
-	  # ylim=extrema(outC[1:4,],outJ[1:4,]))
-lines(timespan_tests,outJ[1,],type="o",pch=19,cex=0.8,col=cols[2])
+clog = function(x){
+	# return(x)
+	return(log(x))
+}
 
-lines(timespan_tests,outC[2,],type="o",pch=19,cex=0.8,col=cols[3])
-lines(timespan_tests,outJ[2,],type="o",pch=19,cex=0.8,col=cols[4])
-legend("bottomright",legend = c("C T=5","C T=10","J T=5","J T=10"),pch=19,lty = 1,
-	   col=c(cols[1],cols[3],cols[2],cols[4]),ncol=2)
+pchC = 19
+pchJ = 15
+plot(ylim=extrema(clog(outC),clog(outJ)),lty=2,
+      timespan_tests,clog(outC[1,]),type="o",pch=pchC,cex=0.8,col=cols[1])
+lines(timespan_tests,clog(outC[2,]),type="o",pch=pchC,cex=0.8,col=cols[3],lty=2)
+lines(timespan_tests,clog(outC[3,]),type="o",pch=pchC,cex=0.8,col=cols[5],lty=2)
+lines(timespan_tests,clog(outC[4,]),type="o",pch=pchC,cex=0.8,col=cols[7],lty=2)
+
+lines(timespan_tests,clog(outJ[1,]),type="o",pch=pchJ,cex=0.8,col=cols[2])
+lines(timespan_tests,clog(outJ[2,]),type="o",pch=pchJ,cex=0.8,col=cols[4])
+lines(timespan_tests,clog(outJ[3,]),type="o",pch=pchJ,cex=0.8,col=cols[6])
+lines(timespan_tests,clog(outJ[4,]),type="o",pch=pchJ,cex=0.8,col=cols[8])
+
+
+legend("bottomright",title="C          Julia",
+# legend(max(timespan_tests)-110,-6.5,title="C              Julia",
+	   title.adj = 0.15,title.font = 3,
+	   legend = c("T=10","T=50","T=100","T=250",
+	   		   #"T=10","T=50","T=100"),
+	   		   "","","",""),
+	   pch=c(rep(pchC,4),rep(pchJ,4)),
+	   lty = c(rep(2,4),rep(1,4)),
+	   col=c(cols[1],cols[3],cols[5],cols[7],
+	   	  cols[2],cols[4],cols[6],cols[8]),
+	   ncol=2,bty="n")
 
 # legend("bottom", legend = paste("unit", 1:size(yred)[1]), col = cols,
 # 	   lty = 1,lwd=2,
