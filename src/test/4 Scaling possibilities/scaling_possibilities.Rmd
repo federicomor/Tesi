@@ -1151,12 +1151,24 @@ spJtscl
 
 # plots
 ```{r}
+save_plot = T
+if (save_plot) {
+	# pdf(file="summary_performance.pdf",width = 8,height = 7)
+	pdf(file="summary_performance.pdf",width = 7,height = 6)
+}
+
 timespan_plots = c(1,2,3,4)
 nunits_plots = c(1,2,3,4)
 dxJ = 0
-dxC = 0.12
+dxC = 0.2
 dx = max(dxJ, dxC)
 
+# par(mfrow=c(2,2),mar=c(3,2,2,2),mai=c(.2,.5,.5,.5),oma=c(1,0.1,0.1,0.1))
+scala = 5.8
+layout(matrix(c(1,2,3,4,5,5), ncol=2, byrow=TRUE),heights=c(scala,scala,1))
+par(mar=c(0.1,2,1,2),mai=c(.4,.2,.1,.2),oma=c(0.1,0.7,0.1,0.1))
+
+for (i in 1:4){
 plot(1, type = "n", xlab = "", ylab = "",
 	 xlim = c(1-dx,4+dx), axes=F,
      ylim = c(0, 2.5), xaxt="n")
@@ -1166,19 +1178,99 @@ xtick<-paste0("T=",as.character(timespan_tests))
 axis(side=1, at=timespan_plots, labels = xtick)
 axis(2)
 
-abline(h=1,col="#eeeeee",lty=1)
+abline(h=1,col="#cccccc",lty=1)
 abline(h=0.5,col="#dddddd",lty=2)
-abline(h=1.75,col="#dddddd",lty=2)
+abline(h=1.5,col="#dddddd",lty=2)
+abline(h=2,col="#eeeeee",lty=4)
 
-title(main="n=10",line=-0.1)
+# lines(x=c(1,4),y=c(1,1),col="#cccccc",lty=1)
+# lines(x=c(1,4),y=c(0.5,0.5),col="#dddddd",lty=2)
+# lines(x=c(1,4),y=c(1.75,1.75),col="#dddddd",lty=2)
+
+title(main=paste0("n=",nunits_tests[i]),line=-0.4)
 cols = colora(8,"div",seed_div = "Paired",show = 0)
-cexs = 1.8
-points(x=timespan_plots + dxC,y = spCt[1,],   pch=15, cex=cexs, col=cols[1])
-points(x=timespan_plots + dxC,y = spCts[1,],  pch=16, cex=cexs, col=cols[3])
-points(x=timespan_plots + dxJ,y = spJt[1,],   pch=0, cex=cexs, col=cols[2], lwd=1.2)
-points(x=timespan_plots + dxJ,y = spJts[1,],  pch=1, cex=cexs, col=cols[4], lwd=1.2)
-points(x=timespan_plots + dxJ,y = spJtsc[1,] ,pch=2, cex=cexs, col=cols[5], lwd=1.2)
-points(x=timespan_plots + dxJ,y = spJtscl[1,],pch=5, cex=cexs, col=cols[7], lwd=1.2)
+cexs = 2.4
+points(x=timespan_plots + dxC,y = spCt[i,],   pch=15, cex=cexs, col=cols[1])
+points(x=timespan_plots + dxC,y = spCts[i,],  pch=16, cex=cexs, col=cols[3])
+points(x=timespan_plots + dxJ,y = spJt[i,],   pch=0, cex=cexs, col=cols[2], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJtscl[i,],pch=5, cex=cexs, col=cols[7], lwd=1.7)
+}
+# legend("bottom",
+par(mai=c(0,0,0,0))
+plot.new()
+legend("center",
+	   bty="n",cex=1.4,
+       # legend = c("Ct","Cts","Jt","Jts","Jtsc","Jtscl"),
+       legend = c("C target","C target+space","J target",
+	   "J target+space","J target+space+Xcl","J target+space+Xcl+Xlk"),
+	   pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 2.1,
+	   col=cols[c(1,3,2,4,5,7)])
+
+if (save_plot) { dev.off() }
+
+```
+
+
+# individuals
+```{r}
+save_plot = T
+
+timespan_plots = c(1,2,3,4)
+nunits_plots = c(1,2,3,4)
+dxJ = 0
+dxC = 0.2
+dx = max(dxJ, dxC)
+
+for (i in 1:4){
+	if (save_plot) {
+	# pdf(file="summary_performance.pdf",width = 8,height = 7)
+	pdf(file=paste0("summary_performance_n",nunits_tests[i],".pdf"),
+		width = 6,height = 4)
+		# width = 7,height = 5)
+}
+
+par(mar=c(0.1,2,1,2),mai=c(.4,.3,.1,.2),oma=c(0.1,1,0.1,0.1))
+plot(1, type = "n", xlab = "", ylab = "",
+	 xlim = c(1-dx,4+dx), axes=F,
+     ylim = c(0, 2.5), xaxt="n")
+
+# Changing x axis
+xtick<-paste0("T=",as.character(timespan_tests))
+axis(side=1, at=timespan_plots, labels = xtick)
+axis(2)
+
+abline(h=1,col="#cccccc",lty=1)
+abline(h=0.5,col="#dddddd",lty=2)
+abline(h=1.5,col="#dddddd",lty=2)
+abline(h=2,col="#eeeeee",lty=4)
+
+# lines(x=c(1,4),y=c(1,1),col="#cccccc",lty=1)
+# lines(x=c(1,4),y=c(0.5,0.5),col="#dddddd",lty=2)
+# lines(x=c(1,4),y=c(1.75,1.75),col="#dddddd",lty=2)
+
+title(main=paste0("n=",nunits_tests[i]),line=-0.4)
+cols = colora(8,"div",seed_div = "Paired",show = 0)
+cexs = 2.4
+points(x=timespan_plots + dxC,y = spCt[i,],   pch=15, cex=cexs, col=cols[1])
+points(x=timespan_plots + dxC,y = spCts[i,],  pch=16, cex=cexs, col=cols[3])
+points(x=timespan_plots + dxJ,y = spJt[i,],   pch=0, cex=cexs, col=cols[2], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJtscl[i,],pch=5, cex=cexs, col=cols[7], lwd=1.7)
+
+legend("bottom",
+	   bty="n",cex=0.8,
+       legend = c("Ct","Cts","Jt","Jts","Jtsc","Jtscl"),
+       # legend = c("C target","C target+space","J target",
+	   # "J target+space","J target+space+Xcl","J target+space+Xcl+Xlk"),
+	   pch=c(15,16,0,1,2,5),ncol=6,pt.cex = 1.6,
+	   # pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 1.6,
+	   col=cols[c(1,3,2,4,5,7)])
+if (save_plot) { dev.off() }
+}
+
 ```
 
 
