@@ -120,6 +120,8 @@ function MCMC_fit(;
 
 	if !skip_checks
 	if logging
+		log_file = open("log.txt", "w+")
+		include("debug.jl")
 		println("Logging to file:\n", abspath("log.txt"),"\n")
 		printlgln(replace(string(now()),"T" => "   "))
 		debug("current seed = $seed")
@@ -1594,7 +1596,9 @@ function MCMC_fit(;
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end
 
-	# close(log_file)
+	if logging
+		close(log_file)
+	end
 
 	if simple_return
 		return Si_out, LPML, WAIC

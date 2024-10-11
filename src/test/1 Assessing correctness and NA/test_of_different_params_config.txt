@@ -239,3 +239,11 @@ LPML: 100.6952308854843 (the higher the better)
 WAIC: -251.65159939525373 (the lower the better)
 acceptance ratio eta1: 67.74%
 
+Progress: 100% Time: 0:00:56 ( 5.69 ms/it)
+
+done!
+Elapsed time: 56 seconds, 851 milliseconds
+LPML: -433.5956936983066 (the higher the better)
+WAIC: 855.8414500576577 (the lower the better)
+acceptance ratio eta1: 97.27%
+acceptance ratio phi1: 94.72%

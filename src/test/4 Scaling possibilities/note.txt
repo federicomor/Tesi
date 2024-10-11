@@ -1,0 +1,1 @@
+il summary performance mostra lo speedup/rallentamento rispetto al fit "Julia target + space" come riferimento. Quindi valori sopra di lei indicano codici più lenti, e la y indica di quanto più lenti (1.5x, 2x, ecc). Quelli sotto sono più veloci invece

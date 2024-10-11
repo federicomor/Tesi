@@ -1155,6 +1155,7 @@ save_plot = T
 if (save_plot) {
 	# pdf(file="summary_performance.pdf",width = 8,height = 7)
 	pdf(file="summary_performance.pdf",width = 7,height = 6)
+	# pdf(file="summary_performance_higher.pdf",width = 7,height = 8)
 }
 
 timespan_plots = c(1,2,3,4)
@@ -1190,12 +1191,13 @@ abline(h=2,col="#eeeeee",lty=4)
 title(main=paste0("n=",nunits_tests[i]),line=-0.4)
 cols = colora(8,"div",seed_div = "Paired",show = 0)
 cexs = 2.4
+lwds = 1.5
 points(x=timespan_plots + dxC,y = spCt[i,],   pch=15, cex=cexs, col=cols[1])
 points(x=timespan_plots + dxC,y = spCts[i,],  pch=16, cex=cexs, col=cols[3])
-points(x=timespan_plots + dxJ,y = spJt[i,],   pch=0, cex=cexs, col=cols[2], lwd=1.7)
-points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=1.7)
-points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=1.7)
-points(x=timespan_plots + dxJ,y = spJtscl[i,],pch=5, cex=cexs, col=cols[7], lwd=1.7)
+points(x=timespan_plots + dxJ,y = spJt[i,],   pch=0, cex=cexs, col=cols[2], lwd=lwds)
+points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=lwds)
+points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=lwds)
+points(x=timespan_plots + dxJ,y = spJtscl[i,],pch=5, cex=cexs, col=cols[7], lwd=lwds)
 }
 # legend("bottom",
 par(mai=c(0,0,0,0))
@@ -1206,6 +1208,7 @@ legend("center",
        legend = c("C target","C target+space","J target",
 	   "J target+space","J target+space+Xcl","J target+space+Xcl+Xlk"),
 	   pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 2.1,
+	   pt.lwd = c(1,1,rep(lwds,4)),
 	   col=cols[c(1,3,2,4,5,7)])
 
 if (save_plot) { dev.off() }
@@ -1266,11 +1269,11 @@ legend("bottom",
        # legend = c("C target","C target+space","J target",
 	   # "J target+space","J target+space+Xcl","J target+space+Xcl+Xlk"),
 	   pch=c(15,16,0,1,2,5),ncol=6,pt.cex = 1.6,
+	   pt.lwd = c(1,1,rep(lwds,4)),
 	   # pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 1.6,
 	   col=cols[c(1,3,2,4,5,7)])
 if (save_plot) { dev.off() }
 }
-
 ```
 
 
