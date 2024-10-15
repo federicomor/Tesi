@@ -274,14 +274,14 @@ function MCMC_fit(;
 	# println(replace(string(now()),"T" => " ")[1:end-4])
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
-	println("thus producing $nout valid iterates in the end")
-	println("\non n=$n subjects\nfor T=$T time instants")
-	println("\nwith space? $sPPM")
+	println("thus producing $nout valid iterates in the end\n")
+	println("on n=$n subjects\nfor T=$T time instants\n")
+	println(sPPM ? "[✓]" : "[✗]", " with space? $sPPM")
 	# if sPPM println("- params: ", sp_params_real) end
-	println("with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
-	println("with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
+	println(lk_xPPM ? "[✓]" : "[✗]", " with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
+	println(cl_xPPM ? "[✓]" : "[✗]", " with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
 	# if cl_xPPM println("- params: ", cv_params) end
-	println("are there missing data in Y? $Y_has_NA")
+	println(Y_has_NA ? "[✓]" : "[✗]", " are there missing data in Y? $Y_has_NA")
 	println()
 	end # skip_checks
 
@@ -1092,9 +1092,10 @@ function MCMC_fit(;
 				end
 
 				# now we need to relabel after the possible mess created by the sampling
-				# eg:       (before)            (after)
+				# eg: (before sampling)  (after sampling)
 				#     units j 2 3 4 5 ->  units j 2 3 4 5
 				#    labels 1 1 1 2 2    labels 3 1 1 2 2
+				# the after case has to be relabelled
 				Si_tmp = @view Si_iter[:,t]
 
 				# Si_relab, nh_reorder, old_lab = relabel_full(Si_tmp,n)				
@@ -1592,6 +1593,7 @@ function MCMC_fit(;
 			]
 		)
 		ss = DataFrame(summarystats(chn))
+		println("\nDiagnostics:")
 		@show ss[!,[1,4,5,6,7]];
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end

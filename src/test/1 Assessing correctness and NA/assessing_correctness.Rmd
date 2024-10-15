@@ -54,8 +54,8 @@ source("../Supplementary material/Functions.R")
 # N <- 5; Tm<-6; M<-1;
 # alpha = 0.99
 
-# N <- 10; Tm<-12; M<-1;
-# alpha = 0.5
+# N <- 4; Tm<-7; M<-1;
+# alpha = 0.9
 
 N <- 10; Tm<-12; M<-1;
 alpha = 0.9
@@ -113,8 +113,8 @@ y_with_na
 # niter=40000; nburn=28000; nthin=12
 # niter=50000; nburn=30000; nthin=20
 # niter=30000; nburn=20000; nthin=10
-niter=10000; nburn=5000; nthin=5
-# niter=20000; nburn=12000; nthin=8
+niter=10000; nburn=5000; nthin=5 #OFFICIAL ONE
+# niter=30000; nburn=20000; nthin=4
 # niter=1000; nburn=200; nthin=4
 
 nout <- (niter-nburn)/nthin
@@ -160,6 +160,11 @@ L0 = 1
 
 a_alpha = 2; b_alpha = 2
 ```
+
+```{r}
+# save(drpm1, rout, file="assessing_correctness_nospace_full_CJ.Rdata")
+```
+
 
 ## drpm C
 ```{r}
@@ -225,10 +230,10 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ## drpm J
 ```{r}
 a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
-a_lambda = 2; b_lambda = 2
+a_tau    = 1.5; b_tau    = 1.5
+a_lambda = 1.5; b_lambda = 1.5
 
-module_JDRPM <- juliaImport(juliaCall("include", module))
+# module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),
 	# Y=as.matrix(y_with_na),
@@ -266,9 +271,12 @@ out = module_JDRPM$MCMC_fit(
 	draws = as.integer(niter), burnin = as.integer(nburn),thin = as.integer(nthin),
 	# draws = 100000, burnin = 60000,thin = 40,
 	logging = FALSE,
-	seed = 111.0
+	seed = 111.0,
+	verbose=T,
+	perform_diagnostics = T
 )
 ```
+
 
 
 ```{r}
@@ -312,11 +320,11 @@ rout$lambda2  = matrix(rout$lambda2, ncol = 1)
 cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```
 ```{r}
-# save(rout,drpm1,file="space_full_CJ.Rdata")
+# save(rout,drpm1,file="nospace_full_CJ.Rdata")
 ```
 
 ```{r}
-load("space_drpm1_run2.Rdata")
+# load("space_drpm1_run2.Rdata")
 ```
 
 
@@ -414,7 +422,7 @@ for (time in 1:Tm){
 ```{r}
 size(drpm1$sig2)
 size(rout$sigma2h)
-unitj = max(1,min(round(runif(1,0,N)),N))
+# unitj = max(1,min(round(runif(1,0,N)),N))
 for (time in 1:Tm){
 		par(mfrow=c(2,2),mar=c(2,2,4,2))
 
@@ -1031,6 +1039,7 @@ y_NA = y
 
 ndata = size(y)[1] * size(y)[2]
 
+set.seed(113)
 na_percentage = 0.1
 na_percentage = 0.09620821
 n_na <- round(ndata * na_percentage) # nstations * nday * na%
@@ -1094,6 +1103,11 @@ out_NA = module_JDRPM$MCMC_fit(
 	logging = FALSE,
 	seed = 113.0
 )
+```
+
+```{r}
+# load(file = "nospace_full_CJ.Rdata")
+# rout_FULL = rout
 ```
 
 
@@ -1185,7 +1199,7 @@ if (save_plots==T){ dev.off()}
 
 # fitted values
 ```{r}
-# rout_FULL = rout
+# save(rout_NA,file="nospace_NA_J.Rdata")
 ```
 
 
@@ -1405,18 +1419,22 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 # ===========
 # 3. WITH SPACE
 ```{r}
-load("../thesis data/df_wsc.Rdata")
+# load("../thesis data/df_wsc.Rdata")
+
 # load("../thesis data/df_daily_full.Rdata")
 # df_wsc = df_daily_full
+
+load("../thesis data/df_daily_full_logtransf.Rdata")
+df_wsc = df_daily_full_logtransf
+
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+
+unique(df_wsc$IDStations)
 na_summary(df_wsc)
 ```
 
-
-```{r}
-setwd("../src/")
-# source("include.R") # 
-source("plot functions/plotter.R")
-```
 
 
 ## real PM10 data
@@ -1437,14 +1455,14 @@ for(st in stations){
 rownames(yfull) = NULL
 colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
 # time_span = 1:14 # GOOD
-time_span = 1:4
-# time_span = 1:12
+# time_span = 1:4
+time_span = 1:12
 
 set.seed(110)
 # quanti = 80; nsubjects = sample(1:105, quanti,replace = F)
-quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
+# quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
 # quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
-# nsubjects = 1:105
+nsubjects = 1:105
 
 y = yfull[nsubjects,1+time_span]
 #############################################
@@ -1543,7 +1561,7 @@ cat("seed",seed,"\n")
 # niter=20000; nburn=15000; nthin=5
 # niter=50000; nburn=30000; nthin=20 # GOOD
 # niter=80000; nburn=60000; nthin=20
-niter=120000; nburn=80000; nthin=40
+niter=110000; nburn=90000; nthin=5
 # niter=100000; nburn=60000; nthin=40
 # niter=100; nburn=0; nthin=1
 nout <- (niter-nburn)/nthin
@@ -1638,8 +1656,8 @@ drpm1 <- drpm_fit(
 		
 		mh=c(sig_mh_sig2,sig_mh_tau2,sig_mh_lambda2,sig_mh_eta1,sig_mh_phi1),
 		verbose=TRUE,
-		draws=4000,burn=2000,thin=2)
-		# draws=niter,burn=nburn,thin=nthin)
+		# draws=4000,burn=2000,thin=2)
+		draws=niter,burn=nburn,thin=nthin)
 
 tempo_fine <- Sys.time()
 differenza_tempo <- tempo_fine - tempo_inizio
@@ -1652,7 +1670,7 @@ cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 
 ```{r}
 # load(file="space_80k_drpm1.Rdata")
-save(drpm1,file="space_drpm1_new.Rdata")
+save(drpm1,file="space_drpm1_run1.Rdata")
 ```
 
 
@@ -1808,11 +1826,12 @@ head(X_lk)
 a_sigma  = 0.01; b_sigma = 0.01
 # a_tau    = 2.1; b_tau   = 0.9
 # a_tau    = 1.7; b_tau   = 0.4
-a_tau    = 1.9; b_tau   = 0.4
+a_tau    = 1.7; b_tau   = 0.4
 # a_lambda = 0.1; b_lambda = 0.1
-a_lambda = 1.9; b_lambda = 0.4
+# a_lambda = 1.7; b_lambda = 0.4
+a_lambda = 4.1; b_lambda = 0.4
 
-module_JDRPM <- juliaImport(juliaCall("include", module))
+# module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
 	sp_coords = s_std,
@@ -1858,9 +1877,7 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(0.1),
 	
 	# covariate_similarity_idx = NA,
-	# draws = niter,burnin = nburn, thin = nthin,
-	# draws = 80000,burnin = 60000, thin = 5,
-	draws = 10000,burnin = 5000, thin = 5,
+	draws = niter,burnin = nburn, thin = nthin,
 	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
 	seed = 113.0,
@@ -1912,7 +1929,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # getwd()
 # load(file="space_drpm1_run2.Rdata")
-save(rout,file="space_rout_new1.Rdata")
+save(rout,file="space_rout_full_run6_dfdaily.Rdata")
 # load("space_rout_run5.Rdata")
 ```
 
@@ -1939,15 +1956,21 @@ cat("lpml = ",rout$lpml,"\n")
 cat("waic = ",rout$waic,"\n")
 ```
 
+# load model
+```{r}
+load("space_rout_full_run2_dfdaily.Rdata")
+```
+
+
 ## MSE analysis
 ```{r}
 # y_with_na
 # y
 j = round(runif(1,1,N))
-# t = round(runif(1,1,Tm))
+t = round(runif(1,1,Tm))
 # j = 17
-j =96
-t = 4
+# j =96
+# t = 4
 size(rout$fitted)
 par(mfrow=c(2,1),mar=c(1,2,3,1))
 plot(rout$fitted[t,j,],type="l",main=paste0("J trace plot of j=",j," at t=",t),
@@ -1960,7 +1983,7 @@ abline(h=y[j,t],col="#005500")
 
 ## Trace plots
 ```{r}
-load("space_drpm1_new.Rdata")
+# load("space_drpm1_new.Rdata")
 # load("space_rout_new_test1.Rdata")
 ```
 
@@ -2331,7 +2354,7 @@ for(i in 1:N){
 ## Partition plots
 
 ```{r}
-# load("space_rout_run5.Rdata")
+# load("space_rout_full_run1_dfdaily.Rdata")
 # load("space_full_100k_run2.Rdata")
 ```
 
@@ -2387,8 +2410,9 @@ if (save_plots==TRUE) {
 	# pdf(file="C_last_iteration.pdf",height = 6,width=10)
 }
 ##### take the median/mean/mode
-summary_fitted = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
+summary_fitted = t(drpm1$fitted[,,size(drpm1$fitted)[3]])*0
 for(j in 1:N){
+	cat(j,"of",N,"\r")
 	for(t in 1:Tm){
 		values_j = c()
 		for (it in 1:size(drpm1$fitted)[3]){
@@ -2429,6 +2453,7 @@ if (save_plots==TRUE) {
 }
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
+	cat(j,"of",N,"\r")
 	for(t in 1:Tm){
 		values_j = c()
 		for (it in 1:size(rout$fitted)[3]){
@@ -2605,7 +2630,43 @@ for(t in 1:Tm){
 	}
 }
 ```
+```{r}
+name = "J6"
+pdf(file=paste0("fit",name,"_simple_map.pdf"),height =7, width = 9)
+par(mfrow=c(3,4),mar=c(2,2,3,1))
+for(t in 1:Tm){
+	partition = partitions_drpmj
+	partition_matrix <- do.call(cbind, partition)
+	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
+		 xlim=extrema(s_std[,1]),main=paste(name,"- time",t),
+		 ylim=extrema(s_std[,2]),
+		 # cex=((y[1,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+		 # cex=y[1,t]+abs(min(y[,t])))
+		  cex=1.2)
+	for (i in 1:N){
+		points(s_std[i,1],s_std[i,2],col=partition_matrix[i,t],pch=19,
+			   # cex=((y[i,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+			   # cex=y[i,t]+abs(min(y[,t])))
+			    cex=1.2)
+	}
+}
+dev.off()
+```
 
+
+```{r}
+partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+
+target_col = "AQ_pm10"
+# target_col = "Altitude"
+
+times = unique(df_wsc$Time)
+t = 1
+df_time_t = df_wsc[df_wsc$Time == times[t],]
+boxplot(df_time_t[,target_col] ~ partition_matrix[,t],)
+
+```
 
 
 # compute mse
@@ -3111,6 +3172,10 @@ for (time in 1:Tm){
 }
 ```
 
+```{r}
+df_wsc = df_
+```
+
 
 ## PM10 plots
 ```{r warning=FALSE}
@@ -3121,10 +3186,14 @@ source("plot functions/plotter.R")
 source("include_clusters_functions.R")
 ```
 
-```{r warning=FALSE}
-sites = data.frame(
-	longitude = unique(df_weekly$Longitude), 
-	latitude = unique(df_weekly$Latitude))
+```{r}
+load("../thesis data/df_daily_full_logtransf.Rdata")
+df_wsc = df_daily_full_logtransf
+
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+
 
 sites = data.frame(
 	longitude = unique(df_weekly$Longitude), 
@@ -3132,32 +3201,70 @@ sites = data.frame(
 std_sites = data.frame(
 	longitude = unique(df_wsc$Longitude), 
 	latitude = unique(df_wsc$Latitude))
+sites_full = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
 stations = unique(df_wsc$IDStations)
-y=data.frame()
+yfull=data.frame()
 
 target = "AQ_pm10"
 # target = "WE_tot_precipitation"
 
 for(st in stations){
 	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
-	y=rbind(y,y_we_pm10)
+	yfull=rbind(yfull,y_we_pm10)
 }
-rownames(y) = NULL
-colnames(y)<- c("id",paste0("w", 1:53))
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+# time_span = 1:14 # GOOD
+# time_span = 1:4
+time_span = 1:12
 
-time_span = 1:Tm # low time span for quick testing, real one will be 1:53
+set.seed(110)
+# quanti = 80; nsubjects = sample(1:105, quanti,replace = F)
+# quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
+# quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
+nsubjects = 1:105
+
+y = yfull[nsubjects,1+time_span]
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+mn <- apply(y,2,mean)
+sd <- apply(y,2,sd)
+
+y <- t(t(y) - mn)
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites_tmp = sites_full[nsubjects,]
+smn <- apply(sites_tmp,2,mean)
+ssd <- apply(sites_tmp,2,sd)
+s_std <- t((t(sites_tmp) - smn)/ssd)
+
+# check
+# mean(s_std[,1])
+# mean(s_std[,2])
+# var(s_std[,2])
+# var(s_std[,1])
+######################################
+time_span = 1:Tm
 ```
+
 
 
 ```{r,warning=F}
 ##########################
-model_name = "model C"
-partition = partitions_drpmc
-# model_name = "model J"
-# partition = partitions_drpmj
+# model_name = "model C"
+# partition = partitions_drpmc
+model_name = "model J"
+partition = partitions_drpmj
+limt = 3
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
-for(time in time_span){
+for(time in time_span[1:limt]){
 
 	salso_out <- partition[[time]]
 	
@@ -3167,9 +3274,9 @@ for(time in time_span){
 		clusters = salso_out[1:105]
 	)
 	
-	idxs = which(is.na(df_temp$clusters))
+	# idxs = which(is.na(df_temp$clusters))
 	# replace(df_temp$clusters, idxs, 3)
-	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	# df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
 	
 	df_temp$Time = rep(time,dim(df_temp)[1])
 	df_cluster = rbind(df_cluster,df_temp)
@@ -3182,7 +3289,7 @@ for(time in time_span){
 }
 
 clusters_old = NULL
-for(time in time_span){
+for(time in time_span[1:limt]){
 	cat(crayon::red("Time",time,"of",Tm,"\n"))
 	
 	df_cluster_cut = df_cluster[df_cluster$Time==time,]
@@ -3197,10 +3304,27 @@ for(time in time_span){
 	# meglio l'idea 1
 	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
 	
+	
 	# q = get_graph_plot(df_cluster_cut,cols)
 	# print(q)
-	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+
+	# p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
 	
+	# plot_intensities(df_cluster_cut)
+
+	# pl = get_hist_continuos_plot(df_cluster_cut) # a bit less nice than nice
+	# pl = get_hist_color_plot(df_cluster_cut) # bad	
+	# pl = get_hist_fill_plot(df_cluster_cut) # nice
+	pl = get_boxplot_plot(df_cluster_cut,cols)
+	print(pl)
+	
+	plx = get_boxplot_covariate_plot(df_cluster_cut,cols,
+									# covariata = "AQ_pm10", # clasic boxplot of other functions
+									# covariata = "Altitude", # clasic boxplot
+									covariata = "LA_lvi", # clasic boxplot
+									annotate = F)
+	print(plx)
+		
 	cur_num = sprintf("%02d", time)
 	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
 	# plot=p, units="px",width=2500, height=1200, dpi=300)
@@ -3211,68 +3335,28 @@ for(time in time_span){
 ```
 
 
-
-
-
-```{r,warning=F}
-##########################
-# model_name = "model C"
-# partition = partitions_drpmc
-model_name = "model J"
-partition = partitions_drpmj
-##########################
-df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
-for(time in time_span){
-
-	salso_out <- partition[[time]]
-	
-	df_temp = data.frame(
-		Longitude = sites$longitude,
-		Latitude = sites$latitude,
-		clusters = salso_out[1:105]
-	)
-	idxs = which(is.na(df_temp$clusters))
-	df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
-	
-	df_temp$Time = rep(time,dim(df_temp)[1])
-	df_cluster = rbind(df_cluster,df_temp)
-	
-	# clusters log
-	clusters_now = df_temp$clusters
-	n_clusters = unique(clusters_now)
-	ycurrent = y[,paste0("w",time)]
-	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
-}
-
-clusters_old = NULL
-for(time in time_span){
-	cat(crayon::red("Time",time,"\n"))
-	
-	df_cluster_cut = df_cluster[df_cluster$Time==time,]
-	clusters_now = df_cluster_cut$clusters
-	####### no mode correct now
-	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
-	# se fai heat plot non serve fare la mode correct
-	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
-	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
-	df_cluster_cut$clusters = clusters_now
-	
-	# meglio l'idea 1
-	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
-	
-	# q = get_graph_plot(df_cluster_cut,cols)
-	# print(q)
-	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
-	
-	cur_num = sprintf("%02d", time)
-	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
-		   # plot=p, units="px",width=2500, height=1200, dpi=300)
-		   # units="px",width=2500, height=1400, dpi=300)
-	# dev.off()
-	
-	clusters_old = clusters_now
-}
+```{r}
+length(df_wsc[,covariata])/105
 ```
+
+
+
+```{r}
+partition = partitions_drpmj
+partition_matrix <- do.call(cbind, partition)
+
+# target_col = "AQ_pm10"
+target_col = "Altitude"
+
+times = unique(df_wsc$Time)
+for (t in c(1,2,3)){
+df_time_t = df_wsc[df_wsc$Time == times[t],]
+boxplot(df_time_t[,target_col] ~ partition_matrix[,t],)
+}
+
+```
+
+
 
 ```{r}
 #########################################

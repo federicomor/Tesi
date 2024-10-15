@@ -1151,11 +1151,11 @@ spJtscl
 
 # plots
 ```{r}
-save_plot = T
+save_plot = F
 if (save_plot) {
 	# pdf(file="summary_performance.pdf",width = 8,height = 7)
-	pdf(file="summary_performance.pdf",width = 7,height = 6)
-	# pdf(file="summary_performance_higher.pdf",width = 7,height = 8)
+	# pdf(file="summary_performance.pdf",width = 7,height = 6)
+	pdf(file="summary_performance_higher.pdf",width = 7,height = 7)
 }
 
 timespan_plots = c(1,2,3,4)
@@ -1192,8 +1192,8 @@ title(main=paste0("n=",nunits_tests[i]),line=-0.4)
 cols = colora(8,"div",seed_div = "Paired",show = 0)
 cexs = 2.4
 lwds = 1.5
-points(x=timespan_plots + dxC,y = spCt[i,],   pch=15, cex=cexs, col=cols[1])
-points(x=timespan_plots + dxC,y = spCts[i,],  pch=16, cex=cexs, col=cols[3])
+points(x=timespan_plots + dxC,y = spCt[i,],   pch=15, cex=cexs, col=cols[1], lwd=2)
+points(x=timespan_plots + dxC,y = spCts[i,],  pch=16, cex=cexs, col=cols[3], lwd=2)
 points(x=timespan_plots + dxJ,y = spJt[i,],   pch=0, cex=cexs, col=cols[2], lwd=lwds)
 points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=lwds)
 points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=lwds)

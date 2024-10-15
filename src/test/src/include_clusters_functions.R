@@ -743,6 +743,55 @@ get_boxplot_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time"
 	# breaks=cols[1:max(clust_vals)])
 }
 
+cat(crayon::red("- get_boxplot_covariate_plot(df_cluster_cut)\n"))
+get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time",time),annotate=FALSE,covariata="AQ_pm10"){
+	clusters_now = df_cluster_cut$clusters # needs to be already mode corrected if wanted
+	# n_clusters = max(clusters_now)
+	n_clusters = unique(clusters_now)
+	
+	# ycurrent = y[,paste0("w",time)]
+	times = unique(df_wsc$Time)
+	cat("using time=",time,"\n")
+	df_time_t = df_wsc[df_wsc$Time == times[time],covariata]
+	ycurrent = df_time_t
+	
+	clsize = table(clusters_now)
+	
+	clust_vals = clusters_now[1:105]
+	df_temp = data.frame(clusters=clust_vals,ycurrent=ycurrent)
+	
+	pad = 2	
+	p = ggplot(df_temp, aes(as.factor(clusters),ycurrent,
+							fill = cols[clusters]
+							# color = cols[clust_vals]
+	))+
+		geom_boxplot()+
+		# geom_jitter(width=0.2)+
+		ggtitle(titolo)+
+		# labs(title = paste("Cluster map - time",time))+
+		labs(title = paste(covariata,"- time",time))+
+		guides(fill = guide_legend(title = "Clusters"))+
+		
+		# theme_classic()
+		theme_bw()+
+		xlab("clusters")+
+		# ylab("log(PM10) values")+
+		# ylab(covariata)+
+		ylab("")+
+		ylim(extrema(df_wsc[,covariata]))+
+		# xlim(extrema(ycurrent)+c(-pad,pad))+
+		# scale_fill_identity(guide="legend",labels=paste0("cl",1:max(clust_vals)),
+		# breaks=cols[1:max(clust_vals)])+
+		scale_fill_identity(guide="legend",labels=paste0("cl",n_clusters),
+							breaks=cols[n_clusters])
+	if(annotate==TRUE){
+		p = p+ annotate("text", x = n_clusters, y = 1.3, label = paste0("size: ",as.vector(clsize)),col="gray")
+	}
+	return(p)
+	# scale_color_identity(guide="legend",labels=paste0("cl",1:max(clust_vals)),
+	# breaks=cols[1:max(clust_vals)])
+}
+
 
 library(gridExtra)
 cat(crayon::red("- plot_graph_and_hist(df_cluster_cut)\n"))

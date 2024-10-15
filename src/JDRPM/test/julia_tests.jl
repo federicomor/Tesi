@@ -92,11 +92,14 @@ full collections:   1
 niter = 10000. # real for these tests
 burnin = 5000.
 thin = 50.
-# niter = 1000. # real for these tests
-# burnin = 5.
-# thin = 1.
-# @timev MCMC_fit(
-ProfileCanvas.@profview_allocs MCMC_fit(
+
+niter = 1000. # real for these tests
+burnin = 5.
+thin = 1.
+
+@timev MCMC_fit(
+# ProfileCanvas.@profview_allocs MCMC_fit(
+# ProfileCanvas.@profview MCMC_fit(
 # out = MCMC_fit(
 	Y=y,              
 	sp_coords = sp,
@@ -139,8 +142,8 @@ ProfileCanvas.@profview_allocs MCMC_fit(
 	thin = thin,                     
 	logging = false,
 	seed = seed
-# );
-)
+);
+# )
 
 
 
