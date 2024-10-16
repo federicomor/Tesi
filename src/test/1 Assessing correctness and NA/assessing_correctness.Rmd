@@ -1416,20 +1416,26 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 
 
 
+```{r}
+# sort(unique(df_wsc$IDStations)) == sort(unique(df_daily_full_logtransf$IDStations))
+# sort(unique(df_wsc$Latitude)) - sort(unique(df_daily_full_logtransf$Latitude))
+# sort(unique(df_wsc$Longitude)) - sort(unique(df_daily_full_logtransf$Longitude))
+```
+
+
 # ===========
 # 3. WITH SPACE
 ```{r}
-# load("../thesis data/df_wsc.Rdata")
+load("../thesis data/df_wsc.Rdata")
 
 # load("../thesis data/df_daily_full.Rdata")
 # df_wsc = df_daily_full
 
-load("../thesis data/df_daily_full_logtransf.Rdata")
-df_wsc = df_daily_full_logtransf
-
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+# load("../thesis data/df_daily_full_logtransf.Rdata")
+# df_wsc = df_daily_full_logtransf
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
 
 unique(df_wsc$IDStations)
 na_summary(df_wsc)
@@ -1472,6 +1478,7 @@ mn <- apply(y,2,mean)
 sd <- apply(y,2,sd)
 
 y <- t(t(y) - mn)
+# y <- t(t(y) - mn)+1 # shifted 1
 
 Tm = tps <- ncol(y) # time span
 N = size(y)[1] # number of units
@@ -1551,9 +1558,10 @@ trendYearStation_week("None")
 ## Fits
 ```{r}
 # as.integer(runif(1,0,1000))*1.0
-# seed = 881.0
-seed = 314.0
+seed = 888.0
+# seed = 314.0
 cat("seed",seed,"\n")
+set.seed(seed)
 
 # niter=10000; nburn=6000; nthin=4
 # niter=50000; nburn=10000; nthin=40 # they did this in their tests
@@ -1579,7 +1587,7 @@ m0_phi0 = 0
 # s20_phi0 = 8
 # A_ub_sigma = 7
 s20_phi0 = 10
-A_ub_sigma = 7
+A_ub_sigma = 5
 A_ub_tau = 5
 A_ub_lambda = 5
 
@@ -1605,11 +1613,11 @@ eta1_scale = 0.9
 
 # mh is the of gaussian standard deviations for metropolis updates
 # So these are not variances!
-sig_mh_sig2 = 0.1
-sig_mh_tau2 = 0.1
-sig_mh_lambda2 = 0.1
-sig_mh_eta1 = 0.1
-sig_mh_phi1 = 0.1
+sig_mh_sig2 = 0.2
+sig_mh_tau2 = 0.2
+sig_mh_lambda2 = 0.2
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
 
 update_eta1 = TRUE
 update_phi1 = F
@@ -1626,8 +1634,15 @@ L0 = 1
 ```
 
 
+```{r}
+# times = unique(df_wsc$Time)
+# as.numeric(df_wsc[df_wsc$Time==times[1],"Altitude"][[1]])
+```
+
+
 ## drpm C
 ```{r}
+set.seed(221)
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
 		y=y, 
@@ -1641,7 +1656,8 @@ drpm1 <- drpm_fit(
         alpha_0=FALSE,
 		
         eta1_0=!(update_eta1),
-        phi1_0=!(update_phi1),
+        # phi1_0=!(update_phi1),
+        phi1_0=FALSE,
         # modelPriors=c(0,100^2,1,1,1,1), # original default one
         modelPriors=c(m0_phi0,s20_phi0,A_ub_sigma,A_ub_tau,A_ub_lambda,eta1_scale),
 
@@ -1670,7 +1686,7 @@ cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 
 ```{r}
 # load(file="space_80k_drpm1.Rdata")
-save(drpm1,file="space_drpm1_run1.Rdata")
+save(drpm1,file="space_drpm1_run6.Rdata")
 ```
 
 
@@ -1826,10 +1842,9 @@ head(X_lk)
 a_sigma  = 0.01; b_sigma = 0.01
 # a_tau    = 2.1; b_tau   = 0.9
 # a_tau    = 1.7; b_tau   = 0.4
-a_tau    = 1.7; b_tau   = 0.4
+a_tau    = 1.75; b_tau   = 0.4
 # a_lambda = 0.1; b_lambda = 0.1
-# a_lambda = 1.7; b_lambda = 0.4
-a_lambda = 4.1; b_lambda = 0.4
+a_lambda = 1.75; b_lambda = 0.4
 
 # module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
@@ -1846,9 +1861,9 @@ out = module_JDRPM$MCMC_fit(
 	update_alpha = TRUE,             
 	
 	include_eta1 = TRUE,                    
-	include_phi1 = F,
+	include_phi1 = T,
 	update_eta1 = update_eta1,                    
-	update_phi1 = F,
+	update_phi1 = T,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
 	eta1_priors = c(eta1_scale,sig_mh_eta1),
@@ -1929,8 +1944,8 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # getwd()
 # load(file="space_drpm1_run2.Rdata")
-save(rout,file="space_rout_full_run6_dfdaily.Rdata")
-# load("space_rout_run5.Rdata")
+save(rout,file="space_rout_full_run5_dfweekly.Rdata")
+# save(rout,file="space_rout_full_run5_dfdaily.Rdata")
 ```
 
 
@@ -1956,9 +1971,13 @@ cat("lpml = ",rout$lpml,"\n")
 cat("waic = ",rout$waic,"\n")
 ```
 
-# load model
+# LOAD models
 ```{r}
-load("space_rout_full_run2_dfdaily.Rdata")
+load("./df wsc fits/space_drpm1_run3.Rdata")
+# load("./df wsc fits/space_rout_full_run4_dfweekly.Rdata")
+
+load("./df daily fits/space_drpm1_run2.Rdata")
+load("./df daily fits/space_rout_full_run1_dfdaily.Rdata")
 ```
 
 
@@ -1968,7 +1987,7 @@ load("space_rout_full_run2_dfdaily.Rdata")
 # y
 j = round(runif(1,1,N))
 t = round(runif(1,1,Tm))
-# j = 17
+j = 81
 # j =96
 # t = 4
 size(rout$fitted)
@@ -2354,8 +2373,13 @@ for(i in 1:N){
 ## Partition plots
 
 ```{r}
-# load("space_rout_full_run1_dfdaily.Rdata")
-# load("space_full_100k_run2.Rdata")
+# load("df wsc fits/space_drpm1_run1.Rdata")
+load("df wsc fits/space_drpm1_run5.Rdata") # bene
+
+# load("df wsc fits/space_rout_full_run1_dfweekly.Rdata") # bad
+load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
+# load("df wsc fits/space_rout_full_run3_dfweekly.Rdata") # better better
+# load("df wsc fits/space_rout_full_run4_dfweekly.Rdata") # bad
 ```
 
 ```{r,warning=F}
@@ -2412,13 +2436,14 @@ if (save_plots==TRUE) {
 ##### take the median/mean/mode
 summary_fitted = t(drpm1$fitted[,,size(drpm1$fitted)[3]])*0
 for(j in 1:N){
-	cat(j,"of",N,"\r")
+	# cat(j,"of",N,"\r")
 	for(t in 1:Tm){
-		values_j = c()
-		for (it in 1:size(drpm1$fitted)[3]){
-			values_j = c(values_j,drpm1$fitted[t,j,it])
-		}
-		summary_fitted[j,t] = mean(values_j)
+		# values_j = c()
+		# for (it in 1:size(drpm1$fitted)[3]){
+			# values_j = c(values_j,drpm1$fitted[t,j,it])
+		# }
+		summary_fitted[j,t] = mean(drpm1$fitted[t,j,])
+		# summary_fitted[j,t] = mean(values_j)
 		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
@@ -2453,13 +2478,14 @@ if (save_plots==TRUE) {
 }
 summary_fitted = t(rout$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
-	cat(j,"of",N,"\r")
+	# cat(j,"of",N,"\r")
 	for(t in 1:Tm){
-		values_j = c()
-		for (it in 1:size(rout$fitted)[3]){
-			values_j = c(values_j,rout$fitted[t,j,it])
-		}
-		summary_fitted[j,t] = mean(values_j)
+		# values_j = c()
+		# for (it in 1:size(rout$fitted)[3]){
+			# values_j = c(values_j,rout$fitted[t,j,it])
+		# }
+		summary_fitted[j,t] = mean(rout$fitted[t,j,])
+		# summary_fitted[j,t] = mean(values_j)
 		# summary_fitted[j,t] = median(values_j)
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
@@ -2730,10 +2756,10 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 LEN = Tm
 compare_ARI = function(Cmod1,Jmod2){
 	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
-	for(k in 1: LEN){
-		cat(k,"\r")
 		rhoC = generate_partition(Cmod1)
 		rhoJ = generate_partition(Jmod2)
+	for(k in 1: LEN){
+		cat(k,"\r")
 		ARIvec[k] <- adjustedRandIndex(rhoC[[k]][1:N], rhoJ[[k]][1:N])
 	}	
 	ncols_ari = 100
@@ -3187,12 +3213,11 @@ source("include_clusters_functions.R")
 ```
 
 ```{r}
-load("../thesis data/df_daily_full_logtransf.Rdata")
-df_wsc = df_daily_full_logtransf
-
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
-df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+# load("../thesis data/df_daily_full_logtransf.Rdata")
+# df_wsc = df_daily_full_logtransf
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
 
 
 sites = data.frame(
@@ -3261,7 +3286,7 @@ time_span = 1:Tm
 # partition = partitions_drpmc
 model_name = "model J"
 partition = partitions_drpmj
-limt = 3
+limt = 12
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
 for(time in time_span[1:limt]){
@@ -3308,22 +3333,23 @@ for(time in time_span[1:limt]){
 	# q = get_graph_plot(df_cluster_cut,cols)
 	# print(q)
 
-	# p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+	print(p)
 	
 	# plot_intensities(df_cluster_cut)
 
 	# pl = get_hist_continuos_plot(df_cluster_cut) # a bit less nice than nice
 	# pl = get_hist_color_plot(df_cluster_cut) # bad	
 	# pl = get_hist_fill_plot(df_cluster_cut) # nice
-	pl = get_boxplot_plot(df_cluster_cut,cols)
-	print(pl)
+	# pl = get_boxplot_plot(df_cluster_cut,cols)
+	# print(pl)
 	
-	plx = get_boxplot_covariate_plot(df_cluster_cut,cols,
-									# covariata = "AQ_pm10", # clasic boxplot of other functions
-									# covariata = "Altitude", # clasic boxplot
-									covariata = "LA_lvi", # clasic boxplot
-									annotate = F)
-	print(plx)
+	# plx = get_boxplot_covariate_plot(df_cluster_cut,cols,
+	# 								# covariata = "AQ_pm10", # clasic boxplot of other functions
+	# 								# covariata = "Altitude", # clasic boxplot
+	# 								covariata = "LA_lvi", # clasic boxplot
+									# annotate = F)
+	# print(plx)
 		
 	cur_num = sprintf("%02d", time)
 	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
@@ -3336,7 +3362,83 @@ for(time in time_span[1:limt]){
 
 
 ```{r}
-length(df_wsc[,covariata])/105
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+# model_name = "model J"
+# partition = partitions_drpmj
+limt = 12
+##########################
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span[1:limt]){
+
+	salso_out <- partition[[time]]
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	
+	# idxs = which(is.na(df_temp$clusters))
+	# replace(df_temp$clusters, idxs, 3)
+	# df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+
+clusters_old = NULL
+for(time in time_span[1:limt]){
+	cat(crayon::red("Time",time,"of",Tm,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	
+	# q = get_graph_plot(df_cluster_cut,cols)
+	# print(q)
+
+	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
+	print(p)
+	
+	# plot_intensities(df_cluster_cut)
+
+	# pl = get_hist_continuos_plot(df_cluster_cut) # a bit less nice than nice
+	# pl = get_hist_color_plot(df_cluster_cut) # bad	
+	# pl = get_hist_fill_plot(df_cluster_cut) # nice
+	# pl = get_boxplot_plot(df_cluster_cut,cols)
+	# print(pl)
+	
+	# plx = get_boxplot_covariate_plot(df_cluster_cut,cols,
+	# 								# covariata = "AQ_pm10", # clasic boxplot of other functions
+	# 								# covariata = "Altitude", # clasic boxplot
+	# 								covariata = "LA_lvi", # clasic boxplot
+									# annotate = F)
+	# print(plx)
+		
+	cur_num = sprintf("%02d", time)
+	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+	# plot=p, units="px",width=2500, height=1200, dpi=300)
+	# dev.off()
+	
+	clusters_old = clusters_now
+}
 ```
 
 
