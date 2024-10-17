@@ -1530,7 +1530,7 @@ cols = colora(105,56,show=F)
 chosen_variable_name = "AQ_pm10"
 trendYearStation_week <- function(file_name){
 	data_from_to = df_wsc
-	len_time = 53
+	len_time = 1
 	chosen_variable = (data_from_to[,chosen_variable_name])
 	# Crea il grafico ggplot
 	station_trend <- ggplot(data_from_to,aes(x = week, 
@@ -1842,9 +1842,9 @@ head(X_lk)
 a_sigma  = 0.01; b_sigma = 0.01
 # a_tau    = 2.1; b_tau   = 0.9
 # a_tau    = 1.7; b_tau   = 0.4
-a_tau    = 1.75; b_tau   = 0.4
+a_tau    = 1.9; b_tau   = 0.4
 # a_lambda = 0.1; b_lambda = 0.1
-a_lambda = 1.75; b_lambda = 0.4
+a_lambda = 1.9; b_lambda = 0.4
 
 # module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
@@ -1944,7 +1944,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # getwd()
 # load(file="space_drpm1_run2.Rdata")
-save(rout,file="space_rout_full_run5_dfweekly.Rdata")
+save(rout,file="space_rout_full_run6_dfweekly_backup.Rdata")
 # save(rout,file="space_rout_full_run5_dfdaily.Rdata")
 ```
 
@@ -1973,11 +1973,11 @@ cat("waic = ",rout$waic,"\n")
 
 # LOAD models
 ```{r}
-load("./df wsc fits/space_drpm1_run3.Rdata")
+load("./df wsc fits/space_drpm1_run5.Rdata")
 # load("./df wsc fits/space_rout_full_run4_dfweekly.Rdata")
 
-load("./df daily fits/space_drpm1_run2.Rdata")
-load("./df daily fits/space_rout_full_run1_dfdaily.Rdata")
+# load("./df daily fits/space_drpm1_run2.Rdata")
+# load("./df daily fits/space_rout_full_run1_dfdaily.Rdata")
 ```
 
 
@@ -1987,7 +1987,7 @@ load("./df daily fits/space_rout_full_run1_dfdaily.Rdata")
 # y
 j = round(runif(1,1,N))
 t = round(runif(1,1,Tm))
-j = 81
+j = 101
 # j =96
 # t = 4
 size(rout$fitted)
@@ -2374,12 +2374,14 @@ for(i in 1:N){
 
 ```{r}
 # load("df wsc fits/space_drpm1_run1.Rdata")
-load("df wsc fits/space_drpm1_run5.Rdata") # bene
+# load("df wsc fits/space_drpm1_run5.Rdata") # final choice since really same model
 
 # load("df wsc fits/space_rout_full_run1_dfweekly.Rdata") # bad
-load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
+# load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
 # load("df wsc fits/space_rout_full_run3_dfweekly.Rdata") # better better
 # load("df wsc fits/space_rout_full_run4_dfweekly.Rdata") # bad
+# load("df wsc fits/space_rout_full_run5_dfweekly.Rdata")
+# load("df wsc fits/space_rout_full_run6_dfweekly.Rdata") # final choice since really same model
 ```
 
 ```{r,warning=F}
@@ -2388,7 +2390,7 @@ load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
 partitions_drpmc <- generate_partition(drpm1, loss ="binder",maxcl = 0)
 partitions_drpmj <- generate_partition(rout , loss ="binder",maxcl = 0)
 
-save_plots=F
+save_plots=T
 
 # partition_matrix <- do.call(cbind, partitions)
 # if (save_plots==T){
@@ -2409,15 +2411,50 @@ if (save_plots==T){ dev.off()}
 
 
 if (save_plots==T){
-	# pdf(file="partizioni_nums.pdf",width=10,height = 4)
-	pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
+	pdf(file="partizioni_nums.pdf",width=10,height = 6)
+	# pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
 }
 par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
-plot_partition_with_numbers(partitions_drpmc, title="model C",cex=0.9,line=2.1)
-plot_partition_with_numbers(partitions_drpmj, title="model J",cex=0.9,line=2.1)
+plot_partition_with_numbers(partitions_drpmc, title="model C",cex=0.7,line=2.1)
+plot_partition_with_numbers(partitions_drpmj, title="model J",cex=0.7,line=2.1)
 if (save_plots==T){ dev.off()}
 ```
 
+maybe better partition numbers plot
+```{r}
+par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
+
+rho <- list()
+for(k in 1:12){
+  rho[[k]] <-partitions_drpmc[[k]]
+}
+header="model C"
+plot(rep(1:12, each=nrow(y)), rep(1:105, times=ncol(y)), type='n',
+   yaxt="n",ylab="", xlab="time", main=header, cex.main=2, cex.lab=1.75,
+   xaxt="n")
+axis(side=1, at=1:12, cex.axis=1.5)
+for(jj in 1:ncol(y)){
+	ord <- order(rho[[jj]])
+	cex1 <- rep(0.8,length(ord))
+	text(rep(jj, each=nrow(y)), 1:105, labels=19, col=rho[[jj]][ord], cex=cex1[ord])
+}
+
+rho <- list()
+for(k in 1:12){
+  rho[[k]] <-partitions_drpmj[[k]]
+}
+header="model J"
+plot(rep(1:12, each=nrow(y)), rep(1:105, times=ncol(y)), type='n',
+   yaxt="n",ylab="", xlab="time", main=header, cex.main=2, cex.lab=1.75,
+   xaxt="n")
+axis(side=1, at=1:12, cex.axis=1.5)
+for(jj in 1:ncol(y)){
+	ord <- order(rho[[jj]])
+	cex1 <- rep(0.8,length(ord))
+	text(rep(jj, each=nrow(y)), 1:105, labels=19, col=rho[[jj]][ord], cex=cex1[ord])
+}
+
+```
 
 
 # fitted values
@@ -2426,7 +2463,7 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) {
 	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
@@ -2520,14 +2557,14 @@ yred=y
 cols = colora(N,56,0)
 # cols = colora(N,"div",seed_div = "Paired",show = 0)
 if (save_plots==TRUE) { 
-	pdf(file="test_1_generated_data.pdf",height = 6,width=11)
+	pdf(file="test_2_spatial_data.pdf",height = 6,width=11)
 }
 par(mar=c(2,2,2,1))
 for(i in 1:size(yred)[1]){
    if(i==1){
      plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yredJ,yredC,yredORIG),type='l',
      	 xlab='time',
-     	 main='Generated values')
+     	 main='Spatio-temporal PM10 values')
  	  } 
 	  else{
 		  lines(1:size(yred)[2],yred[i,],col=cols[i])
@@ -2555,9 +2592,9 @@ yred=y
 # cols = colora(N,"div",0)
 cols = colora(N,56,0)
 # cols = colora(N,"div",seed_div = "Paired",show = 0)
-cexs = 0.6
+cexs = 0.7
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=11)
@@ -2690,7 +2727,7 @@ target_col = "AQ_pm10"
 times = unique(df_wsc$Time)
 t = 1
 df_time_t = df_wsc[df_wsc$Time == times[t],]
-boxplot(df_time_t[,target_col] ~ partition_matrix[,t],)
+boxplot(df_time_t[,target_col][[1]] ~ partition_matrix[,t],)
 
 ```
 
@@ -2714,12 +2751,12 @@ summary_fitted_mean = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
 summary_fitted_median = t(drpm1$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
 	for(t in 1:Tm){
-		values_j = c()
-		for (it in 1:size(drpm1$fitted)[3]){
-			values_j = c(values_j,drpm1$fitted[t,j,it])
-		}
-		summary_fitted_mean[j,t] = mean(values_j)
-		summary_fitted_median[j,t] = median(values_j)
+		# values_j = c()
+		# for (it in 1:size(drpm1$fitted)[3]){
+			# values_j = c(values_j,drpm1$fitted[t,j,it])
+		# }
+		summary_fitted_mean[j,t] = mean(drpm1$fitted[t,j,])
+		summary_fitted_median[j,t] = median(drpm1$fitted[t,j,])
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -2733,12 +2770,12 @@ summary_fitted_mean = t(rout$fitted[,,size(rout$fitted)[3]])*0
 summary_fitted_median = t(rout$fitted[,,size(rout$fitted)[3]])*0
 for(j in 1:N){
 	for(t in 1:Tm){
-		values_j = c()
-		for (it in 1:size(rout$fitted)[3]){
-			values_j = c(values_j,rout$fitted[t,j,it])
-		}
-		summary_fitted_mean[j,t] = mean(values_j)
-		summary_fitted_median[j,t] = median(values_j)
+		# values_j = c()
+		# for (it in 1:size(rout$fitted)[3]){
+			# values_j = c(values_j,rout$fitted[t,j,it])
+		# }
+		summary_fitted_mean[j,t] = mean(rout$fitted[t,j,])
+		summary_fitted_median[j,t] = median(rout$fitted[t,j,])
 		# summary_fitted[j,t] = Mode(values_j) # function from include.R
 	}
 }
@@ -2781,13 +2818,15 @@ compare_ARI = function(Cmod1,Jmod2){
 	# 		   main=paste0("ARI values - ",mod1," vs ",mod2),axes=FALSE,col=cols_ARI,
 	# 		   breaks=brks)
 	# mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
-
+	return(ARIvec)
 }
 
 mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
 Cmod1 = drpm1
 Jmod2 = rout
-compare_ARI(Cmod1,Jmod2)
+ariv = compare_ARI(Cmod1,Jmod2)
+cat("mean ",mean(ariv),"\n")
+cat("median ",median(ariv))
 ```
 
 # covariate effect (if any)
@@ -2865,297 +2904,6 @@ plot(cova_of_interest[,1],
 
 
 #-------------
-## Partition plots
-```{r, warning=F}
-maxNClusters = 3
-
-# partition_plots = function(drpm1, rout){ 
-# Initialize a list to store the partitions for each time instant
-partitions_drpmc <- list()
-partitions_drpmj <- list()
-
-# Loop over each time instant to extract the consensus partition
-for (t in 1:Tm) {
-  Sic_t <- drpm1$Si[t, , ]
-  Sic_t <- t(Sic_t) 
-  partitions_drpmc[[t]] <- salso(Sic_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
-  							   )
-
-  Sij_t <- rout$Si[t, , ]
-  Sij_t <- t(Sij_t) 
-  partitions_drpmj[[t]] <- salso(Sij_t, loss = "binder"
-  							   , maxNClusters = maxNClusters
-  							   )
-}
-maxk = 0
-cat(crayon::red("DRPM - C\n"))
-for (t in 1:Tm){
-	cat("Time",t,"- #clusters =",length(unique(partitions_drpmc[[t]])),"\n")
-	maxk = max(length(unique(partitions_drpmc[[t]])),maxk)
-}
-cat("\n")
-cat(crayon::red("DRPM - J\n"))
-for (t in 1:Tm){
-	cat("Time",t,"- #clusters =",length(unique(partitions_drpmj[[t]])),"\n")
-	maxk = max(length(unique(partitions_drpmj[[t]])),maxk)
-}
-```
-
-
-```{r, warning=F}
-# cols=colora(len=maxk, seed=67, show=1)
-# cols=colora(len=maxk, seed=41, show=0) # greens/light-blues
-# cols=colora(len=maxk, seed=73, show=0) # dark blues
-# cols=colora(len=maxk, seed=32, show=0) # viridis
-# cols=colora(len=maxk, seed=22, show=0) # reds/blues
-# cols=colora(len=maxk, seed=44, show=0) # greens
-cols=colora(len=maxk, seed=56, show=0) # la 56
-# cols = colora(len=10,"rand")
-
-heatmap_matrix <- do.call(rbind, partitions_drpmc)
-# Generate the heatmap
-heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
-		main="model C", xlab = "units", ylab = "time instants",
-        # col = terrain.colors(length(unique(as.vector(heatmap_matrix)))))
-		col = cols)
-heatmap_matrix <- do.call(rbind, partitions_drpmj)
-# Generate the heatmap
-heatmap(heatmap_matrix, Rowv = NA, Colv = NA, scale = "none",
-		main="model J",xlab = "units", ylab = "time instants",
-        # col = terrain.colors(length(unique(as.vector(heatmap_matrix)))))
-		col = cols)
-
-####################################################################
-
-partitions = partitions_drpmc
-partition_matrix <- do.call(cbind, partitions)
-num_units <- nrow(partition_matrix)
-Tm <- ncol(partition_matrix)
-# Set up the plot
-par(mar=c(4,4,2,2))
-plot(1:Tm, rep(NA, Tm), type = "n",
-     xlab = "Time Instants", ylab = "clusters", main="model C",
-     ylim = range(partition_matrix)+c(-0.1,0.1), xaxt = "n", yaxt = "n")
-axis(1, at = 1:Tm, labels = 1:Tm)
-axis(2, at = unique(as.vector(partition_matrix)), las = 2)
-# Add grid lines for clarity
-abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted")
-abline(v = 1:Tm, col = "lightgray", lty = "dotted")
-# Plot lines and points for each unit
-for (unit in 1:num_units) {
-  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
-        col = unit, lwd = 1)
-}
-# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
-       # lty = 1, lwd = 2, pch = 19, bty = "n")
-
-
-partitions = partitions_drpmj
-partition_matrix <- do.call(cbind, partitions)
-num_units <- nrow(partition_matrix)
-Tm <- ncol(partition_matrix)
-# Set up the plot
-par(mar=c(4,4,2,2))
-plot(1:Tm, rep(NA, Tm), type = "n",
-     xlab = "Time Instants", ylab = "clusters", main="model J",
-     ylim = range(partition_matrix)+c(-0.1,0.1), xaxt = "n", yaxt = "n")
-axis(1, at = 1:Tm, labels = 1:Tm)
-axis(2, at = unique(as.vector(partition_matrix)), las = 2)
-abline(h = unique(as.vector(partition_matrix)), col = "lightgray", lty = "dotted")
-abline(v = 1:Tm, col = "lightgray", lty = "dotted")
-for (unit in 1:num_units) {
-  lines(1:Tm, partition_matrix[unit, ], type = "l", pch = 19,
-        col = unit, lwd = 1)
-}
-# legend("topright", legend = paste("Unit", 1:num_units), col = 1:num_units,
-       # lty = 1, lwd = 2, pch = 19, bty = "n")
-
-
-####################################################################
-
-partitions = partitions_drpmc
-partition_matrix <- do.call(cbind, partitions)
-par(mar=c(3.8,1,3,1),mfrow=c(1,2))
-plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, num_units)+c(-0.5,0.5),
-     xlab = "Time Instants", ylab = "Units",
-     xaxt = "n", yaxt = "n", main = "model C")
-axis(1, at = 1:Tm, labels = 1:Tm)
-for (t in 1:Tm) {
-  for (unit in 1:num_units) {
-    text(x = t, y = unit, labels = as.character(unit),
-         col = partition_matrix[unit, t], cex = 0.5)
-  }
-}
-
-partitions = partitions_drpmj
-partition_matrix <- do.call(cbind, partitions)
-plot(NULL, NULL, xlim = c(1, Tm), ylim = c(1, num_units)+c(-0.5,0.5),
-     xlab = "Time Instants", ylab = "Units",
-     xaxt = "n", yaxt = "n", main = "model J")
-axis(1, at = 1:Tm, labels = 1:Tm)
-for (t in 1:Tm) {
-  for (unit in 1:num_units) {
-    text(x = t, y = unit, labels = as.character(unit),
-         col = partition_matrix[unit, t], cex = 0.5)
-  }
-}
-```
-
-
-## Ari plot
-```{r warning=FALSE}
-LEN = Tm
-##########################
-model_name = "model C"
-partition = partitions_drpmc
-##########################
-
-df_cluster = data.frame(clusters=c(),Time=c())
-for(time in 1:Tm){
-	salso_out <- partition[[time]]
-	df_temp = data.frame(
-		clusters = salso_out
-	)
-	df_temp$Time = rep(time,dim(df_temp)[1])
-	df_cluster = rbind(df_cluster,df_temp)
-	
-	# clusters log
-	clusters_now = df_temp$clusters
-	n_clusters = unique(clusters_now)
-	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
-}
-library(mclust)
-# build the ARI matrix
-ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
-rho_ARI <- list()
-for(k in 1:LEN){
-	rho_ARI[[k]] <- partition[[k]]
-}
-for(k in 1: LEN){
-	for(kk in 1: LEN){
-		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
-	}
-}
-ncols_ari = 100
-# if (min(ARImats)<0){
-	# cols_ARI = colora(ncols_ari,79,0)
-	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
-# } else {
-	# cols_ARI = colora(ncols_ari,56,0)
-	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
-	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
-	# cols_ARI = colora(ncols_ari,102,0)
-	# brks = seq(0,1,length.out=ncols_ari+1)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
-# }
-# or see ?designer.colors for colors
-library(fields)
-image.plot(ARImats,
-		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
-		   breaks=brks)
-mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
-mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
-
-##########################
-model_name = "model J"
-partition = partitions_drpmj
-##########################
-
-df_cluster = data.frame(clusters=c(),Time=c())
-for(time in 1:Tm){
-	salso_out <- partition[[time]]
-	df_temp = data.frame(
-		clusters = salso_out
-	)
-	df_temp$Time = rep(time,dim(df_temp)[1])
-	df_cluster = rbind(df_cluster,df_temp)
-	
-	# clusters log
-	clusters_now = df_temp$clusters
-	n_clusters = unique(clusters_now)
-	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
-}
-library(mclust)
-# build the ARI matrix
-ARImats <- matrix(NA, nrow=LEN, ncol=LEN)
-rho_ARI <- list()
-for(k in 1:LEN){
-	rho_ARI[[k]] <- partition[[k]]
-}
-for(k in 1: LEN){
-	for(kk in 1: LEN){
-		ARImats[k,kk] <- adjustedRandIndex(rho_ARI[[k]], rho_ARI[[kk]])
-	}
-}
-ncols_ari = 100
-# if (min(ARImats)<0){
-	# cols_ARI = colora(ncols_ari,79,0)
-	# brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
-# } else {
-	# cols_ARI = colora(ncols_ari,56,0)
-	# cols_ARI = rev(cols_ARI) # must be ordered from cold to warm
-	cols_ARI = rev(colora(ncols_ari,104,0)) # or 109
-	# cols_ARI = colora(ncols_ari,102,0)
-	# brks = seq(0,1,length.out=ncols_ari+1)
-	brks = seq(min(-1,floor(min(ARImats))),1,length.out=ncols_ari+1)
-# }
-# or see ?designer.colors for colors
-library(fields)
-image.plot(ARImats,
-		   main=paste0("Lagged ARI values - ",model_name),axes=FALSE,col=cols_ARI,
-		   breaks=brks)
-mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
-mtext(text=c(paste("",1:LEN)), side=1, line=0.3,at=seq(0,1,length=LEN), las=2, cex=0.8)
-
-##########################################################
-
-# take last sample (maybe not the best choice)
-yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
-yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
-yred=y
-
-cols = colora(size(yred)[1],56,0)
-# cols = colora(size(yred)[1],"div",show = 0)
-
-par(mar=c(4,4,4,2))
-for(i in 1:size(yredC)[1]){
-   if(i==1){
-     plot(1:size(yredC)[2],yredC[i,],col=cols[i],
-     	 ylim=extrema(yred,yredJ,yredC),
-     	 type='l',xlab='time',ylab="fitted values",main="model C")
- 	  } 
-	  else{
-		  lines(1:size(yredC)[2],yredC[i,],col=cols[i])
-	  }
-}
-
-par(mar=c(4,4,4,2))
-for(i in 1:size(yredJ)[1]){
-   if(i==1){
-     plot(1:size(yredJ)[2],yredJ[i,],col=cols[i],
-     	 ylim=extrema(yred,yredJ,yredC),
-     	 type='l',xlab='time',ylab="fitted values",main="model J")
- 	  } 
-	  else{
-		  lines(1:size(yredJ)[2],yredJ[i,],col=cols[i])
-	  }
-}
-
-# original real data
-for(i in 1:size(yred)[1]){
-   if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],type='l',
-     	 xlab='time',ylab='values',main="original data",
-     	 ylim=extrema(yred,yredJ,yredC))
- 	  } 
-	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
-	  }
-}
-```
-
-
 ## salso plots
 ```{r}
 ##########################
@@ -3196,10 +2944,6 @@ for (time in 1:Tm){
 	# plot(ssout,type="dendrogram")
 	# dev.off()
 }
-```
-
-```{r}
-df_wsc = df_
 ```
 
 
@@ -3279,14 +3023,14 @@ time_span = 1:Tm
 ```
 
 
-
+## plot j
 ```{r,warning=F}
 ##########################
 # model_name = "model C"
 # partition = partitions_drpmc
-model_name = "model J"
+model_name = "model J6"
 partition = partitions_drpmj
-limt = 12
+limt = 2
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
 for(time in time_span[1:limt]){
@@ -3313,6 +3057,7 @@ for(time in time_span[1:limt]){
 	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
 }
 
+plots_J = list()
 clusters_old = NULL
 for(time in time_span[1:limt]){
 	cat(crayon::red("Time",time,"of",Tm,"\n"))
@@ -3334,8 +3079,8 @@ for(time in time_span[1:limt]){
 	# print(q)
 
 	p = plot_graph_and_hist(df_cluster_cut,cols,titolo = model_name)
-	print(p)
-	
+	# print(p)
+		
 	# plot_intensities(df_cluster_cut)
 
 	# pl = get_hist_continuos_plot(df_cluster_cut) # a bit less nice than nice
@@ -3346,21 +3091,24 @@ for(time in time_span[1:limt]){
 	
 	# plx = get_boxplot_covariate_plot(df_cluster_cut,cols,
 	# 								# covariata = "AQ_pm10", # clasic boxplot of other functions
-	# 								# covariata = "Altitude", # clasic boxplot
-	# 								covariata = "LA_lvi", # clasic boxplot
-									# annotate = F)
+	# 								covariata = "Altitude", # clasic boxplot
+	# 								# covariata = "LA_lvi", # clasic boxplot
+	# annotate = F)
 	# print(plx)
 		
 	cur_num = sprintf("%02d", time)
-	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
-	# plot=p, units="px",width=2500, height=1200, dpi=300)
-	# dev.off()
+	ggsave(file=paste0("./tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+	plot=p, units="px",width=2500, height=1200, dpi=300)
+	dev.off()
 	
 	clusters_old = clusters_now
 }
 ```
 
 
+
+
+## plot c
 ```{r}
 ##########################
 model_name = "model C"
@@ -3433,9 +3181,9 @@ for(time in time_span[1:limt]){
 	# print(plx)
 		
 	cur_num = sprintf("%02d", time)
-	# ggsave(file=paste0("../../tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
-	# plot=p, units="px",width=2500, height=1200, dpi=300)
-	# dev.off()
+	ggsave(file=paste0("./tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+	plot=p, units="px",width=2500, height=1200, dpi=300)
+	dev.off()
 	
 	clusters_old = clusters_now
 }
@@ -3497,4 +3245,181 @@ dev.off()
 ```
 
 
+# final plot j
+```{r}
+library(gridExtra)
+##########################
+# model_name = "model C"
+# partition = partitions_drpmc
+folder = "./spaceJ/"
+model_name = "model J"
+partition = partitions_drpmj
+limt = 3
+##########################
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span[1:limt]){
 
+	salso_out <- partition[[time]]
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	
+	# idxs = which(is.na(df_temp$clusters))
+	# replace(df_temp$clusters, idxs, 3)
+	# df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+
+clusters_old = NULL
+for(time in time_span[1:limt]){
+	cat(crayon::red("Time",time,"of",Tm,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	cur_num = sprintf("%02d", time)
+
+plot1 <- get_graph_plot(df_cluster_cut,cols,titolo=paste0(model_name," - time ",time))
+
+covariata = "WE_tot_precipitation"
+plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "Altitude"
+plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "AQ_pm10"
+plot4 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "LA_lvi"
+plot5 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+g <- arrangeGrob(
+# grid.arrange(
+	plot1, plot2, plot3, plot4, plot5,
+				widths = c(2, 1, 1),
+  layout_matrix = rbind(c(1, 2, 3),
+                        c(1, 4, 5)))
+
+ggsave(file=paste0(folder,model_name,"_t",cur_num,".pdf"),plot = g,
+	   # units="px",width=2500, height=1200, dpi=300)
+	   # units="px",width=4500, height=2000, dpi=300)
+	   units="px",width=3600, height=1500, dpi=300)
+dev.off()
+	
+	clusters_old = clusters_now
+}
+```
+
+
+# final plot c
+```{r}
+library(gridExtra)
+##########################
+model_name = "model C"
+partition = partitions_drpmc
+folder = "./spaceC/"
+# model_name = "model J"
+# partition = partitions_drpmj
+limt = 12
+##########################
+df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
+for(time in time_span[1:limt]){
+
+	salso_out <- partition[[time]]
+	
+	df_temp = data.frame(
+		Longitude = sites$longitude,
+		Latitude = sites$latitude,
+		clusters = salso_out[1:105]
+	)
+	
+	# idxs = which(is.na(df_temp$clusters))
+	# replace(df_temp$clusters, idxs, 3)
+	# df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
+	
+	df_temp$Time = rep(time,dim(df_temp)[1])
+	df_cluster = rbind(df_cluster,df_temp)
+	
+	# clusters log
+	clusters_now = df_temp$clusters
+	n_clusters = unique(clusters_now)
+	ycurrent = y[,paste0("w",time)]
+	cat(crayon::red("Time",time,"- #clusters =",length(unique(clusters_now)),"\n"))
+}
+
+clusters_old = NULL
+for(time in time_span[1:limt]){
+	cat(crayon::red("Time",time,"of",Tm,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	cur_num = sprintf("%02d", time)
+
+plot1 <- get_graph_plot(df_cluster_cut,cols,titolo=paste0(model_name," - time ",time))
+
+covariata = "WE_tot_precipitation"
+plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "Altitude"
+plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "AQ_pm10"
+plot4 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "LA_lvi"
+plot5 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+g <- arrangeGrob(
+# grid.arrange(
+	plot1, plot2, plot3, plot4, plot5,
+				widths = c(2, 1, 1),
+  layout_matrix = rbind(c(1, 2, 3),
+                        c(1, 4, 5)))
+
+ggsave(file=paste0(folder,model_name,cur_num,".pdf"),plot = g,
+	   # units="px",width=2500, height=1200, dpi=300)
+	   # units="px",width=4500, height=2000, dpi=300)
+	   units="px",width=3600, height=1500, dpi=300)
+dev.off()
+	
+	clusters_old = clusters_now
+}
+```

@@ -751,7 +751,7 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 	
 	# ycurrent = y[,paste0("w",time)]
 	times = unique(df_wsc$Time)
-	cat("using time=",time,"\n")
+	# cat("using time=",time,"\n")
 	df_time_t = df_wsc[df_wsc$Time == times[time],covariata]
 	ycurrent = df_time_t
 	
@@ -759,17 +759,19 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 	
 	clust_vals = clusters_now[1:105]
 	df_temp = data.frame(clusters=clust_vals,ycurrent=ycurrent)
+	# print(df_temp)
 	
 	pad = 2	
-	p = ggplot(df_temp, aes(as.factor(clusters),ycurrent,
+	p = ggplot(df_temp, aes(as.factor(clusters),ycurrent[[1]],
 							fill = cols[clusters]
 							# color = cols[clust_vals]
 	))+
-		geom_boxplot()+
+		geom_boxplot(show.legend = FALSE)+
 		# geom_jitter(width=0.2)+
 		ggtitle(titolo)+
 		# labs(title = paste("Cluster map - time",time))+
-		labs(title = paste(covariata,"- time",time))+
+		# labs(title = paste(covariata,"- time",time))+
+		labs(title = covariata)+
 		guides(fill = guide_legend(title = "Clusters"))+
 		
 		# theme_classic()
@@ -778,7 +780,7 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 		# ylab("log(PM10) values")+
 		# ylab(covariata)+
 		ylab("")+
-		ylim(extrema(df_wsc[,covariata]))+
+		ylim(c(min(df_wsc[,covariata]),max(df_wsc[,covariata])))+
 		# xlim(extrema(ycurrent)+c(-pad,pad))+
 		# scale_fill_identity(guide="legend",labels=paste0("cl",1:max(clust_vals)),
 		# breaks=cols[1:max(clust_vals)])+

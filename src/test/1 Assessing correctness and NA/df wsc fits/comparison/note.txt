@@ -1,0 +1,63 @@
+!c5 j6
+C MSE
+mean  0.01421829 
+median  0.01486602 
+J MSE
+mean  0.0131126 
+median  0.01375188 
+
+C
+Time difference of 1.6365 hours
+LPML = 694.805074499711 
+WAIC = -1768.42433676758
+
+J
+Elapsed time: 48 minutes, 45 seconds, 862 milliseconds
+LPML: 624.9135200152505 (the higher the better)
+WAIC: -1898.049549751033 (the lower the better)
+
+arivec
+mean  0.8017492 
+median  0.8630863
+
+
+
+!c5 j5
+
+J Elapsed time: 42 minutes, 21 seconds, 195 milliseconds
+LPML: 618.7936529332273 (the higher the better)
+WAIC: -1848.460742611097 (the lower the better)
+
+C Time difference of 1.6365 hours
+LPML = 694.805074499711 
+WAIC = -1768.42433676758
+
+arivec
+mean  0.7662587 
+median  0.8074818
+
+C MSE
+mean  0.01421829 
+median  0.01486602 
+J MSE
+mean  0.01558459 
+median  0.01615344
+
+
+
+!c5 j2
+aricvec
+mean  0.6911608 
+median  0.7043929
+
+C MSE
+mean  0.01421829 
+median  0.01486602 
+J MSE
+mean  0.01463979 
+median  0.01491392 
+
+
+
+!c5 j3
+
