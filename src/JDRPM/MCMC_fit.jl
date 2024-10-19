@@ -58,6 +58,7 @@ function MCMC_fit(;
 	burnin::Real,                         # Number of burn-in
 	thin::Real,                           # Thinning interval
 
+	beta_update_threshold = 0,            # if to update beta regressor only after some iterates
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Real,                           # Random seed for reproducibility
 	simple_return = false,                # Return just the partition Si
@@ -80,7 +81,7 @@ function MCMC_fit(;
 	Y_has_NA = any(ismissing.(Y))
 	nout = round(Int64, (draws - burnin)/(thin))
 	# beta_update_threshold = round(Int64, burnin/2)
-	beta_update_threshold = 0
+	# beta_update_threshold = 0
 
 	if sPPM
 		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
@@ -189,9 +190,24 @@ function MCMC_fit(;
 			@error "Wrong params for covariate similarity 4.\nExpected input form: [Real, Real, Real, Real]." _file=""
 			return
 		end
+
+		if covariate_similarity==2 || covariate_similarity==3
+			Rs = zeros(p_cl,T)
+			for p in 1:p_cl
+				for t in 1:T
+					if isa(Xcl_covariates[1,p,t],Real)
+						Rs[p,t] = maximum(Xcl_covariates[:,p,t])-minimum(Xcl_covariates[:,p,t])
+					end
+				end
+			end
+		end
 	end
 
 	if lk_xPPM
+		if beta_update_threshold>=draws
+			@error "Cannot use such a high value of beta beta_update_threshold." _file=""
+			return
+		end
 		if ismissing(beta_priors)
 			@error "Cannot use covariates in the likelihood if beta_priors is not defined." _file=""
 			return
@@ -251,7 +267,10 @@ function MCMC_fit(;
 		println("Parameters:")
 		println("sig2h ∼ InverseGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
 		println("Logit(1/2(eta1+1)) ∼ Laplace(0, $(eta1_priors[1]))")
-		if lk_xPPM println("beta ∼ MvNormal(μ=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)") end
+		if lk_xPPM
+			println("beta ∼ MvNormal(μ=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)")
+			println("updating beta after iteration $beta_update_threshold")
+		end
 		println("tau2 ∼ InverseGamma($(tau2_priors[1]), $(tau2_priors[2]))")
 		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
 		println("lambda2 ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
@@ -284,6 +303,8 @@ function MCMC_fit(;
 	println(Y_has_NA ? "[✓]" : "[✗]", " are there missing data in Y? $Y_has_NA")
 	println()
 	end # skip_checks
+
+
 
 	############# update to handle missing data #############
 	# printlgln("############# update to handle missing data #############\n")
@@ -376,6 +397,8 @@ function MCMC_fit(;
 	rho_tmp = zeros(Int64,n)
 	Xo = zeros(n)
 	Xn = zeros(n)
+	Xo_cat = Vector{String}(undef, n)
+	Xn_cat = Vector{String}(undef, n)
 
 	a_star_tau = 0
 	b_star_tau = 0
@@ -544,7 +567,7 @@ function MCMC_fit(;
 
 		for t in 1:T
 			############# update gamma #############
-			# printlgln("############# update gamma #############\n")
+			# println("############# update gamma #############\n")
 			# debug(@showd t gamma_iter)
 			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
 			for j in 1:n
@@ -679,19 +702,30 @@ function MCMC_fit(;
 						if cl_xPPM
 							# lS .= 0.
 							for p in 1:p_cl
-								# Xo = @view Xcl_covariates_red[aux_idxs,p]
-								# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
-								# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
-								copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
-								copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
-								# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
-								# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
-								# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-								# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
-								covariate_similarity!(covariate_similarity_idx, Xo, cv_params, true,1,true,lS)
-								covariate_similarity!(covariate_similarity_idx, Xn, cv_params, true,2,true,lS)
-								# covariate_similarity!(covariate_similarity_idx, Xo, cv_params_struct, true,1,true,lS)
-								# covariate_similarity!(covariate_similarity_idx, Xn, cv_params_struct, true,2,true,lS)
+								if isa(first(Xcl_covariates[j,p,t]),Real)
+									# Xo = @view Xcl_covariates_red[aux_idxs,p]
+									# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
+									# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
+									copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
+									copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
+									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
+									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
+									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xo, cv_params, Rs[p,t], true,1,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xn, cv_params, Rs[p,t], true,2,true,lS)
+									# covariate_similarity!(covariate_similarity_idx, Xo, cv_params_struct, true,1,true,lS)
+									# covariate_similarity!(covariate_similarity_idx, Xn, cv_params_struct, true,2,true,lS)
+								else
+									copy!(Xo_cat, @view Xcl_covariates_red[aux_idxs,p])
+									copy!(Xn_cat, Xo_cat); push!(Xn_cat,Xcl_covariates[j,p,t])
+									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
+									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
+									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
+									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xo_cat, cv_params, Rs[p,t], true,1,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xn_cat, cv_params, Rs[p,t], true,2,true,lS)
+								end
 							end
 						end
 						# end # of the @timeit for sPPM
@@ -719,7 +753,7 @@ function MCMC_fit(;
 						# lS .= 0.
 						for p in 1:p_cl
 							# lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
-							covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params, true, 2,true,lS)
+							covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params, Rs[p,t], true, 2,true,lS)
 							# covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params_struct, true, 2,true,lS)
 						end
 					end
@@ -795,7 +829,7 @@ function MCMC_fit(;
 
 			# end # of the @timeit for gamma
 			############# update rho #############
-			# printlgln("############# update rho #############\n")
+			# println("############# update rho #############\n")
 			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
 			# movable_units = findall(j -> gamma_iter[j,t]==0, 1:n) # slow
@@ -912,12 +946,11 @@ function MCMC_fit(;
 							if cl_xPPM
 								# debug(@showd cv_idxs)
 								for p in 1:p_cl
-									# debug(@showd p)
 									Xn_view = @view Xcl_covariates[aux_idxs,p,t]
 									# debug(@showd Xn)
 									# debug(@showd kk lPP)
 									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
+									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP)
 									# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
 								end
 							end
@@ -1004,7 +1037,7 @@ function MCMC_fit(;
 							for p in 1:p_cl
 								Xn_view = @view Xcl_covariates[aux_idxs,p,t]
 								# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, true,1,true,lPP)
+								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP)
 								# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
 							end
 						end
@@ -1296,7 +1329,7 @@ function MCMC_fit(;
 			a_star_tau = tau2_priors[1] + kt/2
 			b_star_tau = tau2_priors[2] + aux1/2
 			tau2_iter[t] = rand(InverseGamma(a_star_tau, b_star_tau))
-			# tau2_iter[t] = rand(truncated(InverseGamma(a_star_tau, b_star_tau),0,20))
+			# tau2_iter[t] = rand(truncated(InverseGamma(a_star_tau, b_star_tau),0,10))
 			# end # of the @timeit for tau2
 
 		end # for t in 1:T
@@ -1453,7 +1486,7 @@ function MCMC_fit(;
 		a_star_lambda2 = lambda2_priors[1] + T/2
 		b_star_lambda2 = lambda2_priors[2] + ((theta_iter[1] - phi0_iter)^2 + aux1) / 2
 		lambda2_iter = rand(InverseGamma(a_star_lambda2,b_star_lambda2))	
-		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,a_star_lambda2),0,20))	
+		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,a_star_lambda2),0,10))	
 
 		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############

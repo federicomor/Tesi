@@ -776,11 +776,11 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 		
 		# theme_classic()
 		theme_bw()+
-		xlab("clusters")+
+		xlab("")+
 		# ylab("log(PM10) values")+
 		# ylab(covariata)+
 		ylab("")+
-		ylim(c(min(df_wsc[,covariata]),max(df_wsc[,covariata])))+
+		ylim(c(min(df_wsc[df_wsc$Time<=times[12],covariata]),max(df_wsc[df_wsc$Time<=times[12],covariata])))+
 		# xlim(extrema(ycurrent)+c(-pad,pad))+
 		# scale_fill_identity(guide="legend",labels=paste0("cl",1:max(clust_vals)),
 		# breaks=cols[1:max(clust_vals)])+

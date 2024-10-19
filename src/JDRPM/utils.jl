@@ -842,32 +842,44 @@ end
 
 ##### Gower similarity
 function gower_d(x1::Real, x2::Real, R::Real) # numerical case
-	x1==x2 && return 1
-	return 1-abs(x1-x2)/R
+	# println("numerical fun")
+	# x1==x2 && return 1
+	# @show x1 x2 R 1-abs(x1-x2)/R
+	return abs(x1-x2)/R
+	# 0 if equal, 1 if different
 end
 function gower_d(x1::String, x2::String, R::Real) # categorical case
+	# println("string fun")
 	# R is fictitious here, just to allow the same function call later
-	return Int(x1 == x2)
-	# 1 if equal, 0 if different
+	return Int(x1 != x2)
+	# 0 if equal, 1 if different
 end
 
 ##### Total Gower dissimilarity - paper 6 pag 4
-function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
+function similarity2(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real,  R::Real, lg::Bool)::Float64
 	H = 0.0
-	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
+	# isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
 	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
+	# Sij = zeros(round(Int,n_j*(n_j-1)/2))
+	# Sij_idx = 1
 	for l in 1:(n_j-1)
 		for k in (l+1):n_j
+			# @show l k H
+			# @show gower_d(X_jt[l], X_jt[k], R)
 			H += gower_d(X_jt[l], X_jt[k], R)
+			# Sij[Sij_idx] = gower_d(X_jt[l], X_jt[k], R)
+			# Sij_idx +=1
 		end
 	end 
 	out = -alpha * H
+	# out = -alpha * mean(Sij)
+	# @show H out Sij
 	return lg ? out : exp(out)
 end
-function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, R::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	H = 0.0
-	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
+	# isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
 	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
@@ -885,22 +897,23 @@ function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}
 end
 
 ##### Average Gower dissimilarity - paper 6 pag 4
-function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool)::Float64
+function similarity3(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, R::Real, lg::Bool)::Float64
 	H = 0.0
-	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
+	# isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
 	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
 		for k in (l+1):n_j
+			# @show gower_d(X_jt[l], X_jt[k], R)
 			H += gower_d(X_jt[l], X_jt[k], R)
 		end
 	end 
 	out = -2*alpha / (n_j*(n_j-1)) * H
 	return lg ? out : exp(out)
 end
-function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function similarity3!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}, alpha::Real, R::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	H = 0.0
-	isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
+	# isa(first(X_jt),Real) ? R = maximum(X_jt) - minimum(X_jt) : R=0.0
 	n_j = length(X_jt)
 	n_j == 1 && return lg ? -alpha*H : exp(-alpha*H)
 	for l in 1:(n_j-1)
@@ -986,36 +999,36 @@ end
 # sim5 removed, double dippery is too much
 
 # numerical covariates specialization
-function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool)
+function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, R::Real, lg::Bool)
 	# println("numerical")
 	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
-	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
-	idx==3 && return similarity3(X_jt,cv_params[1],lg) 
+	idx==2 && return similarity2(X_jt,cv_params[1],cv_params[2],lg) 
+	idx==3 && return similarity3(X_jt,cv_params[1],cv_params[2],lg) 
 	idx==4 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg) 
 end
 # categorical covariates specialization
-function covariate_similarity(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool)
+function covariate_similarity(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, R::Real, lg::Bool)
 	# println("categorical")
 	idx==1 && return similarity1(X_jt,cv_params[1],lg) 
-	idx==2 && return similarity2(X_jt,cv_params[1],lg) 
-	idx==3 && return similarity3(X_jt,cv_params[1],lg) 
+	idx==2 && return similarity2(X_jt,cv_params[1],0,lg) 
+	idx==3 && return similarity3(X_jt,cv_params[1],0,lg) 
 end
 
 
 # numerical covariates specialization
-function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, R::Real, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	# println("numerical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
-	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
-	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params[1],cv_params[2],lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params[1],cv_params[2],lg,case,add,lS); return; end
 	if idx==4 similarity4!(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg,case,add,lS); return; end
 end
 # categorical covariates specialization
-function covariate_similarity!(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
+function covariate_similarity!(idx::Real, X_jt::AbstractVector{String}, cv_params::Vector, R::Real, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)))
 	# println("categorical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS); return; end
-	if idx==2 similarity2!(X_jt,cv_params[1],lg,case,add,lS); return; end
-	if idx==3 similarity3!(X_jt,cv_params[1],lg,case,add,lS); return; end
+	if idx==2 similarity2!(X_jt,cv_params[1],0,lg,case,add,lS); return; end
+	if idx==3 similarity3!(X_jt,cv_params[1],0,lg,case,add,lS); return; end
 end
 
 # # numerical covariates specialization
