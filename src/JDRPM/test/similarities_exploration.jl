@@ -370,6 +370,7 @@ savefig(p,"similarity_sorted_test.pdf")
 
 begin
 lg = false
+# lg = true
 alphas = range(0, 2.0, length=1000)
 similarity1_vals_cl1 = [similarity1(X_cl1, alpha, lg) for alpha in alphas]
 similarity1_vals_cl2 = [similarity1(X_cl2, alpha, lg) for alpha in alphas]
@@ -421,13 +422,9 @@ similarity4(myX2,1,5,2,2,true)
 
 
 
-
-
-
-
 begin
 lg = true
-alphas = range(0, 1.0, length=1000)
+alphas = range(0, 3.0, length=1000)
 R = maximum(alts)-minimum(alts)
 similarity2_vals_cl1 = [similarity2(X_cl1, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl2 = [similarity2(X_cl2, alpha, R, lg) for alpha in alphas]
@@ -470,23 +467,25 @@ end
 begin
 lg = true
 mu = 0; lambda = 1; 
-a_c = 1
-b_c = 1
-lambdas = range(0, 8, length=1000)
+a_c = 2
+b_c = 3
+cv_weight = 2.5
+print(quantile.(InverseGamma(a_c,b_c),[0.1 0.9]))
+lambdas = range(0, 10, length=1000)
 # acs = range(0.1, 3.0, length=1000)
-similarity4_vals_cl1 = [similarity4(X_cl1, mu, lambda, a_c, b_c, lg)
+similarity4_vals_cl1 = [similarity4(X_cl1, mu, lambda, a_c, b_c, lg, cv_weight)
 for lambda in lambdas]
 # for b_c in acs]
 # for b_c in acs]
-similarity4_vals_cl2 = [similarity4(X_cl2, mu, lambda, a_c, b_c, lg)
+similarity4_vals_cl2 = [similarity4(X_cl2, mu, lambda, a_c, b_c, lg, cv_weight)
 for lambda in lambdas]
 # for b_c in acs]
 # for b_c in acs]
-similarity4_vals_cl3 = [similarity4(X_cl3, mu, lambda, a_c, b_c, lg)
+similarity4_vals_cl3 = [similarity4(X_cl3, mu, lambda, a_c, b_c, lg, cv_weight)
 for lambda in lambdas]
 # for b_c in acs]
 # for b_c in acs]
-similarity4_vals_cl4 = [similarity4(X_cl4, mu, lambda, a_c, b_c, lg)
+similarity4_vals_cl4 = [similarity4(X_cl4, mu, lambda, a_c, b_c, lg, cv_weight)
 for lambda in lambdas]
 # for b_c in acs]
 # for b_c in acs]
@@ -518,14 +517,16 @@ end
 
 
 
+
+
+
+
+
+
 #### categorical - sims: 123
 #### precipitation type
 Xj_cat_nums = vec([5 1 1 1 1 1 0 1 1 0 0 1 0 0 1 0 1 0 5 5 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 0 5 0 1 5 1 1 1 1 1 1 1 0 1 1 0 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1])
 Xj_cat = vec(string.([5 1 1 1 1 1 0 1 1 0 0 1 0 0 1 0 1 0 5 5 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 0 5 0 1 5 1 1 1 1 1 1 1 0 1 1 0 1 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1]))
-
-
-
-
 
 
 #### wind direction
@@ -550,9 +551,6 @@ scatter(1:length(Xj_cat), vec(Xj_num), marker=:o, c = color_labels, legend = fal
 		markerstrokewidth=0)
 # Add category labels on the y-axis
 yticks!(1:7, ["N", "S", "E", "W", "SE", "SW", "NW"])
-
-
-
 
 
 

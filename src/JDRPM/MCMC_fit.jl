@@ -53,6 +53,7 @@ function MCMC_fit(;
 	sp_params = missing,                  # Parameters for spatial cohesion functions
 	covariate_similarity_idx = missing,   # similarity choice
 	cv_params = missing,                  # Parameters for covariates similarity functions
+	cv_weight = 1.0,                      # factor to which scale the covariate similarity values
 
 	draws::Real,                          # Number of MCMC draws
 	burnin::Real,                         # Number of burn-in
@@ -275,6 +276,7 @@ function MCMC_fit(;
 		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
 		println("lambda2 ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
 		println("alpha ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
+		# if sPPM println(sp_params_struct) end
 		println()
 	end
 	# if verbose
@@ -295,10 +297,10 @@ function MCMC_fit(;
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end\n")
 	println("on n=$n subjects\nfor T=$T time instants\n")
-	println(sPPM ? "[✓]" : "[✗]", " with space? $sPPM")
+	println(sPPM ? "[✓]" : "[✗]", " with space? $sPPM", sPPM ? "(cohesion $spatial_cohesion_idx)" : "")
 	# if sPPM println("- params: ", sp_params_real) end
 	println(lk_xPPM ? "[✓]" : "[✗]", " with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
-	println(cl_xPPM ? "[✓]" : "[✗]", " with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl)" : "")
+	println(cl_xPPM ? "[✓]" : "[✗]", " with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl, sim $covariate_similarity_idx)" : "")
 	# if cl_xPPM println("- params: ", cv_params) end
 	println(Y_has_NA ? "[✓]" : "[✗]", " are there missing data in Y? $Y_has_NA")
 	println()
@@ -712,8 +714,8 @@ function MCMC_fit(;
 									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
 									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
-									covariate_similarity!(covariate_similarity_idx, Xo, cv_params, Rs[p,t], true,1,true,lS)
-									covariate_similarity!(covariate_similarity_idx, Xn, cv_params, Rs[p,t], true,2,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xo, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
+									covariate_similarity!(covariate_similarity_idx, Xn, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 									# covariate_similarity!(covariate_similarity_idx, Xo, cv_params_struct, true,1,true,lS)
 									# covariate_similarity!(covariate_similarity_idx, Xn, cv_params_struct, true,2,true,lS)
 								else
@@ -723,8 +725,8 @@ function MCMC_fit(;
 									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
 									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
-									covariate_similarity!(covariate_similarity_idx, Xo_cat, cv_params, Rs[p,t], true,1,true,lS)
-									covariate_similarity!(covariate_similarity_idx, Xn_cat, cv_params, Rs[p,t], true,2,true,lS)
+									covariate_similarity!(covariate_similarity_idx, Xo_cat, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
+									covariate_similarity!(covariate_similarity_idx, Xn_cat, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 								end
 							end
 						end
@@ -753,7 +755,7 @@ function MCMC_fit(;
 						# lS .= 0.
 						for p in 1:p_cl
 							# lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
-							covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params, Rs[p,t], true, 2,true,lS)
+							covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params, Rs[p,t], true, 2,true,lS,cv_weight)
 							# covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params_struct, true, 2,true,lS)
 						end
 					end
@@ -950,7 +952,7 @@ function MCMC_fit(;
 									# debug(@showd Xn)
 									# debug(@showd kk lPP)
 									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP)
+									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP,cv_weight)
 									# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
 								end
 							end
@@ -1037,7 +1039,7 @@ function MCMC_fit(;
 							for p in 1:p_cl
 								Xn_view = @view Xcl_covariates[aux_idxs,p,t]
 								# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP)
+								covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP,cv_weight)
 								# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
 							end
 						end

@@ -1164,6 +1164,44 @@ for(i in 1:N){
 }
 if (save_plots==TRUE) { dev.off() }
 ```
+# see simple map
+the simple one
+```{r}
+# folder = "spaceC/"
+# name = "CDRPM - target + space"
+# partition = partitions_drpmc
+
+# folder = "spaceJ/"
+# name = "JDRPM - target + space"
+# partition = partitions_drpmj
+
+save_plot = T
+
+if (save_plot==TRUE) {pdf(file=paste0(folder,"fit",name,"_simple_map.pdf"),
+						  height =7, width = 9)}
+par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
+for(t in 1:Tm){
+	
+	partition_matrix <- do.call(cbind, partition)
+	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
+		 xlim=extrema(s_std[,1]),main=paste("time",t),
+		 ylim=extrema(s_std[,2]),
+		 # cex=((y[1,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+		 # cex=y[1,t]+abs(min(y[,t])))
+		  cex=1.2)
+	for (i in 1:N){
+		points(s_std[i,1],s_std[i,2],col=partition_matrix[i,t],pch=19,
+			   # cex=((y[i,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+			   # cex=y[i,t]+abs(min(y[,t])))
+			    cex=1.2)
+	}
+}
+# [1] "#070707" "#2E1831" "#402E56" "#404B7B" "#036D9B" "#0092B2" "#00AFB2" "#60C8B6"
+ # [9] "#A8DFC5" "#E0F7E1"
+mtext(name,side=3,line=0,outer=T,col="#2E1831")
+if (save_plot==TRUE) {dev.off()}
+```
+
 
 
 ```{r}
@@ -1191,7 +1229,7 @@ for(t in 1:Tm){
 
 
 
-# compute mse
+# see mse
 ```{r}
 yredORIGI=y
 MSE_matrices = function(m1,m2){
@@ -1225,58 +1263,12 @@ for(j in 1:N){
 cat("J MSE\n")
 cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
 cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
+
+
 ```
 
 
-# covariate effect (if any)
-```{r}
-#########################################
-titleJ = "model J - considering Altitude when clustering"
-# titleJ = "model J - ignoring covariates when clustering"
-partition = partitions_drpmj
-# titleJ = "model C"
-# partition = partitions_drpmc
-#########################################
 
-
-# pdf(paste0("../../tmp_images/",titleJ,".pdf"),width = 8, height = 5)
-# png(paste0("../../tmp_images/",titleJ,".png"), width = 500, height = 300,units = "px")
-par(mar=c(4,4,2,1))
-for (time in 1:Tm){
-maxk = 5
-##### if fitted with Xcl
-# mean(X_cl[which(partition[[time]]==1),,1])
-# mean(X_cl[which(partition[[time]]==2),,1])
-# mean(X_cl[which(partition[[time]]==3),,1])
-# plot(X_cl[,,1],pch=19,col=partition[[time]],
-# 	 main=paste0("time=",time," - ",titleJ),xlab="units",ylab="Altitude")
-
-		# Set3	    12
-		# Paired    12
-		# Pastel1   9
-		# Set1	    9
-		# Accent    8
-		# Dark2     8
-		# Pastel2   8
-		# Set2	    8
-cols = cols_copy = colora(maxk,"div",seed_div = "Set2",show = 0)
-# cols = cols_copy = colora(maxk,80,show=0)
-cols[1] = cols_copy[2]
-cols[2] = cols_copy[1]
-##### otherwise
-cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],"Altitude"])
-plot(cova_of_interest[,1],
-	col=cols[partition[[time]]],
-	# col=partition[[time]],
-	pch=19,
-	# cex=pmax(y[, time]*4, rep(0.7, N)),
-	main=paste0("time=",time," - ",titleJ,"#cl=",length(unique(partition[[time]]))),
-				xlab="units",ylab="Altitude"
-	)
-
-# dev.off()
-}
-```
 
 
 #-------------
@@ -1303,7 +1295,7 @@ for (time in 1:Tm){
 ```
 
 
-## PM10 plots
+## PM10 plots load
 ```{r warning=FALSE}
 setwd("../src/")
 # preparation
@@ -1378,14 +1370,11 @@ time_span = 1:Tm
 ```
 
 
-## plot j
+## see pm10 plots
 ```{r,warning=F}
 ##########################
-# model_name = "model C"
-# partition = partitions_drpmc
-model_name = "model J6"
-partition = partitions_drpmj
-limt = 2
+model_name = name
+limt = 12
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
 for(time in time_span[1:limt]){
@@ -1452,9 +1441,9 @@ for(time in time_span[1:limt]){
 	# print(plx)
 		
 	cur_num = sprintf("%02d", time)
-	ggsave(file=paste0("./tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
-	plot=p, units="px",width=2500, height=1200, dpi=300)
-	dev.off()
+	# ggsave(file=paste0("./tmp_images/",model_name,"-Graph and Boxplot-",cur_num,".png"),
+	# plot=p, units="px",width=2500, height=1200, dpi=300)
+	# dev.off()
 	
 	clusters_old = clusters_now
 }
@@ -1502,15 +1491,199 @@ dev.off()
 ```
 
 
-# final plot j
+
+# ===========
+# FINAL PLOTS save
+
+# models
+```{r,warning=F}
+folder = "spaceC/"
+name = "CDRPM target + space"
+# load("../1 Assessing correctness and NA/df wsc fits/space_drpm1_run6.Rdata")
+load("../1 Assessing correctness and NA/df wsc fits/space_drpm1_run5.Rdata")
+partition = partitions_drpmc = generate_partition(drpm1, loss ="binder",maxcl = 0)
+MODEL = drpm1
+```
+
+```{r,warning=F}
+folder = "spaceJ/"
+name = "JDRPM target + space"
+load("../1 Assessing correctness and NA/df wsc fits/space_rout_full_run6_dfweekly.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+# plots
 ```{r}
+save_plot = save_plots = T
+
+cat(name,"\n")
+cat("LPML: ",drpm1$lpml,"\n")
+cat("WAIC: ",drpm1$waic,"\n")
+
+
+############################################## ARI
+if (save_plot==T){
+	pdf(file=paste0(folder,"ari",name,".pdf"),width=6,height = 5)
+}
+# par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
+par(mar=c(2,2,2,2),oma=c(0.1,0.1,0.1,0.1))
+plot_ARI(partition, title=name)
+if (save_plot==T){ dev.off()}
+
+
+############################################## SIMPLE FULL MAP
+if (save_plot==TRUE) {pdf(file=paste0(folder,"fit",name,"_simple_map.pdf"),
+						  height =7, width = 9)}
+par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
+for(t in 1:Tm){
+	
+	partition_matrix <- do.call(cbind, partition)
+	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
+		 xlim=extrema(s_std[,1]),main=paste("time",t),
+		 ylim=extrema(s_std[,2]),
+		 # cex=((y[1,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+		 # cex=y[1,t]+abs(min(y[,t])))
+		  cex=1.2)
+	for (i in 1:N){
+		points(s_std[i,1],s_std[i,2],col=partition_matrix[i,t],pch=19,
+			   # cex=((y[i,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+			   # cex=y[i,t]+abs(min(y[,t])))
+			    cex=1.2)
+	}
+}
+# [1] "#070707" "#2E1831" "#402E56" "#404B7B" "#036D9B" "#0092B2" "#00AFB2" "#60C8B6"
+ # [9] "#A8DFC5" "#E0F7E1"
+mtext(name,side=3,line=0,outer=T,col="#2E1831")
+if (save_plot==TRUE) {dev.off()}
+
+
+
+############################################## FITTED VALUES
+yredJ=t(MODEL$fitted[,,size(MODEL$fitted)[3]])
+if (save_plots==TRUE) { 
+	pdf(file=paste0(folder,"fitted_values",name,".pdf"),height = 6,width=11)
+}
+summary_fitted = t(MODEL$fitted[,,size(MODEL$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		summary_fitted[j,t] = mean(MODEL$fitted[t,j,])
+	}
+}
+yred=summary_fitted
+par(mar=c(2,2,2,1))
+cols = colora(N,56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredJ,y),type='l',xlab='',ylab="",
+     	 # main="J fitted values - last iteration")
+     	 main=paste0(name, " - fitted values - iterations mean"))
+     	 # main="J fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off() }
+
+
+
+####################################################### MSE
+yredORIGI=y
+MSE_matrices = function(m1,m2){
+	MSE = 0
+	for (i in 1:size(m1)[1]){
+		for (t in 1:size(m1)[2]){
+			MSE = MSE + (m1[i,t]-m2[i,t])^2
+		}
+	}
+	MSE = MSE/(size(m1)[1]*size(m1)[2])
+	return(MSE)
+}
+summary_fitted_mean = t(MODEL$fitted[,,size(MODEL$fitted)[3]])*0
+summary_fitted_median = t(MODEL$fitted[,,size(MODEL$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		summary_fitted_mean[j,t] = mean(MODEL$fitted[t,j,])
+		summary_fitted_median[j,t] = median(MODEL$fitted[t,j,])
+	}
+}
+cat(name,"\n")
+cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
+cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
+```
+
+## covariate
+```{r,warning=F}
+########################################## COVARIATES EFFECTS
+covariate_scelte = c(
+	"Altitude"
+	,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	,"WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	)
+
+for (target in covariate_scelte){
+	dir.create(paste0(folder,target))
+for (time in 1:Tm){
+##### otherwise
+if (save_plot==T) {
+	pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+}
+par(mar=c(2,4,2,1),oma=c(0.1,0.1,0.1,0.1))
+
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])
+plot(cova_of_interest[,1],
+	col=partition[[time]],
+	# col=partition[[time]],
+	pch=19,
+	cex=1.3,
+	# cex=pmax(y[, time]*4, rep(0.7, N)),
+	main=paste0(name, " - time ", time),
+				xlab="",ylab=target
+	)
+
+if (save_plots==TRUE) { dev.off() }
+}
+}
+
+```
+
+## pm10
+```{r,warning=F}
+############################################# PM10 layout 1
 library(gridExtra)
-##########################
-save_plot = F
-folder = "./spaceJ/"
-model_name = "model J"
-partition = partitions_drpmj
-limt = 2
+save_plot = T
+model_name = name
+limt = 12
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
 for(time in time_span[1:limt]){
@@ -1522,10 +1695,6 @@ for(time in time_span[1:limt]){
 		Latitude = sites$latitude,
 		clusters = salso_out[1:105]
 	)
-	
-	# idxs = which(is.na(df_temp$clusters))
-	# replace(df_temp$clusters, idxs, 3)
-	# df_temp$clusters[idxs] = max(na.omit(df_temp$clusters))+1
 	
 	df_temp$Time = rep(time,dim(df_temp)[1])
 	df_cluster = rbind(df_cluster,df_temp)
@@ -1582,7 +1751,8 @@ g <- arrangeGrob(
                         c(1, 4, 5)))
 
 if (save_plot==TRUE){
-ggsave(file=paste0(folder,model_name,"_t",cur_num,".pdf"),plot = g,
+	dir.create(paste0(folder,"layout_small"))
+ggsave(file=paste0(folder,"layout_small/",model_name,"_t",cur_num,".pdf"),plot = g,
 	   # units="px",width=2500, height=1200, dpi=300)
 	   # units="px",width=4500, height=2000, dpi=300)
 	   units="px",width=3600, height=1500, dpi=300)
@@ -1596,55 +1766,88 @@ dev.off()
 }
 ```
 
+## pm10 large
+```{r,warning=F}
+clusters_old = NULL
+for(time in time_span[1:limt]){
+	cat(crayon::red("Time",time,"of",Tm,"\n"))
+	
+	df_cluster_cut = df_cluster[df_cluster$Time==time,]
+	clusters_now = df_cluster_cut$clusters
+	####### no mode correct now
+	# clusters_now = mode_correct_clusters(clusters_old,clusters_now,very_verbose = 0)
+	# se fai heat plot non serve fare la mode correct
+	# perché la heat plot la usi per vedere anche i valori di pm10, non la coerenza temporale
+	# nei gruppi, che con la heat coloration si perde come visibilità (non so se è chiaro)
+	df_cluster_cut$clusters = clusters_now
+	
+	# meglio l'idea 1
+	cols = color_correct_clusters(df_cluster_cut,idea=1,verbose=0)
+	
+	cur_num = sprintf("%02d", time)
 
-# another layout
-```{r}
 plot1 <- get_graph_plot(df_cluster_cut,cols,titolo=paste0(model_name," - time ",time))
 
 covariata = "AQ_pm10"
 plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-covariata = "Altitude"
+covariata = "WE_wind_speed_10m_max"
 plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-covariata = "LA_lvi"
+covariata = "WE_tot_precipitation"
 plot4 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-covariata = "WE_tot_precipitation" # or
-# covariata = "WE_blh_layer_max"
+covariata = "WE_blh_layer_max"
 plot5 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-# covariata = "WE_tot_precipitation" # or
-covariata = "WE_blh_layer_max"
+covariata = "EM_nh3_sum"
 plot6 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
+covariata = "Altitude"
+plot7 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+# g <- arrangeGrob(
+# 	plot1, plot2, plot3, plot4, plot5,
+# 			   widths = c(2, 1, 1),
+#   layout_matrix = rbind(c(1, 2, 3),
+#                         c(1, 4, 5)))
 
 g <- arrangeGrob(
-	plot1, plot2, plot3, plot4, plot5,plot6,
-				widths = c(1,1,1,1),
-			    heights = c(1,1,1.3),
-  layout_matrix = rbind(c(1, 1, 1, 2),
-  					    c(1, 1, 1, 2),
-                        c(3, 4, 5, 6)))
+	plot1, plot2, plot3, plot4, plot5, plot6, plot7,
+			   # widths = c(1, 1, 1, 1),
+			  heights = c(1, 1, 1.8, 1.8),
+  # layout_matrix = rbind(c(1, 1, 2, 2),
+                        # c(1, 1, 2, 2),
+                        # c(3, 4, 5, 6) 
+  layout_matrix = rbind(c(1, 1, 1, 1, 1, 2, 2, 2),
+                        c(1, 1, 1, 1, 1, 2, 2, 2),
+                        c(1, 1, 1, 1, 1, 7, 7, 7),
+                        c(3, 3, 4, 4, 5, 5, 6, 6)
+  					  ))
 
-ggsave(file=paste0(folder,"test",".pdf"),plot = g,
+if (save_plot==TRUE){
+	dir.create(paste0(folder,"layout_large"))
+
+ggsave(file=paste0(folder,"layout_large/",model_name,"_t",cur_num,".pdf"),plot = g,
 	   # units="px",width=2500, height=1200, dpi=300)
 	   # units="px",width=4500, height=2000, dpi=300)
-	   units="px",width=2900, height=2500, dpi=300)
+	   # units="px",width=3600, height=1500, dpi=300)
+	   # units="px",width=3000, height=2400, dpi=300)
+	   units="px",width=3300, height=2600, dpi=300)
+	   # units="px",width=2880, height=1200, dpi=300)
 dev.off()
-
+} else {
+	print(g)
+}
+	clusters_old = clusters_now
+}
 ```
-
-
-
-
-
-
 
 
 

@@ -1615,7 +1615,7 @@ yred=y
 
 save_plot=T
 folder = "./all_covariates_trend/"
-if (save_plot==T) { pdf(file=paste0(folder,target,".pdf"),width = 7,height = 4)}
+if (save_plot==T) { pdf(file=paste0(folder,target,".pdf"),height = 6,width = 11)}
 par(mar=c(2,2,2,1))
 col_idx = 1
 for(i in ranked_indices){
@@ -1956,6 +1956,12 @@ head(X_lk)
 ```
 
 
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM$trigger_compilation()
+```
+
+
 ## drpm J
 ```{r}
 a_sigma  = 0.01; b_sigma = 0.01
@@ -1995,8 +2001,10 @@ out = module_JDRPM$MCMC_fit(
 	alpha_priors = c(a_alpha,b_alpha),  
 	
 	######## space
-	spatial_cohesion_idx = spatial_cohesion,
-	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = spatial_cohesion,
+	# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	spatial_cohesion_idx = 1,
+	sp_params = list(0.60),
 	
 	######## likelihood covariates
 	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
@@ -2063,7 +2071,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # getwd()
 # load(file="space_drpm1_run2.Rdata")
-save(rout,file="space_rout_full_run6_dfweekly_backup.Rdata")
+save(rout,file="space_rout_full_run6_dfweekly_spcohes1.Rdata")
 # save(rout,file="space_rout_full_run5_dfdaily.Rdata")
 ```
 
@@ -2092,7 +2100,7 @@ cat("waic = ",rout$waic,"\n")
 
 # LOAD models
 ```{r}
-load("./df wsc fits/space_drpm1_run5.Rdata")
+load("./df wsc fits/space_drpm1_run6.Rdata")
 # load("./df wsc fits/space_rout_full_run4_dfweekly.Rdata")
 
 # load("./df daily fits/space_drpm1_run2.Rdata")
@@ -2495,7 +2503,7 @@ for(i in 1:N){
 
 ```{r}
 # load("df wsc fits/space_drpm1_run1.Rdata")
-load("df wsc fits/space_drpm1_run5.Rdata") # final choice since really same model
+load("df wsc fits/space_drpm1_run6.Rdata") # final choice since really same model
 
 # load("df wsc fits/space_rout_full_run1_dfweekly.Rdata") # bad
 # load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
@@ -2584,7 +2592,7 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) {
 	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
@@ -2715,7 +2723,7 @@ cols = colora(N,56,0)
 # cols = colora(N,"div",seed_div = "Paired",show = 0)
 cexs = 0.7
 
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=11)
@@ -2819,11 +2827,12 @@ for(t in 1:Tm){
 the simple one
 ```{r}
 folder = "spaceC/"
-name = "CDRPM - target + space"
-partition = partitions_drpmc
+name = "CDRPM target + space"
+load("./df wsc fits/space_drpm1_run6.Rdata")
+partition = partitions_drpmc = generate_partition(drpm1, loss ="binder",maxcl = 0)
 
 # folder = "spaceJ/"
-# name = "JDRPM - target + space"
+# name = "JDRPM target + space"
 # partition = partitions_drpmj
 
 save_plot = T
@@ -3373,7 +3382,7 @@ dev.off()
 ```{r}
 library(gridExtra)
 ##########################
-model_name = "CDRPM - target + space"
+model_name = "CDRPM target + space"
 partition = partitions_drpmc
 folder = "./spaceC/"
 # 
@@ -3381,7 +3390,7 @@ folder = "./spaceC/"
 # partition = partitions_drpmj
 # folder = "./spaceJ/"
 
-limt = 12
+limt = 2
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
 for(time in time_span[1:limt]){
@@ -3432,30 +3441,51 @@ covariata = "AQ_pm10"
 plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-covariata = "Altitude"
+covariata = "WE_wind_speed_10m_max"
 plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-# covariata = "LA_lvi"
 covariata = "WE_tot_precipitation"
 plot4 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-# covariata = "WE_tot_precipitation"
 covariata = "WE_blh_layer_max"
 plot5 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
+covariata = "EM_nh3_sum"
+plot6 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+covariata = "Altitude"
+plot7 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
+covariata = covariata,annotate = F)
+
+# g <- arrangeGrob(
+# 	plot1, plot2, plot3, plot4, plot5,
+# 			   widths = c(2, 1, 1),
+#   layout_matrix = rbind(c(1, 2, 3),
+#                         c(1, 4, 5)))
+
 g <- arrangeGrob(
-	plot1, plot2, plot3, plot4, plot5,
-				widths = c(2, 1, 1),
-  layout_matrix = rbind(c(1, 2, 3),
-                        c(1, 4, 5)))
+	plot1, plot2, plot3, plot4, plot5, plot6, plot7,
+			   # widths = c(1, 1, 1, 1),
+			  heights = c(1, 1, 1.8, 1.8),
+  # layout_matrix = rbind(c(1, 1, 2, 2),
+                        # c(1, 1, 2, 2),
+                        # c(3, 4, 5, 6) 
+  layout_matrix = rbind(c(1, 1, 1, 1, 1, 2, 2, 2),
+                        c(1, 1, 1, 1, 1, 2, 2, 2),
+                        c(1, 1, 1, 1, 1, 7, 7, 7),
+                        c(3, 3, 4, 4, 5, 5, 6, 6)
+  					  ))
 
 ggsave(file=paste0(folder,model_name,"_t",cur_num,".pdf"),plot = g,
 	   # units="px",width=2500, height=1200, dpi=300)
 	   # units="px",width=4500, height=2000, dpi=300)
-	   units="px",width=3600, height=1500, dpi=300)
+	   # units="px",width=3600, height=1500, dpi=300)
+	   # units="px",width=3000, height=2400, dpi=300)
+	   units="px",width=3300, height=2600, dpi=300)
 	   # units="px",width=2880, height=1200, dpi=300)
 dev.off()
 	
@@ -3785,9 +3815,9 @@ save(rout,file="../3 Covaraites effects/space_rout_NA_LK_ALT_ECC_dfweekly.Rdata"
 load("df wsc fits/space_rout_full_run6_dfweekly.Rdata")
 rout_FULL = rout
 # load("df wsc fits/space_rout_NA_run6_dfweekly.Rdata")
-# load("df wsc fits/space_rout_NA_run6e_dfweekly.Rdata")
+load("df wsc fits/space_rout_NA_run6e_dfweekly.Rdata")
 # load("space NA/space_rout_NA_LK_ALT_better_dfweekly.Rdata")
-load("../3 Covaraites effects/NA lk improvement/space_rout_NA_LK_ALT_ECC_dfweekly.Rdata")
+# load("../3 Covaraites effects/NA lk improvement/space_rout_NA_LK_ALT_ECC_dfweekly.Rdata")
 rout_NA = rout
 ```
 
@@ -3840,7 +3870,8 @@ save_plots=T
 
 #################################################################
 if (save_plots==TRUE) { 
-	pdf(file="J_mean_prediction_NApluslk.pdf",height = 6,width=11)
+	# pdf(file="J_mean_prediction_NApluslk.pdf",height = 5.7,width=11)
+	pdf(file="J_mean_prediction_NA.pdf",height = 5.7,width=11)
 	# pdf(file="J_median_prediction.pdf",height = 6,width=10)
 	# pdf(file="J_last_iteration.pdf",height = 6,width=10)
 }
@@ -3885,8 +3916,8 @@ for(i in 1:size(yred_NA)[1]){
      plot(1:size(yred_NA)[2],yred_NA[i,],col=cols[i],
      	 ylim=extrema(yredORIG,yred_FULL,yred_NA),type='l',xlab='',ylab="",
      	 # main="J fitted values - last iteration")
-     	 # main="J fitted values (NA data) - iterations mean")
-     	 main="J fitted values (NA data + lk covariates) - iterations mean")
+     	 main="J fitted values (NA data) - iterations mean")
+     	 # main="J fitted values (NA data + lk covariates) - iterations mean")
      	 # main="J fitted values - iterations median")
  	  } 
 	  else{
