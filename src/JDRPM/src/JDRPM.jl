@@ -36,6 +36,7 @@ include("../MCMC_fit.jl")
 # since all first call to something in julia are slower as they need to be compiled
 # then all subsequent runs will be faster 
 function trigger_compilation()
+	Random.seed!(1)
 	N = 4; T = 4
 	y = rand(N,T)
 	sp = rand(N,2)

@@ -36,7 +36,7 @@ juliaEval("using Pkg; Pkg.status()")
 
 module = normalizePath("../../JDRPM/src/JDRPM.jl")
 module_JDRPM <- juliaImport(juliaCall("include", module))
-
+ 
 module_JDRPM$trigger_compilation()
 ```
 
@@ -87,6 +87,7 @@ set.seed(110)
 # quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
 # quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
 nsubjects = 1:105
+# nsubjects = 1:10
 
 y = yfull[nsubjects,1+time_span]
 #############################################
@@ -143,6 +144,34 @@ plot(s_std)
 rownames(s_std) = NULL
 ```
 
+
+```{r}
+yred=y
+# unit_summary <- rowMeans(yred)
+unit_summary <- apply(yred, 1, median)
+# unit_summary <- yred[,1]
+
+cols = colora(105,111,0)
+ranked_indices <- order(unit_summary, decreasing=TRUE)
+
+par(mar=c(2,2,2,1))
+col_idx = 1
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+
+```
+
+
 ## othter interesting variables
 ```{r}
 sites_full = data.frame(
@@ -174,18 +203,17 @@ set.seed(110)
 # quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
 nsubjects = 1:105
 
-y = yfull[nsubjects,1+time_span]
+y_other = yfull[nsubjects,1+time_span]
 #############################################
 # authors suggested to/did scale the spatial locations and also centered the observations
 
-mn <- apply(y,2,mean)
-sd <- apply(y,2,sd)
+mn <- apply(y_other,2,mean)
+sd <- apply(y_other,2,sd)
 
-y <- t(t(y) - mn)
-# y <- t(t(y) - mn)+1 # shifted 1
+y_other <- t(t(y_other) - mn)
 
-Tm = tps <- ncol(y) # time span
-N = size(y)[1] # number of units
+Tm = tps <- ncol(y_other) # time span
+N = size(y_other)[1] # number of units
 num_units = N
 
 sites = sites_full[nsubjects,]
@@ -201,57 +229,31 @@ s_std <- t((t(sites) - smn)/ssd)
 ######################################
 
 # yred=(y[,time_span]+0.5)*2
-yred=y
+yred=y_other
 
+save_plot=F
+folder = "./all_covariates_trend/"
+if (save_plot==T) { pdf(file=paste0(folder,target,".pdf"),height = 6,width = 11)}
 par(mar=c(2,2,2,1))
-# par(mar=c(4,4,2,2))
-cols = colora(size(yred)[1],56,0)
-for(i in 1:size(yred)[1]){
-   if(i==1){
-     plot(1:size(yred)[2],yred[i,],col=cols[i],
+col_idx = 1
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
      	 # ylim=extrema(as.matrix(yred[,-c(1)])),
-     	 ylim=extrema(as.matrix(yred)),
-     	 main=target,
+     	 ylim=extrema(as.matrix(yred)),main=target,
      	 type='l',xlab='weeks',ylab='pm10')
  	  } 
 	  else{
-		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
 	  }
+	col_idx = col_idx+1
 }
-
+if (save_plot==T) {dev.off()}
 }
 }
 ```
 
 
-```{r}
-cols = colora(105,56,show=F)
-chosen_variable_name = "AQ_pm10"
-trendYearStation_week <- function(file_name){
-	data_from_to = df_wsc
-	len_time = 1
-	chosen_variable = (data_from_to[,chosen_variable_name])
-	# Crea il grafico ggplot
-	station_trend <- ggplot(data_from_to,aes(x = week, 
-												 y = AQ_pm10,
-												 group=IDStations, 
-												 color = as.factor(IDStations))) +
-		geom_line(show.legend = FALSE) +
-		labs(x = "Stations", y = chosen_variable_name,
-			 # title = bquote(PM[10] * " values - year 2018")) +
-			 title = "PM10 values - year 2018") +
-		ylim(range(na.omit(chosen_variable))) +
-		scale_color_manual(values = cols) +
-		theme_bw()+
-		theme(panel.grid = element_blank()) +
-		guides(color = guide_legend())+
-		labs(x="",y="")
-
-	len_time = (len_time%/%5)
-	return(trend_animator(file_name,station_trend, data_from_to$week,len_time))
-}
-trendYearStation_week("None")
-```
 
 
 ## Fits
@@ -361,13 +363,14 @@ n = dim(y)[1]
 
 # colnames(df_wsc)
 covariate_scelte = c(
-	"Altitude"
+	# "AQ_pm10",
+	# "Altitude"
 	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
-	# ,"WE_wind_speed_10m_max"
+	"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
-	# "WE_tot_precipitation"
-	# "WE_precipitation_t"
+	,"WE_tot_precipitation"
+	# ,"WE_precipitation_t"
 	# ,"WE_surface_pressure"
 	# ,"WE_solar_radiation"
 	# ,"WE_rh_min"
@@ -375,8 +378,8 @@ covariate_scelte = c(
 	# ,"WE_rh_max"
 	# ,"WE_wind_speed_100m_mean"
 	# ,"WE_wind_speed_100m_max"
-	# "WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
 	# ,"WE_blh_layer_min"
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
@@ -401,19 +404,79 @@ X_cl = array(data = 0, dim = c(n, p, Tm))
 dim(X_cl)
 cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
 
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			# X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-			X_cl[i,pp,t] = df_st[t,covariate_scelte[pp]][[1]]
-			# X_cl[i,pp,t] = as.character(df_st[t,covariate_scelte[pp]][[1]])
-		}
+
+for (pp in 1:p){
+	target = covariate_scelte[pp]
+	yfull=data.frame()
+	if (typeof(unique(df_wsc[,target][[1]])) != "character"){
+	for(st in stations[1:n]){
+		y_we_target=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+		yfull=rbind(yfull,y_we_target)
 	}
+	rownames(yfull) = NULL
+	colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+	
+	time_span = 1:12
+	nsubjects = 1:n
+	y_other = yfull[nsubjects,1+time_span]
+	mn <- apply(y_other,2,mean)
+	sd <- apply(y_other,2,sd)
+	y_other <- t(t(y_other) - mn) # timewise mean
+	# y_other <- t(t(y_other) - mean(y_other[[1]])) # global mean
+
+	for (t in 1:Tm){
+		X_cl[,pp,t] = y_other[,t]
+	}
+	}
+
 }
+
+## original variable case, i.e. centered wrt global mean actually
+# for(i in 1:n){
+# 	st = stations[i]
+# 	for(t in 1:Tm){
+# 		df_st = df_wsc[which(df_wsc$IDStations == st),]
+# 		for (pp in 1:p){
+# 			# X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+# 			X_cl[i,pp,t] = df_st[t,covariate_scelte[pp]][[1]]
+# 			# X_cl[i,pp,t] = as.character(df_st[t,covariate_scelte[pp]][[1]])
+# 		}
+# 	}
+# }
+
+
+titolo = "centered wrt time-wise mean"
+# titolo = "centered wrt global mean"
+# titolo = "original variable"
+
+for (pp in 1:p){
+yred=X_cl[,pp,]
+target = covariate_scelte[pp]
+save_plot=F
+folder = "./different means/"
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 6,width = 11)}
+par(mar=c(2,2,2,1))
+col_idx = 1
+# ranked_indices = c(1:n)
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 main=paste0(covariate_scelte[pp]," - ",titolo),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+if (save_plot==T) {dev.off()}
+}
+
 colnames(X_cl) = covariate_scelte
 head(X_cl)
+y
 ```
 
 
@@ -428,7 +491,7 @@ colnames(df_wsc)
 # perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
 covariate_scelte = c(
 	# "Altitude"
-	"WE_temp_2m"
+	# "WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
 	# ,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
@@ -467,15 +530,59 @@ X_lk = array(data = 0, dim = c(n, p, Tm))
 dim(X_lk)
 cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
 
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			X_lk[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-		}
+for (pp in 1:p){
+	target = covariate_scelte[pp]
+	yfull=data.frame()
+	if (typeof(unique(df_wsc[,target][[1]])) != "character"){
+	for(st in stations[1:n]){
+		y_we_target=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+		yfull=rbind(yfull,y_we_target)
 	}
+	rownames(yfull) = NULL
+	colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+	
+	time_span = 1:12
+	nsubjects = 1:n
+	y_other = yfull[nsubjects,1+time_span]
+	mn <- apply(y_other,2,mean)
+	sd <- apply(y_other,2,sd)
+	y_other <- t(t(y_other) - mn) # timewise mean
+	# y_other <- t(t(y_other) - mean(y_other[[1]])) # global mean
+
+	for (t in 1:Tm){
+		X_lk[,pp,t] = y_other[,t]
+	}
+	}
+
 }
+
+
+titolo = "centered wrt time-wise mean"
+for (pp in 1:p){
+yred=X_lk[,pp,]
+target = covariate_scelte[pp]
+save_plot=F
+folder = "./different means/"
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 6,width = 11)}
+par(mar=c(2,2,2,1))
+col_idx = 1
+# ranked_indices = c(1:n)
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 main=paste0(covariate_scelte[pp]," - ",titolo),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+if (save_plot==T) {dev.off()}
+}
+
 colnames(X_lk) = covariate_scelte
 head(X_lk)
 ```
@@ -506,7 +613,8 @@ out = module_JDRPM$MCMC_fit(
 	
 	include_eta1 = TRUE,                    
 	include_phi1 = T,
-	update_eta1 = update_eta1,                    
+	
+	update_eta1 = T, # the not so useful parameter
 	update_phi1 = T,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
@@ -529,8 +637,10 @@ out = module_JDRPM$MCMC_fit(
 	
 	######## clustering covariates
 	covariate_similarity_idx = 4,
-	cv_params = list(0,5,2,2),
+	cv_params = list(0,1,3,2),
 	Xcl_covariates = X_cl,
+	cv_weight = 0.2,
+
 	# covariate_similarity_idx = 1,
 	# cv_params = list(1),
 	# Xcl_covariates = X_cl,
@@ -540,13 +650,13 @@ out = module_JDRPM$MCMC_fit(
 	
 	# covariate_similarity_idx = NA,
 	draws = niter,burnin = nburn, thin = nthin,
-	# draws = 100,burnin = 20, thin = 4,
+	# draws = 100,burnin = 0, thin = 1,
 	# draws = 40000,burnin = 30000, thin = 5,
 	logging = F,
 	seed = 113.0,
 	simple_return = FALSE,
 	verbose = T,
-	perform_diagnostics = TRUE
+	perform_diagnostics = T
 )
 
 ```
@@ -590,7 +700,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 
 ```{r}
-save(rout,file="Jspace_CL_altitude_LK_nothing.Rdata")
+save(rout,file="J_space_run6_Xcl_sim4_alt_wsp10mmax_totprec_rhmean_bhlmax.Rdata")
 ```
 
 
@@ -619,7 +729,7 @@ cat("waic = ",rout$waic,"\n")
 # LOAD models
 ```{r}
 # just to have something in the C trace plots space
-load("../1 Assessing correctness and NA/df wsc fits/space_drpm1_run6.Rdata")
+load("../1 Assessing correctness and NA/df wsc fits/space_drpm1_run5.Rdata")
 ```
 
 
@@ -629,7 +739,7 @@ load("../1 Assessing correctness and NA/df wsc fits/space_drpm1_run6.Rdata")
 # y
 j = round(runif(1,1,N))
 t = round(runif(1,1,Tm))
-j = 101
+# j = 101
 # j =96
 # t = 4
 size(rout$fitted)
@@ -1175,8 +1285,16 @@ the simple one
 # name = "JDRPM - target + space"
 # partition = partitions_drpmj
 
-save_plot = T
+folder = "run 4 images/"
+name = "JDRPM target + space + Xcl (p=4)"
+partition = partitions_drpmj
+```
 
+
+```{r,warning=FALSE}
+save_plot = F
+
+dir.create(paste0("./",folder))
 if (save_plot==TRUE) {pdf(file=paste0(folder,"fit",name,"_simple_map.pdf"),
 						  height =7, width = 9)}
 par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
@@ -1200,31 +1318,6 @@ for(t in 1:Tm){
  # [9] "#A8DFC5" "#E0F7E1"
 mtext(name,side=3,line=0,outer=T,col="#2E1831")
 if (save_plot==TRUE) {dev.off()}
-```
-
-
-
-```{r}
-name = "model J"
-# pdf(file=paste0("fit",name,"_simple_map.pdf"),height =7, width = 9)
-par(mfrow=c(3,4),mar=c(2,2,3,1))
-for(t in 1:Tm){
-	partition = partitions_drpmj
-	partition_matrix <- do.call(cbind, partition)
-	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
-		 xlim=extrema(s_std[,1]),main=paste(name,"- time",t),
-		 ylim=extrema(s_std[,2]),
-		 # cex=((y[1,t]-mean(y[,t]))/sd(y[,t])+3)/2)
-		 # cex=y[1,t]+abs(min(y[,t])))
-		  cex=1.2)
-	for (i in 1:N){
-		points(s_std[i,1],s_std[i,2],col=partition_matrix[i,t],pch=19,
-			   # cex=((y[i,t]-mean(y[,t]))/sd(y[,t])+3)/2)
-			   # cex=y[i,t]+abs(min(y[,t])))
-			    cex=1.2)
-	}
-}
-# dev.off()
 ```
 
 
@@ -1268,8 +1361,68 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 ```
 
 
+# see covariate
+```{r,warning=F}
+save_plot = F
+########################################## COVARIATES EFFECTS
+# covariate_scelte = c(
+	# "Altitude"
+	# ,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	# ,"WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	# ,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# )
 
+for (target in covariate_scelte){
+	dir.create(paste0(folder,target))
+for (time in 1:Tm){
+##### otherwise
+if (save_plot==T) {
+	pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+}
+par(mar=c(2,4,2,1),oma=c(0.1,0.1,0.1,0.1))
 
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])
+plot(cova_of_interest[,1],
+	col=partition[[time]],
+	# col=partition[[time]],
+	pch=19,
+	cex=1.3,
+	# cex=pmax(y[, time]*4, rep(0.7, N)),
+	main=paste0(name, " - time ", time),
+				xlab="",ylab=target
+	)
+
+if (save_plots==TRUE) { dev.off() }
+}
+}
+```
 
 #-------------
 ## salso plots
@@ -1464,7 +1617,7 @@ partition = partitions_drpmj
 #########################################
 
 
-pdf(paste0("../../tmp_images/",titleJ,".pdf"),width = 8, height = 5)
+# pdf(paste0("../../tmp_images/",titleJ,".pdf"),width = 8, height = 5)
 # png(paste0("../../tmp_images/",titleJ,".png"), width = 500, height = 300,units = "px")
 par(mar=c(4,4,2,1))
 time=1
@@ -1476,7 +1629,6 @@ time=1
 # plot(X_cl[,,1],pch=19,col=partition[[time]],
 # 	 main=paste0("time=",time," - ",titleJ),xlab="units",ylab="Altitude")
 
-cols = colora(maxk,34,0)
 ##### otherwise
 cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],"Altitude"])
 plot(cova_of_interest[,1],
@@ -1487,7 +1639,7 @@ plot(cova_of_interest[,1],
 	main=paste0("time=",time," - ",titleJ),xlab="units",ylab="Altitude"
 	)
 
-dev.off()
+# dev.off()
 ```
 
 
@@ -1513,13 +1665,31 @@ partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0
 MODEL = rout
 ```
 
+
+```{r,warning=F}
+folder = "run 3 images/"
+name = "JDRPM target + space + Xcl (p=3)"
+load("J_space_run3_Xcl_Altitude_wsp10mmax_totprec.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+```{r,warning=F}
+folder = "run 4 images/"
+name = "JDRPM target + space + Xcl (p=4)"
+load("J_space_run4_Xcl_wsp10mmax_totprec_rhmean_bhlmax.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+
 # plots
 ```{r}
 save_plot = save_plots = T
 
 cat(name,"\n")
-cat("LPML: ",drpm1$lpml,"\n")
-cat("WAIC: ",drpm1$waic,"\n")
+cat("LPML: ",MODEL$lpml,"\n")
+cat("WAIC: ",MODEL$waic,"\n")
 
 
 ############################################## ARI
@@ -1628,7 +1798,7 @@ covariate_scelte = c(
 	# ,"WE_surface_pressure"
 	# ,"WE_solar_radiation"
 	# ,"WE_rh_min"
-	# ,"WE_rh_mean"
+	,"WE_rh_mean"
 	# ,"WE_rh_max"
 	# ,"WE_wind_speed_100m_mean"
 	# ,"WE_wind_speed_100m_max"
@@ -1677,7 +1847,7 @@ if (save_plots==TRUE) { dev.off() }
 
 ```
 
-## pm10
+## pm10 small
 ```{r,warning=F}
 ############################################# PM10 layout 1
 library(gridExtra)

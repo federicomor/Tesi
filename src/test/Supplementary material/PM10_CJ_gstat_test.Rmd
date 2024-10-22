@@ -59,6 +59,26 @@ s_std <- t((t(s_coords) - smn)/ssd)
 
 
 ```{r}
+yred=y
+# yred=ysub2
+par(mar=c(2,2,2,1))
+# par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+
+
+```{r}
 # modelPriors = c(m0, s20, Asig, Atau, Alam, a, b, be)
 # m0 - mean of theta (or phi0)
 # s20 - variance of theta (or phi0)

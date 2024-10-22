@@ -1588,10 +1588,10 @@ y = yfull[nsubjects,1+time_span]
 #############################################
 # authors suggested to/did scale the spatial locations and also centered the observations
 
-mn <- apply(y,2,mean)
-sd <- apply(y,2,sd)
+# mn <- apply(y,2,mean)
+# sd <- apply(y,2,sd)
 
-y <- t(t(y) - mn)
+# y <- t(t(y) - mn)
 # y <- t(t(y) - mn)+1 # shifted 1
 
 Tm = tps <- ncol(y) # time span
@@ -1805,7 +1805,7 @@ cat(crayon::red("\nLPML =",drpm1$lpml, "\nWAIC =",drpm1$waic))
 
 ```{r}
 # load(file="space_80k_drpm1.Rdata")
-save(drpm1,file="space_drpm1_run6.Rdata")
+save(drpm1,file="right/RIGHT_space_drpm1_run6.Rdata")
 ```
 
 
@@ -1903,31 +1903,31 @@ colnames(df_wsc)
 # perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
 covariate_scelte = c(
 	"Altitude"
-	,"WE_temp_2m"
+	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
 	# ,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
 	,"WE_tot_precipitation"
 	# ,"WE_precipitation_t"
 	# ,"WE_surface_pressure"
-	# ,"WE_solar_radiation"
+	,"WE_solar_radiation"
 	# ,"WE_rh_min"
 	# ,"WE_rh_mean"
 	# ,"WE_rh_max"
 	# ,"WE_wind_speed_100m_mean"
 	# ,"WE_wind_speed_100m_max"
 	# ,"WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
-	,"WE_blh_layer_min"
+	,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
 	# ,"EM_nh3_agr_waste_burn"
 	# ,"EM_nh3_sum"
-	,"EM_nox_traffic"
-	# ,"EM_nox_sum"
+	# ,"EM_nox_traffic"
+	,"EM_nox_sum"
 	# ,"EM_so2_sum"
 	# ,"LI_pigs"
-	# ,"LI_bovine"
+	,"LI_bovine"
 	# ,"LI_pigs_v2"
 	# ,"LI_bovine_v2"
 	# ,"LA_hvi"
@@ -1942,15 +1942,59 @@ X_lk = array(data = 0, dim = c(n, p, Tm))
 dim(X_lk)
 cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
 
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			X_lk[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-		}
+for (pp in 1:p){
+	target = covariate_scelte[pp]
+	yfull=data.frame()
+	if (typeof(unique(df_wsc[,target][[1]])) != "character"){
+	for(st in stations[1:n]){
+		y_we_target=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+		yfull=rbind(yfull,y_we_target)
 	}
+	rownames(yfull) = NULL
+	colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+	
+	time_span = 1:12
+	nsubjects = 1:n
+	y_other = yfull[nsubjects,1+time_span]
+	mn <- apply(y_other,2,mean)
+	sd <- apply(y_other,2,sd)
+	y_other <- t(t(y_other) - mn) # timewise mean
+	# y_other <- t(t(y_other) - mean(y_other[[1]])) # global mean
+
+	for (t in 1:Tm){
+		X_lk[,pp,t] = y_other[,t]
+	}
+	}
+
 }
+
+
+titolo = "centered wrt time-wise mean"
+for (pp in 1:p){
+yred=X_lk[,pp,]
+target = covariate_scelte[pp]
+save_plot=F
+folder = "./different means/"
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 6,width = 11)}
+par(mar=c(2,2,2,1))
+col_idx = 1
+ranked_indices = c(1:n)
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 main=paste0(covariate_scelte[pp]," - ",titolo),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+if (save_plot==T) {dev.off()}
+}
+
 colnames(X_lk) = covariate_scelte
 head(X_lk)
 ```
@@ -2001,13 +2045,14 @@ out = module_JDRPM$MCMC_fit(
 	alpha_priors = c(a_alpha,b_alpha),  
 	
 	######## space
-	# spatial_cohesion_idx = spatial_cohesion,
-	# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
-	spatial_cohesion_idx = 1,
-	sp_params = list(0.60),
+	spatial_cohesion_idx = spatial_cohesion,
+	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.60),
 	
 	######## likelihood covariates
-	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	beta_update_threshold = nburn/3,
 	# Xlk_covariates = NA, beta_priors = NA,
 	
 	######## clustering covariates
@@ -2023,9 +2068,9 @@ out = module_JDRPM$MCMC_fit(
 	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
 	seed = 113.0,
-	simple_return = FALSE,
+	simple_return = F,
 	verbose = T,
-	perform_diagnostics = TRUE
+	perform_diagnostics = T
 )
 
 ```
@@ -2069,10 +2114,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 
 ```{r}
-# getwd()
-# load(file="space_drpm1_run2.Rdata")
-save(rout,file="space_rout_full_run6_dfweekly_spcohes1.Rdata")
-# save(rout,file="space_rout_full_run5_dfdaily.Rdata")
+save(rout,file="space NA/space_rout_full_Xlk_timewisecorrected.Rdata")
 ```
 
 
@@ -2114,7 +2156,7 @@ load("./df wsc fits/space_drpm1_run6.Rdata")
 # y
 j = round(runif(1,1,N))
 t = round(runif(1,1,Tm))
-j = 101
+# j = 101
 # j =96
 # t = 4
 size(rout$fitted)
@@ -2135,7 +2177,7 @@ abline(h=y[j,t],col="#005500")
 
 ### beta
 ```{r}
-rout = rout_NA
+# rout = rout_NA
 for (covariata_idx in 1:length(covariate_scelte)){
 	cols = colora(size(rout$beta)[3],44,0)
 	# verde scuro: iterazioni iniziali
@@ -2503,14 +2545,14 @@ for(i in 1:N){
 
 ```{r}
 # load("df wsc fits/space_drpm1_run1.Rdata")
-load("df wsc fits/space_drpm1_run6.Rdata") # final choice since really same model
+# load("df wsc fits/space_drpm1_run6.Rdata") # final choice since really same model
 
 # load("df wsc fits/space_rout_full_run1_dfweekly.Rdata") # bad
 # load("df wsc fits/space_rout_full_run2_dfweekly.Rdata") # better
 # load("df wsc fits/space_rout_full_run3_dfweekly.Rdata") # better better
 # load("df wsc fits/space_rout_full_run4_dfweekly.Rdata") # bad
 # load("df wsc fits/space_rout_full_run5_dfweekly.Rdata")
-load("df wsc fits/space_rout_full_run6_dfweekly.Rdata") # final choice since really same model
+# load("df wsc fits/space_rout_full_run6_dfweekly.Rdata") # final choice since really same model
 ```
 
 ```{r,warning=F}
@@ -2590,7 +2632,7 @@ for(jj in 1:ncol(y)){
 ```{r}
 yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
-yredORIG=y
+yredORIG=y[[1]]
 
 save_plots=F
 
@@ -3741,8 +3783,8 @@ out = module_JDRPM$MCMC_fit(
 	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 	
 	######## likelihood covariates
-	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),10),
-	beta_update_threshold = as.integer(nburn/2),
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	beta_update_threshold = nburn/3,
 	# Xlk_covariates = NA, beta_priors = NA,
 	
 	######## clustering covariates
@@ -3757,10 +3799,10 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,burnin = nburn, thin = nthin,
 	# draws = 200,burnin = 20, thin = 4,
 	logging = F,
-	seed = 111.0,
-	simple_return = FALSE,
+	seed = 113.0,
+	simple_return = F,
 	verbose = T,
-	perform_diagnostics = TRUE
+	perform_diagnostics = T
 )
 ```
 
@@ -3806,18 +3848,15 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 ```{r}
 # save(rout,file="./space NA/space_rout_NA_LK_ALT_better_dfweekly.Rdata")
-save(rout,file="../3 Covaraites effects/space_rout_NA_LK_ALT_ECC_dfweekly.Rdata")
+save(rout,file="Xlk NA/space_rout_NA_Xlk_timewisecorrected.Rdata")
 ```
 
 
 ## Partition plots
 ```{r}
-load("df wsc fits/space_rout_full_run6_dfweekly.Rdata")
+load("Xlk/Xlk full/space_rout_full_Xlk_timewisecorrected.Rdata")
 rout_FULL = rout
-# load("df wsc fits/space_rout_NA_run6_dfweekly.Rdata")
-load("df wsc fits/space_rout_NA_run6e_dfweekly.Rdata")
-# load("space NA/space_rout_NA_LK_ALT_better_dfweekly.Rdata")
-# load("../3 Covaraites effects/NA lk improvement/space_rout_NA_LK_ALT_ECC_dfweekly.Rdata")
+load("Xlk/Xlk NA/space_rout_NA_Xlk_timewisecorrected.Rdata")
 rout_NA = rout
 ```
 
@@ -3828,7 +3867,7 @@ rout_NA = rout
 partitions_drpmj_NA <- generate_partition(rout_NA, loss ="binder",maxcl = 0)
 partitions_drpmj_FL <- generate_partition(rout_FULL, loss ="binder",maxcl = 0)
 
-save_plots=F
+save_plots=T
 
 # partition_matrix <- do.call(cbind, partitions)
 # if (save_plots==T){
@@ -3843,8 +3882,8 @@ if (save_plots==T){
 	pdf(file="ari.pdf",width=10,height = 5)
 }
 par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
-plot_ARI(partitions_drpmj_NA, title="model J (NA data)")
-plot_ARI(partitions_drpmj_FL, title="model J (full data)")
+plot_ARI(partitions_drpmj_NA, title="model J (NA data + Xlk)")
+plot_ARI(partitions_drpmj_FL, title="model J (full data + Xlk)")
 if (save_plots==T){ dev.off()}
 
 
@@ -3916,7 +3955,7 @@ for(i in 1:size(yred_NA)[1]){
      plot(1:size(yred_NA)[2],yred_NA[i,],col=cols[i],
      	 ylim=extrema(yredORIG,yred_FULL,yred_NA),type='l',xlab='',ylab="",
      	 # main="J fitted values - last iteration")
-     	 main="J fitted values (NA data) - iterations mean")
+     	 main="J fitted values (NA data + Xlk) - iterations mean")
      	 # main="J fitted values (NA data + lk covariates) - iterations mean")
      	 # main="J fitted values - iterations median")
  	  } 
@@ -3940,10 +3979,36 @@ for (k in 1:n_na){
 
 }
 # legend("bottom",legend=c("fitted with NA data + lk covariates","fitted with full data"),
-legend("bottom",legend=c("fitted with NA data","fitted with full data"),
+legend("bottom",legend=c("fitted with NA data + Xlk","fitted with full data + Xlk"),
 	   col=c("#990000","#009900"),
 	   pch=pch_diff,cex=cexs, bty="n")
 if (save_plots==TRUE) { dev.off() }
+#################################################################
+
+yred=summary_fitted_FULL
+if (save_plots==TRUE) { 
+	pdf(file="J_mean_prediction_full.pdf",height = 5.7,width=11)
+}
+par(mar=c(2,2,2,1))
+# cols = colora(size(yred)[1],56,0)
+# cols = colora(N,"div",0)
+cols = colora(N,56,0)
+# cols = colora(N,"div",seed_div = "Paired",show = 0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 ylim=extrema(yredORIG,yred_FULL,yred_NA),type='l',xlab='',ylab="",
+     	 # main="J fitted values - last iteration")
+     	 main="J fitted values (full data + Xlk) - iterations mean")
+     	 # main="J fitted values - iterations median")
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+if (save_plots==TRUE) { dev.off() }
+
+
 #################################################################
 
 
@@ -4029,11 +4094,16 @@ if (save_plots==TRUE) { dev.off() }
 ```
 
 ```{r}
-name = "JDRPM - NA data - target + space + covariates in the likelihood"
+# name = "JDRPM - NA data + Xlk"
+# partition = partitions_drpmj_NA
+name = "JDRPM - full data + Xlk"
+partition = partitions_drpmj_FL
+
+
 pdf(file=paste0("fit",name,"_simple_map.pdf"),height =7, width = 9)
 par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
 for(t in 1:Tm){
-	partition = partitions_drpmj
+	# partition = partitions_drpmj
 	partition_matrix <- do.call(cbind, partition)
 	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
 		 xlim=extrema(s_std[,1]),main=paste("time",t),
@@ -4089,6 +4159,28 @@ for(j in 1:N){
 cat("J NA MSE\n")
 cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
 cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
+
+
+#################################################################
+summary_fitted_mean = t(rout_FULL$fitted[,,size(rout_FULL$fitted)[3]])*0
+summary_fitted_median = t(rout_FULL$fitted[,,size(rout_FULL$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		# values_j = c()
+		# for (it in 1:size(rout_FULL$fitted)[3]){
+			# values_j = c(values_j,rout_FULL$fitted[t,j,it])
+		# }
+		summary_fitted_mean[j,t] = mean(rout_FULL$fitted[t,j,])
+		summary_fitted_median[j,t] = median(rout_FULL$fitted[t,j,])
+		# summary_fitted[j,t] = Mode(values_j) # function from include.R
+	}
+}
+# take last sample (maybe not the best choice)
+# yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
+#################################################################
+cat("J full MSE\n")
+cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
+cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 ```
 
 ## ari pairwise
@@ -4137,9 +4229,9 @@ cat("median ",median(ariv))
 
 ### beta
 ```{r}
-rout = rout_NA
+rout_here = rout_FULL
 
-save_plots = F
+save_plots = T
 # par(mar=c(0,0,0,0),oma=c(0.1,0.1,0.1,0.1))
 
 par(mfrow=c(3,2),mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
@@ -4147,32 +4239,32 @@ for (covariata_idx in 1:length(covariate_scelte)){
 # for (covariata_idx in 1:2){
 	
 	if (save_plots==T){
-	pdf(file=paste0("beta_",covariate_scelte[covariata_idx],".pdf"),width=10,height = 5)
+	pdf(file=paste0("full_beta_",covariate_scelte[covariata_idx],".pdf"),width=10,height = 5)
 	}
 	
-	cols = colora(size(rout$beta)[3],44,0)
+	cols = colora(size(rout_here$beta)[3],44,0)
 	cols = paste0(cols,"AA")
 	# verde scuro: iterazioni iniziali
 	# giallo: iterazioni finali
 	# par(mar=c(3,3,3,1))
 	# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
-	for (iter in 1:size(rout$beta)[3]){
+	for (iter in 1:size(rout_here$beta)[3]){
 		if(iter==1) {
-			plot(rout$beta[,covariata_idx,iter],
-				 ylim=extrema(rout$beta[,covariata_idx,]),
+			plot(rout_here$beta[,covariata_idx,iter],
+				 ylim=extrema(rout_here$beta[,covariata_idx,]),
 				 # main=covariate_scelte[covariata_idx],
 				 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[covariata_idx])),
 				 col = cols[iter],type="l")
 	# abline(h=0,col="gray40",lty=2)
 		} else {
-			lines(rout$beta[,covariata_idx,iter],col = cols[iter])
+			lines(rout_here$beta[,covariata_idx,iter],col = cols[iter])
 		}
 	}
 	legend("topleft",legend = c("initial iterates","final iterates"),
-		   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+		   col = c(cols[1],cols[size(rout_here$beta)[3]]),lty=c(1,1),
 		   lwd=3,cex=0.8,bty="n"
 		   )
-	# boxplot(rout$beta[,covariata_idx,],
+	# boxplot(rout_here$beta[,covariata_idx,],
 		# main=covariate_scelte[covariata_idx])
 if (save_plots==T) { dev.off() }
 }
@@ -4180,51 +4272,58 @@ if (save_plots==T) { dev.off() }
 
 
 ```{r}
-rout = rout_NA
+name = "JDRPM - full data + Xlk"
+rout_here = rout_FULL
+
+# name = "JDRPM - NA data + Xlk"
+# rout_here = rout_NA
 
 save_plots = T
 # par(mar=c(0,0,0,0),oma=c(0.1,0.1,0.1,0.1))
 
 	if (save_plots==T){
-	pdf(file=paste0("beta_alls_and_alt.pdf"),width=10,height = 10)
+	pdf(file=paste0("beta_alls",name,".pdf"),width=10,height = 11)
 	}
 
-layout(mat = matrix(rbind(c(1,1),c(2,3),c(4,5)),ncol=2),
-       heights = c(1,1,1), # Heights of the two rows
-       widths = c(1,1)) # Widths of the two columns
+# layout(mat = matrix(rbind(c(1,1),c(2,3),c(4,5)),ncol=2),
+       # heights = c(1,1,1), # Heights of the two rows
+       # widths = c(1,1)) # Widths of the two columns
 
-# par(mfrow=c(2,2),mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
-par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
+par(mfrow=c(3,2),mar=c(2,2,2,1),oma=c(0.1,0.1,1.2,0.1))
+# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
 
 for (covariata_idx in 1:length(covariate_scelte)){
 # for (covariata_idx in 2:length(covariate_scelte)){
 
-	cols = colora(size(rout$beta)[3],44,0)
+	cols = colora(size(rout_here$beta)[3],44,0)
 	cols = paste0(cols,"AA")
 	# verde scuro: iterazioni iniziali
 	# giallo: iterazioni finali
 	# par(mar=c(3,3,3,1))
 	# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
-	for (iter in 1:size(rout$beta)[3]){
+	for (iter in 1:size(rout_here$beta)[3]){
 		if(iter==1) {
-			plot(rout$beta[,covariata_idx,iter],
-				 ylim=extrema(rout$beta[,covariata_idx,]),
+			plot(rout_here$beta[,covariata_idx,iter],
+				 ylim=extrema(rout_here$beta[,covariata_idx,]),
 				 # main=covariate_scelte[covariata_idx],
 				 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[covariata_idx])),
 				 col = cols[iter],type="l")
-	# abline(h=0,col="gray40",lty=2)
+	abline(h=0,col="gray80",lty=1)
+	lines(rout_here$beta[,covariata_idx,1],col = cols[1])
 		} else {
-			lines(rout$beta[,covariata_idx,iter],col = cols[iter])
+			lines(rout_here$beta[,covariata_idx,iter],col = cols[iter])
 		}
 	}
-	# boxplot(rout$beta[,covariata_idx,],
+	
+	# boxplot(rout_here$beta[,covariata_idx,],
 		# main=covariate_scelte[covariata_idx])
 	legend("topleft",legend = c("initial iterates","final iterates"),
-		   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+		   col = c(cols[1],cols[size(rout_here$beta)[3]]),lty=c(1,1),
 		   lwd=3,cex=0.8,bty="n"
 		   )
 }
 # plot.new()
+mtext(name,side=3,line=0,outer=T,col="#2E1831")
 
 if (save_plots==T) { dev.off() }
 ```

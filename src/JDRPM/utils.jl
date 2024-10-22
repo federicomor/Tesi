@@ -984,8 +984,18 @@ function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a
 end
 
 function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)), cv_weight::Real=1)
-	n = length(X_jt)
-	nm = n/2
+	nx = length(X_jt)
+	# println("calling this sim")
+	# println("mu_c: ", mu_c)
+	# println("lambda_c: ", lambda_c)
+	# println("a_c: ", a_c)
+	# println("b_c: ", b_c)
+	# println("lg: ", lg)
+	# println("case: ", case)
+	# println("add: ", add)
+	# println("lS: ", lS)
+	# println("cv_weight: ", cv_weight)
+	nxm = nx/2
 	xbar = mean(X_jt)
 	aux2 = 0.0
 	# @inbounds @fastmath @simd for i in eachindex(X_jt)
@@ -993,8 +1003,8 @@ function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, 
 		aux2 += X_jt[i]^2
 	end
 	# @show aux2
-	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
-	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	aux1 = b_c + 0.5 * (aux2 - (nx*xbar + lambda_c*mu_c)^2/(nx+lambda_c) + lambda_c*mu_c^2 )
+	out = -nxm*log2pi + 0.5*log(lambda_c/(lambda_c+nx)) + lgamma(a_c+nxm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nxm)*log(aux1)
 	out *= cv_weight
 	if add
 		lS[case] += lg ? out : exp(out)
@@ -1028,6 +1038,7 @@ end
 
 # numerical covariates specialization
 function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, R::Real, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)), cv_weight::Real=1)
+	# println("calling this")
 	# println("numerical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS,cv_weight); return; end
 	if idx==2 similarity2!(X_jt,cv_params[1],cv_params[2],lg,case,add,lS,cv_weight); return; end

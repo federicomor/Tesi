@@ -12,8 +12,8 @@ using MCMCChains
 using DataFrames
 using CSV
 
-# log_file = open("log.txt", "w+")
-# include("debug.jl")
+log_file = open("log.txt", "w+")
+include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -122,8 +122,7 @@ function MCMC_fit(;
 
 	if !skip_checks
 	if logging
-		log_file = open("log.txt", "w+")
-		include("debug.jl")
+		# log_file = open("log.txt", "w+")
 		println("Logging to file:\n", abspath("log.txt"),"\n")
 		printlgln(replace(string(now()),"T" => "   "))
 		debug("current seed = $seed")
@@ -192,8 +191,8 @@ function MCMC_fit(;
 			return
 		end
 
+		Rs = zeros(p_cl,T)
 		if covariate_similarity==2 || covariate_similarity==3
-			Rs = zeros(p_cl,T)
 			for p in 1:p_cl
 				for t in 1:T
 					if isa(Xcl_covariates[1,p,t],Real)
@@ -297,10 +296,10 @@ function MCMC_fit(;
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end\n")
 	println("on n=$n subjects\nfor T=$T time instants\n")
-	println(sPPM ? "[✓]" : "[✗]", " with space? $sPPM", sPPM ? "(cohesion $spatial_cohesion_idx)" : "")
+	println(sPPM ? "[✓]" : "[✗]", " with space? $sPPM", sPPM ? " (cohesion $spatial_cohesion_idx)" : "")
 	# if sPPM println("- params: ", sp_params_real) end
 	println(lk_xPPM ? "[✓]" : "[✗]", " with covariates in the likelihood? $lk_xPPM", lk_xPPM ? " (p=$p_lk)" : "")
-	println(cl_xPPM ? "[✓]" : "[✗]", " with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl, sim $covariate_similarity_idx)" : "")
+	println(cl_xPPM ? "[✓]" : "[✗]", " with covariates in the clustering process? $cl_xPPM", cl_xPPM ? " (p=$p_cl, similarity $covariate_similarity_idx)" : "")
 	# if cl_xPPM println("- params: ", cv_params) end
 	println(Y_has_NA ? "[✓]" : "[✗]", " are there missing data in Y? $Y_has_NA")
 	println()
@@ -700,26 +699,35 @@ function MCMC_fit(;
 						# debug(@showd cl_xPPM)
 
 						lS .= 0.
-						# Xcl_covariates is a n*p*T matrix
 						if cl_xPPM
-							# lS .= 0.
+						# Xcl_covariates is a n*p*T matrix
 							for p in 1:p_cl
+								# debug(@showd i j t k aux_idxs)
 								if isa(first(Xcl_covariates[j,p,t]),Real)
 									# Xo = @view Xcl_covariates_red[aux_idxs,p]
 									# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
 									# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
-									copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
+									# copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
+									copy!(Xo, Xcl_covariates_red[aux_idxs,p])
 									copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
 									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
 									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
 									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
+									
+									# debug(@showd covariate_similarity_idx)
+									# debug(@showd Xo)
+									# debug(@showd cv_params)
+									# debug(@showd Rs)
+									# debug(@showd cv_weight)
+
 									covariate_similarity!(covariate_similarity_idx, Xo, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
 									covariate_similarity!(covariate_similarity_idx, Xn, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 									# covariate_similarity!(covariate_similarity_idx, Xo, cv_params_struct, true,1,true,lS)
 									# covariate_similarity!(covariate_similarity_idx, Xn, cv_params_struct, true,2,true,lS)
 								else
-									copy!(Xo_cat, @view Xcl_covariates_red[aux_idxs,p])
+									# copy!(Xo_cat, @view Xcl_covariates_red[aux_idxs,p])
+									copy!(Xo_cat, Xcl_covariates_red[aux_idxs,p])
 									copy!(Xn_cat, Xo_cat); push!(Xn_cat,Xcl_covariates[j,p,t])
 									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
 									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
@@ -728,8 +736,14 @@ function MCMC_fit(;
 									covariate_similarity!(covariate_similarity_idx, Xo_cat, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
 									covariate_similarity!(covariate_similarity_idx, Xn_cat, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 								end
+								if i%10 == 0 printlgln("(i=$i) after covariate $p of $p_cl") end
+								if i%10 == 0 debug(@showd lS) end
 							end
 						end
+						if i%10 == 0 debug(@showd cv_weight lC) end
+						if i%10 == 0 debug(@showd lS) end
+						if i%10 == 0 printlgln("\n") end
+
 						# end # of the @timeit for sPPM
 						# debug(@showd lC)
 						# printlgln("\n")
@@ -1488,7 +1502,7 @@ function MCMC_fit(;
 		a_star_lambda2 = lambda2_priors[1] + T/2
 		b_star_lambda2 = lambda2_priors[2] + ((theta_iter[1] - phi0_iter)^2 + aux1) / 2
 		lambda2_iter = rand(InverseGamma(a_star_lambda2,b_star_lambda2))	
-		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,a_star_lambda2),0,10))	
+		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,b_star_lambda2),0,10))	
 
 		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############
@@ -1633,9 +1647,13 @@ function MCMC_fit(;
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end
 
-	if logging
+	# if logging
 		close(log_file)
-	end
+	# end
+	# if !logging
+		# rm("log.txt")
+		# rm("log.txt",force=true)
+	# end
 
 	if simple_return
 		return Si_out, LPML, WAIC
