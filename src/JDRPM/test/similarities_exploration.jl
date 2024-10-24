@@ -5,6 +5,7 @@ using Random
 using Colors
 using Printf
 using LaTeXStrings
+using Distributions
 
 ################################################
 # COHESIONS
@@ -303,33 +304,27 @@ end
 # SIMILARITIES
 ################################################
 #### numerical - sims: 1234
-alts = vec([
-	0.420135834,-0.472240779,-0.518110605,0.074027148,-0.589000336,-0.034392441,
-	-0.201191808,-0.305441412,-0.313781381,0.136576910,-0.217871745,-0.297101444,
-	0.094877069,0.069857163,0.807944363,0.053177227,0.374266008,0.749564584,
-	0.491025565,4.319071039,0.303376277,0.103217037,0.374266008,0.249166483,
-	0.249166483,0.007307401,0.003137417,-0.030222457,-0.580660368,-0.455560843,
-	-0.434710922,-0.543130510,-0.338801286,-0.626530194,-0.459730827,-0.497260685,
-	-0.468070795,-0.468070795,-0.167831935,0.332566167,0.132406926,0.666164901,
-	-0.176171903,-0.714099862,-0.714099862,-0.497260685,-0.697419925,-0.413861001,
-	-0.113622140,-0.609850257,0.240826515,4.189801530,-0.234551681,0.349246103,
-	0.107387021,-0.484750732,-0.434710922,-0.317951365,-0.730779798,-0.743289751,
-	-0.280421507,0.345076119,-0.322121349,-0.334631302,0.378435993,0.057347211,
-	0.482685597,-0.755799703,1.879630296,0.086537100,0.044837258,-0.393011080,
-	-0.626530194,-0.484750732,-0.538960526,-0.580660368,0.795434410,-0.559810447,
-	-0.684909972,5.886985090,-0.530620558,-0.272081539,0.057347211,0.645314980,
-	-0.247061634,-0.684909972,-0.305441412,-0.134472061,-0.647380115,-0.409691017,
-	-0.242891650,1.796230613,-0.664060052,-0.697419925,-0.722439830,-0.751629719,
-	-0.772479640,-0.534790542,-0.534790542,-0.764139672,2.400878318,0.290866325,
-	0.466005660,-0.543130510,-0.589000336])
+
+# altitude
+alts = vec([0.420135834,-0.472240779,-0.518110605,0.074027148,-0.589000336,-0.034392441,-0.201191808,-0.305441412,-0.313781381,0.136576910,-0.217871745,-0.297101444,0.094877069,0.069857163,0.807944363,0.053177227,0.374266008,0.749564584,0.491025565,4.319071039,0.303376277,0.103217037,0.374266008,0.249166483,0.249166483,0.007307401,0.003137417,-0.030222457,-0.580660368,-0.455560843,-0.434710922,-0.543130510,-0.338801286,-0.626530194,-0.459730827,-0.497260685,-0.468070795,-0.468070795,-0.167831935,0.332566167,0.132406926,0.666164901,-0.176171903,-0.714099862,-0.714099862,-0.497260685,-0.697419925,-0.413861001,-0.113622140,-0.609850257,0.240826515,4.189801530,-0.234551681,0.349246103,0.107387021,-0.484750732,-0.434710922,-0.317951365,-0.730779798,-0.743289751,-0.280421507,0.345076119,-0.322121349,-0.334631302,0.378435993,0.057347211,0.482685597,-0.755799703,1.879630296,0.086537100,0.044837258,-0.393011080,-0.626530194,-0.484750732,-0.538960526,-0.580660368,0.795434410,-0.559810447,-0.684909972,5.886985090,-0.530620558,-0.272081539,0.057347211,0.645314980,-0.247061634,-0.684909972,-0.305441412,-0.134472061,-0.647380115,-0.409691017,-0.242891650,1.796230613,-0.664060052,-0.697419925,-0.722439830,-0.751629719,-0.772479640,-0.534790542,-0.534790542,-0.764139672,2.400878318,0.290866325,0.466005660,-0.543130510,-0.589000336])
+
+# wspeed10mmax
+alts  = vec([-1.5831941135,0.6462411450,0.7692486349,0.0050318893,0.9707715439,-0.0289914590,-0.1729363940,0.0086556778,-0.0088593003,-0.0038262606,-0.0165095206,0.0020120655,-0.0716716355,-0.1815932222,-0.7527425656,-0.6007447671,-0.4934403610,-0.1511936625,-1.5781409416,-1.5945486510,-1.5277098840,-0.6389958687,0.0303984093,0.0040252813,-0.0265755999,-0.0285888158,0.0430816693,-0.0207372739,0.8403151553,0.6450332155,0.6355711009,0.8731305740,-0.0006051152,1.0140556852,0.4024407027,0.6653666958,0.6500662552,0.6703997355,-0.5012919029,-0.6832866179,-0.9705725231,-0.7485148122,-0.3925782458,0.9713755086,0.9206424686,-0.3366108445,0.8483680187,0.0255666912,-0.0469090803,1.0535147163,-0.6279231814,-0.8753474123,-0.0249650272,0.0330155899,-0.2540689937,0.4108962094,0.5135702190,0.1089138284,1.2808067884,1.1251852014,-0.0118791241,-0.8109245043,0.4104935662,0.3911666938,-1.4589988262,-1.6156471533,-1.4815065797,1.1004226461,-1.3345820852,0.0547583214,-1.8693727499,-0.1622663498,0.5665177964,-1.6715138938,0.6017490742,0.5208177961,0.6448318939,0.5973199993,0.5739666952,-1.9038591378,-0.0505328688,0.1238116258,-1.3019478559,-0.7946174557,0.0889829912,1.1181389458,0.5330984129,-0.0052355117,0.5876565631,-0.1634742793,0.0928081014,-0.1956857333,0.7946151549,0.6854988546,1.0796865226,1.0786799147,1.1755155982,0.7128785905,0.7064362997,1.1058583290,-0.3678156905,-1.2541138467,-0.7638152529,0.5512173558,0.0968345331])
+
+# blh layer max
+alts = vec([-0.502001858,0.088231371,0.156189698,0.115436612,0.204830478,0.028270289,-0.096983372,-0.008100745,0.076545898,-0.050716204,-0.066929797,-0.007772091,-0.077337171,-0.091688393,-0.163955738,-0.145551118,-0.046735840,-0.069157340,-0.502965909,-0.097786749,-0.373783008,-0.040418381,0.057301385,0.081074019,0.076253761,0.182335943,0.159403203,0.155824527,0.198403468,0.085894276,0.066759314,0.160498716,0.153377881,0.216515951,0.183102802,0.207642295,-0.001892838,-0.003682176,0.138405869,-0.009597947,-0.358445825,-0.062620779,0.084725729,0.030534349,0.031410759,0.149507068,0.029657938,-0.001965872,0.024874198,0.202091696,-0.032128999,-0.119623976,0.132051893,0.077714445,-0.104688481,-0.016171025,-0.029390216,-0.007333886,-0.014564272,-0.003499590,-0.001454633,-0.104213759,-0.064519668,-0.049182485,-0.238012422,-0.271535121,-0.242248405,0.047953007,-0.150283735,0.351410127,-0.390836495,-0.020772180,0.249125723,-0.424651332,0.285606309,0.272058464,0.386210926,0.294041759,0.183687076,-0.485233204,-0.107609849,-0.068682618,-0.251706335,-0.297608333,-0.102680040,-0.081719224,-0.092637837,-0.101146322,0.244122880,-0.022488484,-0.103592968,0.112807380,0.203041140,0.133695163,0.112113556,0.081585258,0.009390947,0.201945627,0.198366951,-0.074963560,0.324460506,-0.333431610,-0.219461734,0.273519148,-0.111845833])
+
+# nh3sum
+alts = vec([-0.42428648,0.52533376,0.43142692,0.28885668,0.21448279,0.30619978,-0.21348475,0.89531076,0.29568308,0.08895826,-0.02276479,0.88246903,0.07803603,-0.04186517,-0.21105158,-0.21553943,-0.25828212,-0.05048941,-0.42104496,-0.44637291,-0.37200577,-0.31247422,-0.16936327,0.13956820,0.11353328,0.64509979,0.12452309,0.43477929,0.02119448,0.52979457,0.42151851,0.33434344,0.64537014,0.21419892,0.77067839,0.84461972,-0.19142401,-0.10487075,0.27984044,-0.25698443,-0.33696813,-0.33126369,0.43342753,0.31670296,0.50694981,0.53303880,0.56777906,-0.38509352,0.38800836,0.40324270,-0.30562079,-0.38734826,0.39757883,-0.14918148,-0.17878505,-0.34105044,-0.33868486,0.28808618,-0.13051366,0.01647683,0.81988249,-0.34433522,-0.03825597,-0.17079614,-0.29991636,-0.30858114,-0.29169765,-0.20726665,-0.45565004,-0.32764098,-0.39937353,-0.15292586,0.24541108,-0.42481772,0.03219782,0.17702549,-0.41555681,0.03111641,-0.07395598,-0.42546657,0.16834719,-0.24241244,-0.40483870,-0.43834750,-0.28591211,0.07598136,-0.31132522,-0.14588318,0.16971247,-0.14254434,-0.30751325,-0.45118653,-0.07363156,0.20857560,-0.32884404,-0.17625726,-0.10638473,-0.09849044,-0.09950426,-0.03007782,-0.45641244,-0.42511106,-0.34862031,0.19877533,0.30221208])
 
 # cls = vec([1 2 2 1 2 2 2 2 2 2 2 2 1 2 1 1 1 1 1 3 1 1 1 1 1 2 1 2 2 2 2 2 2 4 2 2 2 2 1 1 1 1 2 4 4 1 4 2 2 2 1 3 2 1 2 2 2 2 4 4 2 1 2 2 1 1 1 4 3 5 1 2 4 1 4 4 3 4 4 3 4 2 1 1 2 4 2 2 4 2 2 3 4 4 4 4 4 4 4 4 3 1 1 4 4])
 cls = vec([1 2 2 1 2 2 2 2 2 2 2 2 1 2 1 1 1 1 1 3 1 1 1 1 1 2 1 2 2 2 2 2 2 4 2 2 2 2 1 1 1 1 2 4 4 1 4 2 2 2 1 3 2 1 2 2 2 2 4 4 2 1 2 2 1 1 1 4 3 2 1 2 4 1 4 4 3 4 4 3 4 2 1 1 2 4 2 2 4 2 2 3 4 4 4 4 4 4 4 4 3 1 1 4 4])
+cls[80] = 5
 maximum(cls)
 n = 105
 cluster_labels = fill(0, n)
-# color_palette = palette(:tab10)[[1,2,3,4,5]]
-color_palette = palette(:tab10)[[1,2,3,5]]
+color_palette = palette(:tab10)[[1,2,3,4,5]]
+# color_palette = palette(:tab10)[[1,2,3,5]]
 n = 105
 color_labels = [color_palette[cls[i]] for i in 1:n];
 
@@ -344,6 +339,7 @@ X_cl1 = alts[cls .== 1]
 X_cl2 = alts[cls .== 2]
 X_cl3 = alts[cls .== 3]
 X_cl4 = alts[cls .== 4]
+X_cl5 = alts[cls .== 5]
 
 begin
 p = scatter(1:length(X_cl1),X_cl1,markerstrokewidth=0,color=color_palette[1],ms=4,legend=false, xlabel="", ylabel="Altitude",title="Similarities analysis test case")
@@ -353,35 +349,38 @@ scatter!(length(X_cl1)+length(X_cl2)+1:length(X_cl1)+length(X_cl2)+length(X_cl3)
 markerstrokewidth=0,color=color_palette[3],ms=4,legend=false)
 scatter!(length(X_cl1)+length(X_cl2)+length(X_cl3)+1:length(X_cl1)+length(X_cl2)+length(X_cl3)+length(X_cl4),X_cl4,
 markerstrokewidth=0,color=color_palette[4],ms=4,legend=false)
-# scatter!(length(X_cl1)+length(X_cl2)+length(X_cl3)+length(X_cl4)+1:length(X_cl1)+length(X_cl2)+length(X_cl3)+length(X_cl4)+length(X_cl5),X_cl5,
-# markerstrokewidth=0,color=color_palette[5],ms=4,legend=false)
-offsets_x = [18,55,75,92]#,103]
-offsets_y = [1.08,0.5,3,-0.1]#,0.5]
-for k in 1:maximum(cls)
+scatter!(length(X_cl1)+length(X_cl2)+length(X_cl3)+length(X_cl4)+1:length(X_cl1)+length(X_cl2)+length(X_cl3)+length(X_cl4)+length(X_cl5),X_cl5,
+markerstrokewidth=0,color=color_palette[5],ms=4,legend=false)
+offsets_x = [18,55,75,92,103]
+offsets_y = [1.08,0.5,3,-0.1,5.5]
+for k in 1:5
 	# k=1
 	annotate!(offsets_x[k],offsets_y[k], 
 	text("cluster $k", 10, color_palette[k]))
 end
 display(p)
 end 
-savefig(p,"similarity_sorted_test.pdf")
+# savefig(p,"similarity_sorted_test.pdf")
 
 
 
 begin
 # lg = false
 lg = true
-alphas = range(0, 2.0, length=1000)
-similarity1_vals_cl1 = [similarity1(X_cl1, alpha, lg) for alpha in alphas]
-similarity1_vals_cl2 = [similarity1(X_cl2, alpha, lg) for alpha in alphas]
-similarity1_vals_cl3 = [similarity1(X_cl3, alpha, lg) for alpha in alphas]
-similarity1_vals_cl4 = [similarity1(X_cl4, alpha, lg) for alpha in alphas]
+cv_weight = 5
+alphas = range(0, 2, length=1000)
+similarity1_vals_cl1 = [similarity1(X_cl1, alpha, lg, cv_weight) for alpha in alphas]
+similarity1_vals_cl2 = [similarity1(X_cl2, alpha, lg, cv_weight) for alpha in alphas]
+similarity1_vals_cl3 = [similarity1(X_cl3, alpha, lg, cv_weight) for alpha in alphas]
+similarity1_vals_cl4 = [similarity1(X_cl4, alpha, lg, cv_weight) for alpha in alphas]
+similarity1_vals_cl5 = [similarity1(X_cl5, alpha, lg, cv_weight) for alpha in alphas]
 plot(alphas,  similarity1_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,400)
 )
 plot!(alphas, similarity1_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity1_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity1_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+plot!(alphas, similarity1_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 1 (log=$lg)")
@@ -430,12 +429,14 @@ similarity2_vals_cl1 = [similarity2(X_cl1, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl2 = [similarity2(X_cl2, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl3 = [similarity2(X_cl3, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl4 = [similarity2(X_cl4, alpha, R, lg) for alpha in alphas]
+similarity2_vals_cl5 = [similarity2(X_cl5, alpha, R, lg) for alpha in alphas]
 plot(alphas,  similarity2_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,400)
 )
 plot!(alphas, similarity2_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity2_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity2_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+plot!(alphas, similarity2_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 2 (log=$lg)")
@@ -451,12 +452,14 @@ similarity3_vals_cl1 = [similarity3(X_cl1, alpha, R, lg) for alpha in alphas]
 similarity3_vals_cl2 = [similarity3(X_cl2, alpha, R, lg) for alpha in alphas]
 similarity3_vals_cl3 = [similarity3(X_cl3, alpha, R, lg) for alpha in alphas]
 similarity3_vals_cl4 = [similarity3(X_cl4, alpha, R, lg) for alpha in alphas]
+similarity3_vals_cl5 = [similarity3(X_cl5, alpha, R, lg) for alpha in alphas]
 plot(alphas, similarity3_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,400)
 )
 plot!(alphas, similarity3_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity3_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity3_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+plot!(alphas, similarity3_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 3 (log=$lg)")
@@ -498,12 +501,17 @@ similarity4_vals_cl4 = [similarity4(X_cl4, mu, lambda, a_c, b_c, lg, cv_weight)
 for lambda in lambdas]
 # for b_c in acs]
 # for b_c in acs]
+similarity4_vals_cl5 = [similarity4(X_cl5, mu, lambda, a_c, b_c, lg, cv_weight)
+for lambda in lambdas]
+# for b_c in acs]
+# for b_c in acs]
 plot(lambdas,  similarity4_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,400)
 )
 plot!(lambdas, similarity4_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(lambdas, similarity4_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(lambdas, similarity4_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+plot!(lambdas, similarity4_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
 xlabel!(L"$\lambda_0$ values")
 ylabel!("")
 # title!("Similarity 4 (log=$lg)")
@@ -515,17 +523,25 @@ end
 
 
 
-a=4
-b=2
+a=4.5
+b=1.4
+# nice for bhl max
+a = 4
+b = 2
+
+a = 7.5
+b = 2
 quantile.(InverseGamma(a,b),[0.05 0.1 0.9 0.95 0.99])
 print(quantile.(Normal(0,sqrt(quantile(InverseGamma(a,b),0.9))),[0.1 0.9]))
-
+mean(InverseGamma(a,b))
+print(quantile.(Normal(0,mean(InverseGamma(a,b))),[0.1 0.9]))
+# ar r bl
 begin
 lg = true
 mu = 0; lambda = 1; 
 b_c = 2
 cv_weight = 1
-acs = range(0.1, 6.0, length=1000)
+acs = range(0.01, 10.0, length=1000)
 similarity4_vals_cl1 = [similarity4(X_cl1, mu, lambda, a_c, b_c, lg, cv_weight)
 # for lambda in lambdas]
 for a_c in acs]
@@ -542,12 +558,17 @@ similarity4_vals_cl4 = [similarity4(X_cl4, mu, lambda, a_c, b_c, lg, cv_weight)
 # for lambda in lambdas]
 for a_c in acs]
 # for b_c in acs]
+similarity4_vals_cl5 = [similarity4(X_cl5, mu, lambda, a_c, b_c, lg, cv_weight)
+# for lambda in lambdas]
+for a_c in acs]
+# for b_c in acs]
 plot(acs,  similarity4_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,400)
 )
 plot!(acs, similarity4_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(acs, similarity4_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(acs, similarity4_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+plot!(acs, similarity4_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
 xlabel!(L"$a_0$ values")
 ylabel!("")
 # title!("Similarity 4 (log=$lg)")

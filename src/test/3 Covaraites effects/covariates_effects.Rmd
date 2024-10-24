@@ -142,9 +142,12 @@ y
 s_std
 plot(s_std)
 rownames(s_std) = NULL
+
+ranked_indices = c(1:n) # per dopo
 ```
 
 
+# ranked colors
 ```{r}
 yred=y
 # unit_summary <- rowMeans(yred)
@@ -231,9 +234,9 @@ s_std <- t((t(sites) - smn)/ssd)
 # yred=(y[,time_span]+0.5)*2
 yred=y_other
 
-save_plot=F
+save_plot=T
 folder = "./all_covariates_trend/"
-if (save_plot==T) { pdf(file=paste0(folder,target,".pdf"),height = 6,width = 11)}
+if (save_plot==T) { pdf(file=paste0(folder,target,".pdf"),height = 5.9,width = 11)}
 par(mar=c(2,2,2,1))
 col_idx = 1
 for(i in ranked_indices){
@@ -342,7 +345,14 @@ num
 ```{r}
 # load("../thesis data/df_daily_full.Rdata")
 times = unique(df_wsc$Time)
-as.numeric(df_wsc[df_wsc$Time==times[11],"Altitude"][[1]])
+# as.numeric(df_wsc[df_wsc$Time==times[11],"Altitude"][[1]])
+# vals = as.numeric(df_wsc[df_wsc$Time==times[11],"EM_nh3_sum"][[1]])
+vals = as.numeric(df_wsc[df_wsc$Time==times[11],"WE_tot_precipitation"][[1]])
+# vals = as.numeric(df_wsc[df_wsc$Time==times[11],"WE_blh_layer_max"][[1]])
+# vals = as.numeric(df_wsc[df_wsc$Time==times[11],"WE_wind_speed_10m_max"][[1]])
+# vals = as.numeric(df_wsc[df_wsc$Time==times[11],"WE_wind_speed_100m_max"][[1]])
+mv = mean(vals)
+vals - mv
 ```
 
 cat
@@ -364,7 +374,7 @@ n = dim(y)[1]
 # colnames(df_wsc)
 covariate_scelte = c(
 	# "AQ_pm10",
-	# "Altitude"
+	# "Altitude",
 	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
 	"WE_wind_speed_10m_max"
@@ -384,7 +394,7 @@ covariate_scelte = c(
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
 	# ,"EM_nh3_agr_waste_burn"
-	# ,"EM_nh3_sum"
+	,"EM_nh3_sum"
 	# ,"EM_nox_traffic"
 	# ,"EM_nox_sum"
 	# ,"EM_so2_sum"
@@ -454,10 +464,9 @@ yred=X_cl[,pp,]
 target = covariate_scelte[pp]
 save_plot=F
 folder = "./different means/"
-if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 6,width = 11)}
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 5.7,width = 11)}
 par(mar=c(2,2,2,1))
 col_idx = 1
-# ranked_indices = c(1:n)
 for(i in ranked_indices){
    if(i==ranked_indices[1]){
      plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
@@ -478,6 +487,12 @@ colnames(X_cl) = covariate_scelte
 head(X_cl)
 y
 ```
+# take cova
+```{r}
+colnames(X_cl)
+# X_cl [ units pp time]
+X_cl[,1,1]
+```
 
 
 
@@ -490,32 +505,32 @@ colnames(df_wsc)
 # penso vadano scelte quelle correlate alla target variable
 # perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
 covariate_scelte = c(
-	# "Altitude"
+	"Altitude",
 	# "WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
 	# ,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
-	# "WE_tot_precipitation"
+	"WE_tot_precipitation"
 	# ,"WE_precipitation_t"
 	# ,"WE_surface_pressure"
-	# ,"WE_solar_radiation"
+	,"WE_solar_radiation"
 	# ,"WE_rh_min"
 	# ,"WE_rh_mean"
 	# ,"WE_rh_max"
 	# ,"WE_wind_speed_100m_mean"
 	# ,"WE_wind_speed_100m_max"
 	# ,"WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
+	,"WE_blh_layer_max"
 	# ,"WE_blh_layer_min"
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
 	# ,"EM_nh3_agr_waste_burn"
 	# ,"EM_nh3_sum"
 	# ,"EM_nox_traffic"
-	# ,"EM_nox_sum"
+	,"EM_nox_sum"
 	# ,"EM_so2_sum"
 	# ,"LI_pigs"
-	# ,"LI_bovine"
+	,"LI_bovine"
 	# ,"LI_pigs_v2"
 	# ,"LI_bovine_v2"
 	# ,"LA_hvi"
@@ -634,12 +649,27 @@ out = module_JDRPM$MCMC_fit(
 	######## likelihood covariates
 	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
 	# Xlk_covariates = NA, beta_priors = NA,
+	# Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	# beta_update_threshold = nburn/3,
 	
 	######## clustering covariates
 	covariate_similarity_idx = 4,
-	cv_params = list(0,1,3,2),
-	Xcl_covariates = X_cl,
+	# cv_params = list(0,1,4.5,0.8),
+	cv_params = list(0,1,
+					 7.5,2,
+					 7.5,2,
+					 7.5,2,
+					 7.5,2
+					 # 4.5,1.4,
+					 # 4.5,1.4,
+					 # 4.5,1.4
+					 ),
+	
+	# covariate_similarity_idx = 1,
+	# cv_params = list(1),
+	
 	cv_weight = 0.2,
+	Xcl_covariates = X_cl,
 
 	# covariate_similarity_idx = 1,
 	# cv_params = list(1),
@@ -656,7 +686,7 @@ out = module_JDRPM$MCMC_fit(
 	seed = 113.0,
 	simple_return = FALSE,
 	verbose = T,
-	perform_diagnostics = T
+	perform_diagnostics = (niter>1000)
 )
 
 ```
@@ -700,7 +730,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 
 ```{r}
-save(rout,file="J_space_run6_Xcl_sim4_alt_wsp10mmax_totprec_rhmean_bhlmax.Rdata")
+save(rout,file="J_run15_as11_but_with_other_sim4_params.Rdata")
 ```
 
 
@@ -742,14 +772,19 @@ t = round(runif(1,1,Tm))
 # j = 101
 # j =96
 # t = 4
+
+# pdf(file="trace_plots_with_Xlk.pdf",height = 6,width=11)
+
 size(rout$fitted)
-par(mfrow=c(2,1),mar=c(1,2,3,1))
-plot(rout$fitted[t,j,],type="l",main=paste0("J trace plot of j=",j," at t=",t),
+par(mfrow=c(2,1),mar=c(1.5,2,2,1),oma=c(0.8,0.1,0,0.1))
+plot(rout$fitted[t,j,],type="l",main=paste0("J (with Xlk) trace plot of unit ",j," at t=",t),
 	 ylim=extrema(y[j,t],rout$fitted[t,j,],drpm1$fitted[t,j,]))
 abline(h=y[j,t],col="#005500")
-plot(drpm1$fitted[t,j,],type="l",main=paste0("C trace plot of j=",j," at t=",t),
+plot(drpm1$fitted[t,j,],type="l",main=paste0("C trace plot of unit ",j," at t=",t),
 	 ylim=extrema(y[j,t],rout$fitted[t,j,],drpm1$fitted[t,j,]))
 abline(h=y[j,t],col="#005500")
+
+# dev.off()
 ```
 
 ## Trace plots
@@ -1682,6 +1717,41 @@ partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0
 MODEL = rout
 ```
 
+```{r,warning=F}
+folder = "run 7 images/"
+name = "JDRPM target + space + Xcl (p=3)"
+load("J_space_run7_Xcl_sim4_wsp10mmax_totprec_bhlmax.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+```{r,warning=F}
+folder = "run 8 images/"
+name = "JDRPM target + space + Xcl (p=3)"
+load("J_space_run8_Xcl_sim4_highercvweight_wsp10mmax_totprec_bhlmax.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+
+```{r,warning=F}
+folder = "spaceJXcl/"
+name = "JDRPM target + space + Xcl"
+load("J_space_run11_Xcl_sim4_wspmax10m_totprec_bhlmax.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+
+```{r,warning=F}
+folder = "spaceJ Xcl Xlk fit13/"
+name = "JDRPM target + Xcl + Xlk"
+load("J_run13_Xcl_sim1_Xlk.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+
 
 # plots
 ```{r}
@@ -1707,7 +1777,7 @@ if (save_plot==TRUE) {pdf(file=paste0(folder,"fit",name,"_simple_map.pdf"),
 						  height =7, width = 9)}
 par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
 for(t in 1:Tm){
-	
+
 	partition_matrix <- do.call(cbind, partition)
 	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
 		 xlim=extrema(s_std[,1]),main=paste("time",t),
@@ -1779,13 +1849,44 @@ for(j in 1:N){
 		summary_fitted_median[j,t] = median(MODEL$fitted[t,j,])
 	}
 }
-cat(name,"\n")
+cat(name,"\nMSE\n")
 cat("mean ", MSE_matrices(summary_fitted_mean,yredORIGI),"\n")
 cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 ```
+```{r}
+cls = partitions_drpmj[[1]]
+cls
+maxk = max(cls)
+idx_sorted = c()
+lens = rep(0,maxk)
+for (k in 1:maxk){
+	idx_sorted = c(idx_sorted,which(cls == k))
+	lens[k] = length(which(cls==k))
+}
+idx_sorted
+lens
+sum(lens)
+colors = c()
+for (k in 1:maxk){
+	colors = c(colors,rep(k,lens[k]))
+}
+colors
 
-## covariate
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])[[1]]
+
+plot(NA, xlim = c(1, 105), ylim = extrema(cova_of_interest), 
+     xlab = "", ylab ="",
+     main = "time t")
+for (i in 1:105){
+	points(i,cova_of_interest[idx_sorted[i]],col=colors[i],pch=19)
+}
+```
+
+
+## covariate sorted
 ```{r,warning=F}
+save_plot = save_plots = F
+
 ########################################## COVARIATES EFFECTS
 covariate_scelte = c(
 	"Altitude"
@@ -1822,14 +1923,104 @@ covariate_scelte = c(
 	)
 
 for (target in covariate_scelte){
-	dir.create(paste0(folder,target))
-for (time in 1:Tm){
+	# dir.create(paste0(folder,target))
 ##### otherwise
 if (save_plot==T) {
-	pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+	# pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+	pdf(paste0(folder,"/",target,"_sorted.pdf"),width = 9.9, height = 5.4)
 }
-par(mar=c(2,4,2,1),oma=c(0.1,0.1,0.1,0.1))
 
+par(mar=c(2,2,2,1),mfrow=c(3,4),oma=c(0.2,0.1,1.5,0.1))
+for (time in 1:Tm){
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])[[1]]
+
+# plot(cova_of_interest[,1],
+# 	col=partition[[time]],
+# 	# col=partition[[time]],
+# 	pch=19,
+# 	cex=1.3,
+# 	# cex=pmax(y[, time]*4, rep(0.7, N)),
+# 	main=paste0("time ", time),
+# 				xlab="",ylab=""
+# 	)
+
+cls = partition[[time]]
+maxk = max(cls)
+idx_sorted = c()
+lens = rep(0,maxk)
+for (k in 1:maxk){
+	idx_sorted = c(idx_sorted,which(cls == k))
+	lens[k] = length(which(cls==k))
+}
+colors = c()
+for (k in 1:maxk){
+	colors = c(colors,rep(k,lens[k]))
+}
+plot(NA, xlim = c(1, 105), ylim = extrema(cova_of_interest), 
+     xlab = "", ylab ="", main = paste0("time ", time))
+for (i in 1:105){
+	points(i,cova_of_interest[idx_sorted[i]],col=colors[i],pch=19,cex=1.3)
+}
+
+
+}
+mtext(paste0(name," - ",target, " (sorted by cluster)"),side=3,line=0,outer=T,col="#2E1831")
+if (save_plots==TRUE) { dev.off() }
+}
+
+```
+
+
+
+## covariate
+```{r,warning=F}
+save_plot = save_plots = T
+
+########################################## COVARIATES EFFECTS
+covariate_scelte = c(
+	"Altitude"
+	,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	,"WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	)
+
+for (target in covariate_scelte){
+	# dir.create(paste0(folder,target))
+##### otherwise
+if (save_plot==T) {
+	# pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+	pdf(paste0(folder,"/",target,".pdf"),width = 9.9, height = 5.4)
+}
+
+par(mar=c(2,2,2,1),mfrow=c(3,4),oma=c(0.2,0.1,1.5,0.1))
+for (time in 1:Tm){
 cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])
 plot(cova_of_interest[,1],
 	col=partition[[time]],
@@ -1837,12 +2028,13 @@ plot(cova_of_interest[,1],
 	pch=19,
 	cex=1.3,
 	# cex=pmax(y[, time]*4, rep(0.7, N)),
-	main=paste0(name, " - time ", time),
-				xlab="",ylab=target
+	main=paste0("time ", time),
+				xlab="",ylab=""
 	)
 
-if (save_plots==TRUE) { dev.off() }
 }
+mtext(paste0(name," - ",target),side=3,line=0,outer=T,col="#2E1831")
+if (save_plots==TRUE) { dev.off() }
 }
 
 ```
@@ -1900,7 +2092,8 @@ covariata = "AQ_pm10"
 plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 
-covariata = "Altitude"
+# covariata = "Altitude"
+covariata = "WE_wind_speed_10m_max"
 plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
 covariata = covariata,annotate = F)
 

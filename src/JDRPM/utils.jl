@@ -770,8 +770,9 @@ function similarity1(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}}
 		xbar_j = mean(X_jt)
 		card_Sjt = length(X_jt)
 		Hx = 0.0
-		@inbounds for i in eachindex(X_jt)
-			Hx += (X_jt[i] - xbar_j)^2 
+		@inbounds @simd for i in eachindex(X_jt)
+			Hx += (X_jt[i] - xbar_j)^2
+			# Hx += (abs(X_jt[i] - xbar_j))^0.8
 		end
 		Hx /= card_Sjt
 		Hx *= cv_weight
@@ -803,8 +804,9 @@ function similarity1!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}
 		xbar_j = mean(X_jt)
 		card_Sjt = length(X_jt)
 		Hx = 0.0
-		@inbounds for i in eachindex(X_jt)
-			Hx += (X_jt[i] - xbar_j)^2 
+		@inbounds @simd for i in eachindex(X_jt)
+			Hx += (X_jt[i] - xbar_j)^2
+			# Hx += (abs(X_jt[i] - xbar_j))^0.8
 		end
 		Hx /= card_Sjt
 		Hx *= cv_weight
