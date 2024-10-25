@@ -394,7 +394,7 @@ covariate_scelte = c(
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
 	# ,"EM_nh3_agr_waste_burn"
-	,"EM_nh3_sum"
+	# ,"EM_nh3_sum"
 	# ,"EM_nox_traffic"
 	# ,"EM_nox_sum"
 	# ,"EM_so2_sum"
@@ -656,7 +656,7 @@ out = module_JDRPM$MCMC_fit(
 	covariate_similarity_idx = 4,
 	# cv_params = list(0,1,4.5,0.8),
 	cv_params = list(0,1,
-					 7.5,2,
+					 # 7.5,2,
 					 7.5,2,
 					 7.5,2,
 					 7.5,2
@@ -668,7 +668,7 @@ out = module_JDRPM$MCMC_fit(
 	# covariate_similarity_idx = 1,
 	# cv_params = list(1),
 	
-	cv_weight = 0.2,
+	cv_weight = 0.4,
 	Xcl_covariates = X_cl,
 
 	# covariate_similarity_idx = 1,
@@ -683,7 +683,7 @@ out = module_JDRPM$MCMC_fit(
 	# draws = 100,burnin = 0, thin = 1,
 	# draws = 40000,burnin = 30000, thin = 5,
 	logging = F,
-	seed = 113.0,
+	seed = 111.0,
 	simple_return = FALSE,
 	verbose = T,
 	perform_diagnostics = (niter>1000)
@@ -730,7 +730,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 
 
 ```{r}
-save(rout,file="J_run15_as11_but_with_other_sim4_params.Rdata")
+save(rout,file="J_run18_as11_but_with_higher_cvweight.Rdata")
 ```
 
 
@@ -1752,6 +1752,31 @@ MODEL = rout
 ```
 
 
+```{r,warning=F}
+folder = "spaceJ Xcl fit16/"
+name = "JDRPM target + space + Xcl"
+load("J_run16_as11_but_with_also_rhmean.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+```{r,warning=F}
+folder = "spaceJ Xcl fit18/"
+name = "JDRPM target + space + Xcl"
+load("J_run18_as11_but_with_higher_cvweight.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+```{r,warning=F}
+folder = "spaceJ Xcl fit larger cv weight/"
+name = "JDRPM target + space + Xcl"
+load("J_run17_as11_but_with_also_altitude_and_higher_cvweight.Rdata")
+partition = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL = rout
+```
+
+
 
 # plots
 ```{r}
@@ -1885,7 +1910,7 @@ for (i in 1:105){
 
 ## covariate sorted
 ```{r,warning=F}
-save_plot = save_plots = F
+save_plot = save_plots = T
 
 ########################################## COVARIATES EFFECTS
 covariate_scelte = c(
