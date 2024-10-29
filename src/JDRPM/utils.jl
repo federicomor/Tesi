@@ -987,16 +987,6 @@ end
 
 function similarity4!(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool,case::Int=1, add::Bool=false, lS=@MVector(zeros(2)), cv_weight::Real=1)
 	nx = length(X_jt)
-	# println("calling this sim")
-	# println("mu_c: ", mu_c)
-	# println("lambda_c: ", lambda_c)
-	# println("a_c: ", a_c)
-	# println("b_c: ", b_c)
-	# println("lg: ", lg)
-	# println("case: ", case)
-	# println("add: ", add)
-	# println("lS: ", lS)
-	# println("cv_weight: ", cv_weight)
 	nxm = nx/2
 	xbar = mean(X_jt)
 	aux2 = 0.0

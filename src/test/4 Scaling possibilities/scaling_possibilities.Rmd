@@ -37,6 +37,8 @@ juliaEval("using Pkg; Pkg.status()")
 
 module = normalizePath("../../JDRPM/src/JDRPM.jl")
 module_JDRPM <- juliaImport(juliaCall("include", module))
+
+module_JDRPM$trigger_compilation()
 ```
 
 # ===========
@@ -120,9 +122,9 @@ A_ub_sigma = 7
 A_ub_tau = 5
 A_ub_lambda = 5
 
-a_sigma  = 3; b_sigma  = 1
-a_tau    = 3; b_tau    = 1
-a_lambda = 3; b_lambda = 1
+a_sigma  = 0.01; b_sigma  = 0.01
+a_tau    = 1.9; b_tau    = 0.4
+a_lambda = 1.9; b_lambda = 0.4
 eta1_scale = 0.9
 
 sig_mh_sig2 = 0.1
@@ -1276,5 +1278,295 @@ if (save_plot) { dev.off() }
 }
 ```
 
+
+# ==========
+# Scaling wrt P
+
+
+# idea 1
+```{r}
+nruns_tests = 1
+
+#### target 
+plk_test = c(0,1,3,5,7)
+pcl_test = c(0,1,3,5,7)
+
+niter_tests = matrix(0,nrow=length(plk_test),ncol=lenght(plk_test))
+for (i in 1:length(plk_test)) {
+	for (j in 1:length(plk_test)) {
+		# niter_tests[i,j] = 1600/(plk_test[i]*plk_test[j]+1)*100
+		niter_tests[i,j] = 30
+	}
+}
+nruns_tests
+niter_tests
+```
+
+
+```{r}
+n = 50
+Tm = 50
+
+performance_Julia <- matrix(1e5, nrow = length(plk_test), ncol = length(plk_test))
+colnames(performance_Julia) = c(paste0("plk_",plk_test))
+rownames(performance_Julia) = c(paste0("pcl_",pcl_test))
+
+performance_Julia
+```
+
+```{r}
+load(file="test_varying_p.Rdata")
+```
+
+
+# fit
+```{r}
+library(lubridate)
+# module_JDRPM <- juliaImport(juliaCall("include", module))
+
+seed = 2.0
+
+# for (cl in 4:length(pcl_test)) {
+for (cl in 4:4) {
+for (lk in 1:length(plk_test)) {
+	
+	out = create_data(n,Tm,p_cl = pcl_test[cl], p_lk = plk_test[lk])
+	y = out[[1]]
+	sites = out[[2]]
+	X_cl = out[[3]]
+	X_lk = out[[4]]
+
+	niter = niter_tests[cl,lk]
+	nruns = nruns_tests
+	
+	cat(crayon::green("########## lk",plk_test[lk]," cl",pcl_test[cl],"\n"))
+	nburn = niter-1
+	nthin = 1
+  	##### fit models
+		
+	##### J Xcl
+	for (run in 1:nruns){
+		tempo_inizio <- proc.time()
+		out = module_JDRPM$MCMC_fit(
+			Y=y,
+			sp_coords = sites,
+			M_dp = 1,
+			initial_partition = NA,
+			starting_alpha = 0.5,
+			unit_specific_alpha = FALSE,
+			time_specific_alpha = TRUE,
+			update_alpha = TRUE,
+			include_eta1 = TRUE,
+			include_phi1 = TRUE,
+			update_eta1 = TRUE,
+			update_phi1 = TRUE,
+			sig2h_priors = c(a_sigma,b_sigma),
+			eta1_priors = c(eta1_scale,sig_mh_eta1),
+			# beta_priors = c(rep(1,p),2),
+			beta_priors = NA,
+			tau2_priors = c(a_tau,b_tau),
+			phi0_priors = c(m0_phi0,s20_phi0),
+			phi1_priors = sig_mh_phi1,
+			lambda2_priors = c(a_lambda,b_lambda),
+			alpha_priors = c(a_alpha,b_alpha),
+
+			####### space
+			spatial_cohesion_idx = spatial_cohesion,
+			sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+			######## likelihood covariates
+			Xlk_covariates = if (lk>1) X_lk else NA, beta_priors = c(rep(0,plk_test[lk]),1),
+			# Xlk_covariates = NA, beta_priors = NA,
+			######## clustering covariates
+			covariate_similarity_idx = 4,
+			cv_params = as.list(c(0,1,rep(c(7.5,2),pcl_test[cl]))),
+			Xcl_covariates = if (cl>1) X_cl else NA,
+
+			draws = niter,burnin = nburn, thin = nthin,
+			logging = FALSE,
+			seed = seed,
+			skip_checks = T,
+			simple_return = TRUE
+		)
+		tempo_fine <- proc.time()
+		elapsed_time <- tempo_fine - tempo_inizio
+		# Elapsed time in seconds
+		differenza_tempo <- elapsed_time["elapsed"]
+		cat(crayon::red(paste0("J Xcl case lk=",plk_test[lk]," cl=",pcl_test[cl],
+							   " elapsed: ",differenza_tempo,"s i.e.\n",
+							   differenza_tempo/niter," s/it \n\n")))
+		cat(crayon::magenta("current value",performance_Julia[cl, lk],
+				   "\nnew candidate",as.double(differenza_tempo) / niter,"\n"))
+		if (as.double(differenza_tempo) / niter < performance_Julia[cl, lk]){
+			cat(crayon::magenta("UPDATE\n"))
+		}
+		performance_Julia[cl, lk] = min(performance_Julia[cl, lk],
+									  as.double(differenza_tempo) / niter)
+	# }
+	
+	}
+  }
+}
+```
+# refine
+```{r}
+cl = 3
+lk = 2
+nruns = 1
+
+out = create_data(n,Tm,p_cl = pcl_test[cl], p_lk = plk_test[lk])
+y = out[[1]]
+sites = out[[2]]
+X_cl = out[[3]]
+X_lk = out[[4]]
+
+niter = niter_tests[cl,lk]
+nruns = nruns_tests
+
+cat(crayon::green("########## lk",plk_test[lk]," cl",pcl_test[cl],"\n"))
+nburn = niter-1
+nthin = 1
+
+##### J Xcl
+for (run in 1:nruns){
+	tempo_inizio <- proc.time()
+	out = module_JDRPM$MCMC_fit(
+		Y=y,
+		sp_coords = sites,
+		M_dp = 1,
+		initial_partition = NA,
+		starting_alpha = 0.5,
+		unit_specific_alpha = FALSE,
+		time_specific_alpha = TRUE,
+		update_alpha = TRUE,
+		include_eta1 = TRUE,
+		include_phi1 = TRUE,
+		update_eta1 = TRUE,
+		update_phi1 = TRUE,
+		sig2h_priors = c(a_sigma,b_sigma),
+		eta1_priors = c(eta1_scale,sig_mh_eta1),
+		# beta_priors = c(rep(1,p),2),
+		beta_priors = NA,
+		tau2_priors = c(a_tau,b_tau),
+		phi0_priors = c(m0_phi0,s20_phi0),
+		phi1_priors = sig_mh_phi1,
+		lambda2_priors = c(a_lambda,b_lambda),
+		alpha_priors = c(a_alpha,b_alpha),
+
+		####### space
+		spatial_cohesion_idx = spatial_cohesion,
+		sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+		######## likelihood covariates
+		Xlk_covariates = if (lk>1) X_lk else NA, beta_priors = c(rep(0,plk_test[lk]),1),
+		# Xlk_covariates = NA, beta_priors = NA,
+		######## clustering covariates
+		covariate_similarity_idx = 4,
+		cv_params = as.list(c(0,1,rep(c(4,2),pcl_test[cl]))),
+		Xcl_covariates = if (cl>1) X_cl else NA,
+
+		draws = niter,burnin = nburn, thin = nthin,
+		logging = FALSE,
+		seed = seed,
+		skip_checks = T,
+		simple_return = TRUE
+	)
+	tempo_fine <- proc.time()
+	elapsed_time <- tempo_fine - tempo_inizio
+	# Elapsed time in seconds
+	differenza_tempo <- elapsed_time["elapsed"]
+	cat(crayon::red(paste0("J Xcl case lk=",plk_test[lk]," cl=",pcl_test[cl],
+						   " elapsed: ",differenza_tempo,"s i.e.\n",
+						   differenza_tempo/niter," s/it \n\n")))
+	cat(crayon::magenta("current value",performance_Julia[cl, lk],
+					   "\nnew candidate",as.double(differenza_tempo) / niter,"\n"))
+	performance_Julia[cl, lk] = min(performance_Julia[cl, lk],
+								  as.double(differenza_tempo) / niter)
+# }
+}
+```
+
+
+```{r}
+save(performance_Julia,file="test_varying_p.Rdata")
+```
+
+
+# plot
+```{r}
+performance_Julia
+# 0.024 è il tempo di C con target + space per questi n e T
+speedup_matrix = 0.024/performance_Julia # time on slow / time on fast
+speedup_matrix
+```
+
+
+```{r}
+Jplot_mat = function(mat,title,maxk){
+ncols_ari <- 1000
+cols <- colora(ncols_ari, 35,0)
+cols = rev(cols)
+ncol_writings = 3
+cols_writings <- colora(ncol_writings, 35,0)
+# cols_writings <- colora(ncol_writings, "rand",1)
+cols_writings <- rev(cols_writings)
+brks <- seq(0,maxk, length.out = ncols_ari + 1)
+
+# Plotting the matrix
+library(fields)
+# image(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks)
+image.plot(mat*1000, axes = FALSE, col = cols, main=title, breaks = brks,legend.width = 1.2)
+		  
+# Adding text annotations for each cell
+
+xaxis = seq(0,1,length.out = size(mat)[1])
+yaxis = seq(0,1,length.out = size(mat)[2])
+
+for (i in 1:size(mat)[1]){
+	for (j in 1:size(mat)[2]){
+		col_chosen = floor(abs(ncol_writings-mat[i,j]/(maxk/1000)*(ncol_writings-1)))+1
+		# cat(col_chosen,"\n")
+		
+		col1 = "#ffffff" #"#CC78AF" "#F8DCD9"
+		col2 = "#aaaaaa"
+		col3 = "#d8DCD9"
+		
+		text(y=yaxis[j],x=xaxis[i],
+			 # font=2,
+		# labels = sprintf("%.2f\nms/it", mat[i, j]*1000),
+		# labels = sprintf("%.2f", mat[i, j]*1000),
+		# labels = sprintf("%.2f\n(%.1fx)", mat[i, j]*1000,speedup_matrix[i,j]),
+		labels = paste0(round(mat[i, j]*1000,digits=2),
+						"\n(",round(speedup_matrix[i,j],digits=2),"x)"),
+		# cex = 1.0, col = "#aaaaaa")
+		# cex = 1, col = cols_writings[col_chosen])
+		# cex = 1, col = if (speedup_matrix[i,j]>1) col1 else col2)
+		cex = 1, col = col3)
+		# cex = mat[i, j], col = cols_writings[col_chosen])
+		# cex = 1.0, col =complement(cols[col_chosen])[[1]])
+		}
+}
+# colora(3,"rand")
+
+mtext(text=c(paste0("cl=",pcl_test[1:size(mat)[1]])),
+	  side=1, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+mtext(text=c(paste0("lk=",plk_test[1:size(mat)[1]])),
+	  side=2, line=0.3,at=seq(0,1,length=size(mat)[1]), las=1, cex=0.8)
+}
+```
+
+
+```{r}
+save_plots = F
+if (save_plots==T){
+	pdf(file="target_space_Xs_varying_p.pdf",width=7,height = 5)
+}
+maxk = max(performance_Julia)*1000
+par(mar=c(2.1,2.3,2,1),oma=c(0.2,0.2,0.1,1.5))
+Jplot_mat(performance_Julia,title="fit J - space + Xlk + Xcl for varying p",maxk)
+
+# mtext("ms/it",side=3,line=-0.8,at=1.235,cex=0.9)
+mtext("ms/it",side=3,line=-0.8,at=1.24,cex=0.9)
+# mtext("Scaling performance comparison", side = 3, line = 0.1, outer = T)
+if (save_plots==T){ dev.off() }
+```
 
 

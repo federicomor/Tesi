@@ -365,8 +365,8 @@ end
 
 
 begin
-# lg = false
-lg = true
+lg = false
+# lg = true
 cv_weight = 5
 alphas = range(0, 2, length=1000)
 similarity1_vals_cl1 = [similarity1(X_cl1, alpha, lg, cv_weight) for alpha in alphas]
@@ -380,11 +380,11 @@ dpi=300, size=(760,400)
 plot!(alphas, similarity1_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity1_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity1_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
-plot!(alphas, similarity1_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
+plot!(alphas, similarity1_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 1 (log=$lg)")
-# savefig("similarity1_log_$lg.pdf")
+savefig("similarity1_log_$lg.pdf")
 end
 
 lg = true
@@ -436,11 +436,11 @@ dpi=300, size=(760,400)
 plot!(alphas, similarity2_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity2_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity2_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
-plot!(alphas, similarity2_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
+plot!(alphas, similarity2_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 2 (log=$lg)")
-# savefig("similarity2.pdf")
+savefig("similarity2.pdf")
 end
 
 
@@ -459,11 +459,11 @@ dpi=300, size=(760,400)
 plot!(alphas, similarity3_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity3_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, similarity3_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
-plot!(alphas, similarity3_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
+plot!(alphas, similarity3_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
 title!("Similarity 3 (log=$lg)")
-# savefig("similarity3.pdf")
+savefig("similarity3.pdf")
 end
 
 
@@ -536,10 +536,11 @@ print(quantile.(Normal(0,sqrt(quantile(InverseGamma(a,b),0.9))),[0.1 0.9]))
 mean(InverseGamma(a,b))
 print(quantile.(Normal(0,mean(InverseGamma(a,b))),[0.1 0.9]))
 # ar r bl
+
 begin
 lg = true
 mu = 0; lambda = 1; 
-b_c = 2
+b_c = 3
 cv_weight = 1
 acs = range(0.01, 10.0, length=1000)
 similarity4_vals_cl1 = [similarity4(X_cl1, mu, lambda, a_c, b_c, lg, cv_weight)
@@ -568,14 +569,14 @@ dpi=300, size=(760,400)
 plot!(acs, similarity4_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(acs, similarity4_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(acs, similarity4_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
-plot!(acs, similarity4_vals_cl5,  label="cluster 4", lw=2, color=color_palette[5])
+plot!(acs, similarity4_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$a_0$ values")
 ylabel!("")
 # title!("Similarity 4 (log=$lg)")
 # annotate!(:bottomright,
 # text("σ² ∼ invGamma($a_c, $b_c)",8,:gray,:right))
 title!("Similarity 4 (log=$lg, b₀=$b_c)")
-# savefig("similarity4_lambda1_bc$(b_c).pdf")
+savefig("similarity4_lambda1_bc$(b_c).pdf")
 end
 	
 

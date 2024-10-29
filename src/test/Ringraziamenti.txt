@@ -6,7 +6,11 @@ Ringrazio Alessandro Carminati per avermi aiutato in molte delle fasi più criti
 
 Ringrazio la mia famiglia per avermi in qualche modo aiutato durante questi anni di università, e i miei amici e compagni di studio, i quali hanno sempre sapientemente fatto emergere le mie migliori potenzialità e risorse. La passione per risolvere problemi, ideare soluzioni creative, perdersi nei calcoli, addentrarsi nel magico mondo della matematica più avanzata, condividere dubbi e ragionamenti; tutto questo ha sempre trovato in voi un'ottima compagnia.
 
-Ringrazio anche tutti i bambini e ragazzi con cui ho avuto modo di lavorare, e giocare, come animatore nei vari campi estivi, per farmi sempre ricordare di come possa daredel vostro affetto e di cosa io magari sia in grado di costruire. 
+Ringrazio anche tutti i bambini e ragazzi con cui ho avuto modo di lavorare, e giocare, come animatore nei vari campi estivi, 
+- per qualcosa che, per quanto mi piaccia scrivere, non riesco a formulare in maniera appropriata a parole. 
+- for something that, as much as I like to write, I still cannot properly express in words
+
+- per avermi ricordato dello spirito gioioso e leggero con cui si possono affrontare le varie sfide della vita. 
 
 Infine, ringrazio tutti i gatti e micini che ho incontrato, anche letteralmente, durante il mio percorso, che con un tenero miagolio o una affettuosa strusciatina sono sempre riusciti a migliorare le giornate.
 
@@ -19,3 +23,15 @@ I thank Professor Alessandra Guglielmi for the faith she put on myself and my sk
 I thank Alessandro Carminati for having helped me in many of the most critical phases of the thesis. His action always precise and effective has been necessary to solve the various theoretical puddles in which I got mired. Moreover, we share the same passion for Julia and, I believe, the pleasure for having defeated the not-so-mourned C of the old model implementation.
 
 I thank my family for having helped somehow during these years of university, and my friends and fellows who have always and wisely brought to light my highest potential and resources. The passion for solving problems, inventing creative solutions, getting lost in calculations, wanderig trough the magical world of the most advanced mathematics, sharing doubts and reasonings; all this has always found in you a great companion.
+
+--------------------------------------------------
+
+Come accade a molti studenti a cui "manca solo la tesi", c'è sempre un po' di incertezza e quasi malinconia nell'aver passato tutti gli esami del percorso di studi ma dover ora sostenere un'ultima complessa prova, prima di dichiararsi effettivamente liberi ancor prima che laureati. 
+
+Ringrazio la professoressa Alessandra Guglielmi per avermi guidato nella nebbia di incertezza e confusione che accompagna il lavoro della tesi. Infatti, una volta finiti tutti gli esami, si manifesta spesso negli studenti a cui "manca solo la tesi" l'idea di forse non farla, di rinunciare a finire il percorso di studi. Dopotutto, uno si è già dimostrato tutto quello che doveva dimostrarsi, non serve necessariamente andare oltre.  
+
+Una volta finiti tutti gli esami si manifesta spesso negli studenti a cui "manca solo la tesi" l'idea di forse non farla, di rinunciare a finire il percorso di studi. Dopotutto, uno si è già dimostrato tutto quello che doveva dimostrarsi, non sembra necessario andare oltre. Specialmente perché questo richiede 
+
+Ringrazio la professoressa Alessandra Guglielmi per avermi guidato nella nebbia di incertezza e confusione che spesso accompagna il lavoro della tesi. Infatti, una volta finiti tutti gli esami, si manifesta in molti studenti a cui "manca solo la tesi" l'idea di forse non farla, di rinunciare a finire il percorso di studi. Dopotutto, uno si è già dimostrato tutto quello che doveva dimostrarsi, non serve necessariamente andare oltre, specialmente se il progetto 
+
+Ringrazio la professoressa Alessandra Guglielmi per avermi guidato attraverso la nebbia di incertezza e confusione che spesso accompagna la tesi, o in generale gli ultimi mesi del percorso di laurea. Fin dall'inizio ha infatti condiviso un sincero interesse per il lavoro che avremmo dovuto svolgere, e una credo complessiva fiducia nelle mie possibilità di condurlo a termine.

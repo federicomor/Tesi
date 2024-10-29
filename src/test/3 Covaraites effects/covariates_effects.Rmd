@@ -143,7 +143,7 @@ s_std
 plot(s_std)
 rownames(s_std) = NULL
 
-ranked_indices = c(1:n) # per dopo
+ranked_indices = c(1:size(y)[1]) # per dopo
 ```
 
 
@@ -668,7 +668,7 @@ out = module_JDRPM$MCMC_fit(
 	# covariate_similarity_idx = 1,
 	# cv_params = list(1),
 	
-	cv_weight = 0.4,
+	cv_weight = 0.3,
 	Xcl_covariates = X_cl,
 
 	# covariate_similarity_idx = 1,
@@ -683,7 +683,7 @@ out = module_JDRPM$MCMC_fit(
 	# draws = 100,burnin = 0, thin = 1,
 	# draws = 40000,burnin = 30000, thin = 5,
 	logging = F,
-	seed = 111.0,
+	seed = 314.0,
 	simple_return = FALSE,
 	verbose = T,
 	perform_diagnostics = (niter>1000)
@@ -1676,6 +1676,38 @@ plot(cova_of_interest[,1],
 
 # dev.off()
 ```
+
+
+
+
+
+
+
+# ===========
+# ari two cols comparison
+```{r,warning=F}
+name_sp = "JDRPM target + space"
+load("../1 Assessing correctness and NA/df wsc fits/space_rout_full_run6_dfweekly.Rdata")
+partition_sp = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL_sp = rout
+
+name_Xcl = "JDRPM target + space + Xcl"
+load("J_space_run11_Xcl_sim4_wspmax10m_totprec_bhlmax.Rdata")
+partition_Xcl = partitions_drpmj = generate_partition(rout, loss ="binder",maxcl = 0)
+MODEL_Xcl = rout
+```
+
+```{r}
+save_plots = T
+if (save_plots==T){
+	pdf(file="ari_sp_vs_Xcl.pdf",width=10,height = 5)
+}
+par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
+plot_ARI(partition_sp, title=name_sp)
+plot_ARI(partition_Xcl, title=name_Xcl)
+if (save_plots==T){ dev.off()}
+```
+
 
 
 

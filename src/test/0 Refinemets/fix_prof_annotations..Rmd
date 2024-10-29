@@ -1,0 +1,843 @@
+---
+title: "R Notebook"
+output: html_document
+---
+
+# setup
+```{r, warning=FALSE}
+library(salso)
+library(RColorBrewer)
+source("../include.R")
+```
+
+
+
+# LOAD 
+## load C drpm
+```{r}
+devtools::load_all("../../drpm_main/")
+# devtools::load_all("../../drpm_sporcato//")
+```
+
+## load J drpm
+```{r}
+library(JuliaConnectoR)
+juliaSetupOk()
+
+# juliaEval("using Pkg")
+# juliaEval("Pkg.activate(\"../../JDRPM\")")
+# juliaEval("Pkg.instantiate()")
+
+# juliaEval("Pkg.status()")
+# setup project
+juliaEval("using Pkg; Pkg.status()")
+juliaEval("Pkg.activate(\"../../JDRPM\")")
+juliaEval("using Pkg; Pkg.status()")
+
+module = normalizePath("../../JDRPM/src/JDRPM.jl")
+module_JDRPM <- juliaImport(juliaCall("include", module))
+ 
+module_JDRPM$trigger_compilation()
+```
+
+
+
+# ===========
+# SPACE and COVA
+```{r}
+load("../thesis data/df_wsc.Rdata")
+
+# load("../thesis data/df_daily_full.Rdata")
+# df_wsc = df_daily_full
+
+# load("../thesis data/df_daily_full_logtransf.Rdata")
+# df_wsc = df_daily_full_logtransf
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+
+unique(df_wsc$IDStations)
+na_summary(df_wsc)
+```
+
+
+
+## real PM10 data
+```{r}
+sites_full = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+yfull=data.frame()
+
+target = "AQ_pm10"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+# time_span = 1:14 # GOOD
+# time_span = 1:4
+time_span = 1:12
+
+set.seed(110)
+# quanti = 80; nsubjects = sample(1:105, quanti,replace = F)
+# quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
+# quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
+nsubjects = 1:105
+# nsubjects = 1:10
+
+y = yfull[nsubjects,1+time_span]
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+mn <- apply(y,2,mean)
+sd <- apply(y,2,sd)
+
+y <- t(t(y) - mn)
+# y <- t(t(y) - mn)+1 # shifted 1
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites = sites_full[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+
+# check
+# mean(s_std[,1])
+# mean(s_std[,2])
+# var(s_std[,2])
+# var(s_std[,1])
+######################################
+
+# yred=(y[,time_span]+0.5)*2
+yred=y
+
+par(mar=c(2,2,2,1))
+# par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# for(i in 1:N){
+# 	text(1,yred[i,1],i,cex=0.7)
+# }
+
+# -> we have
+# y = yred
+y
+s_std
+plot(s_std)
+rownames(s_std) = NULL
+
+ranked_indices = c(1:size(y)[1]) # per dopo
+```
+
+
+# ===========
+# 1. fix beta vec plots
+credible intervals rather than messy trace plots
+or both but tidier
+
+```{r}
+library(bayestestR)
+covariate_scelte = c(
+	"Altitude"
+	,"WE_tot_precipitation"
+	,"WE_solar_radiation"
+	,"WE_blh_layer_max"
+	,"EM_nox_sum"
+	,"LI_bovine"
+	)
+```
+
+
+```{r}
+size(rout$beta)
+
+par(mfrow=c(3,2),mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
+for (cova_idx in 1:6){
+
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, 12),
+	 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[cova_idx])),
+     ylim = extrema(rout$beta[,cova_idx,]))
+abline(h=0,col="#dCd5d2")
+	for (time in 1:12){
+		ci_hdi <- ci(rout$beta[time,cova_idx,], method = "HDI")
+		UPP = ci_hdi[[2]]
+		MID = mean(rout$beta[time,cova_idx,])
+		LOW = ci_hdi[[3]]
+		lines(c(time,time),c(LOW,UPP),col="#FFD99F")
+		points(time,MID,cex=1,col="#7D1D67",pch=15)
+		points(time,UPP,cex=1,col="#F65A6D",pch=19)
+		points(time,LOW,cex=1,col="#F65A6D",pch=19)
+	}
+}
+```
+
+
+## full data
+```{r}
+load("../1 Assessing correctness and NA/Xlk/Xlk full/space_rout_full_Xlk_timewisecorrected.Rdata")
+```
+
+
+# NA data
+```{r}
+load("../1 Assessing correctness and NA/Xlk/Xlk NA/space_rout_NA_Xlk_timewisecorrected.Rdata")
+```
+
+
+# idea 1
+```{r}
+# name  = "JDRPM - full data + Xlk"
+name = "JDRPM - NA data + Xlk"
+
+save_plots = T
+
+	if (save_plots==T){
+	pdf(file=paste0("beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+	}
+
+par(mfrow=c(6,2),mar=c(2,2,2,1),oma=c(0.1,0.1,1.3,0.1))
+for (cova_idx in 1:6){
+##### TR PLOT
+	cols = colora(size(rout$beta)[3],44,0)
+	cols = paste0(cols,"AA")
+	# verde scuro: iterazioni iniziali
+	# giallo: iterazioni finali
+	# par(mar=c(3,3,3,1))
+	# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
+	for (iter in 1:size(rout$beta)[3]){
+		if(iter==1) {
+			plot(rout$beta[,cova_idx,iter],
+				 ylim=extrema(rout$beta[,cova_idx,]),
+				 # main=covariate_scelte[cova_idx],
+				 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[cova_idx])),
+				 col = cols[iter],type="l")
+	abline(h=0,col="gray80",lty=1)
+	lines(rout$beta[,cova_idx,1],col = cols[1])
+		} else {
+			lines(rout$beta[,cova_idx,iter],col = cols[iter])
+		}
+	}
+	legend("topleft",legend = c("initial iterates","final iterates"),
+	   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+	   lwd=3,cex=0.8,bty="n"
+	   )
+
+	
+##### CRED INT
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, 12),
+	 # main=bquote(beta[t] * " regressor - " * .(covariate_scelte[cova_idx])),
+	 main=("95% credible intervals (HDI)"),
+     ylim = extrema(rout$beta[,cova_idx,]))
+abline(h=0,col="#dCd5d2")
+	for (time in 1:12){
+		ci_hdi <- ci(rout$beta[time,cova_idx,],ci = 0.95, method = "HDI")
+		UPP = ci_hdi[[2]]
+		MID = mean(rout$beta[time,cova_idx,])
+		LOW = ci_hdi[[3]]
+		lines(c(time,time),c(LOW,UPP),col="#FFD99F")
+		points(time,MID,cex=1,col="#7D1D67",pch=15)
+		points(time,UPP,cex=1,col="#F65A6D",pch=19)
+		points(time,LOW,cex=1,col="#F65A6D",pch=19)
+	}
+}
+
+mtext(name,side=3,line=0,outer=T,col="#2E1831")
+
+if (save_plots==T) { dev.off() }
+```
+
+
+# ============
+# 2. CI na fit
+Nelle sezioni 3.2.1 e 3.2.2 sarebbe carino mostrare i credible intervals nei punti in cui mancano i dati, in questo modo possiamo verificare se la vera osservazione cade nel credible interval. Non sono sicuro che mostrarlo per tutti i punti mancanti sia fattibile, magari nel caso possiamo mostrarlo per pochi esempi (magari alcuni che funzionano e altri che non funzionano).
+
+## no space
+```{r}
+seed = as.integer(runif(1,0,1000))*1.0
+seed = 398.0
+# seed = 398.0
+# seed = 881.0
+set.seed(seed)
+cat(seed)
+
+source("../Supplementary material/Functions.R")
+# N <- 5; Tm<-6; M<-1;
+# alpha = 0.99
+
+# N <- 4; Tm<-7; M<-1;
+# alpha = 0.9
+
+N <- 10; Tm<-12; M<-1;
+alpha = 0.9
+
+# N <- 20; Tm<-20; M<-1;
+# set.seed(345233)
+# alpha = 0.8
+
+ndata <- 100
+dat <- rtpartition1(N=N,M=M,rho=alpha,ntime=Tm,tau=5,sig=1,
+					Caron=FALSE,FirstPart=NULL,TYPE="Random",
+				    phi0=0, phi1=1)
+
+y<- t(dat$YMat)
+
+cols = colora(N,seed = 56,show = 0)
+yred=y
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+```
+## setting NA
+```{r}
+# Number of elements to set as NA
+y_NA = y
+
+ndata = size(y)[1] * size(y)[2]
+
+set.seed(113)
+na_percentage = 0.1
+na_percentage = 0.09620821
+n_na <- round(ndata * na_percentage) # nstations * nday * na%
+cat(n_na,"\n")
+
+# Randomly sample positions to be set as NA
+na_indices_j <- sample(size(y)[1], n_na,replace = T)
+na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (k in 1:n_na){
+	cat("NAing index (",na_indices_j[k],",",na_indices_t[k],")\n")
+	y_NA[na_indices_j[k], na_indices_t[k]] = NA
+}
+
+# Check the dataset
+cat(sum(is.na(y_NA)))
+# y_NA
+```
+
+## with space
+
+
+Un'altra cosa che potresti fare è mettere a NA un'intera time series e plottare media e credible intervals ottenuti per quella time series, così da vedere quanto il modello è bravo a predirre per un punto nello spazio in cui non potrebbe non esserci un sensore. Questa cosa potrebbe essere fatta prendendo un punto e poi facendo vedere gli intervalli nel caso del modello base, poi con il clustering spaziale, poi con le covariate in likelihood e/o clustering. Si suppone che aumentando la complessità del modello piano piano ci sia un miglioramento nella predizione.
+
+
+
+# ============
+# NAing a whole ts
+we set to NA a whole time series and compare the fits of 
+J space
+J space + Xlk
+Jspace + Xcv anche forse?
+
+# data
+```{r}
+load("../thesis data/df_wsc.Rdata")
+
+# load("../thesis data/df_daily_full.Rdata")
+# df_wsc = df_daily_full
+
+# load("../thesis data/df_daily_full_logtransf.Rdata")
+# df_wsc = df_daily_full_logtransf
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0011A")] = "STA.CH0011A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0033A")] = "STA.CH0033A"
+# df_wsc$IDStations[which(df_wsc$IDStations=="STA-CH0043A")] = "STA.CH0043A"
+
+unique(df_wsc$IDStations)
+na_summary(df_wsc)
+```
+
+## real PM10 data
+```{r}
+sites_full = data.frame(
+	longitude = unique(df_wsc$Longitude), 
+	latitude = unique(df_wsc$Latitude))
+stations = unique(df_wsc$IDStations)
+yfull=data.frame()
+
+target = "AQ_pm10"
+
+for(st in stations){
+	y_we_pm10=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+	yfull=rbind(yfull,y_we_pm10)
+}
+rownames(yfull) = NULL
+colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+# time_span = 1:14 # GOOD
+# time_span = 1:4
+time_span = 1:12
+
+set.seed(110)
+# quanti = 80; nsubjects = sample(1:105, quanti,replace = F)
+# quanti = 30; nsubjects = sample(1:105, quanti,replace = F) #GOOD
+# quanti = 60; nsubjects = sample(1:105, quanti,replace = F)
+nsubjects = 1:105
+
+y = yfull[nsubjects,1+time_span]
+#############################################
+# authors suggested to/did scale the spatial locations and also centered the observations
+
+mn <- apply(y,2,mean)
+sd <- apply(y,2,sd)
+
+y <- t(t(y) - mn)
+# y <- t(t(y) - mn)+1 # shifted 1
+
+Tm = tps <- ncol(y) # time span
+N = size(y)[1] # number of units
+num_units = N
+
+sites = sites_full[nsubjects,]
+smn <- apply(sites,2,mean)
+ssd <- apply(sites,2,sd)
+s_std <- t((t(sites) - smn)/ssd)
+
+# check
+# mean(s_std[,1])
+# mean(s_std[,2])
+# var(s_std[,2])
+# var(s_std[,1])
+######################################
+
+# yred=(y[,time_span]+0.5)*2
+yred=y
+par(mar=c(2,2,2,1))
+# par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# for(i in 1:N){
+# 	text(1,yred[i,1],i,cex=0.7)
+# }
+
+# -> we have
+# y = yred
+y
+s_std
+plot(s_std)
+rownames(s_std) = NULL
+```
+
+## Fits
+```{r}
+# as.integer(runif(1,0,1000))*1.0
+seed = 888.0
+# seed = 314.0
+cat("seed",seed,"\n")
+set.seed(seed)
+
+# niter=10000; nburn=6000; nthin=4
+# niter=50000; nburn=10000; nthin=40 # they did this in their tests
+# niter=10000; nburn=0; nthin=1
+# niter=20000; nburn=15000; nthin=5
+# niter=50000; nburn=30000; nthin=20 # GOOD
+# niter=80000; nburn=60000; nthin=20
+niter=110000; nburn=90000; nthin=5
+# niter=100000; nburn=60000; nthin=40
+# niter=100; nburn=0; nthin=1
+nout <- (niter-nburn)/nthin
+cat(nout,"valid iterations\n")
+
+niter = as.integer(niter)
+nburn = as.integer(nburn)
+nthin = as.integer(nthin)
+```
+
+
+```{r}
+# params
+m0_phi0 = 0
+# s20_phi0 = 8
+# A_ub_sigma = 7
+s20_phi0 = 10
+A_ub_sigma = 5
+A_ub_tau = 5
+A_ub_lambda = 5
+
+# a_sigma  = 3; b_sigma  = 4
+# a_tau    = 3; b_tau    = 4
+# a_lambda = 3; b_lambda = 4
+
+# a_sigma  = 2; b_sigma  = 2
+# a_tau    = 2; b_tau    = 2
+# a_lambda = 2; b_lambda = 2
+
+a_sigma  = 0.01; b_sigma  = 0.01
+a_lambda = 0.1; b_lambda = 0.1
+# # a_tau    = 0.1; b_tau    = 0.1
+a_tau    = 2; b_tau    = 2
+# a_tau    = 1; b_tau    = 1.5
+
+
+# a_sigma  = 5; b_sigma  = 8
+# a_tau    = 5; b_tau    = 8
+# a_lambda = 5; b_lambda = 8
+eta1_scale = 0.9
+
+# mh is the of gaussian standard deviations for metropolis updates
+# So these are not variances!
+sig_mh_sig2 = 0.2
+sig_mh_tau2 = 0.2
+sig_mh_lambda2 = 0.2
+sig_mh_eta1 = 0.2
+sig_mh_phi1 = 0.2
+
+update_eta1 = TRUE
+update_phi1 = F
+
+a_alpha = 2; b_alpha = 2
+time_specific_alpha = TRUE
+
+# now space
+spatial_cohesion = 3
+mu0 = 0 
+k0 = 1
+v0 = 5
+L0 = 1
+```
+
+## clustering covariates
+```{r}
+n = dim(y)[1]
+# Tm
+
+# colnames(df_wsc)
+covariate_scelte = c(
+	"Altitude"
+	# ,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	# "WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	# ,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	# ,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	# ,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	# ,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+p = lenght(covariate_scelte)
+X_cl = array(data = 0, dim = c(n, p, Tm))
+dim(X_cl)
+cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
+
+for(i in 1:n){
+	st = stations[i]
+	for(t in 1:Tm){
+		df_st = df_wsc[which(df_wsc$IDStations == st),]
+		for (pp in 1:p){
+			X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+		}
+	}
+}
+colnames(X_cl) = covariate_scelte
+head(X_cl)
+```
+
+
+
+## likelihood covariates
+```{r}
+n = dim(y)[1]
+# Tm
+
+colnames(df_wsc)
+# penso vadano scelte quelle correlate alla target variable
+# perché qui vogliamo solo migliorare il fit, non individuare/separare i cluster
+covariate_scelte = c(
+	"Altitude"
+	# ,"WE_temp_2m"
+	# ,"WE_wind_speed_10m_mean"
+	# ,"WE_wind_speed_10m_max"
+	# ,"WE_mode_wind_direction_10m"
+	,"WE_tot_precipitation"
+	# ,"WE_precipitation_t"
+	# ,"WE_surface_pressure"
+	,"WE_solar_radiation"
+	# ,"WE_rh_min"
+	# ,"WE_rh_mean"
+	# ,"WE_rh_max"
+	# ,"WE_wind_speed_100m_mean"
+	# ,"WE_wind_speed_100m_max"
+	# ,"WE_mode_wind_direction_100m"
+	,"WE_blh_layer_max"
+	# ,"WE_blh_layer_min"
+	# ,"EM_nh3_livestock_mm"
+	# ,"EM_nh3_agr_soils"
+	# ,"EM_nh3_agr_waste_burn"
+	# ,"EM_nh3_sum"
+	# ,"EM_nox_traffic"
+	,"EM_nox_sum"
+	# ,"EM_so2_sum"
+	# ,"LI_pigs"
+	,"LI_bovine"
+	# ,"LI_pigs_v2"
+	# ,"LI_bovine_v2"
+	# ,"LA_hvi"
+	# ,"LA_lvi"
+	# ,"LA_land_use"
+	# ,"day"
+	# ,"week"
+	)
+
+p = lenght(covariate_scelte)
+X_lk = array(data = 0, dim = c(n, p, Tm))
+dim(X_lk)
+cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
+
+for (pp in 1:p){
+	target = covariate_scelte[pp]
+	yfull=data.frame()
+	if (typeof(unique(df_wsc[,target][[1]])) != "character"){
+	for(st in stations[1:n]){
+		y_we_target=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+		yfull=rbind(yfull,y_we_target)
+	}
+	rownames(yfull) = NULL
+	colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+	
+	time_span = 1:12
+	nsubjects = 1:n
+	y_other = yfull[nsubjects,1+time_span]
+	mn <- apply(y_other,2,mean)
+	sd <- apply(y_other,2,sd)
+	y_other <- t(t(y_other) - mn) # timewise mean
+	# y_other <- t(t(y_other) - mean(y_other[[1]])) # global mean
+
+	for (t in 1:Tm){
+		X_lk[,pp,t] = y_other[,t]
+	}
+	}
+
+}
+
+
+titolo = "centered wrt time-wise mean"
+for (pp in 1:p){
+yred=X_lk[,pp,]
+target = covariate_scelte[pp]
+save_plot=F
+folder = "./different means/"
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 6,width = 11)}
+par(mar=c(2,2,2,1))
+col_idx = 1
+ranked_indices = c(1:n)
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 main=paste0(covariate_scelte[pp]," - ",titolo),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+if (save_plot==T) {dev.off()}
+}
+
+colnames(X_lk) = covariate_scelte
+head(X_lk)
+```
+
+
+```{r}
+module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM$trigger_compilation()
+```
+
+
+## drpm J
+```{r}
+a_sigma  = 0.01; b_sigma = 0.01
+# a_tau    = 2.1; b_tau   = 0.9
+# a_tau    = 1.7; b_tau   = 0.4
+a_tau    = 1.9; b_tau   = 0.4
+# a_lambda = 0.1; b_lambda = 0.1
+a_lambda = 1.9; b_lambda = 0.4
+
+# module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y),              
+	sp_coords = s_std,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = T,
+	update_eta1 = update_eta1,                    
+	update_phi1 = T,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	######## space
+	spatial_cohesion_idx = spatial_cohesion,
+	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.60),
+	
+	######## likelihood covariates
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
+	beta_update_threshold = nburn/3,
+	# Xlk_covariates = NA, beta_priors = NA,
+	
+	######## clustering covariates
+	# covariate_similarity_idx = 4,
+	# cv_params = list(0,1,2,2),
+	# Xcl_covariates = X_cl,
+	
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.1),
+	
+	# covariate_similarity_idx = NA,
+	draws = niter,burnin = nburn, thin = nthin,
+	# draws = 1000,burnin = 20, thin = 4,
+	logging = F,
+	seed = 113.0,
+	simple_return = F,
+	verbose = T,
+	perform_diagnostics = T
+)
+
+```
+
+## rout
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma",
+				 "alpha",
+				 "sigma2h",
+				 "muh",
+				 "eta1",
+				 "beta",
+				 "theta",
+				 "tau2",
+				 "phi0",
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+rout$alpha        = aperm(rout$alpha,    c(2, 1))
+rout$theta        = aperm(rout$theta,    c(2, 1))
+rout$tau2         = aperm(rout$tau2,     c(2, 1))
+rout$eta1         = aperm(rout$eta1,    c(2, 1))
+rout$phi0     = matrix(rout$phi0,    ncol = 1)
+rout$phi1     = matrix(rout$phi1,    ncol = 1)
+rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
+```
+
+
+```{r}
+save(rout,file="space NA/space_rout_full_Xlk_timewisecorrected.Rdata")
+```
+
+
+```{r}
+names(rout)
+
+cat("Si           size = ",size(rout$Si),"\n")
+cat("gamma        size = ",size(rout$gamma),"\n")
+cat("sigma2h      size = ",size(rout$sigma2h),"\n")
+cat("muh          size = ",size(rout$muh),"\n")
+cat("alpha        size = ",size(rout$alpha),"\n")
+cat("theta        size = ",size(rout$theta),"\n")
+cat("tau2         size = ",size(rout$tau2),"\n")
+cat("eta1         size = ",size(rout$eta1),"\n")
+cat("phi0         size = ",size(rout$phi0),"\n")
+cat("phi1         size = ",size(rout$phi1),"\n")
+cat("lambda2      size = ",size(rout$lambda2),"\n")
+cat("beta         size = ",size(rout$beta),"\n")
+cat("fitted       size = ",size(rout$fitted),"\n")
+cat("llike        size = ",size(rout$llike),"\n")
+
+cat("lpml = ",rout$lpml,"\n")
+cat("waic = ",rout$waic,"\n")
+```
+
+
+
+
+

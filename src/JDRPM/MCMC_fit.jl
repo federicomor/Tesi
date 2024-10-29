@@ -12,8 +12,8 @@ using MCMCChains
 using DataFrames
 using CSV
 
-log_file = open("log.txt", "w+")
-include("debug.jl")
+# log_file = open("log.txt", "w+")
+# include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -65,7 +65,7 @@ function MCMC_fit(;
 	simple_return = false,                # Return just the partition Si
 	verbose = false,                      # if to print additional info
 	perform_diagnostics = false,          # if to perform diagnostics on the fit
-	skip_checks = false                   # if to perform all the pre-fitting args checks
+	skip_checks = false                   # if to skip initial checks
 	)
 	Random.seed!(round(Int64,seed))
 
@@ -106,16 +106,28 @@ function MCMC_fit(;
 		# @show sp_params sp_params_struct
 	end
 
-	# if cl_xPPM
-	# cv_params_struct = CvParams(
-	# 	alpha = (covariate_similarity_idx==1) ? cv_params[1] : 1. ,
-	# 	alpha_g = (covariate_similarity_idx==2 || covariate_similarity_idx==3) ? cv_params[1] : 1.,
-	# 	mu_c = (covariate_similarity_idx==4) ? cv_params[1] : 1. ,
-	# 	lambda_c = (covariate_similarity_idx==4) ? cv_params[2] : 1. ,
-	# 	a_c = (covariate_similarity_idx==4) ? cv_params[3] : 1. ,
-	# 	b_c = (covariate_similarity_idx==4) ? cv_params[4] : 1. 
-	# )
-	# end
+	if cl_xPPM
+		# provide different as and bs for each p covariate
+		cv_params_sim4 = Dict()
+		if covariate_similarity_idx == 4
+			for i in 1:2:length(cv_params)-2
+				cv_params_sim4[i ÷ 2 + 1] = [cv_params[1], cv_params[2], cv_params[i+2], cv_params[i+3]]
+			end
+		end
+		# println(cv_params)
+		# println(cv_params_sim4)
+
+		Rs = zeros(p_cl,T)
+		if covariate_similarity==2 || covariate_similarity==3
+			for p in 1:p_cl
+				for t in 1:T
+					if isa(Xcl_covariates[1,p,t],Real)
+						Rs[p,t] = maximum(Xcl_covariates[:,p,t])-minimum(Xcl_covariates[:,p,t])
+					end
+				end
+			end
+		end
+	end
 	
 	if update_eta1 acceptance_ratio_eta1 = 0 end
 	if update_phi1 acceptance_ratio_phi1 = 0 end
@@ -189,28 +201,6 @@ function MCMC_fit(;
 		elseif covariate_similarity == 4 && length(cv_params) != 2+2p_cl
 			@error "Wrong params for covariate similarity 4.\nExpected input form: [Real, Real, (Real, Real) for p_cl times]." _file=""
 			return
-		end
-
-		# provide different as and bs for each p covariate
-		cv_params_sim4 = Dict()
-		if covariate_similarity_idx == 4
-			for i in 1:2:length(cv_params)-2
-				cv_params_sim4[i ÷ 2 + 1] = [cv_params[1], cv_params[2], cv_params[i+2], cv_params[i+3]]
-			end
-		end
-		# println(cv_params)
-		# println(cv_params_sim4)
-
-
-		Rs = zeros(p_cl,T)
-		if covariate_similarity==2 || covariate_similarity==3
-			for p in 1:p_cl
-				for t in 1:T
-					if isa(Xcl_covariates[1,p,t],Real)
-						Rs[p,t] = maximum(Xcl_covariates[:,p,t])-minimum(Xcl_covariates[:,p,t])
-					end
-				end
-			end
 		end
 	end
 
@@ -1678,9 +1668,8 @@ function MCMC_fit(;
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end
 
-	# if logging
-		close(log_file)
-	# end
+	# close(log_file)
+
 	# if !logging
 		# rm("log.txt")
 		# rm("log.txt",force=true)

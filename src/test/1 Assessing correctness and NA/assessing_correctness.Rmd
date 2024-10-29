@@ -115,7 +115,8 @@ y_with_na
 # niter=40000; nburn=28000; nthin=12
 # niter=50000; nburn=30000; nthin=20
 # niter=30000; nburn=20000; nthin=10
-niter=10000; nburn=5000; nthin=5 #OFFICIAL ONE
+# niter=10000; nburn=5000; nthin=5 #OFFICIAL ONE
+niter=50000; nburn=30000; nthin=10 #larger ONE
 # niter=30000; nburn=20000; nthin=4
 # niter=1000; nburn=200; nthin=4
 
@@ -146,14 +147,15 @@ a_lambda = 2; b_lambda = 2
 # a_lambda = 1; b_lambda = 2
 eta1_scale = 0.9
 
-sig_mh_sig2 = 0.3
-sig_mh_tau2 = 0.3
-sig_mh_lambda2 = 0.3
+sig_mh_sig2 = 0.2
+sig_mh_tau2 = 0.2
+sig_mh_lambda2 = 0.2
 sig_mh_eta1 = 0.1
 sig_mh_phi1 = 0.2
 
 update_eta1 = TRUE
 update_phi1 = TRUE
+# update_phi1 = F
 
 mu0 = 0 
 k0 = 1
@@ -170,7 +172,10 @@ a_alpha = 2; b_alpha = 2
 
 ## drpm C
 ```{r}
-set.seed(1)
+seed = runif(1,0,1000)
+cat("seed ",seed,"\n")
+set.seed(seed)
+
 tempo_inizio <- Sys.time()
 drpm1 <- drpm_fit(
 		y=y,
@@ -231,9 +236,12 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 
 ## drpm J
 ```{r}
-a_sigma  = 2; b_sigma  = 2
+a_sigma  = 2; b_sigma  = 1
 a_tau    = 1.5; b_tau    = 1.5
 a_lambda = 1.5; b_lambda = 1.5
+# a_sigma  = 0.01; b_sigma  = 0.01
+# a_tau    = 1.9; b_tau    = 0.4
+# a_lambda = 1.9; b_lambda = 0.4
 
 # module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
@@ -252,7 +260,7 @@ out = module_JDRPM$MCMC_fit(
 	update_alpha = TRUE,             
 	
 	include_eta1 = TRUE,                    
-	include_phi1 = TRUE,
+	include_phi1 = update_phi1,
 	update_eta1 = update_eta1,                    
 	update_phi1 = update_phi1,
 	
@@ -273,15 +281,12 @@ out = module_JDRPM$MCMC_fit(
 	draws = as.integer(niter), burnin = as.integer(nburn),thin = as.integer(nthin),
 	# draws = 100000, burnin = 60000,thin = 40,
 	logging = FALSE,
-	seed = 111.0,
+	# seed = 111.0,
+	seed = runif(1,0,1000),
 	verbose=T,
-	perform_diagnostics = T
+	perform_diagnostics = F
 )
-```
 
-
-
-```{r}
 rout = juliaGet(out)
 names(rout)  = c("Si",
 				 "gamma",
@@ -1033,7 +1038,29 @@ compare_ARI(Cmod1,Jmod2)
 ```
 
 # ===========
-# with NA
+# with NA on a full place
+```{r}
+# Number of elements to set as NA
+y_NA = y
+
+ndata = size(y)[1] * size(y)[2]
+
+set.seed(111)
+unita_che_scompare = round(runif(1,1,size(y)[1]))
+cat(unita_che_scompare)
+
+y_NA[unita_che_scompare]
+
+
+# Check the dataset
+cat(sum(is.na(y_NA)))
+# y_NA
+```
+
+
+
+# ===========
+# with NA randomly
 ## setting NA
 ```{r}
 # Number of elements to set as NA
@@ -1041,7 +1068,7 @@ y_NA = y
 
 ndata = size(y)[1] * size(y)[2]
 
-set.seed(113)
+set.seed(112)
 na_percentage = 0.1
 na_percentage = 0.09620821
 n_na <- round(ndata * na_percentage) # nstations * nday * na%
@@ -1156,6 +1183,10 @@ cat(crayon::red("\nLPML =",rout_NA$lpml, "\nWAIC =",rout_NA$waic))
 
 ```{r}
 # save(rout_NA,file="no_space_NAJ.Rdata")
+# load(file="./no space NA/no_space_NAJ.Rdata")
+load(file="./no space NA/nospace_NA_J.Rdata")
+load(file="./no space/nospace_full_CJ.Rdata")
+rout_FULL = rout
 ```
 
 ## Partition plots
