@@ -2119,7 +2119,7 @@ covariate_scelte = c(
 	"Altitude"
 	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
-	# ,"WE_wind_speed_10m_max"
+	,"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
 	,"WE_tot_precipitation"
 	# ,"WE_precipitation_t"
@@ -2136,12 +2136,12 @@ covariate_scelte = c(
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
 	# ,"EM_nh3_agr_waste_burn"
-	# ,"EM_nh3_sum"
+	,"EM_nh3_sum"
 	# ,"EM_nox_traffic"
-	,"EM_nox_sum"
+	# ,"EM_nox_sum"
 	# ,"EM_so2_sum"
 	# ,"LI_pigs"
-	,"LI_bovine"
+	# ,"LI_bovine"
 	# ,"LI_pigs_v2"
 	# ,"LI_bovine_v2"
 	# ,"LA_hvi"
@@ -2649,12 +2649,21 @@ hist(rout$lambda2[,1],
 # ============
 # NAing whole TSs
 ```{r}
+library(scales)
+library(bayestestR)	
+library(colorspace)
+```
+
+
+```{r}
 y_NA = y
-# seed = round(runif(1,0,1000))
-seed = 487
+seed = round(runif(1,0,1000))
+# seed = 487
 cat(seed,"\n")
-na_js = round(runif(3,1,105))
-na_js = c(83,42,101 )
+na_js = round(runif(2,1,105))
+# na_js = c(83,42,101 )
+na_js = c(92,61,44 )
+
 cat(na_js,"\n")
 
 y_NA[na_js,] = NA
@@ -2666,7 +2675,7 @@ cols = colora(size(yred)[1],56,0)
 cols_transp = alpha(cols,0.4)
 
 
-save_plots=T
+save_plots=F
 if (save_plots==TRUE) {
 	pdf(file="NAed_units.pdf",height = 5,width=12)
 }
@@ -2686,14 +2695,19 @@ for(i in 1:size(yred)[1]){
 	  lines(1:size(yred)[2],yred[i,],col=cols_transp[i])
 }
 
-col_NA = "#2F327D"
+# colora(10,72)
+col_NA = rep(0,105)
+col_NA[na_js[2]] = "#2F327D"
+col_NA[na_js[1]] = "#0087BA"
+col_NA[na_js[3]] = "#1AC0BD"
 for (j in na_js){
-	 lines(1:size(yred)[2],yred[j,],col=col_NA,lwd=2)
+	 # lines(1:size(yred)[2],yred[j,],col=col_NA,lwd=2)
+	 lines(1:size(yred)[2],yred[j,],col=col_NA[j],lwd=2)
 }
 
 plot(s_std,main="Spatial coordinates")
 for (j in na_js){
-	 points(s_std[j,1],s_std[j,2],col=col_NA,cex=1.7,pch=19)
+	 points(s_std[j,1],s_std[j,2],col=col_NA[j],cex=1.7,pch=19)
 }
 if (save_plots==TRUE) {dev.off()}
 ```
@@ -2817,7 +2831,239 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 ```{r}
 # save(rout,file="NAed_3units_fit_space.Rdata")
 # save(rout,file="NAed_3units_fit_space_Xlk.Rdata")
+# save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
+
 save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
+```
+
+## plots
+```{r}
+folder = "./Target variable plus space NA - kriging/"
+```
+
+
+```{r}
+load(paste0(folder,"NAed_3units_fit_space.Rdata"))
+model_name = "JDRPM - NA fit - space"
+```
+
+
+```{r}
+load(paste0(folder,"NAed_3units_fit_space_Xlk.Rdata"))
+model_name = "JDRPM - NA fit - space + Xlk"
+```
+
+
+```{r}
+load(paste0(folder,"NAed_3units_fit_space_Xlk_Xcl.Rdata"))
+model_name = "JDRPM - NA fit - space + Xlk + Xcl"
+```
+
+
+### ARI
+```{r,warning=F}
+save_plot = F
+
+MODEL = rout
+partition = generate_partition(rout)
+cat(model_name,"\n")
+cat("LPML: ",MODEL$lpml,"\n")
+cat("WAIC: ",MODEL$waic,"\n")
+
+############################################## ARI
+if (save_plot==T){
+	pdf(file=paste0(folder,"ari",model_name,".pdf"),width=6,height = 5)
+}
+# par(mar=c(2,2,2,2),mfrow=c(1,2),oma=c(0.1,0.1,0.1,2))
+par(mar=c(2,2,2,2),oma=c(0.1,0.1,0.1,0.1))
+plot_ARI(partition, title=model_name)
+if (save_plot==T){ dev.off()}
+
+############################################## SIMPLE FULL MAP
+if (save_plot==TRUE) {pdf(file=paste0(folder,"fit",model_name,"_simple_map.pdf"),
+						  height =7, width = 9)}
+par(mfrow=c(3,4),mar=c(1.5,2,2,1),oma=c(1,1,2,1))
+for(t in 1:Tm){
+
+	partition_matrix <- do.call(cbind, partition)
+	plot(s_std[1,1],s_std[1,2],col=partition_matrix[1,t],pch=19,
+		 xlim=extrema(s_std[,1]),main=paste("time",t),
+		 ylim=extrema(s_std[,2]),
+		 # cex=((y[1,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+		 # cex=y[1,t]+abs(min(y[,t])))
+		  cex=1.2)
+	for (i in 1:N){
+		points(s_std[i,1],s_std[i,2],col=partition_matrix[i,t],pch=19,
+			   # cex=((y[i,t]-mean(y[,t]))/sd(y[,t])+3)/2)
+			   # cex=y[i,t]+abs(min(y[,t])))
+			    cex=1.2)
+	}
+}
+# [1] "#070707" "#2E1831" "#402E56" "#404B7B" "#036D9B" "#0092B2" "#00AFB2" "#60C8B6"
+ # [9] "#A8DFC5" "#E0F7E1"
+mtext(model_name,side=3,line=0,outer=T,col="#2E1831")
+if (save_plot==TRUE) {dev.off()}
+
+```
+
+
+
+### FItted values
+```{r}
+save_plots = F
+MODEL = rout
+name = model_name
+
+yredJ=t(MODEL$fitted[,,size(MODEL$fitted)[3]])
+summary_fitted = t(MODEL$fitted[,,size(MODEL$fitted)[3]])*0
+for(j in 1:N){
+	for(t in 1:Tm){
+		summary_fitted[j,t] = mean(MODEL$fitted[t,j,])
+	}
+}
+yred=summary_fitted
+
+cols = colora(size(yred)[1],56,0)
+cols = rep("gray80",105)
+cols_transp = alpha(cols,0.2)
+
+if (save_plots==TRUE) {
+	pdf(file=paste0("fitted_values",name,".pdf"),height = 5,width=12)
+}
+
+par(mar=c(2,2,2,1))
+
+plot(1:size(yred)[2],yred[i,],col=cols_transp[i],
+	 	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+	 main=model_name,
+     	 type='l',xlab='weeks',ylab='pm10')
+for(i in 1:size(yred)[1]){
+	  lines(1:size(yred)[2],yred[i,],col=cols_transp[i])
+}
+
+col_NA = rep(0,105)
+# col_NA[na_js[2]] = "#2F327D"
+# col_NA[na_js[1]] = "#0087BA"
+# col_NA[na_js[3]] = "#1AC0BD"
+col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
+# col_NA[na_js] = colora(3,"div",seed_div = "Dark2",0)
+for (j in na_js){
+	 # lines(1:size(yred)[2],yred[j,],col=col_NA,lwd=2)
+	 lines(1:size(yred)[2],yred[j,],col=col_NA[j],lwd=2)
+	 lines(1:size(yred)[2],y[j,],col=col_NA[j],lwd=1,lty=2)
+}
+
+if (save_plots==TRUE) {dev.off()}
+
+```
+
+
+
+### CIs
+```{r}
+save_plots=F
+
+if (save_plots==TRUE) {
+	pdf(file=paste0(model_name,".pdf"),height = 4.6,width=10)
+}
+# nf <- layout(
+#   matrix(c(1,2,3,4), ncol=1, byrow=TRUE), 
+#   widths=c(1,1,1,1), 
+#   heights=c(1,1,1,0.5)
+# )
+
+# par(mar=c(0.5,2,0.5,1),
+# 	mfrow=c(3,1),
+# 	oma=c(0.1,0.1,0.1,0.1))
+
+par(mar=c(0.5,1,0.5,1),
+	mfrow=c(1,3),
+	oma=c(0.1,0.1,0.1,0.1))
+
+for (j in na_js){
+		
+	##### BUILD CIs
+	cat(j,"\n")
+	UPP = c()
+	LOW = c()
+	MID = c()
+	for (t in 1:Tm){
+		sampled_values = rout$fitted[t,j,]
+		ci_hdi <- ci(sampled_values, ci=0.90, method = "HDI")
+		LOW = c(LOW,min(ci_hdi[[2]],ci_hdi[[3]]))
+		UPP = c(UPP,max(ci_hdi[[2]],ci_hdi[[3]]))
+		MID = c(MID,mean(sampled_values))
+	}
+	cat(extrema(c(LOW,MID,UPP)),"\n")
+	
+	##### PLOT BACKGROUND
+	plot(1, type="n", xlab="", ylab="", xlim=c(1, 12),
+		 xaxt="n",
+		 yaxt="n",
+		 # ylim=extrema(c(LOW,MID,UPP,y[j,])))
+		 ylim=extrema(y))
+	# axis(side = 1, at = c(1:Tm), labels = FALSE, tck = -0.1)
+	# axis(side = 2, labels = FALSE, tck = -0.1)
+
+	yred = y
+	cols = rep("gray80",105)
+	cols_transp = alpha(cols,0.3)
+	for(i in 1:size(yred)[1]){
+		  lines(1:size(yred)[2],yred[i,],col=cols_transp[i])
+	}
+	
+	###### PLOT REAL VALUE 
+	lines(1:size(yred)[2],yred[j,],col=darken(col_NA[j],0.1),lty=2,lwd=1.2)
+	
+	###### PLOT FITTED MEAN VALUE 
+	lines(1:size(yred)[2],MID,col=col_NA[j],lwd=2)
+
+	##### PLOT CIs AROUND FITTED MEAN VALUE
+	col_NA_soft[na_js] = alpha(col_NA[na_js],0.3)
+	polygon(c(1:Tm,rev(1:Tm)),c(UPP,rev(LOW)),col=col_NA_soft[j],border=NA)
+	
+	# legend("bottomleft",legend = c("true value","mean fitted value"),
+	#    lty=c(2,1),bty="n",cex=.9,col=rep(col_NA[j],2))
+}
+
+legend("bottomleft",legend = c("true value","mean fitted value"),
+lty=c(2,1),bty="n",cex=1)
+# mtext(model_name,side=3,line=-0.3,outer=T,col="#2E1831")
+
+if (save_plots==TRUE) {dev.off()}
+```
+
+
+
+
+```{r}
+# Using polygon function to create a
+# simulated confidence interval
+# 14 February 2013
+# NJG
+par(mar=c(5,6,4,2)+0.1)
+par(pty="s")
+
+# create data
+x <- 1:100
+Exp <- 50 + x*0.1
+Con.High <- Exp + 5 + rnorm(100)
+Con.Low <- Exp - 5 + rnorm(100)
+One.Run <- Exp + rnorm(100,0,2)
+
+# create plot
+plot(Exp~x,type="l",
+     xlab= "Time Step",
+     ylab="Populatioh Size (N)",
+     lty="dashed",
+     ylim=range(One.Run,Exp,Con.High,Con.Low),
+     cex.lab=1.5,las=1,cex.axis=1.5)
+
+# add polygon and overlplot the lines
+polygon(c(x,rev(x)),c(Con.Low,rev(Con.High)),col="thistle",border=NA)
+lines(x,Exp,lty="solid",col="purple",lwd=1.5)
+lines(x,One.Run)
 ```
 
 

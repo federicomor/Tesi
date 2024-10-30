@@ -41,7 +41,8 @@ Ho fatto anche questa aggiunta per esempio (da sistemare forse come le altre agg
 - [x] In vari punti del testo ho visto che hai scritto "trough", invece dovrebbe essere "through". Infatti, con "trough" si intende una mangiatoia per animali (https://www.dictionary.com/browse/trough), che non credo rientri nei nostri discorsi.
 - [x] Alla fine di pagina 33 c'è un "helps to emphasizes", va corretto in "helps to emphasize".
 
-Si qui mi spiace se ti/vi ho fatto spulciare ogni parola, pensavo che la vostra correzione si riferisse solo ai concetti, mentre la sintassi e gli errori sintattici li avrei naturalmente ricontrollati io alla fine.
+Si qui mi spiace se ti/vi ho fatto spulciare ogni parola, pensavo che la vostra correzione si riferisse solo ai concetti, mentre la sintassi e gli errori sintattici li avrei naturalmente ricontrollati io alla fine.  
+Ammetto che però la trough mi sarebbe quasi certamente sfuggita 😂😅
 
 # Nota 6
 - [ ] Nelle sezioni 3.2.1 e 3.2.2 sarebbe carino mostrare i credible intervals nei punti in cui mancano i dati, in questo modo possiamo verificare se la vera osservazione cade nel credible interval. Non sono sicuro che mostrarlo per tutti i punti mancanti sia fattibile, magari nel caso possiamo mostrarlo per pochi esempi (magari alcuni che funzionano e altri che non funzionano). Un'altra cosa che potresti fare è mettere a NA un'intera time series e plottare media e credible intervals ottenuti per quella time series, così da vedere quanto il modello è bravo a predirre per un punto nello spazio in cui non potrebbe non esserci un sensore. Per intenderci, come in Figura 2 e Figura 3 a pagina 1013 di questo documento: https://it.pearson.com/content/dam/region-core/italy/pearson-italy/pdf/Docenti/Universit%C3%A0/bozza-book-compresso-new1.pdf. Questa cosa potrebbe essere fatta prendendo un punto e poi facendo vedere gli intervalli nel caso del modello base, poi con il clustering spaziale, poi con le covariate in likelihood e/o clustering. Si suppone che aumentando la complessità del modello piano piano ci sia un miglioramento nella predizione.
@@ -54,7 +55,7 @@ Il grafico dei CI per il test NA sarebbe questo:
 # Nota 7
 - [x] Sezione 3.3: a questo punto, standardizzerei direttamente le covariate. In questo modo, hai anche una maggiore interpretabilità dei beta che ottieni.
 
-Qui dovrei aver già sistemato. Forse aveva fatto questa nota in una vecchia "versione" del documento, in cui in effetti avevo riportato dei risultati senza standardizzare le covariate. Ora/dopo un qualche aggiornamento avevo invece usato ovunque covariate standardizzate. Infatti ho messo come premessa alla sezione 3.3 (che comunque diventerà 2.3 perché la prof mi ha detto di far partire la numerazione 1 dal capitolo description of the model):
+Qui dovrei aver già sistemato. Forse aveva fatto questa nota in una vecchia versione del documento, in cui in effetti avevo riportato dei risultati senza standardizzare le covariate. Ora/dopo un qualche aggiornamento avevo invece usato ovunque covariate standardizzate. Infatti ho messo come premessa alla sezione 3.3 (che comunque diventerà 2.3 perché la prof mi ha detto di far partire la numerazione 1 dal capitolo description of the model):
 
 > To perform the fits that will now follow, all the included covariates were treated
 > in the same way as the target value, with the time-wise centering procedure and
