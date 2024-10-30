@@ -1,0 +1,68 @@
+seed  955.5692 
+sPPM =  FALSE 
+ntime =  12 
+ntime_out =  12 
+nsubject = 10
+ntime = 12
+nout = 2000
+update_alpha = 1
+update_eta1 = 1
+update_phi1 = 1
+Prior values: Asig = 5.00, Atau = 5.00, Alam = 5.00, 
+ m0 = 0.00, s20 = 10.00
+
+Wed Oct 30 09:04:54 2024
+ntime =  12 40000
+ntime_out =  12 
+Fit took:
+Time difference of 19.1025 secs
+
+LPML = -1070.03582178795 
+WAIC = 469.228693336397
+
+
+-----------------------------------------------------------
+
+Parameters:
+sig2h ∼ InverseGamma(2.0, 1.0)
+Logit(1/2(eta1+1)) ∼ Laplace(0, 0.9)
+tau2 ∼ InverseGamma(1.7, 1.5)
+phi0 ∼ Normal(μ=0.0, σ=10.0)
+lambda2 ∼ InverseGamma(1.7, 1.5)
+alpha ∼ Beta(2.0, 2.0)
+
+- using seed 925.3134564496577 -
+fitting 50000 total iterates (with burnin=40000, thinning=5)
+thus producing 2000 valid iterates in the end
+
+on n=10 subjects
+for T=12 time instants
+
+[✗] with space? false
+[✗] with covariates in the likelihood? false
+[✗] with covariates in the clustering process? false
+[✗] are there missing data in Y? false
+
+2024-10-30 08:57:01
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:15 ( 0.31 ms/it)
+
+done!
+Elapsed time: 13 seconds, 498 milliseconds
+LPML: -223.36051332251395 (the higher the better)
+WAIC: 393.97122507998245 (the lower the better)
+acceptance ratio eta1: 46.15%
+acceptance ratio phi1: 68.30%
+
+LPML = -223.360513322514 
+WAIC = 393.971225079982
+
+-----------------------------------------------------------
+
+
+C MSE
+mean  1.622056 
+median  1.582313 
+J MSE
+mean  1.263381 
+median  1.203414 

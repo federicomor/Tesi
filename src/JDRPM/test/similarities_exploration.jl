@@ -132,7 +132,8 @@ p = scatter(s1, s2, color=color_labels,ms=5,legend=false, xlabel="", ylabel="",
 markerstrokewidth=0,
 # dpi=300, size=(500,400),
 # title="Clusters test case")
-title="Cohesions analysis test case")
+title="")
+# title="Cohesions analysis test case")
 # title="Cluster subdivision at test")
 alpha_sp = 0.1
 lg = false
@@ -148,7 +149,8 @@ for k in unique(cls)
 	text("cluster $k", 10, color_palette[k]))
 	# text("$(round(cohesion,digits=6))", 10, :black))
 end
-display(p) savefig(p,"cohesions_test.pdf")
+display(p)
+savefig(p,"cohesions_test.pdf")
 
 
 s1_cl1 = s1[cls .== 1]; s2_cl1 = s2[cls .== 1]
@@ -165,7 +167,8 @@ cohesion1_vals_cl3 = [cohesion1(s1_cl3, s2_cl3, alpha, lg) for alpha in alphas]
 cohesion1_vals_cl4 = [cohesion1(s1_cl4, s2_cl4, alpha, lg) for alpha in alphas]
 begin
 plot(alphas,  cohesion1_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+# dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(alphas, cohesion1_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, cohesion1_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -173,23 +176,20 @@ plot!(alphas, cohesion1_vals_cl4,  label="cluster 4", lw=2, color=color_palette[
 # xlabel!("alpha values")
 xlabel!(L"$\alpha$ values")
 ylabel!("")
-title!("Cohesion 1 (log=$lg)") savefig("cohesion1.pdf")
+# title!("Cohesion 1 (log=$lg)")
+# ylabel!("Cohesion 1 (log=$lg")
+savefig("cohesion1.pdf")
 end
 
-# scatter(s1_cl1,s2_cl1,color=:red)
-# scatter!(s1_cl2,s2_cl2,color=:green)
-# scatter!(s1_cl3,s2_cl3,color=:orange)
-
-
+begin
 lg = false
 as = range(0, 6, length=1000)
 cohesion2_vals_cl1 = [cohesion2(s1_cl1, s2_cl1, a, lg) for a in as]
 cohesion2_vals_cl2 = [cohesion2(s1_cl1, s2_cl2, a, lg) for a in as]
 cohesion2_vals_cl3 = [cohesion2(s1_cl3, s2_cl3, a, lg) for a in as]
 cohesion2_vals_cl4 = [cohesion2(s1_cl4, s2_cl4, a, lg) for a in as]
-begin
 plot(as,  cohesion2_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(as, cohesion2_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(as, cohesion2_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -197,8 +197,8 @@ plot!(as, cohesion2_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
 plot!(legend=:bottomright)
 xlabel!(L"$a$ values")
 ylabel!("")
-title!("Cohesion 2 (log=$lg)")
-# savefig("cohesion2.pdf")
+# title!("Cohesion 2 (log=$lg)")
+savefig("cohesion2.pdf")
 end
 
 
@@ -212,7 +212,7 @@ cohesion3_vals_cl2 = [cohesion3(s1_cl1, s2_cl2, mu0, k0, v0, Psi, lg, M, S) for 
 cohesion3_vals_cl3 = [cohesion3(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 cohesion3_vals_cl4 = [cohesion3(s1_cl4, s2_cl4, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 plot(v0s,  cohesion3_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(v0s, cohesion3_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(v0s, cohesion3_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -235,7 +235,7 @@ cohesion4_vals_cl2 = [cohesion4(s1_cl1, s2_cl2, mu0, k0, v0, Psi, lg, M, S) for 
 cohesion4_vals_cl3 = [cohesion4(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 cohesion4_vals_cl4 = [cohesion4(s1_cl4, s2_cl4, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 plot(v0s,  cohesion4_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(v0s, cohesion4_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(v0s, cohesion4_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -244,8 +244,8 @@ plot!(v0s, cohesion4_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
 plot!(legend=:bottomright)
 xlabel!(L"$\nu_0$ values")
 ylabel!("")
-title!("Cohesion 4 (log=$lg)")
-# savefig("cohesion4.pdf")
+# title!("Cohesion 4 (log=$lg)")
+savefig("cohesion4.pdf")
 end
 
 begin
@@ -256,7 +256,7 @@ cohesion5_vals_cl2 = [cohesion5(s1_cl1, s2_cl2, phi, lg) for phi in phis]
 cohesion5_vals_cl3 = [cohesion5(s1_cl3, s2_cl3, phi, lg) for phi in phis]
 cohesion5_vals_cl4 = [cohesion5(s1_cl4, s2_cl4, phi, lg) for phi in phis]
 plot(phis,  cohesion5_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(phis, cohesion5_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(phis, cohesion5_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -264,9 +264,9 @@ plot!(phis, cohesion5_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4]
 # xlabel!("ϕ values")
 xlabel!(L"$\varphi$ values")
 ylabel!("")
-title!("Cohesion 5 (log=$lg)")
+# title!("Cohesion 5 (log=$lg)")
 # title!("Cohesion 5 (log=$lg)" * L" wrt parameter $\phi$")
-# savefig("cohesion5.pdf")
+savefig("cohesion5.pdf")
 end
 
 
@@ -278,7 +278,7 @@ cohesion6_vals_cl2 = [cohesion6(s1_cl1, s2_cl2, phi, lg) for phi in phis]
 cohesion6_vals_cl3 = [cohesion6(s1_cl3, s2_cl3, phi, lg) for phi in phis]
 cohesion6_vals_cl4 = [cohesion6(s1_cl4, s2_cl4, phi, lg) for phi in phis]
 plot(phis,  cohesion6_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(phis, cohesion6_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(phis, cohesion6_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -286,8 +286,8 @@ plot!(phis, cohesion6_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4]
 # xlabel!("phi values")
 xlabel!(L"$\varphi$ values")
 ylabel!("")
-title!("Cohesion 6 (log=$lg)")
-# savefig("cohesion6.pdf")
+# title!("Cohesion 6 (log=$lg)")
+savefig("cohesion6.pdf")
 end
 
 
@@ -342,7 +342,9 @@ X_cl4 = alts[cls .== 4]
 X_cl5 = alts[cls .== 5]
 
 begin
-p = scatter(1:length(X_cl1),X_cl1,markerstrokewidth=0,color=color_palette[1],ms=4,legend=false, xlabel="", ylabel="Altitude",title="Similarities analysis test case")
+p = scatter(1:length(X_cl1),X_cl1,markerstrokewidth=0,color=color_palette[1],ms=4,legend=false, xlabel="", ylabel="Altitude",
+# title="Similarities analysis test case")
+title="")
 scatter!(length(X_cl1)+1:length(X_cl1)+length(X_cl2),X_cl2,
 markerstrokewidth=0,color=color_palette[2],ms=4,legend=false)
 scatter!(length(X_cl1)+length(X_cl2)+1:length(X_cl1)+length(X_cl2)+length(X_cl3),X_cl3,
@@ -360,13 +362,13 @@ for k in 1:5
 end
 display(p)
 end 
-# savefig(p,"similarity_sorted_test.pdf")
+savefig(p,"similarity_sorted_test.pdf")
 
 
 
 begin
-lg = false
-# lg = true
+# lg = false
+lg = true
 cv_weight = 5
 alphas = range(0, 2, length=1000)
 similarity1_vals_cl1 = [similarity1(X_cl1, alpha, lg, cv_weight) for alpha in alphas]
@@ -375,7 +377,7 @@ similarity1_vals_cl3 = [similarity1(X_cl3, alpha, lg, cv_weight) for alpha in al
 similarity1_vals_cl4 = [similarity1(X_cl4, alpha, lg, cv_weight) for alpha in alphas]
 similarity1_vals_cl5 = [similarity1(X_cl5, alpha, lg, cv_weight) for alpha in alphas]
 plot(alphas,  similarity1_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(alphas, similarity1_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity1_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -383,7 +385,7 @@ plot!(alphas, similarity1_vals_cl4,  label="cluster 4", lw=2, color=color_palett
 plot!(alphas, similarity1_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
-title!("Similarity 1 (log=$lg)")
+# title!("Similarity 1 (log=$lg)")
 savefig("similarity1_log_$lg.pdf")
 end
 
@@ -431,7 +433,7 @@ similarity2_vals_cl3 = [similarity2(X_cl3, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl4 = [similarity2(X_cl4, alpha, R, lg) for alpha in alphas]
 similarity2_vals_cl5 = [similarity2(X_cl5, alpha, R, lg) for alpha in alphas]
 plot(alphas,  similarity2_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(alphas, similarity2_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity2_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -439,7 +441,7 @@ plot!(alphas, similarity2_vals_cl4,  label="cluster 4", lw=2, color=color_palett
 plot!(alphas, similarity2_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
-title!("Similarity 2 (log=$lg)")
+# title!("Similarity 2 (log=$lg)")
 savefig("similarity2.pdf")
 end
 
@@ -454,7 +456,7 @@ similarity3_vals_cl3 = [similarity3(X_cl3, alpha, R, lg) for alpha in alphas]
 similarity3_vals_cl4 = [similarity3(X_cl4, alpha, R, lg) for alpha in alphas]
 similarity3_vals_cl5 = [similarity3(X_cl5, alpha, R, lg) for alpha in alphas]
 plot(alphas, similarity3_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(alphas, similarity3_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, similarity3_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -462,7 +464,7 @@ plot!(alphas, similarity3_vals_cl4,  label="cluster 4", lw=2, color=color_palett
 plot!(alphas, similarity3_vals_cl5,  label="cluster 5", lw=2, color=color_palette[5])
 xlabel!(L"$\alpha$ values")
 ylabel!("")
-title!("Similarity 3 (log=$lg)")
+# title!("Similarity 3 (log=$lg)")
 savefig("similarity3.pdf")
 end
 
@@ -564,7 +566,7 @@ similarity4_vals_cl5 = [similarity4(X_cl5, mu, lambda, a_c, b_c, lg, cv_weight)
 for a_c in acs]
 # for b_c in acs]
 plot(acs,  similarity4_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
-dpi=300, size=(760,400)
+dpi=300, size=(760,340)
 )
 plot!(acs, similarity4_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(acs, similarity4_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
@@ -575,7 +577,7 @@ ylabel!("")
 # title!("Similarity 4 (log=$lg)")
 # annotate!(:bottomright,
 # text("σ² ∼ invGamma($a_c, $b_c)",8,:gray,:right))
-title!("Similarity 4 (log=$lg, b₀=$b_c)")
+# title!("Similarity 4 (log=$lg, b₀=$b_c)")
 savefig("similarity4_lambda1_bc$(b_c).pdf")
 end
 	

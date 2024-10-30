@@ -91,6 +91,9 @@ y_NA = y
 
 ndata = size(y)[1] * size(y)[2]
 
+for (seed in c(100:120)){
+	set.seed(seed)
+
 na_percentage = 0.1
 na_percentage = 0.09620821
 n_na <- round(ndata * na_percentage) # nstations * nday * na%
@@ -106,7 +109,33 @@ for (k in 1:n_na){
 
 # Check the dataset
 y_NA
+
+
+
+cols = colora(N,seed = 56,show = 0)
+yred=y
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10',main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+na_indices_j <- sample(size(y)[1], n_na,replace = T)
+na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (i in 1:length(na_indices_t)){
+	t = na_indices_t[i]
+	j = na_indices_j[i]
+	points(t,yred[j,t],col="black",pch=19)
+}
+
+}
 ```
+
 
 
 ## Fits

@@ -1295,7 +1295,7 @@ niter_tests = matrix(0,nrow=length(plk_test),ncol=lenght(plk_test))
 for (i in 1:length(plk_test)) {
 	for (j in 1:length(plk_test)) {
 		# niter_tests[i,j] = 1600/(plk_test[i]*plk_test[j]+1)*100
-		niter_tests[i,j] = 30
+		niter_tests[i,j] = 80
 	}
 }
 nruns_tests
@@ -1327,7 +1327,7 @@ library(lubridate)
 seed = 2.0
 
 # for (cl in 4:length(pcl_test)) {
-for (cl in 4:4) {
+for (cl in 5:5) {
 for (lk in 1:length(plk_test)) {
 	
 	out = create_data(n,Tm,p_cl = pcl_test[cl], p_lk = plk_test[lk])
@@ -1557,7 +1557,7 @@ mtext(text=c(paste0("lk=",plk_test[1:size(mat)[1]])),
 ```{r}
 save_plots = F
 if (save_plots==T){
-	pdf(file="target_space_Xs_varying_p.pdf",width=7,height = 5)
+	pdf(file="test_varying_p.pdf",width=7,height = 5)
 }
 maxk = max(performance_Julia)*1000
 par(mar=c(2.1,2.3,2,1),oma=c(0.2,0.2,0.1,1.5))

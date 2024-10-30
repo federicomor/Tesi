@@ -116,7 +116,7 @@ y_with_na
 # niter=50000; nburn=30000; nthin=20
 # niter=30000; nburn=20000; nthin=10
 # niter=10000; nburn=5000; nthin=5 #OFFICIAL ONE
-niter=50000; nburn=30000; nthin=10 #larger ONE
+niter=50000; nburn=40000; nthin=5 #larger ONE
 # niter=30000; nburn=20000; nthin=4
 # niter=1000; nburn=200; nthin=4
 
@@ -135,7 +135,7 @@ A_ub_tau = 5
 A_ub_lambda = 5
 a_sigma  = 2; b_sigma  = 2
 a_tau    = 2; b_tau    = 1
-a_lambda = 2; b_lambda = 2
+a_lambda = 2; b_lambda = 1
 # a_sigma  = 1.3; b_sigma  = 1.9
 # a_tau    = 1.3; b_tau    = 1.9
 # a_lambda = 1.3; b_lambda = 1.9
@@ -150,7 +150,7 @@ eta1_scale = 0.9
 sig_mh_sig2 = 0.2
 sig_mh_tau2 = 0.2
 sig_mh_lambda2 = 0.2
-sig_mh_eta1 = 0.1
+sig_mh_eta1 = 0.2
 sig_mh_phi1 = 0.2
 
 update_eta1 = TRUE
@@ -237,8 +237,8 @@ cat("fitted size = ",size(drpm1$fitted),"\n")
 ## drpm J
 ```{r}
 a_sigma  = 2; b_sigma  = 1
-a_tau    = 1.5; b_tau    = 1.5
-a_lambda = 1.5; b_lambda = 1.5
+a_tau    = 1.7; b_tau    = 1.5
+a_lambda = 1.7; b_lambda = 1.5
 # a_sigma  = 0.01; b_sigma  = 0.01
 # a_tau    = 1.9; b_tau    = 0.4
 # a_lambda = 1.9; b_lambda = 0.4
@@ -714,6 +714,11 @@ for(i in 1:N){
 ```
 
 
+```{r}
+save(drpm1,rout,file="target_variable_only.Rdata")
+```
+
+
 ## Partition plots
 ```{r}
 # partition_plots = function(drpm1, rout){ 
@@ -721,7 +726,7 @@ for(i in 1:N){
 partitions_drpmc <- generate_partition(drpm1)
 partitions_drpmj <- generate_partition(rout)
 
-save_plots=F
+save_plots=T
 
 # partition_matrix <- do.call(cbind, partitions)
 # if (save_plots==T){
@@ -742,8 +747,8 @@ if (save_plots==T){ dev.off()}
 
 
 if (save_plots==T){
-	# pdf(file="partizioni_nums.pdf",width=10,height = 4)
-	pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
+	pdf(file="partizioni_nums.pdf",width=10,height = 4)
+	# pdf(file="partizioni_nums_higher.pdf",width=10,height = 5)
 }
 par(mar=c(3.2,1,2,1),mfrow=c(1,2),oma=c(0.1,0.1,0.1,0.1))
 plot_partition_with_numbers(partitions_drpmc, title="model C",cex=1.5,line=2.1)
@@ -759,7 +764,7 @@ yredC=t(drpm1$fitted[,,size(drpm1$fitted)[3]])
 yredJ=t(rout$fitted[,,size(rout$fitted)[3]])
 yredORIG=y
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
 	pdf(file="C_mean_prediction.pdf",height = 6,width=11)
@@ -891,7 +896,7 @@ cols = colora(N,"div",0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
 cexs = 1
 
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
 	pdf(file="clusters_C.pdf",height = 6,width=11)
@@ -1068,7 +1073,10 @@ y_NA = y
 
 ndata = size(y)[1] * size(y)[2]
 
-set.seed(112)
+seed = runif(1,0,1000)
+cat(seed)
+set.seed(seed)
+
 na_percentage = 0.1
 na_percentage = 0.09620821
 n_na <- round(ndata * na_percentage) # nstations * nday * na%
@@ -1077,6 +1085,7 @@ cat(n_na,"\n")
 # Randomly sample positions to be set as NA
 na_indices_j <- sample(size(y)[1], n_na,replace = T)
 na_indices_t <- sample(size(y)[2], n_na,replace = T)
+load("./Target variable only NA case/NA_indexes_jt.Rdata")
 
 for (k in 1:n_na){
 	cat("NAing index (",na_indices_j[k],",",na_indices_t[k],")\n")
@@ -1086,12 +1095,38 @@ for (k in 1:n_na){
 # Check the dataset
 cat(sum(is.na(y_NA)))
 # y_NA
+
+
+cols = colora(N,seed = 56,show = 0)
+yred=y
+cols = colora(size(yred)[1],56,0)
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10',main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# na_indices_j <- sample(size(y)[1], n_na,replace = T)
+# na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (i in 1:length(na_indices_t)){
+	t = na_indices_t[i]
+	j = na_indices_j[i]
+	points(t,yred[j,t],col="black",pch=19)
+}
 ```
 
 
 
 ## drpm J
 ```{r}
+a_sigma  = 2; b_sigma  = 1
+a_tau    = 1.7; b_tau    = 1.5
+a_lambda = 1.7; b_lambda = 1.5
+
 # module_JDRPM <- juliaImport(juliaCall("include", module))
 out_NA = module_JDRPM$MCMC_fit(
 	# Y=as.matrix(y),
@@ -1130,17 +1165,9 @@ out_NA = module_JDRPM$MCMC_fit(
 	draws = as.integer(niter), burnin = as.integer(nburn),thin = as.integer(nthin),
 	# draws = 100000, burnin = 60000,thin = 40,
 	logging = FALSE,
-	seed = 113.0
+	seed = runif(1,0,1000)
 )
-```
 
-```{r}
-# load(file = "nospace_full_CJ.Rdata")
-# rout_FULL = rout
-```
-
-
-```{r}
 rout_NA = juliaGet(out_NA)
 names(rout_NA)  = c("Si",
 				 "gamma",
@@ -1182,10 +1209,14 @@ cat(crayon::red("\nLPML =",rout_NA$lpml, "\nWAIC =",rout_NA$waic))
 ```
 
 ```{r}
-# save(rout_NA,file="no_space_NAJ.Rdata")
+load(file="./Target variable only NA case/target_varible_only_NAJ_called_rout_NA.Rdata")
+
+# save(rout_NA,file="target_varible_only_NAJ_called_rout_NA.Rdata")
 # load(file="./no space NA/no_space_NAJ.Rdata")
-load(file="./no space NA/nospace_NA_J.Rdata")
-load(file="./no space/nospace_full_CJ.Rdata")
+# load(file="./no space NA/nospace_NA_J.Rdata")
+
+# load(file="./no space/nospace_full_CJ.Rdata")
+load(file="./Target variable only/target_variable_only.Rdata")
 rout_FULL = rout
 ```
 
@@ -1231,11 +1262,6 @@ if (save_plots==T){ dev.off()}
 
 
 # fitted values
-```{r}
-# save(rout_NA,file="nospace_NA_J.Rdata")
-```
-
-
 ```{r}
 yredORIG=y
 save_plots=F
@@ -1356,7 +1382,7 @@ cols = colora(N,"div",0)
 # cols = colora(N,56,0)
 cols = colora(N,"div",seed_div = "Paired",show = 0)
 
-save_plots=F
+save_plots=T
 
 # yred=y
 # cols = colora(N,"div",0)
@@ -1384,6 +1410,7 @@ for(i in 1:N){
 		if (is.na(y_NA[i,t])){
 			pchh = 8
 			cexs = 1.2
+			cat(i," ",t,"\n")
 		}
 		else {
 			pchh = 19
@@ -1393,6 +1420,12 @@ for(i in 1:N){
 			   pch=pchh,cex=cexs)
 	}
 }
+# for (i in 1:length(na_indices_j)){
+# 	j = na_indices_j[i]
+# 	t = na_indices_t[i]
+# 	points(t,yred[j,t],col=partition_matrix[j, t],
+# 		   pch=pchh,cex=cexs)
+# }
 if (save_plots==TRUE) { dev.off() }
 ```
 
@@ -1433,27 +1466,177 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 ```
 
 
+# CIs
+credible intervals around missing data
+
+```{r}
+# save(na_indices_j,na_indices_t,file="NA_indexes_jt.Rdata")
+```
+
+```{r}
+library(scales)
+library(plotrix) 
+library(bayestestR)
+
+na_indices_t
+na_indices_j
+```
 
 
+```{r}
+yred=y
+cols = colora(size(yred)[1],56,0)
+# cols = paste0(cols,"FF")
+cols = alpha(cols, 0.3)
+
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10',main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# na_indices_j <- sample(size(y)[1], n_na,replace = T)
+# na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (i in 1:length(na_indices_t)){
+	t = na_indices_t[i]
+	j = na_indices_j[i]
+	points(t,yred[j,t],col="black",pch=19)
+}
+```
 
 
+```{r}
+dx = 0.1
+plot(1, type = "n", xlab = "",
+     ylab = "", xlim = c(1, 12+dx),
+     # ylim = extrema(rout$fitted[,,]))
+     ylim = c(-5,5))
 
+yred=y
+cols = colora(size(yred)[1],56,0)
+cols = alpha(cols, 0.3)
 
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10',main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
 
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, method = "HDI")
+		UPP = ci_hdi[[2]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[3]]
+		
+		lines(c(t,t),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(t-dx,t+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(t-dx,t+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(t-dx,t+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(t+2*dx,yred[j,t],col="#348959",pch=18)
+}
+```
 
+```{r}
+save_plots=F
 
+if (save_plots==TRUE) { 
+	pdf(file="target_only_NA_CIs.pdf",height = 4.5,width=9)
+}
+par(mar=c(1,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, 12+dx),
+     ylim = c(-5,13),
+	 main="95% credible intervals (HDI) for the missing data ")
 
-
-
-
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		lines(c(i,i),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(i-dx,i+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(i-dx,i+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(i-dx,i+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(i+dx,yred[j,t],col="#348959",pch=18)
+		
+	text(i,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=0.9,col="gray50")
+}
+legend("topleft",legend=c("true value of the missing datum")
+	   ,pch=18,col="#348959",bty="n",cex=0.8)
+if (save_plots==TRUE) { dev.off() }
+```
 
 
 
 ```{r}
-# sort(unique(df_wsc$IDStations)) == sort(unique(df_daily_full_logtransf$IDStations))
-# sort(unique(df_wsc$Latitude)) - sort(unique(df_daily_full_logtransf$Latitude))
-# sort(unique(df_wsc$Longitude)) - sort(unique(df_daily_full_logtransf$Longitude))
+save_plots=F
+
+if (save_plots==TRUE) { 
+	pdf(file="target_only_NA_CIs.pdf",height = 6,width=11)
+}
+par(mar=c(4,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, 12+dx),
+     ylim = c(-5,13),xaxt="n")
+
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, method = "HDI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		lines(c(i,i),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(i-dx,i+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(i-dx,i+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(i-dx,i+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(i+dx,yred[j,t],col="#348959",pch=18)
+		
+}
+axis(1, at = seq(1,12,by = 1), labels = paste0("j=",na_indices_j,"\nt=",na_indices_t),col="gray40")
+if (save_plots==TRUE) { dev.off() }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ===========
@@ -1869,12 +2052,12 @@ n = dim(y)[1]
 
 # colnames(df_wsc)
 covariate_scelte = c(
-	"Altitude"
+	# "Altitude"
 	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
-	# ,"WE_wind_speed_10m_max"
+	"WE_wind_speed_10m_max"
 	# ,"WE_mode_wind_direction_10m"
-	# "WE_tot_precipitation"
+	,"WE_tot_precipitation"
 	# ,"WE_precipitation_t"
 	# ,"WE_surface_pressure"
 	# ,"WE_solar_radiation"
@@ -1884,7 +2067,7 @@ covariate_scelte = c(
 	# ,"WE_wind_speed_100m_mean"
 	# ,"WE_wind_speed_100m_max"
 	# ,"WE_mode_wind_direction_100m"
-	# ,"WE_blh_layer_max"
+	,"WE_blh_layer_max"
 	# ,"WE_blh_layer_min"
 	# ,"EM_nh3_livestock_mm"
 	# ,"EM_nh3_agr_soils"
@@ -2089,6 +2272,16 @@ out = module_JDRPM$MCMC_fit(
 	######## clustering covariates
 	# covariate_similarity_idx = 4,
 	# cv_params = list(0,1,2,2),
+	# Xcl_covariates = X_cl,
+	# covariate_similarity_idx = 4,
+	# # cv_params = list(0,1,4.5,0.8),
+	# cv_params = list(0,1,
+	# 				 # 7.5,2,
+	# 				 7.5,2,
+	# 				 7.5,2,
+	# 				 7.5,2
+	# 				 ),
+	# cv_weight = 0.2,
 	# Xcl_covariates = X_cl,
 	
 	# spatial_cohesion_idx = 1,
@@ -2453,6 +2646,184 @@ hist(rout$lambda2[,1],
 		 	    max(drpm1$lam2[,1],rout$lambda2[,1])))
 ```
 
+# ============
+# NAing whole TSs
+```{r}
+y_NA = y
+# seed = round(runif(1,0,1000))
+seed = 487
+cat(seed,"\n")
+na_js = round(runif(3,1,105))
+na_js = c(83,42,101 )
+cat(na_js,"\n")
+
+y_NA[na_js,] = NA
+
+yred=y
+par(mar=c(2,2,2,1))
+# par(mar=c(4,4,2,2))
+cols = colora(size(yred)[1],56,0)
+cols_transp = alpha(cols,0.4)
+
+
+save_plots=T
+if (save_plots==TRUE) {
+	pdf(file="NAed_units.pdf",height = 5,width=12)
+}
+nf <- layout(
+  matrix(c(1,2), ncol=2, byrow=TRUE), 
+  widths=c(2,1.4), 
+  heights=c(1,1)
+)
+par(mar=c(2,2,2,1))
+
+plot(1:size(yred)[2],yred[i,],col=cols_transp[i],
+	 	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+	 main="PM10 target values",
+     	 type='l',xlab='weeks',ylab='pm10')
+for(i in 1:size(yred)[1]){
+	  lines(1:size(yred)[2],yred[i,],col=cols_transp[i])
+}
+
+col_NA = "#2F327D"
+for (j in na_js){
+	 lines(1:size(yred)[2],yred[j,],col=col_NA,lwd=2)
+}
+
+plot(s_std,main="Spatial coordinates")
+for (j in na_js){
+	 points(s_std[j,1],s_std[j,2],col=col_NA,cex=1.7,pch=19)
+}
+if (save_plots==TRUE) {dev.off()}
+```
+
+## drpm J
+```{r}
+a_sigma  = 0.01; b_sigma = 0.01
+# a_tau    = 2.1; b_tau   = 0.9
+# a_tau    = 1.7; b_tau   = 0.4
+a_tau    = 1.9; b_tau   = 0.4
+# a_lambda = 0.1; b_lambda = 0.1
+a_lambda = 1.9; b_lambda = 0.4
+
+# module_JDRPM <- juliaImport(juliaCall("include", module))
+out = module_JDRPM$MCMC_fit(
+	Y=as.matrix(y_NA),              
+	sp_coords = s_std,
+	M_dp = 1,                     
+	initial_partition = NA,
+	Xlk_covariates = NA,
+	Xcl_covariates = NA,
+	
+	starting_alpha = 0.5,         
+	unit_specific_alpha = FALSE,       
+	time_specific_alpha = TRUE,       
+	update_alpha = TRUE,             
+	
+	include_eta1 = TRUE,                    
+	include_phi1 = T,
+	update_eta1 = update_eta1,                    
+	update_phi1 = T,
+	
+	sig2h_priors = c(a_sigma,b_sigma),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
+	# beta_priors = c(rep(1,p),2),
+	beta_priors = NA,
+	tau2_priors = c(a_tau,b_tau),
+	phi0_priors = c(m0_phi0,s20_phi0),
+	phi1_priors = sig_mh_phi1,
+	lambda2_priors = c(a_lambda,b_lambda),
+	alpha_priors = c(a_alpha,b_alpha),  
+	
+	######## space
+	spatial_cohesion_idx = spatial_cohesion,
+	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.60),
+	
+	######## likelihood covariates
+	Xlk_covariates = X_lk, beta_priors = c(rep(0,size(X_lk)[2]),1),
+	beta_update_threshold = nburn/3,
+	# Xlk_covariates = NA, beta_priors = NA,
+	
+	######## clustering covariates
+	# covariate_similarity_idx = 4,
+	# cv_params = list(0,1,2,2),
+	# Xcl_covariates = X_cl,
+	covariate_similarity_idx = 4,
+	cv_params = list(0,1,
+					 # 7.5,2,
+					 7.5,2,
+					 7.5,2,
+					 7.5,2
+					 ),
+	cv_weight = 0.2,
+	Xcl_covariates = X_cl,
+	
+	# spatial_cohesion_idx = 1,
+	# sp_params = list(0.1),
+	
+	# covariate_similarity_idx = NA,
+	draws = niter,burnin = nburn, thin = nthin,
+	# draws = 1000,burnin = 20, thin = 4,
+	logging = F,
+	seed = 111.0,
+	simple_return = F,
+	verbose = T,
+	perform_diagnostics = T
+)
+
+```
+
+## rout
+```{r}
+rout = juliaGet(out)
+names(rout)  = c("Si",
+				 "gamma",
+				 "alpha",
+				 "sigma2h",
+				 "muh",
+				 "eta1",
+				 "beta",
+				 "theta",
+				 "tau2",
+				 "phi0",
+				 "phi1",
+				 "lambda2",
+				 "fitted",
+				 "llike",
+				 "lpml",
+				 "waic")
+
+# reshape some stuff to uniform it to drpm output
+rout$Si           = aperm(rout$Si,       c(2, 1, 3))
+rout$gamma        = aperm(rout$gamma,    c(2, 1, 3))
+rout$sigma2h      = aperm(rout$sigma2h,  c(2, 1, 3))
+rout$muh          = aperm(rout$muh,      c(2, 1, 3))
+rout$fitted       = aperm(rout$fitted,   c(2, 1, 3))
+rout$llike        = aperm(rout$llike,    c(2, 1, 3))
+rout$alpha        = aperm(rout$alpha,    c(2, 1))
+rout$theta        = aperm(rout$theta,    c(2, 1))
+rout$tau2         = aperm(rout$tau2,     c(2, 1))
+rout$eta1         = aperm(rout$eta1,    c(2, 1))
+rout$phi0     = matrix(rout$phi0,    ncol = 1)
+rout$phi1     = matrix(rout$phi1,    ncol = 1)
+rout$lambda2  = matrix(rout$lambda2, ncol = 1)
+cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
+```
+
+
+```{r}
+# save(rout,file="NAed_3units_fit_space.Rdata")
+# save(rout,file="NAed_3units_fit_space_Xlk.Rdata")
+save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
+```
+
+
+
+
+# ============
 
 #-------------
 # functions

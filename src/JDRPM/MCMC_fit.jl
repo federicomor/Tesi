@@ -12,8 +12,8 @@ using MCMCChains
 using DataFrames
 using CSV
 
-# log_file = open("log.txt", "w+")
-# include("debug.jl")
+log_file = open("log.txt", "w+")
+include("debug.jl")
 include("utils.jl")
 
 function MCMC_fit(;
@@ -1668,7 +1668,7 @@ function MCMC_fit(;
 		if logging CSV.write(log_file,ss[!,[1,4,5,6,7]]) end
 	end
 
-	# close(log_file)
+	close(log_file)
 
 	# if !logging
 		# rm("log.txt")

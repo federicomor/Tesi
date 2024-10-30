@@ -1,0 +1,33 @@
+- using seed 470.7049720454961 -
+fitting 50000 total iterates (with burnin=40000, thinning=5)
+thus producing 2000 valid iterates in the end
+
+on n=10 subjects
+for T=12 time instants
+
+[✗] with space? false
+[✗] with covariates in the likelihood? false
+[✗] with covariates in the clustering process? false
+[✓] are there missing data in Y? true
+
+2024-10-30 09:35:52
+Starting MCMC algorithm
+Progress: 100% Time: 0:00:13 ( 0.27 ms/it)
+
+done!
+Elapsed time: 13 seconds, 682 milliseconds
+LPML: -236.93115312711666 (the higher the better)
+WAIC: 401.4450571170275 (the lower the better)
+acceptance ratio eta1: 27.39%
+acceptance ratio phi1: 67.42%
+
+LPML = -236.931153127117 
+WAIC = 401.445057117027
+
+J MSE
+mean  1.263381 
+median  1.203414 
+
+J NA MSE
+mean  1.472143 
+median  1.210157 
