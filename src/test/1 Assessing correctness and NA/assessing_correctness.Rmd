@@ -2672,6 +2672,7 @@ yred=y
 par(mar=c(2,2,2,1))
 # par(mar=c(4,4,2,2))
 cols = colora(size(yred)[1],56,0)
+cols = rep("gray80",105)
 cols_transp = alpha(cols,0.4)
 
 
@@ -2696,16 +2697,18 @@ for(i in 1:size(yred)[1]){
 }
 
 # colora(10,72)
+# col_NA = rep(0,105)
+# col_NA[na_js[2]] = "#2F327D"
+# col_NA[na_js[1]] = "#0087BA"
+# col_NA[na_js[3]] = "#1AC0BD"
 col_NA = rep(0,105)
-col_NA[na_js[2]] = "#2F327D"
-col_NA[na_js[1]] = "#0087BA"
-col_NA[na_js[3]] = "#1AC0BD"
+col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
 for (j in na_js){
 	 # lines(1:size(yred)[2],yred[j,],col=col_NA,lwd=2)
 	 lines(1:size(yred)[2],yred[j,],col=col_NA[j],lwd=2)
 }
 
-plot(s_std,main="Spatial coordinates")
+plot(s_std,main="Spatial coordinates",col="gray70")
 for (j in na_js){
 	 points(s_std[j,1],s_std[j,2],col=col_NA[j],cex=1.7,pch=19)
 }
@@ -2757,8 +2760,8 @@ out = module_JDRPM$MCMC_fit(
 	# sp_params = list(0.60),
 	
 	######## likelihood covariates
-	Xlk_covariates = X_lk, beta_priors = c(rep(0,size(X_lk)[2]),1),
-	beta_update_threshold = nburn/3,
+	# Xlk_covariates = X_lk, beta_priors = c(rep(0,size(X_lk)[2]),1),
+	# beta_update_threshold = nburn/3,
 	# Xlk_covariates = NA, beta_priors = NA,
 	
 	######## clustering covariates
@@ -2782,7 +2785,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,burnin = nburn, thin = nthin,
 	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
-	seed = 111.0,
+	seed = 112.0,
 	simple_return = F,
 	verbose = T,
 	perform_diagnostics = T
@@ -2833,7 +2836,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 # save(rout,file="NAed_3units_fit_space_Xlk.Rdata")
 # save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
 
-save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
+save(rout,file="NAed_3units_fit_space_Xcl.Rdata")
 ```
 
 ## plots
@@ -2857,6 +2860,13 @@ model_name = "JDRPM - NA fit - space + Xlk"
 ```{r}
 load(paste0(folder,"NAed_3units_fit_space_Xlk_Xcl.Rdata"))
 model_name = "JDRPM - NA fit - space + Xlk + Xcl"
+```
+
+```{r}
+# load(paste0(folder,"NAed_3units_fit_space_Xcl_1.Rdata"))
+# load(paste0(folder,"NAed_3units_fit_space_Xcl_2.Rdata"))
+load(paste0("NAed_3units_fit_space_Xcl.Rdata"))
+model_name = "JDRPM - NA fit - space + Xcl"
 ```
 
 
@@ -2963,9 +2973,14 @@ if (save_plots==TRUE) {dev.off()}
 ### CIs
 ```{r}
 save_plots=F
+col_NA = rep(0,105)
+col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
+
 
 if (save_plots==TRUE) {
-	pdf(file=paste0(model_name,".pdf"),height = 4.6,width=10)
+	# pdf(file=paste0(model_name,".pdf"),height = 4.6,width=10)
+	pdf(file=paste0(model_name,"_VERTICAL.pdf"),height = 4.6,width=10)
+	# pdf(file=paste0(model_name,"_VERTICAL_ZOOMED.pdf"),height = 4.6,width=10)
 }
 # nf <- layout(
 #   matrix(c(1,2,3,4), ncol=1, byrow=TRUE), 
@@ -2979,7 +2994,7 @@ if (save_plots==TRUE) {
 
 par(mar=c(0.5,1,0.5,1),
 	mfrow=c(1,3),
-	oma=c(0.1,0.1,0.1,0.1))
+	oma=c(0.2,1.2,0.2,0.2))
 
 for (j in na_js){
 		
@@ -2990,7 +3005,7 @@ for (j in na_js){
 	MID = c()
 	for (t in 1:Tm){
 		sampled_values = rout$fitted[t,j,]
-		ci_hdi <- ci(sampled_values, ci=0.90, method = "HDI")
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
 		LOW = c(LOW,min(ci_hdi[[2]],ci_hdi[[3]]))
 		UPP = c(UPP,max(ci_hdi[[2]],ci_hdi[[3]]))
 		MID = c(MID,mean(sampled_values))
@@ -2998,11 +3013,21 @@ for (j in na_js){
 	cat(extrema(c(LOW,MID,UPP)),"\n")
 	
 	##### PLOT BACKGROUND
+	if (j==na_js[1]) {
 	plot(1, type="n", xlab="", ylab="", xlim=c(1, 12),
-		 xaxt="n",
-		 yaxt="n",
-		 # ylim=extrema(c(LOW,MID,UPP,y[j,])))
+		 # xaxt="n",
+		 # yaxt="n",
 		 ylim=extrema(y))
+		 # ylim=extrema(c(LOW,MID,UPP,y[j,])))
+	} else {
+		plot(1, type="n", xlab="", ylab="", xlim=c(1, 12),
+		 axes=FALSE, frame.plot=TRUE,
+		 ylim=extrema(y))
+		 # ylim=extrema(c(LOW,MID,UPP,y[j,])))
+		Axis(side=1, labels=FALSE)
+		Axis(side=2, labels=FALSE)
+	}
+	# 
 	# axis(side = 1, at = c(1:Tm), labels = FALSE, tck = -0.1)
 	# axis(side = 2, labels = FALSE, tck = -0.1)
 
@@ -3027,11 +3052,46 @@ for (j in na_js){
 	#    lty=c(2,1),bty="n",cex=.9,col=rep(col_NA[j],2))
 }
 
+
 legend("bottomleft",legend = c("true value","mean fitted value"),
-lty=c(2,1),bty="n",cex=1)
+lty=c(2,1),bty="n",cex=1.2)
 # mtext(model_name,side=3,line=-0.3,outer=T,col="#2E1831")
 
 if (save_plots==TRUE) {dev.off()}
+```
+
+### MSE
+```{r}
+MSE_vectors = function(v1,v2){
+	MSE = 0
+	for (i in 1:length(v1)){
+		MSE = MSE + (v1[i]-v2[i])^2
+	}
+	MSE = MSE/length(v1)
+	return(MSE)
+}
+
+cat(model_name,"###########\n")
+for (j in na_js){
+		
+	##### BUILD CIs
+	# cat(j,"\n")
+	MED = c()
+	MID = c()
+	for (t in 1:Tm){
+		sampled_values = rout$fitted[t,j,]
+		MID = c(MID,mean(sampled_values))
+		MED = c(MED,median(sampled_values))
+	}
+	y_jfull = y[j,]
+	# cat(length(MID),"\n")
+	# cat(length(MED),"\n")
+	
+
+	cat("MSE",j,"\n")
+	cat("mean ", MSE_vectors(MID,y_jfull),"\n")
+	cat("median ", MSE_vectors(MED,y_jfull),"\n")
+}
 ```
 
 
