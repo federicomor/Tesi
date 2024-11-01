@@ -1,0 +1,46 @@
+Comparison between CDRPM and JDRPM fits and their associated algorithms, in
+the simulated data scenario.
+Comparison between CDRPM and JDRPM fits and their associated algorithms, in
+the real-world scenario.
+Comparison of JDRPM fits, in the simulated data scenario, on a dataset with missing values
+Comparison of JDRPM fits, in the real-world scenario, on a dataset with missing values
+
+Lagged ARI values of CDRPM and JDRPM fits, in the simulated data scenario.
+Lagged ARI values of CDRPM and JDRPM fits, in the real-world scenario.
+Lagged ARI values of JDRPM fits, in the simulated data scenario, on a dataset
+with missing values
+Lagged ARI values of JDRPM fits, in the real-world scenario, on a dataset with
+missing values.
+
+Clusters estimates produced by CDRPM and JDRPM fits, in the simulated data
+scenario. Time instants are annotated on the x axis, units are indicated vertically by their number,
+and colors represent the cluster label.
+Clusters estimates produced by JDRPM fits, in the simulated data scenario, on
+a dataset with missing values. Time instants are annotated on the x axis, units are indicated
+vertically by their number, and colors represent the cluster label.
+
+Fitted values of CDRPM (middle) and JDRPM (bottom) fits, in the simulated data
+scenario, alongside the generated target values (top).
+Fitted values of CDRPM (middle) and JDRPM (bottom) fits, in the real-world
+scenario, alongside the generated target values (top).
+Fitted values of JDRPM fit, in the simulated data scenario, with missing values in
+the target variable. Special square markers are devoted to the data points which were missing,
+highlighting the gaps between the fitted values on the full dataset (green) and the fitted values on
+the dataset with missing values (red).
+Fitted values of JDRPM fit, in the real-world scenario, with missing values in
+the target variable. Special square markers are devoted to the data points which were missing,
+highlighting the gaps between the fitted values on the full dataset (green) and the fitted values on
+the dataset with missing values (red).
+
+
+Visual representation of the clusters estimates produced by CDRPM and JDRPM
+fits, in the simulated data scenario. Cluster labels are represented as colored dots overlaid to the
+trend of the target variable.
+Visual representation of the clusters estimates produced by CDRPM and JDRPM
+fits, in the real-world scenario.
+Visual representation of the clusters estimates produced by JDRPM fit, in the
+simulated data scenario, on a dataset with missing values. Cluster labels are represented as
+colored dots overlaid to the trend of the target variable, with special point markers devoted to
+data points corresponding to missing values.
+
+

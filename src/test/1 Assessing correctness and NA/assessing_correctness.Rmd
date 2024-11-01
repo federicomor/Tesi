@@ -2052,7 +2052,8 @@ n = dim(y)[1]
 
 # colnames(df_wsc)
 covariate_scelte = c(
-	# "Altitude"
+	# "AQ_pm10",
+	# "Altitude",
 	# ,"WE_temp_2m"
 	# ,"WE_wind_speed_10m_mean"
 	"WE_wind_speed_10m_max"
@@ -2092,21 +2093,79 @@ X_cl = array(data = 0, dim = c(n, p, Tm))
 dim(X_cl)
 cat("N * p * T = ",n,"*",p,"*",Tm,"\n")
 
-for(i in 1:n){
-	st = stations[i]
-	for(t in 1:Tm){
-		df_st = df_wsc[which(df_wsc$IDStations == st),]
-		for (pp in 1:p){
-			X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
-		}
+
+for (pp in 1:p){
+	target = covariate_scelte[pp]
+	yfull=data.frame()
+	if (typeof(unique(df_wsc[,target][[1]])) != "character"){
+	for(st in stations[1:n]){
+		y_we_target=cbind(as.data.frame(st),t(df_wsc[which(df_wsc$IDStations==st),target]))
+		yfull=rbind(yfull,y_we_target)
 	}
+	rownames(yfull) = NULL
+	colnames(yfull)<- c("id",paste0("w", 1:(size(yfull)[2]-1)))
+	
+	time_span = 1:12
+	nsubjects = 1:n
+	y_other = yfull[nsubjects,1+time_span]
+	mn <- apply(y_other,2,mean)
+	sd <- apply(y_other,2,sd)
+	y_other <- t(t(y_other) - mn) # timewise mean
+	# y_other <- t(t(y_other) - mean(y_other[[1]])) # global mean
+
+	for (t in 1:Tm){
+		X_cl[,pp,t] = y_other[,t]
+	}
+	}
+
 }
+
+## original variable case, i.e. centered wrt global mean actually
+# for(i in 1:n){
+# 	st = stations[i]
+# 	for(t in 1:Tm){
+# 		df_st = df_wsc[which(df_wsc$IDStations == st),]
+# 		for (pp in 1:p){
+# 			# X_cl[i,pp,t] = as.numeric(df_st[t,covariate_scelte[pp]])
+# 			X_cl[i,pp,t] = df_st[t,covariate_scelte[pp]][[1]]
+# 			# X_cl[i,pp,t] = as.character(df_st[t,covariate_scelte[pp]][[1]])
+# 		}
+# 	}
+# }
+
+
+titolo = "centered wrt time-wise mean"
+# titolo = "centered wrt global mean"
+# titolo = "original variable"
+
+for (pp in 1:p){
+yred=X_cl[,pp,]
+target = covariate_scelte[pp]
+save_plot=F
+folder = "./different means/"
+if (save_plot==T) { pdf(file=paste0(folder,target,titolo,".pdf"),height = 5.7,width = 11)}
+par(mar=c(2,2,2,1))
+col_idx = 1
+for(i in ranked_indices){
+   if(i==ranked_indices[1]){
+     plot(1:size(yred)[2],yred[i,],col=cols[col_idx],
+     	 # ylim=extrema(as.matrix(yred[,-c(1)])),
+     	 ylim=extrema(as.matrix(yred)),
+     	 main=paste0(covariate_scelte[pp]," - ",titolo),
+     	 type='l',xlab='weeks',ylab='pm10')
+ 	  }
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[col_idx])
+	  }
+	col_idx = col_idx+1
+}
+if (save_plot==T) {dev.off()}
+}
+
 colnames(X_cl) = covariate_scelte
 head(X_cl)
+y
 ```
-
-
-
 ## likelihood covariates
 ```{r}
 n = dim(y)[1]
@@ -2273,16 +2332,16 @@ out = module_JDRPM$MCMC_fit(
 	# covariate_similarity_idx = 4,
 	# cv_params = list(0,1,2,2),
 	# Xcl_covariates = X_cl,
-	# covariate_similarity_idx = 4,
+	covariate_similarity_idx = 4,
 	# # cv_params = list(0,1,4.5,0.8),
-	# cv_params = list(0,1,
-	# 				 # 7.5,2,
-	# 				 7.5,2,
-	# 				 7.5,2,
-	# 				 7.5,2
-	# 				 ),
-	# cv_weight = 0.2,
-	# Xcl_covariates = X_cl,
+	cv_params = list(0,1,
+					 # 7.5,2,
+					 7.5,2,
+					 7.5,2,
+					 7.5,2
+					 ),
+	cv_weight = 0.2,
+	Xcl_covariates = X_cl,
 	
 	# spatial_cohesion_idx = 1,
 	# sp_params = list(0.1),
@@ -2291,7 +2350,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,burnin = nburn, thin = nthin,
 	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
-	seed = 113.0,
+	seed = 888.0,
 	simple_return = F,
 	verbose = T,
 	perform_diagnostics = T
@@ -2785,7 +2844,7 @@ out = module_JDRPM$MCMC_fit(
 	draws = niter,burnin = nburn, thin = nthin,
 	# draws = 1000,burnin = 20, thin = 4,
 	logging = F,
-	seed = 112.0,
+	seed = 888.0,
 	simple_return = F,
 	verbose = T,
 	perform_diagnostics = T
@@ -2836,7 +2895,7 @@ cat(crayon::red("\nLPML =",rout$lpml, "\nWAIC =",rout$waic))
 # save(rout,file="NAed_3units_fit_space_Xlk.Rdata")
 # save(rout,file="NAed_3units_fit_space_Xlk_Xcl.Rdata")
 
-save(rout,file="NAed_3units_fit_space_Xcl.Rdata")
+save(rout,file="NAed_3units_fit_space_Xcl_real_2.Rdata")
 ```
 
 ## plots
@@ -2865,7 +2924,9 @@ model_name = "JDRPM - NA fit - space + Xlk + Xcl"
 ```{r}
 # load(paste0(folder,"NAed_3units_fit_space_Xcl_1.Rdata"))
 # load(paste0(folder,"NAed_3units_fit_space_Xcl_2.Rdata"))
-load(paste0("NAed_3units_fit_space_Xcl.Rdata"))
+
+# load(paste0("NAed_3units_fit_space_Xcl_real.Rdata"))
+load(paste0("NAed_3units_fit_space_Xcl_real_2.Rdata"))
 model_name = "JDRPM - NA fit - space + Xcl"
 ```
 
@@ -2953,9 +3014,6 @@ for(i in 1:size(yred)[1]){
 }
 
 col_NA = rep(0,105)
-# col_NA[na_js[2]] = "#2F327D"
-# col_NA[na_js[1]] = "#0087BA"
-# col_NA[na_js[3]] = "#1AC0BD"
 col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
 # col_NA[na_js] = colora(3,"div",seed_div = "Dark2",0)
 for (j in na_js){
@@ -3045,6 +3103,9 @@ for (j in na_js){
 	lines(1:size(yred)[2],MID,col=col_NA[j],lwd=2)
 
 	##### PLOT CIs AROUND FITTED MEAN VALUE
+	col_NA = rep(0,105)
+	col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
+	col_NA_soft = rep(0,105)
 	col_NA_soft[na_js] = alpha(col_NA[na_js],0.3)
 	polygon(c(1:Tm,rev(1:Tm)),c(UPP,rev(LOW)),col=col_NA_soft[j],border=NA)
 	
