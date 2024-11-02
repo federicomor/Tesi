@@ -210,7 +210,8 @@ name = "JDRPM - NA data + Xlk"
 save_plots = T
 
 	if (save_plots==T){
-	pdf(file=paste0("beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+	# pdf(file=paste0("beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+	pdf(file=paste0("LINES_beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
 	}
 
 par(mfrow=c(6,2),mar=c(2,2,2,1),oma=c(0.1,0.1,1.3,0.1))
@@ -253,10 +254,15 @@ abline(h=0,col="#dCd5d2")
 		UPP = ci_hdi[[2]]
 		MID = mean(rout$beta[time,cova_idx,])
 		LOW = ci_hdi[[3]]
-		lines(c(time,time),c(LOW,UPP),col="#FFD99F")
-		points(time,MID,cex=1,col="#7D1D67",pch=15)
-		points(time,UPP,cex=1,col="#F65A6D",pch=19)
-		points(time,LOW,cex=1,col="#F65A6D",pch=19)
+		# lines(c(time,time),c(LOW,UPP),col="#FFD99F")
+		# points(time,MID,cex=1,col="#7D1D67",pch=15)
+		# points(time,UPP,cex=1,col="#F65A6D",pch=19)
+		# points(time,LOW,cex=1,col="#F65A6D",pch=19)
+		dx = 0.1
+		lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4)
+		lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7,col="#7D1D67")
+		lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7,col="#F65A6D")
+		lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7,col="#F65A6D")
 	}
 }
 

@@ -51,7 +51,9 @@ end
 =#
 
 # include("../old/MCMC_fit.jl")
-include("../prelease/MCMC_fit.jl")
+include("../past versions/prelease/MCMC_fit.jl")
+include("../past versions/old/MCMC_fit.jl")
+include("../past versions/cova testing time/MCMC_fit.jl")
 
 # include("../new/MCMC_fit.jl")
 
@@ -107,11 +109,11 @@ thin = 1.
 	# Xcl_covariates = X_cl,
 	# covariate_similarity_idx = 4,
 	# cv_params = [0.,2.,1.,2.],  
-	cv_params = missing,  
+	# cv_params = missing,  
 
 	M_dp = 1.0,                     
 	initial_partition = missing,
-	Xlk_covariates = missing,
+	# Xlk_covariates = missing,
 	starting_alpha = 0.5,         
 	unit_specific_alpha = false,       
 	time_specific_alpha = time_specific_alpha,     
@@ -123,12 +125,12 @@ thin = 1.
 	update_phi1 = update_phi1,
 
 	sig2h_priors = [a_sigma,b_sigma],
-	eta1_priors = [eta1_scale,sig_mh_eta1^2],
+	eta1_priors = [eta1_scale,sig_mh_eta1],
 	# beta_priors = c(rep(1,p),2),
-	beta_priors = missing,
+	# beta_priors = missing,
 	tau2_priors = [a_tau,b_tau],
 	phi0_priors = [m0_phi0,s20_phi0],
-	phi1_priors = sig_mh_phi1^2,
+	phi1_priors = sig_mh_phi1,
 	lambda2_priors = [a_lambda,b_lambda],
 	alpha_priors = [a_alpha,b_alpha],
 	
@@ -137,13 +139,68 @@ thin = 1.
 	# spatial_cohesion_idx = 1,
 	# sp_params = [0.5],
 
-	draws = niter,                    
-	burnin = burnin,                   
-	thin = thin,                     
+	draws = niter * 1.0,                    
+	burnin = burnin * 1.0,                   
+	thin = thin * 1.0,                     
 	logging = false,
 	seed = seed
 );
 # )
+
+
+#=
+official version #############################
+Elapsed time: 4 seconds, 515 milliseconds
+(25.35 M allocations: 2.236 GiB, 4.64%% gc time)
+elapsed time (ns):  4431394100
+gc time (ns):       214217200
+bytes allocated:    2400526000
+pool allocs:        25350195
+non-pool GC allocs: 112
+malloc() calls:     10
+free() calls:       0
+minor collections:  37
+full collections:   0
+
+pre(re)lease version #############################
+Elapsed time: 54 seconds, 190 milliseconds
+(331.76 M allocations: 21.547 GiB, 5.80% gc time)
+elapsed time (ns):  55209293200
+gc time (ns):       3203797000
+bytes allocated:    23135946288
+pool allocs:        330762753
+non-pool GC allocs: 1001718
+malloc() calls:     10
+free() calls:       0
+minor collections:  267
+full collections:   0
+
+old version #############################
+Elapsed time: 17 seconds, 314 milliseconds
+(193.25 M allocations: 18.233 GiB, 9.22% gc time)
+elapsed time (ns):  17322894900
+gc time (ns):       1597300100
+bytes allocated:    19577849360
+pool allocs:        192243554
+non-pool GC allocs: 1001720
+malloc() calls:     10
+free() calls:       0
+minor collections:  427
+full collections:   0
+
+cova time version #############################
+Elapsed time: 17 seconds, 16 milliseconds
+(169.99 M allocations: 17.248 GiB, 9.01% gc time)
+elapsed time (ns):  18037863700
+gc time (ns):       1625568400
+bytes allocated:    18519403520
+pool allocs:        168985729
+non-pool GC allocs: 1001718
+malloc() calls:     10
+free() calls:       0
+minor collections:  381
+full collections:   0
+=#
 
 
 
