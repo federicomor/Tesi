@@ -1737,9 +1737,9 @@ y
 s_std
 plot(s_std)
 rownames(s_std) = NULL
-```
 
-```{r}
+
+#####################################
 yred=y
 # unit_summary <- rowMeans(yred)
 unit_summary <- apply(yred, 1, median)
@@ -3030,7 +3030,7 @@ if (save_plots==TRUE) {dev.off()}
 
 ### CIs
 ```{r}
-save_plots=F
+save_plots=T
 col_NA = rep(0,105)
 col_NA[na_js] = colora(3,"div",seed_div = "Set1",0)
 

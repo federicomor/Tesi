@@ -44,3 +44,4 @@ colored dots overlaid to the trend of the target variable, with special point ma
 data points corresponding to missing values.
 
 
+rewritten version of your text in a more coherent, professional, and academic style:
