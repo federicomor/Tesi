@@ -1569,4 +1569,45 @@ mtext("ms/it",side=3,line=-0.8,at=1.24,cex=0.9)
 if (save_plots==T){ dev.off() }
 ```
 
+# FINAL PLOT
+```{r}
+load("performance_C_target_lim250.Rdata")
+performance_C
+load("performance_C_target_space_lim250.Rdata")
+performance_C
+
+load("performance_Julia_target_lim250.Rdata")
+J_no_space = performance_Julia
+load("performance_Julia_target_space_lim250.Rdata")
+J_space = performance_Julia
+
+load("test_varying_p.Rdata")
+J_varying_p = performance_Julia
+```
+
+```{r}
+# case T=50, N=50
+
+cls = c(0,1,3,5,7)
+C_no_space = 0.014075
+C_space = 0.02400
+```
+
+```{r}
+# cols = colora(4,"rand")
+# 112, 55
+cols = colora(4,55,0)
+cols_C = colora(4,"rand",0)
+
+plot( cls,as.numeric(J_varying_p[,1]),type="o",pch=19,col=cols[1],ylim=extrema(J_varying_p))
+abline(h=C_no_space,col="gray70")
+abline(h=C_space,   col="gray70")
+lines(cls,as.numeric(J_varying_p[,1]),type="o",pch=19,col=cols[1])
+lines(cls,as.numeric(J_varying_p[,2]),type="o",pch=19,col=cols[2])
+lines(cls,as.numeric(J_varying_p[,3]),type="o",pch=19,col=cols[3])
+lines(cls,as.numeric(J_varying_p[,4]),type="o",pch=19,col=cols[4])
+
+```
+
+
 

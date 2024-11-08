@@ -158,14 +158,19 @@ s1_cl2 = s1[cls .== 2]; s2_cl2 = s2[cls .== 2]
 s1_cl3 = s1[cls .== 3]; s2_cl3 = s2[cls .== 3]
 s1_cl4 = s1[cls .== 4]; s2_cl4 = s2[cls .== 4]
 
+scatter(s1_cl1,s2_cl1) # blue
+scatter(s1_cl2,s2_cl2) # orange
+scatter(s1_cl3,s2_cl3) # green
+scatter(s1_cl4,s2_cl4) # purple
 
-lg = true
-alphas = range(0, 1.0, length=1000)
-cohesion1_vals_cl1 = [cohesion1(s1_cl1, s2_cl1, alpha, lg) for alpha in alphas]
-cohesion1_vals_cl2 = [cohesion1(s1_cl1, s2_cl2, alpha, lg) for alpha in alphas]
-cohesion1_vals_cl3 = [cohesion1(s1_cl3, s2_cl3, alpha, lg) for alpha in alphas]
-cohesion1_vals_cl4 = [cohesion1(s1_cl4, s2_cl4, alpha, lg) for alpha in alphas]
 begin
+lg = true
+M=1
+alphas = range(1,2, length=1000)
+cohesion1_vals_cl1 = [cohesion1(s1_cl1, s2_cl1, alpha, lg)+log(M)+lgamma(sum(cls.==1)) for alpha in alphas]
+cohesion1_vals_cl2 = [cohesion1(s1_cl2, s2_cl2, alpha, lg)+log(M)+lgamma(sum(cls.==2)) for alpha in alphas]
+cohesion1_vals_cl3 = [cohesion1(s1_cl3, s2_cl3, alpha, lg)+log(M)+lgamma(sum(cls.==3)) for alpha in alphas]
+cohesion1_vals_cl4 = [cohesion1(s1_cl4, s2_cl4, alpha, lg) for alpha in alphas]
 plot(alphas,  cohesion1_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
 # dpi=300, size=(760,400)
 dpi=300, size=(760,340)
@@ -173,6 +178,7 @@ dpi=300, size=(760,340)
 plot!(alphas, cohesion1_vals_cl2,  label="cluster 2", lw=2, color=color_palette[2])
 plot!(alphas, cohesion1_vals_cl3,  label="cluster 3", lw=2, color=color_palette[3])
 plot!(alphas, cohesion1_vals_cl4,  label="cluster 4", lw=2, color=color_palette[4])
+
 # xlabel!("alpha values")
 xlabel!(L"$\alpha$ values")
 ylabel!("")
@@ -183,10 +189,11 @@ end
 
 begin
 lg = false
+M = 1
 as = range(0, 6, length=1000)
-cohesion2_vals_cl1 = [cohesion2(s1_cl1, s2_cl1, a, lg) for a in as]
-cohesion2_vals_cl2 = [cohesion2(s1_cl1, s2_cl2, a, lg) for a in as]
-cohesion2_vals_cl3 = [cohesion2(s1_cl3, s2_cl3, a, lg) for a in as]
+cohesion2_vals_cl1 = [cohesion2(s1_cl1, s2_cl1, a, lg)+log(M)+lgamma(sum(cls.==1))  for a in as]
+cohesion2_vals_cl2 = [cohesion2(s1_cl2, s2_cl2, a, lg)+log(M)+lgamma(sum(cls.==2))  for a in as]
+cohesion2_vals_cl3 = [cohesion2(s1_cl3, s2_cl3, a, lg)+log(M)+lgamma(sum(cls.==3))  for a in as]
 cohesion2_vals_cl4 = [cohesion2(s1_cl4, s2_cl4, a, lg) for a in as]
 plot(as,  cohesion2_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
 dpi=300, size=(760,340)
@@ -198,18 +205,18 @@ plot!(legend=:bottomright)
 xlabel!(L"$a$ values")
 ylabel!("")
 # title!("Cohesion 2 (log=$lg)")
-savefig("cohesion2.pdf")
+# savefig("cohesion2.pdf")
 end
 
 
 begin
 mu0 = @SVector [0.,0.]; k0 = 1; v0 = 5; M=1.
 Psi = @SMatrix [1.0 0.; 0. 1.0]; S = @MMatrix zeros(2,2)
-v0s = range(0, 6, length=1000)
+v0s = range(0, 5, length=1000)
 lg = true
-cohesion3_vals_cl1 = [cohesion3(s1_cl1, s2_cl1, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
-cohesion3_vals_cl2 = [cohesion3(s1_cl1, s2_cl2, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
-cohesion3_vals_cl3 = [cohesion3(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
+cohesion3_vals_cl1 = [cohesion3(s1_cl1, s2_cl1, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==1)) for v0 in v0s]
+cohesion3_vals_cl2 = [cohesion3(s1_cl2, s2_cl2, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==2)) for v0 in v0s]
+cohesion3_vals_cl3 = [cohesion3(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==3)) for v0 in v0s]
 cohesion3_vals_cl4 = [cohesion3(s1_cl4, s2_cl4, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 plot(v0s,  cohesion3_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
 dpi=300, size=(760,340)
@@ -228,11 +235,11 @@ end
 begin
 mu0 = @SVector [0.,0.]; k0 = 1; v0 = 5; M=1.
 Psi = @SMatrix [1.0 0.; 0. 1.0]; S = @MMatrix zeros(2,2)
-v0s = range(0, 6, length=1000)
+v0s = range(0, 5, length=1000)
 lg = true
-cohesion4_vals_cl1 = [cohesion4(s1_cl1, s2_cl1, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
-cohesion4_vals_cl2 = [cohesion4(s1_cl1, s2_cl2, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
-cohesion4_vals_cl3 = [cohesion4(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
+cohesion4_vals_cl1 = [cohesion4(s1_cl1, s2_cl1, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==1)) for v0 in v0s]
+cohesion4_vals_cl2 = [cohesion4(s1_cl2, s2_cl2, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==2)) for v0 in v0s]
+cohesion4_vals_cl3 = [cohesion4(s1_cl3, s2_cl3, mu0, k0, v0, Psi, lg, M, S)+log(M)+lgamma(sum(cls.==3)) for v0 in v0s]
 cohesion4_vals_cl4 = [cohesion4(s1_cl4, s2_cl4, mu0, k0, v0, Psi, lg, M, S) for v0 in v0s]
 plot(v0s,  cohesion4_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
 dpi=300, size=(760,340)
@@ -245,15 +252,15 @@ plot!(legend=:bottomright)
 xlabel!(L"$\nu_0$ values")
 ylabel!("")
 # title!("Cohesion 4 (log=$lg)")
-savefig("cohesion4.pdf")
+# savefig("cohesion4.pdf")
 end
 
 begin
 lg = true
-phis = range(0, 3.0, length=1000)
-cohesion5_vals_cl1 = [cohesion5(s1_cl1, s2_cl1, phi, lg) for phi in phis]
-cohesion5_vals_cl2 = [cohesion5(s1_cl1, s2_cl2, phi, lg) for phi in phis]
-cohesion5_vals_cl3 = [cohesion5(s1_cl3, s2_cl3, phi, lg) for phi in phis]
+phis = range(0, 8.0, length=1000)
+cohesion5_vals_cl1 = [cohesion5(s1_cl1, s2_cl1, phi, lg)+log(M)+lgamma(sum(cls.==1)) for phi in phis]
+cohesion5_vals_cl2 = [cohesion5(s1_cl2, s2_cl2, phi, lg)+log(M)+lgamma(sum(cls.==2)) for phi in phis]
+cohesion5_vals_cl3 = [cohesion5(s1_cl3, s2_cl3, phi, lg)+log(M)+lgamma(sum(cls.==3)) for phi in phis]
 cohesion5_vals_cl4 = [cohesion5(s1_cl4, s2_cl4, phi, lg) for phi in phis]
 plot(phis,  cohesion5_vals_cl1,  label="cluster 1", lw=2, color=color_palette[1],
 dpi=300, size=(760,340)
@@ -272,10 +279,10 @@ end
 
 begin
 lg = true
-phis = range(0, 3.0, length=1000)
-cohesion6_vals_cl1 = [cohesion6(s1_cl1, s2_cl1, phi, lg) for phi in phis]
-cohesion6_vals_cl2 = [cohesion6(s1_cl1, s2_cl2, phi, lg) for phi in phis]
-cohesion6_vals_cl3 = [cohesion6(s1_cl3, s2_cl3, phi, lg) for phi in phis]
+phis = range(0, 100, length=1000)
+cohesion6_vals_cl1 = [cohesion6(s1_cl1, s2_cl1, phi, lg)+log(M)+lgamma(sum(cls.==1)) for phi in phis]
+cohesion6_vals_cl2 = [cohesion6(s1_cl2, s2_cl2, phi, lg)+log(M)+lgamma(sum(cls.==2)) for phi in phis]
+cohesion6_vals_cl3 = [cohesion6(s1_cl3, s2_cl3, phi, lg)+log(M)+lgamma(sum(cls.==3)) for phi in phis]
 cohesion6_vals_cl4 = [cohesion6(s1_cl4, s2_cl4, phi, lg) for phi in phis]
 plot(phis,  cohesion6_vals_cl1,  label="cluster 1",  lw=2, color=color_palette[1],
 dpi=300, size=(760,340)
@@ -806,3 +813,51 @@ ylabel!("")
 title!("Similarity 3 (log=$lg)")
 # savefig("similarity3_cat_lg$lg.pdf")
 end
+
+
+@show X_cat1 = ["A","A","A","B","B","B"]
+@show X_cat2 = ["A","A","A","A","B","B"]
+@show X_cat3 = ["A","A","A","A","A","B"]
+@show alpha = 1
+@show lg = false
+
+@show similarity1(X_cat1, alpha, lg)
+@show similarity2(X_cat1, alpha,0, lg)
+@show similarity3(X_cat1, alpha,0, lg)
+
+@show similarity1(X_cat2, alpha, lg)
+@show similarity2(X_cat2, alpha,0, lg)
+@show similarity3(X_cat2, alpha,0, lg)
+
+@show similarity1(X_cat3, alpha, lg)
+@show similarity2(X_cat3, alpha,0, lg)
+@show similarity3(X_cat3, alpha,0, lg)
+
+
+@show X_cat4 = ["A","A","B","B","B","B"]
+@show X_cat4 = ["A","A","A","A","A","A"]
+@show similarity1(X_cat4, alpha, lg)
+@show similarity2(X_cat4, alpha,0, lg)
+@show similarity3(X_cat4, alpha,0, lg)
+
+using Printf
+n = 20
+lg = false
+for i in 0:n
+	X_cat = [repeat(["A"],i)...,repeat(["B"],n-i)...]
+	println(
+		# "A"^i,"B"^(n-i)," & ",
+		"$i A, $(n-i) B &",
+			round(similarity1(X_cat,alpha,lg),digits=4)," & ",
+			@sprintf("%.4e",similarity2(X_cat,alpha,0,lg)), " & ",
+			round(similarity3(X_cat,alpha,0,lg),digits=4),"\\\\")
+end
+
+
+
+X = [repeat(["a"],100)...,"b"]
+similarity2(X, alpha,0, lg)
+similarity3(X, alpha,0, lg)
+X = string.([rand((1:100),100)]...)
+similarity2(X, alpha,0, lg)
+similarity3(X, alpha,0, lg)

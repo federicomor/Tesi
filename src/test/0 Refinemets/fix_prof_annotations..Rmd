@@ -193,20 +193,166 @@ abline(h=0,col="#dCd5d2")
 ## full data
 ```{r}
 load("../1 Assessing correctness and NA/Xlk/Xlk full/space_rout_full_Xlk_timewisecorrected.Rdata")
+name  = "JDRPM - full data + Xlk"
 ```
 
 
 # NA data
 ```{r}
 load("../1 Assessing correctness and NA/Xlk/Xlk NA/space_rout_NA_Xlk_timewisecorrected.Rdata")
+name = "JDRPM - NA data + Xlk"
+```
+
+# idea 2 CI
+```{r}
+save_plots = T
+
+	if (save_plots==T){
+	# pdf(file=paste0("beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+	# pdf(file=paste0("LINES_beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+		
+	pdf(file=paste0("LINES_beta_ALL_CI_",name,".pdf"),width=9,height = 6)
+	# pdf(file=paste0("LINES_beta_ALL_TR_",name,".pdf"),width=8,height = 12.5)
+	}
+
+par(mfrow=c(2,3),mar=c(2,2,2,1),oma=c(0.1,0.1,1.3,0.1))
+for (cova_idx in 1:6){
+# ##### TR PLOT
+# 	cols = colora(size(rout$beta)[3],44,0)
+# 	cols = paste0(cols,"AA")
+# 	# verde scuro: iterazioni iniziali
+# 	# giallo: iterazioni finali
+# 	# par(mar=c(3,3,3,1))
+# 	# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
+# 	for (iter in 1:size(rout$beta)[3]){
+# 		if(iter==1) {
+# 			plot(rout$beta[,cova_idx,iter],
+# 				 ylim=extrema(rout$beta[,cova_idx,]),
+# 				 # main=covariate_scelte[cova_idx],
+# 				 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[cova_idx])),
+# 				 col = cols[iter],type="l")
+# 	abline(h=0,col="gray80",lty=1)
+# 	lines(rout$beta[,cova_idx,1],col = cols[1])
+# 		} else {
+# 			lines(rout$beta[,cova_idx,iter],col = cols[iter])
+# 		}
+# 	}
+# 	legend("topleft",legend = c("initial iterates","final iterates"),
+# 	   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+# 	   lwd=3,cex=0.8,bty="n"
+# 	   )
+
+	
+#### CRED INT
+plot(1, type = "n", xlab = "",
+     ylab = "", xlim = c(1, 12),
+	 main=bquote(beta[t] * " " * .(covariate_scelte[cova_idx])),
+	 # main=("95% credible intervals (HDI)"),
+     ylim = extrema(rout$beta[,cova_idx,]))
+abline(h=0,col="#dCd5d2")
+	for (time in 1:12){
+		ci_hdi <- ci(rout$beta[time,cova_idx,],ci = 0.95, method = "HDI")
+		UPP = ci_hdi[[2]]
+		MID = mean(rout$beta[time,cova_idx,])
+		LOW = ci_hdi[[3]]
+		# lines(c(time,time),c(LOW,UPP),col="#FFD99F")
+		# points(time,MID,cex=1,col="#7D1D67",pch=15)
+		# points(time,UPP,cex=1,col="#F65A6D",pch=19)
+		# points(time,LOW,cex=1,col="#F65A6D",pch=19)
+		lwd_multiplier = 0.9
+		if ((UPP>0 && LOW>0) || (UPP<0 && LOW<0) ){
+			lwd_multiplier = 2.3
+		}
+		dx = 0.1
+		lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4*lwd_multiplier)
+		lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7*lwd_multiplier,col="#7D1D67")
+		lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+		lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+	}
+}
+
+mtext(paste0(name," - 95% credible intervals (HDI)")
+	  ,side=3,line=0,outer=T,col="#2E1831")
+
+if (save_plots==T) { dev.off() }
+```
+# idea 2 TR
+```{r}
+save_plots = F
+
+	if (save_plots==T){
+	# pdf(file=paste0("beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+	# pdf(file=paste0("LINES_beta_TR_plus_CI",name,".pdf"),width=8,height = 12.5)
+		
+	# pdf(file=paste0("LINES_beta_ALL_CI_",name,".pdf"),width=10,height = 5)
+	pdf(file=paste0("LINES_beta_ALL_TR_",name,".pdf"),width=10,height = 5)
+	}
+
+par(mfrow=c(2,3),mar=c(2,2,2,1),oma=c(0.1,0.1,1.3,0.1))
+for (cova_idx in 1:6){
+##### TR PLOT
+	cols = colora(size(rout$beta)[3],44,0)
+	cols = paste0(cols,"AA")
+	# verde scuro: iterazioni iniziali
+	# giallo: iterazioni finali
+	# par(mar=c(3,3,3,1))
+	# par(mar=c(2,2,2,1),oma=c(0.1,0.1,0.2,0.1))
+	for (iter in 1:size(rout$beta)[3]){
+		if(iter==1) {
+			plot(rout$beta[,cova_idx,iter],
+				 ylim=extrema(rout$beta[,cova_idx,]),
+				 # main=covariate_scelte[cova_idx],
+				 main=bquote(beta[t] * " regressor - " * .(covariate_scelte[cova_idx])),
+				 col = cols[iter],type="l")
+	abline(h=0,col="gray80",lty=1)
+	lines(rout$beta[,cova_idx,1],col = cols[1])
+		} else {
+			lines(rout$beta[,cova_idx,iter],col = cols[iter])
+		}
+	}
+	legend("topleft",legend = c("initial iterates","final iterates"),
+	   col = c(cols[1],cols[size(rout$beta)[3]]),lty=c(1,1),
+	   lwd=3,cex=0.8,bty="n"
+	   )
+
+	
+#### CRED INT
+# plot(1, type = "n", xlab = "",
+#      ylab = "", xlim = c(1, 12),
+# 	 main=bquote(beta[t] * " " * .(covariate_scelte[cova_idx])),
+# 	 # main=("95% credible intervals (HDI)"),
+#      ylim = extrema(rout$beta[,cova_idx,]))
+# abline(h=0,col="#dCd5d2")
+# 	for (time in 1:12){
+# 		ci_hdi <- ci(rout$beta[time,cova_idx,],ci = 0.95, method = "HDI")
+# 		UPP = ci_hdi[[2]]
+# 		MID = mean(rout$beta[time,cova_idx,])
+# 		LOW = ci_hdi[[3]]
+# 		# lines(c(time,time),c(LOW,UPP),col="#FFD99F")
+# 		# points(time,MID,cex=1,col="#7D1D67",pch=15)
+# 		# points(time,UPP,cex=1,col="#F65A6D",pch=19)
+# 		# points(time,LOW,cex=1,col="#F65A6D",pch=19)
+# 		lwd_multiplier = 0.9
+# 		if ((UPP>0 && LOW>0) || (UPP<0 && LOW<0) ){
+# 			lwd_multiplier = 2.1
+# 		}
+# 		dx = 0.1
+# 		lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4*lwd_multiplier)
+# 		lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7*lwd_multiplier,col="#7D1D67")
+# 		lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+# 		lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+# 	}
+}
+
+mtext(paste0(name," - 95% credible intervals (HDI)")
+	  ,side=3,line=0,outer=T,col="#2E1831")
+
+if (save_plots==T) { dev.off() }
 ```
 
 
 # idea 1
 ```{r}
-# name  = "JDRPM - full data + Xlk"
-name = "JDRPM - NA data + Xlk"
-
 save_plots = T
 
 	if (save_plots==T){
@@ -258,11 +404,33 @@ abline(h=0,col="#dCd5d2")
 		# points(time,MID,cex=1,col="#7D1D67",pch=15)
 		# points(time,UPP,cex=1,col="#F65A6D",pch=19)
 		# points(time,LOW,cex=1,col="#F65A6D",pch=19)
+		
+		# lwd_multiplier = 0.9
+		# if ((UPP>0 && LOW>0) || (UPP<0 && LOW<0) ){
+		# 	lwd_multiplier = 2.3
+		# }
+		# dx = 0.1
+		# lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4*lwd_multiplier)
+		# lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7*lwd_multiplier,col="#7D1D67")
+		# lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+		# lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7*lwd_multiplier,col="#F65A6D")
+		
+		lwd_multiplier = 0.9
 		dx = 0.1
-		lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4)
-		lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7,col="#7D1D67")
-		lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7,col="#F65A6D")
-		lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7,col="#F65A6D")
+		if ((UPP>0 && LOW>0) || (UPP<0 && LOW<0) ){
+			lwd_multiplier = 2
+			lines(c(time,time),c(LOW,UPP),lwd=1.4*lwd_multiplier,      col=darken("#FFD99F",0.0))
+			lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7*lwd_multiplier,col=darken("#7D1D67",0.2))
+			lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7*lwd_multiplier,col=darken("#F65A6D",0.2))
+			lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7*lwd_multiplier,col=darken("#F65A6D",0.2))
+		} else {
+			lines(c(time,time),c(LOW,UPP),col="#FFD99F",lwd=1.4*lwd_multiplier)
+			lines(c(time-dx,time+dx),rep(MID,2),lwd=1.7*lwd_multiplier,col=lighten("#7D1D67",0.2))
+			lines(c(time-dx,time+dx),rep(UPP,2),lwd=1.7*lwd_multiplier,col=lighten("#F65A6D",0.2))
+			lines(c(time-dx,time+dx),rep(LOW,2),lwd=1.7*lwd_multiplier,col=lighten("#F65A6D",0.2))
+		}
+
+
 	}
 }
 

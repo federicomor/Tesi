@@ -81,19 +81,12 @@ function MCMC_fit(;
 	p_cl = cl_xPPM ? size(Xcl_covariates)[2] : 0
 	Y_has_NA = any(ismissing.(Y))
 	nout = round(Int64, (draws - burnin)/(thin))
-	# beta_update_threshold = round(Int64, burnin/2)
-	# beta_update_threshold = 0
 
 	if sPPM
 		sp1::Vector{Float64} = copy(vec(sp_coords[:,1]))
 		sp2::Vector{Float64} = copy(vec(sp_coords[:,2]))
 
 		S=@MMatrix zeros(2, 2)
-		# if spatial_cohesion_idx==3 || spatial_cohesion_idx==4
-		# 	sp_params_real = [SVector{2}(sp_params[1]...), sp_params[2], sp_params[3], SMatrix{2,2}(sp_params[4]...)]
-		# else 
-		# 	sp_params_real = sp_params
-		# end
 		sp_params_struct = SpParams(
 			alpha = spatial_cohesion_idx==1 ? sp_params[1] : 1.,
 			a = spatial_cohesion_idx==2 ? sp_params[1] : 1.,
@@ -103,19 +96,16 @@ function MCMC_fit(;
 			Psi = (spatial_cohesion_idx==3 || spatial_cohesion_idx==4) ? SMatrix{2,2}(sp_params[4]...) : @SMatrix(zeros(2,2)),
 			phi = (spatial_cohesion_idx==5 || spatial_cohesion_idx==6) ? sp_params[1] : 1.
 		)
-		# @show sp_params sp_params_struct
 	end
 
 	if cl_xPPM
-		# provide different as and bs for each p covariate
+		# provide different a's and b's for each p covariate
 		cv_params_sim4 = Dict()
 		if covariate_similarity_idx == 4
 			for i in 1:2:length(cv_params)-2
 				cv_params_sim4[i ÷ 2 + 1] = [cv_params[1], cv_params[2], cv_params[i+2], cv_params[i+3]]
 			end
 		end
-		# println(cv_params)
-		# println(cv_params_sim4)
 
 		Rs = zeros(p_cl,T)
 		if covariate_similarity==2 || covariate_similarity==3
@@ -134,20 +124,11 @@ function MCMC_fit(;
 
 	if !skip_checks
 	if logging
-		# log_file = open("log.txt", "w+")
 		println("Logging to file:\n", abspath("log.txt"),"\n")
 		printlgln(replace(string(now()),"T" => "   "))
 		debug("current seed = $seed")
-		# to = TimerOutput()
 	end
 
-	# if save_trace_plots
-	# 	plots = [
-	# 	[plot(title="alpha @ t=$t", xlabel="Iteration", ylabel="") for t in 1:T]...,
-	# 	plot(title="mu @ t=$t, j=1",xlabel="Iteration",ylabel="")]
-	# end
-
-# try
 
 	############# check some stuff #############
 	if sPPM
@@ -276,23 +257,10 @@ function MCMC_fit(;
 		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
 		println("lambda2 ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
 		println("alpha ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
-		# if sPPM println(sp_params_struct) end
 		println()
 	end
-	# if verbose
-	# 	println("Parameters:")
-	# 	println("σ²ₕ ∼ InverseGamma($(sig2h_priors[1]), $(sig2h_priors[2]))")
-	# 	println("Logit(1/2(η₁+1)) ∼ Laplace(0, $(eta1_priors[1]))")
-	# 	if lk_xPPM println("β⃗∼ MvNormal(μ⃗=$(beta_priors[1:end-1]), Σ=$(beta_priors[end])*I)") end
-	# 	println("τ² ∼ InverseGamma($(tau2_priors[1]), $(tau2_priors[2]))")
-	# 	println("ϕ₀ ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
-	# 	println("λ² ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
-	# 	println("α ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
-	# 	println()
-	# end
 
-	# ✓ and ✗
-	# println(replace(string(now()),"T" => " ")[1:end-4])
+
 	println("- using seed $seed -")
 	println("fitting $(Int(draws)) total iterates (with burnin=$(Int(burnin)), thinning=$(Int(thin)))")
 	println("thus producing $nout valid iterates in the end\n")
@@ -304,12 +272,11 @@ function MCMC_fit(;
 	# if cl_xPPM println("- params: ", cv_params) end
 	println(Y_has_NA ? "[✓]" : "[✗]", " are there missing data in Y? $Y_has_NA")
 	println()
-	end # skip_checks
+	end # of the skip_checks if
 
 
 
 	############# update to handle missing data #############
-	# printlgln("############# update to handle missing data #############\n")
 	# to remember which units and at which times had a missing value
 	missing_map = ismissing.(Y)
 	# eg will be something like this
@@ -332,7 +299,6 @@ function MCMC_fit(;
 	#  0  0  0  0
 	# so with the map we note that if we encounter a 1 when working on [j,t] we have to simulate the Y value
 	# The map is needed since when we simulate it it will no longer be missing, and therefore we could "lose track" of him
-	# debug(@showd missing_map)
 	missing_idxs = Tuple.(findall(missing_map))
 
 	############# allocate output variables #############
@@ -463,7 +429,6 @@ function MCMC_fit(;
 			# beta_iter[t] = rand(MvNormal(beta0, s2_beta*I(p_lk)))
 			beta_iter[t] = beta0 # initialize with the mean? maybe it's better
 		end
-		# debug(@showd beta_iter)
 	end
 
 	eta1_iter = zeros(n)
@@ -486,7 +451,6 @@ function MCMC_fit(;
 	for t in 1:T
 		nclus_iter[t] = maximum(@view Si_iter[:,t])
 	end
-	# debug(@showd nh nclus_iter)
 
 
 
@@ -526,8 +490,6 @@ function MCMC_fit(;
 				Xlk_term_t = (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0)
 				aux1 = eta1_iter[j]^2
 
-				# printlgln("########### iteration $i ###########\n")
-				# debug(@showd c_it Si_iter sig2h_iter muh_iter)
 
 				if t==1	
 					c_itp1 = Si_iter[j,t+1]
@@ -551,10 +513,7 @@ function MCMC_fit(;
 						(eta1_iter[j]/(sig2h_iter[c_itp1,t+1]*(1-aux1)))*((ismissing(Y[j,t+1]) ? 0 : Y[j,t+1]) - muh_iter[c_itp1,t+1] - Xlk_term_tp1)
 						)
 
-					# mu_prior = muh_iter[c_it,t] + eta1_iter[j]*Y[j,t-1] + Xlk_term_t
-					# sig2_prior = sig2h_iter[c_it,t]*(1-aux1)
 					Y[j,t] = rand(Normal(mu_post,sqrt(sig2_post)))
-					# debug(@showd c_itp1 mu_prior mu_post sig2_prior sig2_post)
 
 				else # t==T
 					Y[j,t] = rand(Normal(
@@ -562,57 +521,39 @@ function MCMC_fit(;
 						sqrt(sig2h_iter[c_it,t]*(1-aux1))
 						))
 				end
-				# debug(@showd Y[j,t])
 			end
 		end
 
 
 		for t in 1:T
 			############# update gamma #############
-			# println("############# update gamma #############\n")
-			# debug(@showd t gamma_iter)
-			# @timeit to " gamma " begin # if logging uncomment this line, and the corresponding "end"
 			for j in 1:n
-				# debug(@showd j)
 				if t==1 
 					gamma_iter[j,t] = 0
 					# at the first time units get reallocated
 				else
 					# we want to find ρ_t^{R_t(-j)} ...
 					indexes = findall_faster(jj -> jj != j && gamma_iter[jj, t] == 1, 1:n)
-					# debug(@showd indexes)
 					Si_red = Si_iter[indexes, t]
-					# Si_red1 = copy(Si_red)
 					copy!(Si_red1, Si_red)
-					# Si_red1 = Si_iter[indexes, t]
 					push!(Si_red1, Si_iter[j,t]) # ... and ρ_t^R_t(+j)}
 
 					# get also the reduced spatial info if sPPM model
-					# @timeit to " sPPM 1 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
 						sp1_red = @view sp1[indexes]
 						sp2_red = @view sp2[indexes]
-						# sp1_red = sp1[indexes]
-						# sp2_red = sp2[indexes]
 					end
-					# debug(@showd sp1 sp2 sp1_red sp2_red)
 					# and the reduced covariates info if cl_xPPM model
 					if cl_xPPM
 						Xcl_covariates_red = @view Xcl_covariates[indexes,:,t]
-						# debug(@showd size(Xcl_covariates_red))
-						# debug(@showd Xcl_covariates_red)
-						# debug(@showd Xcl_covariates)
 					end
-					# end # of the @timeit for sPPM
 
 					# compute n_red's and nclus_red's and relabel
 					n_red = length(Si_red) # = "n" relative to here, i.e. the sub-partition size
 					n_red1 = length(Si_red1)
 					# @assert n_red1 == n_red+1
-					# debug(@showd Si_red Si_red1)
 					relabel!(Si_red,n_red)
 					relabel!(Si_red1,n_red1)
-					# debug(@showd Si_red Si_red1)
 					nclus_red = isempty(Si_red) ? 0 : maximum(Si_red) # = number of clusters
 					nclus_red1 = maximum(Si_red1)
 
@@ -620,8 +561,6 @@ function MCMC_fit(;
 					j_label = Si_red1[end]
 
 					# compute also nh_red's
-					# nh_red = zeros(Int64,nclus_red)
-					# nh_red1 = zeros(Int64,nclus_red1)
 					nh_red .= 0
 					nh_red1 .= 0
 					for jj in 1:n_red
@@ -629,98 +568,34 @@ function MCMC_fit(;
 						nh_red1[Si_red1[jj]] += 1
 					end
 					nh_red1[Si_red1[end]] += 1 # account for the last added unit j, not included in the above loop
-					# debug(@showd Si_red Si_red1 j_label)
 
 					# start computing weights
-					# lg_weights = zeros(nclus_red+1)
 					lg_weights .= 0
-					# lCo = 0.0; lCn = 0.0 # log cohesions (for space) old and new
-					# lC = @MVector zeros(2)
-					# lSo = 0.0; lSn = 0.0 # log similarities (for covariates) old and new
-					# debug(@showd Si_iter nclus_red)
 
 					# unit j can enter an existing cluster...
 					for k in 1:nclus_red
-						# @timeit to " sPPM 2 " begin # if logging uncomment this line, and the corresponding "end"
 
 						# filter the covariates of the units of label k
-						# aux_idxs = findall(jj -> Si_red[jj] == k, 1:n_red) # slow
-						# aux_idxs = findall_faster(jj -> Si_red[jj] == k, 1:n_red)
 						aux_idxs = findall(Si_red .== k) # fast
 						lC .= 0.
 						if sPPM
 							# filter the spatial coordinates of the units of label k
-							# debug(@showd sp_idxs)
-							# debug(@showd k Si_red)
-
-							# pretty_log("sp_coords")
-							# pretty_log("sp1")
-							# pretty_log("sp2")
-							# debug(@showd sp_idxs)
-							# printlgln("\n")
-
-							# "forse qui qualcosa da poter fare dovrebbe esserci" con le views?
-							# o forse no per via della push, che modificherebbe la view
-							# s1o = @view sp1_red[aux_idxs]
-							# s2o = @view sp2_red[aux_idxs]
-							# s1n = copy(s1o); push!(s1n, sp1[j])
-							# s2n = copy(s2o); push!(s2n, sp2[j])
-
-							# copy!(s1o, @view sp1_red[aux_idxs])
-							# copy!(s2o, @view sp2_red[aux_idxs])
 							copy!(s1o, sp1_red[aux_idxs])
 							copy!(s2o, sp2_red[aux_idxs])
-							# s1o_v = @view sp1_red[aux_idxs]
-							# s2o_v = @view sp2_red[aux_idxs]
 							copy!(s1n,s1o); push!(s1n, sp1[j])
 							copy!(s2n,s2o); push!(s2n, sp2[j])
-							# copy!(s1n,sp1_red[aux_idxs]); push!(s1n, sp1[j])
-							# copy!(s2n,sp2_red[aux_idxs]); push!(s2n, sp2[j])
-
-							# println(typeof(s1n))
-							# resize!(s1n,length(s1o)+1)
-							# copy!(s1n,s1o)
-							# s1n[end] = sp1[j]
-							# resize!(s2n,length(s2o)+1)
-							# copy!(s2n,s1o)
-							# s2n[end] = sp2[j]
-							# copy!(s1n,s1o); push!(s1n, sp1[j])
-							# copy!(s2n,s2o); push!(s2n, sp2[j])
-							# lCo = spatial_cohesion(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S)
-							# lCn = spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
-							# spatial_cohesion!(spatial_cohesion_idx, s1o_v, s2o_v, sp_params_real, true, M_dp, S,1,false,lC)
-							# spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_real, true, M_dp, S,1,false,lC)
-							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,2,false,lC)
 							spatial_cohesion!(spatial_cohesion_idx, s1o, s2o, sp_params_struct, true, M_dp, S,1,false,lC)
 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,2,false,lC)
 						end
-						# printlgln("i=$i j=$j t=$t")
-						# debug(@showd spatial_cohesion_idx sp_params_struct aux_idxs lC)
-						# debug(@showd lCn lCo)
-						# debug(@showd cl_xPPM)
 
 						lS .= 0.
 						if cl_xPPM
 						# Xcl_covariates is a n*p*T matrix
 							for p in 1:p_cl
-								# debug(@showd i j t k aux_idxs)
 								if isa(first(Xcl_covariates[j,p,t]),Real) # numerical covariate
-									# Xo = @view Xcl_covariates_red[aux_idxs,p]
-									# Xo_view = @view Xcl_covariates_red[aux_idxs,p]
-									# Xn = copy(Xo); push!(Xn,Xcl_covariates[j,p,t])
 									copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
-									# copy!(Xo, Xcl_covariates_red[aux_idxs,p])
 									copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
-									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
-									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
-									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
 									
-									# debug(@showd covariate_similarity_idx)
-									# debug(@showd Xo)
-									# debug(@showd cv_params)
-									# debug(@showd Rs)
-									# debug(@showd cv_weight)
 									if covariate_similarity_idx == 4
 										covariate_similarity!(covariate_similarity_idx, Xo, cv_params_sim4[p], Rs[p,t], true,1,true,lS,cv_weight)
 										covariate_similarity!(covariate_similarity_idx, Xn, cv_params_sim4[p], Rs[p,t], true,2,true,lS,cv_weight)
@@ -728,78 +603,41 @@ function MCMC_fit(;
 										covariate_similarity!(covariate_similarity_idx, Xo, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
 										covariate_similarity!(covariate_similarity_idx, Xn, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 									end
-									# covariate_similarity!(covariate_similarity_idx, Xo, cv_params_struct, true,1,true,lS)
-									# covariate_similarity!(covariate_similarity_idx, Xn, cv_params_struct, true,2,true,lS)
 								else # categorical covariate
 									copy!(Xo_cat, @view Xcl_covariates_red[aux_idxs,p])
-									# copy!(Xo_cat, Xcl_covariates_red[aux_idxs,p])
 									copy!(Xn_cat, Xo_cat); push!(Xn_cat,Xcl_covariates[j,p,t])
-									# copy!(Xn, Xcl_covariates_red[aux_idxs,p]); push!(Xn,Xcl_covariates[j,p,t])
-									# lSo += covariate_similarity(covariate_similarity_idx, Xo, cv_params, lg=true)
-									# lSn += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
-									# covariate_similarity!(covariate_similarity_idx, Xo_view, cv_params, true,1,true,lS)
 									covariate_similarity!(covariate_similarity_idx, Xo_cat, cv_params, Rs[p,t], true,1,true,lS,cv_weight)
 									covariate_similarity!(covariate_similarity_idx, Xn_cat, cv_params, Rs[p,t], true,2,true,lS,cv_weight)
 								end
-								# if i%10 == 0 printlgln("(i=$i) after covariate $p of $p_cl") end
-								# if i%10 == 0 debug(@showd lS) end
 							end
 						end
-						# if i%10 == 0 debug(@showd cv_weight lC); debug(@showd lS); printlgln("\n") end
 
-						# end # of the @timeit for sPPM
-						# debug(@showd lC)
-						# printlgln("\n")
-						# lg_weights[k] = log(nh_red[k]) + lCn - lCo + lSn - lSo
-						# lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lSn - lSo
 						lg_weights[k] = log(nh_red[k]) + lC[2] - lC[1] + lS[2] - lS[1]
 					end
 					
 					# ... or unit j can create a singleton
-					# lCn = 0.0
-					# lSn = 0.0 
 					lC .= 0.
-					# @timeit to " sPPM 3 " begin # if logging uncomment this line, and the corresponding "end"
 					if sPPM
-						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, lg=true, M=M_dp, S=S)
-						# lCn = spatial_cohesion(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S)
-						# spatial_cohesion!(spatial_cohesion_idx, [sp1[j]], [sp2[j]], sp_params_real, true, M_dp, S,2,false,lC)
-						# spatial_cohesion!(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_real, true, M_dp, S,2,false,lC)
 						spatial_cohesion!(spatial_cohesion_idx, SVector(sp1[j]), SVector(sp2[j]), sp_params_struct, true, M_dp, S,2,false,lC)
 					end
 					lS .= 0.
 					if cl_xPPM
-						# lS .= 0.
 						for p in 1:p_cl
-							# lSn += covariate_similarity(covariate_similarity_idx, [Xcl_covariates[j,p,t]], cv_params, lg=true)
 							if covariate_similarity_idx == 4
 								covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params_sim4[p], Rs[p,t], true, 2,true,lS,cv_weight)
 							else
 								covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params, Rs[p,t], true, 2,true,lS,cv_weight)
 							end
-							# covariate_similarity!(covariate_similarity_idx, SVector(Xcl_covariates[j,p,t]), cv_params_struct, true, 2,true,lS)
 						end
 					end
-					# end # of the @timeit for sPPM
-					# lg_weights[nclus_red+1] = log(M_dp) + lCn + lSn
-					# lg_weights[nclus_red+1] = log_Mdp + lCn + lSn
-					# lg_weights[nclus_red+1] = log_Mdp + lC[2] + lSn
 					lg_weights[nclus_red+1] = log_Mdp + lC[2] + lS[2]
 
-					# printlgln("before exp and normalization:")
-					# debug(@showd lg_weights)
 
 					# now use the weights towards sampling the new gamma_jt
-					# max_ph = maximum(lg_weights)
-					# printlgln("i=$i j=$j t=$t")
-					# debug(@showd lg_weights)
 					max_ph = maximum(@view lg_weights[1:(nclus_red+1)])
-					# max_ph = maximum(lg_weights[1:(nclus_red+1)])
-
 					sum_ph = 0.0
 
 					# exponentiate...
-					# for k in eachindex(lg_weights)
 					for k in 1:(nclus_red+1)
 						 # for numerical purposes we subract max_ph
 						lg_weights[k] = exp(lg_weights[k] - max_ph)
@@ -807,8 +645,6 @@ function MCMC_fit(;
 					end
 					# ... and normalize
 					lg_weights ./= sum_ph
-					# printlgln("after exp and normalization:")
-					# debug(@showd lg_weights)
 
 					# compute probh
 					probh::Float64 = 0.0
@@ -821,21 +657,15 @@ function MCMC_fit(;
 					elseif time_specific_alpha==true && unit_specific_alpha==true
 						probh = alpha_iter[j,t] / (alpha_iter[j,t] + (1 - alpha_iter[j,t]) * lg_weights[j_label])
 					end
-					# debug(@showd probh)
 
 
 					# compatibility check for gamma transition
 					if gamma_iter[j, t] == 0
 						# we want to find ρ_(t-1)^{R_t(+j)} ...
-						# indexes = findall(jj -> gamma_iter[jj, t]==1, 1:n) # slow
-						# indexes = findall_faster(jj -> gamma_iter[jj, t]==1, 1:n)
-						# indexes = findall(gamma_iter[:, t] .== 1) # fast
-						# push!(indexes,j)
 						indexes = findall_faster(jj -> jj==j || gamma_iter[jj, t]==1, 1:n)
 						Si_comp1 = @view Si_iter[indexes, t-1]
 						Si_comp2 = @view Si_iter[indexes, t] # ... and ρ_t^R_t(+j)}
 
-						# rho_comp = compatibility(Si_comp1, Si_comp2)
 						rho_comp = compatibility(Si_comp1, Si_comp2)
 						if rho_comp == 0
 							probh = 0.0
@@ -844,26 +674,16 @@ function MCMC_fit(;
 					# sample the new gamma
 					gt = rand(Bernoulli(probh))
 					gamma_iter[j, t] = gt
-					# printlgln("sampled gamma:")
-					# debug(@showd probh gt gamma_iter[:,t])
 				end
 			end # for j in 1:n
 
 
-			# end # of the @timeit for gamma
 			############# update rho #############
-			# println("############# update rho #############\n")
-			# @timeit to " rho " begin # if logging uncomment this line, and the corresponding "end"
 			# we only update the partition for the units which can move (i.e. with gamma_jt=0)
-			# movable_units = findall(j -> gamma_iter[j,t]==0, 1:n) # slow
-			# movable_units = findall_faster(j -> gamma_iter[j,t]==0, 1:n) 
 			movable_units = findall(gamma_iter[:,t] .== 0) # fast
 		
 			for j in movable_units
-				# printlgln("working on unit j=$j at t=$t")
 				# remove unit j from the cluster she is currently in
-				# debug(@showd j t)
-				# debug(@showd movable_units)
 
 				if nh[Si_iter[j,t],t] > 1 # unit j does not belong to a singleton cluster
 					nh[Si_iter[j,t],t] -= 1
@@ -871,7 +691,6 @@ function MCMC_fit(;
 				else # unit j belongs to a singleton cluster
 					j_label = Si_iter[j,t]
 					last_label = nclus_iter[t]
-					# print(@showd last_label)
 
 					if j_label < last_label
 						# here we enter if j_label is not the last label, so we need to
@@ -899,42 +718,24 @@ function MCMC_fit(;
 				end
 
 				# setup probability weights towards the sampling of rho_jt
-				# ph = zeros(nclus_iter[t]+1) 
 				ph .= 0.0
 				resize!(ph,nclus_iter[t]+1)
-				# rho_tmp = copy(Si_iter[:,t])
 				copy!(rho_tmp, @view Si_iter[:,t])
-				# rho_tmp = Si_iter[:,t]
 
 				# compute nh_tmp (numerosities for each cluster label)
-				# nh_tmp = copy(nh[:,t])
 				copy!(nh_tmp, @view nh[:,t])
 				# unit j contribute is already absent from the change we did above
-
-				# nh_tmp = zeros(Int,nclus_iter[t]+1)
-				# for jj in setdiff(1:n,j)
-					# nh_tmp[rho_tmp[jj]] += 1
-				# end
 				nclus_temp = 0
 
-				# printlgln("Before the loop on k")
-				# debug(@showd rho_tmp)
 					
 				# we now simulate the unit j to be assigned to one of the existing clusters...
 				for k in 1:nclus_iter[t]
 					rho_tmp[j] = k
-					# debug(@showd j rho_tmp k)
-					# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
-					# indexes = findall_faster(j -> gamma_iter[j,t+1]==1, 1:n)
 					indexes = findall(gamma_iter[:,t+1] .== 1) # fast
 					# we check the compatibility between ρ_t^{h=k,R_(t+1)} ...
 					Si_comp1 = @view rho_tmp[indexes]
 					Si_comp2 = @view Si_iter[indexes,t+1] # and ρ_(t+1)^{R_(t+1)}
-					# rho_comp = compatibility(Si_comp1, Si_comp2)
 					rho_comp = compatibility(Si_comp1, Si_comp2)
-					# printlgln("Assigning to cluster k=$k :")
-					# pretty_log("gamma_iter"); # pretty_log("Si_iter")
-					# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 					
 					if rho_comp != 1
 						ph[k] = log(0) # assignment to cluster k is not compatible
@@ -944,53 +745,25 @@ function MCMC_fit(;
 						# nclus_temp = sum(nh_tmp .> 0) # = number of clusters
 						nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 						# count is a bit slower but does not allocate
-						# debug(@showd nh_tmp nclus_temp)
 
-						# lpp = 0.0
 						lPP .= 0.
 						for kk in 1:nclus_temp
-							# @timeit to " sPPM 4 " begin # if logging uncomment this line, and the corresponding "end"
-							# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
-							# aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 							aux_idxs = findall(rho_tmp .== kk) # fast
 							if sPPM
-								# s1n = @view sp1[aux_idxs]
-								# s2n = @view sp2[aux_idxs]
-
 								copy!(s1n, @view sp1[aux_idxs])
 								copy!(s2n, @view sp2[aux_idxs])
-
-								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-								# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
-								# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
-								# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
 								spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,1,true,lPP)
-
-								# printlgln("(LPP) after spatial cohesion")
-								# debug(@showd lPP)
 							end
 							if cl_xPPM
-								# debug(@showd cv_idxs)
 								for p in 1:p_cl
 									Xn_view = @view Xcl_covariates[aux_idxs,p,t]
-									# debug(@showd Xn)
-									# debug(@showd kk lPP)
-									# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 									if covariate_similarity_idx == 4
 										covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_sim4[p], Rs[p,t], true,1,true,lPP,cv_weight)
 									else
 										covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP,cv_weight)
 									end
-									# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
-
-									# printlgln("(LPP) after covariate simlarity $p of $p_cl")
-									# debug(@showd lPP)
 								end
 							end
-							# end # of the @timeit for sPPM
-							# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-							# lpp += log_Mdp + lgamma(nh_tmp[kk])
-
 							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
 							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
@@ -1002,13 +775,11 @@ function MCMC_fit(;
 							ph[k] = loglikelihood(Normal(
 								muh_iter[k,t] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t])),
-								# Y[j,t]) + lpp
 								Y[j,t]) + lPP[1]
 						else
 							ph[k] = loglikelihood(Normal(
 								muh_iter[k,t] + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 								sqrt(sig2h_iter[k,t]*(1-eta1_iter[j]^2))),
-								# Y[j,t]) + lpp
 								Y[j,t]) + lPP[1]
 						end
 
@@ -1016,23 +787,16 @@ function MCMC_fit(;
 						nh_tmp[k] -= 1
 					end
 				end
-				# print(@showd ph, "before k+1")
 				# ... plus the case of being assigned to a new (singleton for now) cluster 
 				k = nclus_iter[t]+1
 				rho_tmp[j] = k
 				# declare (for later scope accessibility) the new params here
 				muh_draw = 0.0; sig2h_draw = 0.0
 
-				# indexes = findall(j -> gamma_iter[j,t+1]==1, 1:n) # slow
-				# indexes = findall_faster(j -> gamma_iter[j,t+1]==1, 1:n) 
 				indexes = findall(gamma_iter[:,t+1] .== 1)
 				Si_comp1 = @view rho_tmp[indexes]
 				Si_comp2 = @view Si_iter[indexes,t+1]
-				# rho_comp = compatibility(Si_comp1, Si_comp2)
 				rho_comp = compatibility(Si_comp1, Si_comp2)
-				# printlgln("Assigning to NEW SINGLETON cluster (k=$k) :")
-				# pretty_log("gamma_iter"); # pretty_log("Si_iter")
-				# debug(@showd rho_tmp Si_comp1 Si_comp2 rho_comp)
 
 				if rho_comp != 1
 					ph[k] = log(0) # assignment to a new cluster is not compatible
@@ -1047,40 +811,24 @@ function MCMC_fit(;
 					nclus_temp = count(a->(a>0), nh_tmp) # similarly fast, not clear
 					# count is a bit slower but does not allocate
 
-					# lpp = 0.0
 					lPP .= 0.
 					for kk in 1:nclus_temp
-						# @timeit to " sPPM 5 " begin # if logging uncomment this line, and the corresponding "end"
-						# aux_idxs = findall(jj -> rho_tmp[jj]==kk, 1:n) # slow
-						# aux_idxs = findall_faster(jj -> rho_tmp[jj]==kk, 1:n)
 						aux_idxs = findall(rho_tmp .== kk) # fast
 						if sPPM
-							# s1n = @view sp1[aux_idxs]
-							# s2n = @view sp2[aux_idxs]
-
 							copy!(s1n, @view sp1[aux_idxs])
 							copy!(s2n, @view sp2[aux_idxs])
-							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, lg=true, M=M_dp, S=S)
-							# lpp += spatial_cohesion(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S)
-							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
-							# spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_real, true, M_dp, S,1,true,lPP)
 							spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,1,true,lPP)
 						end
 						if cl_xPPM
 							for p in 1:p_cl
 								Xn_view = @view Xcl_covariates[aux_idxs,p,t]
-								# lPP[1] += covariate_similarity(covariate_similarity_idx, Xn, cv_params, lg=true)
 								if covariate_similarity_idx == 4
 									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_sim4[p], Rs[p,t], true,1,true,lPP,cv_weight)
 								else
 									covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params, Rs[p,t], true,1,true,lPP,cv_weight)
 								end
-								# covariate_similarity!(covariate_similarity_idx, Xn_view, cv_params_struct, true,1,true,lPP)
 							end
 						end
-						# end # of the @timeit for sPPM
-						# lpp += log(M_dp) + lgamma(nh_tmp[kk])
-						# lpp += log_Mdp + lgamma(nh_tmp[kk])
 						lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
 						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 					end
@@ -1091,13 +839,11 @@ function MCMC_fit(;
 						ph[k] = loglikelihood(Normal(
 							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw)),
-							# Y[j,t]) + lpp
 							Y[j,t]) + lPP[1]
 					else
 						ph[k] = loglikelihood(Normal(
 							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
 							sqrt(sig2h_draw*(1-eta1_iter[j]^2))),
-							# Y[j,t]) + lpp
 							Y[j,t]) + lPP[1]
 					end
 
@@ -1105,13 +851,9 @@ function MCMC_fit(;
 					nh_tmp[k] -= 1
 				end
 
-				# printlgln("Before exp and normalization:")
-				# debug(@showd ph)
 				# now exponentiate the weights...
 				max_ph = maximum(ph)
-				# max_ph = maximum(ph[1:(nclus_iter[t]+1)])
 				sum_ph = 0.0
-				# for k in 1:(nclus_iter[t]+1)
 				for k in eachindex(ph)
 					# for numerical purposes we subract max_ph
 					ph[k] = exp(ph[k] - max_ph)
@@ -1120,13 +862,10 @@ function MCMC_fit(;
 				# ... and normalize them
 				ph ./= sum_ph
 				
-				# printlgln("After exp and normalization:")
-				# debug(@showd ph)
 
 				# now sample the new label Si_iter[j,t]
 				u = rand(Uniform(0,1))
 				cph = cumsum(ph)
-				# debug(@showd ph cph)
 				cph[end] = 1 # fix numerical problems of having sums like 0.999999etc
 				new_label = 0
 				for k in eachindex(ph)
@@ -1135,16 +874,7 @@ function MCMC_fit(;
 						break
 					end
 				end
-				# debug(@showd cph u)
-				# debug(@showd new_label j)
-				# printlgln("\n")
 				
-				# old if for testing, now we can remove to optimize/speed up the computation
-				# if all(isinf.(ph) .|| isnan.(ph))
-				# 	@warn "No valid weight in ph vector when updating for rho.\n"
-				# 	close(log_file); return
-				# end
-
 				if new_label <= nclus_iter[t]
 					# we enter an existing cluster
 					Si_iter[j, t] = new_label
@@ -1156,7 +886,7 @@ function MCMC_fit(;
 					cl_new = nclus_iter[t]
 					Si_iter[j, t] = cl_new
 					nh[cl_new, t] = 1
-					# rho_tmp[j] = cl_new
+					# rho_tmp[j] = cl_new # useless
 					muh_iter[cl_new, t] = muh_draw
 					sig2h_iter[cl_new, t] = sig2h_draw
 				end
@@ -1180,10 +910,7 @@ function MCMC_fit(;
 
 				# now fix everything (morally permute params)
 				Si_iter[:,t] = Si_relab
-				# discard the zeros at the end of the auxiliary vectors nh_reorde and old_lab
-				# muh_iter_copy = copy(muh_iter)
 				copy!(muh_iter_copy, muh_iter) # copy!(dst,src)
-				# sig2h_iter_copy = copy(sig2h_iter)
 				copy!(sig2h_iter_copy, sig2h_iter) # copy!(dst,src)
 				len = findlast(x -> x != 0, nh_reorder)
 				for k in 1:nclus_iter[t]
@@ -1191,17 +918,11 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = sig2h_iter_copy[old_lab[k],t]
 					nh[k,t] = nh_reorder[k]
 				end
-				# debug(@showd Si_iter[:,t])
 
 			end # for j in movable_units
 
-			# check = relabel(Si_iter[:,t],n)
-			# @assert check == Si_iter[:,t]
 
-			# end # of the @timeit for rho
 			############# update muh #############
-			# printlgln("############# update muh #############\n")
-			# @timeit to " muh " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
 					sum_Y = 0.0
@@ -1234,27 +955,12 @@ function MCMC_fit(;
 				end
 			end
 			
-			# end # of the @timeit for muh
 			############# update sigma2h #############
-			# printlgln("############# update sigma2h #############\n")
-			# @timeit to " sigma2h " begin # if logging uncomment this line, and the corresponding "end"
 			if t==1
 				for k in 1:nclus_iter[t]
-					# a_star = sig2h_priors[1] + sum(Si_iter[:,t] .== k)/2
 					a_star = sig2h_priors[1] + nh[k,t]/2 # should be the same
 					sum_Y = 0.0
-					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
-					# S_kt = findall_faster(j -> Si_iter[j,t] == k, 1:n)
 					S_kt = findall(Si_iter[:,t] .== k) # fast
-					# if lk_xPPM
-					# 	for j in S_kt
-					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - dot(Xlk_covariates[j,:,t], beta_iter[t]))^2
-					# 	end
-					# else 
-					# 	for j in S_kt
-					# 		sum_Y += (Y[j,t] - muh_iter[k,t])^2
-					# 	end
-					# end
 					for j in S_kt
 						sum_Y += (Y[j,t] - muh_iter[k,t] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0.0))^2
 					end
@@ -1267,18 +973,7 @@ function MCMC_fit(;
 				for k in 1:nclus_iter[t]
 					a_star = sig2h_priors[1] + nh[k,t]/2
 					sum_Y = 0.0
-					# S_kt = findall(j -> Si_iter[j,t] == k, 1:n) # slow
-					# S_kt = findall_faster(j -> Si_iter[j,t] == k, 1:n)
 					S_kt = findall(Si_iter[:,t] .== k) # fast
-					# if lk_xPPM
-					# 	for j in S_kt
-					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - dot(Xlk_covariates[j,t], beta_iter[t]))^2
-					# 	end
-					# else 
-					# 	for j in S_kt
-					# 		sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1])^2
-					# 	end
-					# end
 					for j in S_kt
 						sum_Y += (Y[j,t] - muh_iter[k,t] - eta1_iter[j]*Y[j,t-1] - (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0.0))^2
 					end
@@ -1287,10 +982,7 @@ function MCMC_fit(;
 					sig2h_iter[k,t] = rand(InverseGamma(a_star, b_star))
 				end
 			end
-			# end # of the @timeit for sigma2h
 			############# update beta #############
-			# printlgln("############# update beta #############\n")
-			# @timeit to " beta " begin # if logging uncomment this line, and the corresponding "end"
 			if lk_xPPM && i>=beta_update_threshold
 				if t==1
 					sum_Y = zeros(p_lk)
@@ -1324,10 +1016,7 @@ function MCMC_fit(;
 				end
 			end
 						
-			# end # of the @timeit for beta
 			############# update theta #############
-			# printlgln("############# update theta #############\n")
-			# @timeit to " theta " begin # if logging uncomment this line, and the corresponding "end"
 			aux1::Float64 = 1 / (lambda2_iter*(1-phi1_iter^2))
 			kt = nclus_iter[t]
 			sum_mu=0.0
@@ -1354,10 +1043,7 @@ function MCMC_fit(;
 				theta_iter[t] = rand(Normal(mu_post, sqrt(sig2_post)))
 			end 
 			
-			# end # of the @timeit for theta
 			############# update tau2 #############
-			# printlgln("############# update tau2 #############\n")
-			# @timeit to " tau2 " begin # if logging uncomment this line, and the corresponding "end"
 			kt = nclus_iter[t]
 			aux1 = 0.0
 			for k in 1:kt
@@ -1367,13 +1053,10 @@ function MCMC_fit(;
 			b_star_tau = tau2_priors[2] + aux1/2
 			tau2_iter[t] = rand(InverseGamma(a_star_tau, b_star_tau))
 			# tau2_iter[t] = rand(truncated(InverseGamma(a_star_tau, b_star_tau),0,10))
-			# end # of the @timeit for tau2
 
 		end # for t in 1:T
 		
 		############# update eta1 #############
-		# printlgln("############# update eta1 #############\n")
-		# @timeit to " eta1 " begin # if logging uncomment this line, and the corresponding "end"
 		# eta1_priors[2] = sqrt(eta1_priors[2]) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_eta1
@@ -1395,8 +1078,6 @@ function MCMC_fit(;
 							sqrt(sig2h_iter[Si_iter[j,t],t]*(1-eta1_new^2))
 							), Y[j,t]) 
 					end
-					# logit_old = logit(1/2*(eta1_old+1)) 
-					# logit_new = logit(1/2*(eta1_new+1))
 					logit_old = aux_logit(eta1_old) 
 					logit_new = aux_logit(eta1_new) 
 
@@ -1406,7 +1087,6 @@ function MCMC_fit(;
 
 					# ll_ratio = min(ll_new-ll_old, 0)
 					ll_ratio = ll_new-ll_old
-					# debug(@showd ll_new ll_old ll_ratio)
 					u = rand(Uniform(0,1))
 					if (ll_ratio > log(u))
 						eta1_iter[j] = eta1_new # accept the candidate
@@ -1416,10 +1096,7 @@ function MCMC_fit(;
 			end
 		end
 
-		# end # of the @timeit for eta1
 		############# update alpha #############
-		# printlgln("############# update alpha #############\n")
-		# @timeit to " alpha " begin # if logging uncomment this line, and the corresponding "end"
 		if update_alpha
 			if time_specific_alpha==false && unit_specific_alpha==false
 				# a scalar
@@ -1458,13 +1135,9 @@ function MCMC_fit(;
 			end
 		end
 
-		# end # of the @timeit for alpha
 		############# update phi0 #############
-		# printlgln("############# update phi0 #############\n")
-		# @timeit to " phi0 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 1/lambda2_iter
 		aux2 = 0.0
-		# i found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
 			aux2 += theta_iter[t] - phi1_iter*theta_iter[t-1]
 		end
@@ -1472,11 +1145,7 @@ function MCMC_fit(;
 		mu_post = sig2_post * ( phi0_priors[1]/phi0_priors[2] + theta_iter[1]*aux1 + aux1/(1+phi1_iter)*aux2 )
 		phi0_iter = rand(Normal(mu_post, sqrt(sig2_post)))
 		
-		# end # of the @timeit for phi0
 		############# update phi1 #############
-		# printlgln("############# update phi1 #############\n")
-		# @timeit to " phi1 " begin # if logging uncomment this line, and the corresponding "end"
-
 		# phi1_priors = sqrt(phi1_priors) # from variance to std dev
 		# no, the input argument is already the std dev
 		if update_phi1
@@ -1511,12 +1180,8 @@ function MCMC_fit(;
 			end
 		end
 
-		# end # of the @timeit for phi1
 		############# update lambda2 #############
-		# printlgln("############# update lambda2 #############\n")
-		# @timeit to " lambda2 " begin # if logging uncomment this line, and the corresponding "end"
 		aux1 = 0.0
-		# I found that looping on t rather than using sum(... for t in ...) seems faster
 		for t in 2:T
 			aux1 += (theta_iter[t] - (1-phi1_iter)*phi0_iter - phi1_iter*theta_iter[t-1])^2
 		end
@@ -1525,7 +1190,6 @@ function MCMC_fit(;
 		lambda2_iter = rand(InverseGamma(a_star_lambda2,b_star_lambda2))	
 		# lambda2_iter = rand(truncated(InverseGamma(a_star_lambda2,b_star_lambda2),0,10))	
 
-		# end # of the @timeit for lambda2
 		############# save MCMC iterates #############
 		if i>burnin && i%thin==0 
 			Si_out[:,:,i_out] = Si_iter[:,1:T]
@@ -1588,24 +1252,11 @@ function MCMC_fit(;
 					CPO[j,t] += exp(-llike[j,t,i_out])
 				end
 			end
-			# debug(@showd fitted mean_likelhd mean_loglikelhd CPO)
 
 			i_out += 1
 		end
 
 	next!(progresso)
-	# next!(progresso,
-		# showvalues = [
-		# # ("iteration",i),
-		# ("a_star_tau",a_star_tau),
-		# ("b_star_tau",b_star_tau),
-		# ("a_star_lambda2",a_star_lambda2),
-		# ("b_star_lambda2",b_star_lambda2)
-		# ])
-
-	# if save_trace_plots
-	# 	# ecc
-	# end
 
 	end # for i in 1:draws
 
@@ -1622,8 +1273,7 @@ function MCMC_fit(;
 	LPML -= n*T*log(nout) # scaling factor
 	LPML = -LPML # fix sign
 
-	# println("LPML: $LPML (the higher the better)")
-	println("LPML: ", LPML, " (the higher the better)") # not interpolating with $ is faster
+	println("LPML: ", LPML, " (the higher the better)")
 	# println("LPML: $LPML - the ↑ the :)")
 	
 	# adjust mean variables
@@ -1635,22 +1285,12 @@ function MCMC_fit(;
 		end
 	end
 	WAIC *= -2
-	# println("WAIC: $WAIC (the lower the better)")
-	println("WAIC: ", WAIC, " (the lower the better)") # not interpolating with $ is faster
+	println("WAIC: ", WAIC, " (the lower the better)")
 	# println("WAIC: $WAIC - the ↓ the :)")
-
-	# println()
-	# println("acceptance ratio for eta1: ", acceptance_ratio_eta1/(n*draws) *100, "%")
-	# println("acceptance ratio for phi1: ", acceptance_ratio_phi1/draws*100, "%")
 	
 	if update_eta1 @printf "acceptance ratio eta1: %.2f%%\n" acceptance_ratio_eta1/(n*draws) *100 end
 	if update_phi1 @printf "acceptance ratio phi1: %.2f%%" acceptance_ratio_phi1/draws*100 end
 	println()
-
-	# if !logging
-		# debug(@showd to)
-		# rm("log.txt",force=true)	
-	# end
 
 	if perform_diagnostics
 		chn = Chains(
@@ -1670,11 +1310,6 @@ function MCMC_fit(;
 
 	close(log_file)
 
-	# if !logging
-		# rm("log.txt")
-		# rm("log.txt",force=true)
-	# end
-
 	if simple_return
 		return Si_out, LPML, WAIC
 	else
@@ -1683,12 +1318,6 @@ function MCMC_fit(;
 			fitted, llike, LPML, WAIC
 	end
 
-# catch e
-# 	println(e)
-# 	close(log_file)
-# end
-
-# global_logger(ConsoleLogger())	
 end
 
 function close_log_file()

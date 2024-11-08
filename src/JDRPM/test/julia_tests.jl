@@ -149,6 +149,11 @@ thin = 1.
 
 
 #=
+Elapsed time: 3 seconds, 124 milliseconds
+LPML: -422.2917598847498 (the higher the better)
+WAIC: 829.7457081318109 (the lower the better)
+acceptance ratio eta1: 72.00%
+acceptance ratio phi1: 64.40%
 official version #############################
 Elapsed time: 4 seconds, 515 milliseconds
 (25.35 M allocations: 2.236 GiB, 4.64%% gc time)
