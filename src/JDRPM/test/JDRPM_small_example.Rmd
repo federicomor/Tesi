@@ -16,7 +16,13 @@ module = normalizePath("../../JDRPM/src/JDRPM.jl")
 module_JDRPM <- juliaImport(juliaCall("include", module))
 ```
 
-# Space data
+# 1. Default fit
+```{r}
+module_JDRPM$trigger_compilation()
+```
+
+
+# 2. Fit on space data
 Spatio-temporal data set with rural background PM10 concentrations in Germany 2005
 ```{r}
 library(salso)
@@ -78,11 +84,11 @@ cat(nout,"valid iterations\n")
 ```{r}
 # params
 m0_phi0 = 0
-s20_phi0 = 1
+s20_phi0 = 5
 
-a_sigma  = 2; b_sigma  = 2
-a_tau    = 2; b_tau    = 2
-a_lambda = 2; b_lambda = 2
+a_sigma  = 0.01; b_sigma  = 0.01
+a_tau    = 1.9; b_tau    = 0.4
+a_lambda = 1.9; b_lambda = 0.4
 eta1_scale = 0.9
 
 sig_mh_eta1 = 0.1
@@ -104,7 +110,7 @@ L0 = 1
 
 # fit
 ```{r}
-module_JDRPM <- juliaImport(juliaCall("include", module))
+# module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
 	sp_coords = s_std,
@@ -124,12 +130,12 @@ out = module_JDRPM$MCMC_fit(
 	update_phi1 = update_phi1,
 	
 	sig2h_priors = c(a_sigma,b_sigma),
-	eta1_priors = c(eta1_scale,sig_mh_eta1^2),
+	eta1_priors = c(eta1_scale,sig_mh_eta1),
 	# beta_priors = c(rep(1,p),2),
 	beta_priors = NA,
 	tau2_priors = c(a_tau,b_tau),
 	phi0_priors = c(m0_phi0,s20_phi0),
-	phi1_priors = sig_mh_phi1^2,
+	phi1_priors = sig_mh_phi1,
 	lambda2_priors = c(a_lambda,b_lambda),
 	alpha_priors = c(a_alpha,b_alpha),  
 	

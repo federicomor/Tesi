@@ -74,58 +74,59 @@ rout$lambda2 = matrix(rout$lambda2, ncol = 1)
 5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list. Otherwise see [here](#tests-and-examples) for some examples, or scan trough the julia code itself, or read the modeling and implementation chapters of the Tesi.pdf document (when it will be finished).
 ```julia
 function MCMC_fit(;
-    Y::Matrix{Float64},                   # n*T matrix, the observed values
-    sp_coords = missing,                  # n*2 matrix, the spatial coordinates
-    Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
-    Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
+  # Y::Matrix{Float64},                   # n*T matrix, the observed values
+  Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
+  # Y::Matrix,                            # n*T matrix, the observed values
+  sp_coords = missing,                  # n*2 matrix, the spatial coordinates
+  Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
+  Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
 
-    M_dp::Float64,                        # Dirichlet mass parameter
-    initial_partition = missing,          # Initial partition (if provided)
+  M_dp::Float64,                        # Dirichlet mass parameter
+  initial_partition = missing,          # Initial partition (if provided)
 
-    starting_alpha::Float64,              # Starting value for alpha
-    unit_specific_alpha::Bool,            # Unit-specific alpha values
-    time_specific_alpha::Bool,            # Time-specific alpha values
-    update_alpha::Bool,                   # Update alpha?
-    
-    include_eta1::Bool,                   # Include the autoregressive part of eta1?
-    include_phi1::Bool,                   # Include the autoregressive part of phi1?
-    update_eta1::Bool,                    # Update the autoregressive part of eta1?
-    update_phi1::Bool,                    # Update the autoregressive part of phi1?
+  starting_alpha::Float64,              # Starting value for alpha
+  unit_specific_alpha::Bool,            # Unit-specific alpha values
+  time_specific_alpha::Bool,            # Time-specific alpha values
+  update_alpha::Bool,                   # Update alpha?
+  
+  include_eta1::Bool,                   # Include the autoregressive part of eta1?
+  include_phi1::Bool,                   # Include the autoregressive part of phi1?
+  update_eta1::Bool,                    # Update the autoregressive part of eta1?
+  update_phi1::Bool,                    # Update the autoregressive part of phi1?
 
-    sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
-    eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
-                                          # plus the std dev for the Metropolis update trough N(eta1_old,mhsig_eta1^2)
-    beta_priors = missing,                # Prior parameters for beta ∼ N(vec_b, k^2*I)
-                                          # so the vector components and the variance k^2
-    tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau), so those two
-    phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(m0, s0^2), so again mean and variance
-    phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1),
-                                          # so we just need the std dev of the Metropolis update trough N(phi1_old,mhsig_phi1^2)
-    lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda), so those two
-    alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha), so again those two,
-                                          # but possibly that pair for each unit j, that's why the abstract array
-    
-    spatial_cohesion_idx = missing,       # cohesion choice
-    sp_params = missing,                  # Parameters for spatial cohesion functions
-    covariate_similarity_idx = missing,   # similarity choice
-    cv_params = missing,                  # Parameters for covariates similarity functions
-    # see the Tesi.pdf for details about these
+  sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
+  eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
+                                        # plus the std dev for the Metropolis update trough N(μ=eta1_old,σ=mhsig_eta1)
+  beta_priors = missing,                # Prior parameters for beta ∼ the mean vector and the s^2 param in fron of the Id matrix
+  tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
+  phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(μ=m0,σ^2=s0^2)
+  phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
+                                        # so we just need the std dev of the Metropolis update trough N(μ=phi1_old,σ=mhsig_phi1)
+  lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda)
+  alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha)
+                                        # but possibly that pair for each unit j, that's why the abstract array
+  
+  spatial_cohesion_idx = missing,       # cohesion choice
+  sp_params = missing,                  # Parameters for spatial cohesion functions
+  covariate_similarity_idx = missing,   # similarity choice
+  cv_params = missing,                  # Parameters for covariates similarity functions
+  cv_weight = 1.0,                      # factor to which scale the covariate similarity values
 
-    draws::Float64,                       # Number of MCMC draws
-    burnin::Float64,                      # Number of burn-in
-    thin::Float64,                        # Thinning interval
+  draws::Real,                          # Number of MCMC draws
+  burnin::Real,                         # Number of burn-in
+  thin::Real,                           # Thinning interval
 
-    logging::Bool,                        # Wheter to save execution infos to log file
-    # actually this is dismissed, it was just using for debugging, so leaving it on true/false doesnt change anything
-
-    seed::Float64                         # Random seed for reproducibility
-    )
+  beta_update_threshold = 0,            # if to update beta regressor only after some iterates
+  logging = false,                      # Wheter to save execution infos to log file
+  seed::Real,                           # Random seed for reproducibility
+  simple_return = false,                # Return just the partition Si
+  verbose = false,                      # if to print additional info
+  perform_diagnostics = false,          # if to perform diagnostics on the fit
+  skip_checks = false                   # if to skip initial checks
+  )
 ```
 
 # Tests and examples
 Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.   
-Try instead [`Tesi/src/test/src/Jdrpm_vs_Cdrpm.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/src/Jdrpm_vs_Cdrpm.Rmd) to see examples regarding all possible combinations of calls of the function. There are in fact
 
-- section 1 "_PAPER TEST_" which fits with **target only**, i.e. some data Y from a simulated dataset
-- section 2 "_SPACE DATA_" which fits with **target + space**
-- section 3 "_PM10 DATA_" which fits with **target + space + covariates** (in the likelihood and/or in the clustering)
+Try instead [`Tesi/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd) to see more complete examples of fits. In this file there are fits with only the target variable, with spatial information, with missing data, with covariates in the likelihood, in the prior, etc: all possible combinations of usage of JDRPM.

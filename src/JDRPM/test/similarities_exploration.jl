@@ -843,13 +843,14 @@ end
 using Printf
 n = 20
 lg = false
-for i in 0:n
+alpha = 1
+for i in Int(floor(n/2)):n
 	X_cat = [repeat(["A"],i)...,repeat(["B"],n-i)...]
 	println(
 		# "A"^i,"B"^(n-i)," & ",
 		"$i A, $(n-i) B &",
 			round(similarity1(X_cat,alpha,lg),digits=4)," & ",
-			@sprintf("%.4e",similarity2(X_cat,alpha,0,lg)), " & ",
+			@sprintf("%.4e",similarity2(X_cat,0.001,0,lg)), " & ",
 			round(similarity3(X_cat,alpha,0,lg),digits=4),"\\\\")
 end
 
