@@ -129,4 +129,4 @@ function MCMC_fit(;
 # Tests and examples
 Try to run the [`Tesi/src/JDRPM/test/JDRPM_small_example.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/JDRPM/test/JDRPM_small_example.Rmd) file to see if everything works fine.   
 
-Try instead [`Tesi/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd`](https://github.com/federicomor/Tesi/blob/main/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd) to see more complete examples of fits. In this file there are fits with only the target variable, with spatial information, with missing data, with covariates in the likelihood, in the prior, etc: all possible combinations of usage of JDRPM.
+Try instead [`Tesi/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd`](<https://github.com/federicomor/Tesi/blob/main/src/test/1 Assessing correctness and NA/assessing_correctness.Rmd>) to see more complete examples of fits. In this file there are fits with only the target variable, with spatial information, with missing data, with covariates in the likelihood, in the prior, etc: all possible combinations of usage of JDRPM.
