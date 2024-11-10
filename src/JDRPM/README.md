@@ -74,9 +74,8 @@ rout$lambda2 = matrix(rout$lambda2, ncol = 1)
 5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list. Otherwise see [here](#tests-and-examples) for some examples, or scan trough the julia code itself, or read the modeling and implementation chapters of the Tesi.pdf document (when it will be finished).
 ```julia
 function MCMC_fit(;
-  # Y::Matrix{Float64},                   # n*T matrix, the observed values
   Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
-  # Y::Matrix,                            # n*T matrix, the observed values
+                                        # this strange type combination to allow missing data entries
   sp_coords = missing,                  # n*2 matrix, the spatial coordinates
   Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
   Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process
