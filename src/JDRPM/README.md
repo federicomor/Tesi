@@ -113,12 +113,12 @@ function MCMC_fit(;
   covariate_similarity_idx = missing,   # similarity choice
   cv_params = missing,                  # Parameters for covariates similarity functions
   cv_weight = 1.0,                      # factor to which scale the covariate similarity values
+  beta_update_threshold = 0,            # if to update beta regressor only after some iterates
 
   draws::Real,                          # Number of MCMC draws
   burnin::Real,                         # Number of burn-in
   thin::Real,                           # Thinning interval
 
-  beta_update_threshold = 0,            # if to update beta regressor only after some iterates
   logging = false,                      # Wheter to save execution infos to log file
   seed::Real,                           # Random seed for reproducibility
   simple_return = false,                # Return just the partition Si
