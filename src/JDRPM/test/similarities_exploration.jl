@@ -850,7 +850,7 @@ for i in Int(floor(n/2)):n
 		# "A"^i,"B"^(n-i)," & ",
 		"$i A, $(n-i) B &",
 			round(similarity1(X_cat,alpha,lg),digits=4)," & ",
-			@sprintf("%.4e",similarity2(X_cat,0.001,0,lg)), " & ",
+			@sprintf("%.4e",similarity2(X_cat,1,0,lg)), " & ",
 			round(similarity3(X_cat,alpha,0,lg),digits=4),"\\\\")
 end
 
@@ -862,3 +862,76 @@ similarity3(X, alpha,0, lg)
 X = string.([rand((1:100),100)]...)
 similarity2(X, alpha,0, lg)
 similarity3(X, alpha,0, lg)
+
+############################################################# 
+using Distributions, Plots
+
+# Define prior parameters
+μ0 = 0.0    # Prior mean
+σ0² = 10   # Prior variance
+
+# Simulated data for the likelihood
+n = 10                # Number of data points
+σ² = 1.0              # Known variance of likelihood
+data = randn(n) .+ 2  # Simulated data (mean shifted to 2)
+
+# Compute posterior parameters
+mean_data = mean(data)
+μ_post = (μ0 / σ0² + n * mean_data / σ²) / (1 / σ0² + n / σ²)
+σ_post² = 1 / (1 / σ0² + n / σ²)
+
+# Define x range for plotting
+x = -2:0.01:4
+
+# Compute densities
+prior_pdf = pdf.(Normal(μ0, sqrt(σ0²)), x)
+posterior_pdf = pdf.(Normal(μ_post, sqrt(σ_post²)), x)
+data_likelihood = pdf.(Normal(mean_data, sqrt(σ² / n)), x)
+
+# Plot
+plot(x, prior_pdf, label="Prior (Normal)", linestyle=:dash, color=:blue, lw=2,legendposition=:topleft)
+plot!(x, posterior_pdf, label="Posterior (Updated)", linestyle=:solid, color=:green, lw=2)
+plot!(x, data_likelihood, label="Data (Scaled Likelihood)", linestyle=:dot, color=:red, lw=2)
+xlabel!("x")
+ylabel!("Density")
+title!("Prior to Posterior Update in Bayesian Statistics")
+
+
+###########################################
+using Distributions, Plots
+
+# Define prior parameters for the Inverse Gamma distribution
+a_sigma = 3.0  # Shape parameter
+b_sigma = 2.0  # Scale parameter
+
+# Simulated data for the update
+S_jt = 5                           # Number of observations
+Y_it = [4.5, 4.8, 5.0, 4.7, 4.9]  # Observed data
+mu_star_jt = 4.6                   # Cluster mean
+beta_t = [0.3]                     # Coefficients (one covariate)
+x_it = ones(length(Y_it))          # Design matrix values (all ones for simplicity)
+
+# Compute posterior parameters
+a_posterior = a_sigma + S_jt / 2
+b_posterior = b_sigma + 0.5 * sum((Y_it .- mu_star_jt .- x_it .* beta_t[1]).^2)
+
+# Define the range of x values
+x = 0.1:0.01:10
+
+# Compute the prior and posterior densities
+prior_pdf = pdf.(InverseGamma(a_sigma, b_sigma), x)
+posterior_pdf = pdf.(InverseGamma(a_posterior, b_posterior), x)
+
+# Simulate "data likelihood" for visualization (scaled Gaussian approximation)
+data_mean = mean(Y_it)
+data_var = var(Y_it)
+data_likelihood = exp.(-(x .- data_mean).^2 ./ (2 * data_var))
+data_likelihood /= maximum(data_likelihood)  # Normalize for comparison
+
+# Plot the distributions
+plot(x, prior_pdf, label="Prior (Inverse Gamma)", linestyle=:dash, color=:blue, lw=2)
+plot!(x, posterior_pdf, label="Posterior (Updated)", linestyle=:solid, color=:green, lw=2)
+plot!(x, data_likelihood, label="Data (Scaled Likelihood)", linestyle=:dot, color=:red, lw=2)
+xlabel!("x")
+ylabel!("Density")
+title!("Prior to Posterior Update with Inverse Gamma")

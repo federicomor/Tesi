@@ -75,7 +75,7 @@ rout$lambda2 = matrix(rout$lambda2, ncol = 1)
 ```julia
 function MCMC_fit(;
   Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
-                                        # this strange type combination to allow missing data entries
+                                        # this strange type combination is to allow missing data entries
   sp_coords = missing,                  # n*2 matrix, the spatial coordinates
   Xlk_covariates = missing,             # n*p*T matrix, the covariates to include in the likelihood
   Xcl_covariates = missing,             # n*p*T matrix, the covariates to include in the clustering process

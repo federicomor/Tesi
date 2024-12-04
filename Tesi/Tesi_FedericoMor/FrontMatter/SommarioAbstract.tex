@@ -1,0 +1,68 @@
+% ------------------------------------------------------------------------ %
+% !TEX encoding = UTF-8 Unicode
+% !TEX TS-program = pdflatex
+% !TEX root = ../Tesi.tex
+% !TEX spellcheck = it-IT
+% ------------------------------------------------------------------------ %
+%
+% ------------------------------------------------------------------------ %
+% 	SOMMARIO + ABSTRACT
+% ------------------------------------------------------------------------ %
+%
+\cleardoublepage
+%
+\phantomsection
+%
+\pdfbookmark{Sommario}{Sommario}
+%
+% ------------------------------------------------------------------------ %
+% consento presenza di più capitoli nella stessa pagina
+\begingroup
+%\let\clearpage\relax
+\let\cleardoublepage\relax
+\let\cleardoublepage\relax
+% ------------------------------------------------------------------------ %
+%
+\chapter*{Sommario}
+%
+\lipsum[1-2]
+
+\medskip
+%
+\noindent \textbf{Parole chiave:} 
+PoliMi,
+Tesi,
+LaTeX,
+Scribd
+%
+\clearpage
+%\vfill
+%
+% ------------------------------------------------------------------------ %
+%
+\selectlanguage{english}
+%
+\pdfbookmark{Abstract}{Abstract}
+%
+\chapter*{Abstract}
+%
+Text of the abstract in english\dots\\
+\lipsum[1-2]
+
+\medskip
+%
+\noindent \textbf{Keywords:} 
+PoliMi,
+Master Thesis,
+LaTeX,
+Scribd
+%
+% ------------------------------------------------------------------------ %
+%
+\selectlanguage{italian}
+%
+\endgroup			
+%
+%\vfill
+%
+% ------------------------------------------------------------------------ %

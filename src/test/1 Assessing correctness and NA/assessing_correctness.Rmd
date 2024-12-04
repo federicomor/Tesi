@@ -1010,6 +1010,17 @@ cat("median ", MSE_matrices(summary_fitted_median,yredORIGI),"\n")
 
 ## ari pairwise
 ```{r,warning=F}
+load("./Target variable only/target_variable_only.Rdata")
+
+partitions_drpmc <- generate_partition(drpm1)
+partitions_drpmj <- generate_partition(rout)
+par(mfrow=c(1,2))
+plot_ARI(partitions_drpmc, title="model C")
+plot_ARI(partitions_drpmj, title="model J")
+```
+
+
+```{r,warning=F}
 LEN = Tm
 compare_ARI = function(Cmod1,Jmod2){
 	ARIvec <- matrix(NA, nrow=1, ncol=LEN)
@@ -1034,6 +1045,8 @@ compare_ARI = function(Cmod1,Jmod2){
 	# 		   breaks=brks)
 	# mtext(text=c(paste("",1:LEN)), side=2, line=0.3,at=seq(0,1,length=LEN), las=1, cex=0.8)
 
+	cat("mean",mean(ARIvec),"\n")
+	cat("median",median(ARIvec),"\n")
 }
 
 mods = c("DRPM","sPPM","Gaussian PPMx","Curve PPMx")
@@ -1644,7 +1657,7 @@ sorted_indexes <- order(METRIC)
 save_plots=T
 
 if (save_plots==TRUE) { 
-	pdf(file="target_only_NA_CIs_SORTED.pdf",height = 4.5,width=9)
+	pdf(file="NA_SORTED.pdf",height = 4.5,width=9)
 }
 par(mar=c(1,2,2,1))
 dx = 0.1
@@ -1666,21 +1679,21 @@ for (i in sorted_indexes){
 		UPP = ci_hdi[[3]]
 		MID = mean(sampled_values)
 		LOW = ci_hdi[[2]]
-		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=2)
-		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
-		lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
-		lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=4)
+		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=4)
+		lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=4)
+		lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=4)
 		
 		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
 		
-		points(idx+dx,yred[j,t],col="#348959",pch=18)
+		points(idx+dx*2.1,yred[j,t],col="#348959",pch=18,cex=1.4)
 		# METRIC = c(METRIC,(yred[j,t]- mean(sampled_values))^2)
 		
-	text(idx,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=0.9,col="gray50")
+	text(idx,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=1,col="gray50")
 	idx = idx+1
 }
 legend("topleft",legend=c("true value of the missing datum")
-	   ,pch=18,col="#348959",bty="n",cex=0.8)
+	   ,pch=18,col="#348959",bty="n",cex=1.2)
 if (save_plots==TRUE) { dev.off() }
 ```
 
@@ -4610,6 +4623,7 @@ y_NA = y
 ndata = size(y)[1] * size(y)[2]
 
 # set.seed(123)
+seed = 181024
 set.seed(181024)
 na_percentage = 0.1
 # na_percentage = 0.09620821
@@ -5154,6 +5168,300 @@ cat("ARI\n")
 cat("mean ",mean(ariv),"\n")
 cat("median ",median(ariv))
 ```
+
+
+# ===========
+# CIs space
+credible intervals around missing data
+
+```{r}
+load("df wsc fits/space_rout_NA_run6e_dfweekly.Rdata")
+# load("Xlk/Xlk NA/space_rout_NA_Xlk_timewisecorrected.Rdata")
+```
+
+```{r}
+rout$lpml
+rout$waic
+```
+
+
+```{r}
+library(scales)
+library(plotrix) 
+library(bayestestR)
+
+na_indices_t
+na_indices_j
+```
+
+
+```{r}
+yred=y
+cols = colora(size(yred)[1],56,0)
+# cols = paste0(cols,"FF")
+cols = alpha(cols, 0.3)
+
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10')
+     	 # main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+# na_indices_j <- sample(size(y)[1], n_na,replace = T)
+# na_indices_t <- sample(size(y)[2], n_na,replace = T)
+
+for (i in 1:length(na_indices_t)){
+	t = na_indices_t[i]
+	j = na_indices_j[i]
+	points(t,yred[j,t],col="black",pch=19)
+}
+```
+
+
+```{r}
+dx = 0.1
+plot(1, type = "n", xlab = "",
+     ylab = "", xlim = c(1, 12+dx),
+     # ylim = extrema(rout$fitted[,,]))
+     ylim = c(-5,5))
+
+yred=y
+cols = colora(size(yred)[1],56,0)
+cols = alpha(cols, 0.3)
+
+for(i in 1:size(yred)[1]){
+   if(i==1){
+     plot(1:size(yred)[2],yred[i,],col=cols[i],ylim=extrema(yred),type='l',
+     	 xlab='weeks',ylab='pm10',main=paste0("seed ",seed))
+ 	  } 
+	  else{
+		  lines(1:size(yred)[2],yred[i,],col=cols[i])
+	  }
+}
+
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, method = "HDI")
+		UPP = ci_hdi[[2]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[3]]
+		
+		lines(c(t,t),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(t-dx,t+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(t-dx,t+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(t-dx,t+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(t+2*dx,yred[j,t],col="#348959",pch=18)
+}
+```
+
+```{r}
+# load("Target variable only NA case/target_varible_only_NAJ_called_rout_NA.Rdata")
+# rout = rout_NA
+```
+
+
+```{r}
+save_plots=F
+
+if (save_plots==TRUE) { 
+	pdf(file="target_only_NA_CIs.pdf",height = 4.5,width=9)
+}
+par(mar=c(1,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, length(na_indices_t)+dx),
+     ylim = c(-1.5,0.7),
+	 main="95% credible intervals (HDI) for the missing data ")
+
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		lines(c(i,i),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(i-dx,i+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(i-dx,i+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(i-dx,i+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(i+dx,yred[j,t],col="#348959",pch=18)
+		
+	# text(i,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=0.9,col="gray50")
+}
+legend("topleft",legend=c("true value of the missing datum")
+	   ,pch=18,col="#348959",bty="n",cex=0.8)
+if (save_plots==TRUE) { dev.off() }
+```
+## sorted
+```{r}
+save_plots=F
+
+if (save_plots==TRUE) { 
+	pdf(file="target_only_NA_CIs.pdf",height = 4.5,width=9)
+}
+par(mar=c(1,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, length(na_indices_t)+dx),
+     ylim = c(-1.5,0.7),
+	 main="95% credible intervals (HDI) for the missing data ")
+
+
+METRIC = c()
+
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		lines(c(i,i),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(i-dx,i+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(i-dx,i+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(i-dx,i+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(i+dx,yred[j,t],col="#348959",pch=18)
+		# METRIC = c(METRIC,(yred[j,t]- mean(sampled_values))^2)
+		METRIC = c(METRIC,
+				   abs(UPP-LOW)
+				   )
+		
+	# text(i,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=0.9,col="gray50")
+}
+legend("topleft",legend=c("true value of the missing datum")
+	   ,pch=18,col="#348959",bty="n",cex=0.8)
+if (save_plots==TRUE) { dev.off() }
+```
+# real plot
+```{r}
+sorted_indexes <- order(METRIC)
+save_plots=T
+
+if (save_plots==TRUE) { 
+	pdf(file="NA_SORTED_space_pure_ETI.pdf",height = 4.5,width=9)
+	# pdf(file="NA_SORTED_space_xlk.pdf",height = 4.5,width=9)
+}
+par(mar=c(1,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, length(na_indices_t)+dx),
+     ylim = c(-1.5,0.7),
+	 main="95% credible intervals (HDI) for the missing data ")
+
+
+# METRIC = c()
+count = 0
+idx = 1
+for (i in sorted_indexes){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		# ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "ETI")
+		# ci_hdi <- ci(sampled_values, ci=0.95, method = "BCI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		
+		if (yred[j,t]<=UPP && yred[j,t]>=LOW){
+		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		# lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		# lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		points(idx+dx*2.1,yred[j,t],col="#348959",pch=18,cex=0.6)
+		} else {
+		lines(c(idx,idx),c(LOW,UPP),col="gray80",lwd=2)
+		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="gray10",pch=15,lwd=2)
+		# lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="gray40",pch=19,lwd=2)
+		# lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="gray40",pch=19,lwd=2)
+		points(idx+dx*2.1,yred[j,t],col="gray10",pch=18,cex=0.6)
+		count = count+1
+		}
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		# METRIC = c(METRIC,(yred[j,t]- mean(sampled_values))^2)
+		
+	# text(idx,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=1,col="gray50")
+	idx = idx+1
+}
+legend("topleft",legend=c("true value of the missing datum")
+	   ,pch=18,col="#348959",bty="n",cex=1)
+if (save_plots==TRUE) { dev.off() }
+
+cat(count)
+```
+
+
+
+```{r}
+save_plots=F
+
+if (save_plots==TRUE) { 
+	pdf(file="target_only_NA_CIs.pdf",height = 6,width=11)
+}
+par(mar=c(4,2,2,1))
+dx = 0.1
+plot(1, type = "n", xlab = "", 
+     ylab = "", xlim = c(1, 12+dx),
+     ylim = c(-5,13),xaxt="n")
+
+for (i in 1:length(na_indices_j)){
+	j = na_indices_j[i]
+	t = na_indices_t[i]
+	sampled_values = rout$fitted[t,j,]
+	
+		ci_hdi <- ci(sampled_values, method = "HDI")
+		UPP = ci_hdi[[3]]
+		MID = mean(sampled_values)
+		LOW = ci_hdi[[2]]
+		lines(c(i,i),c(LOW,UPP),col="#FFD99F",lwd=2)
+		lines(c(i-dx,i+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(i-dx,i+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		lines(c(i-dx,i+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
+		
+		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
+		
+		points(i+dx,yred[j,t],col="#348959",pch=18)
+		
+}
+axis(1, at = seq(1,12,by = 1), labels = paste0("j=",na_indices_j,"\nt=",na_indices_t),col="gray40")
+if (save_plots==TRUE) { dev.off() }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ===========

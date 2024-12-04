@@ -1,0 +1,107 @@
+% ------------------------------------------------------------------------ %
+% !TEX encoding = UTF-8 Unicode
+% !TEX TS-program = pdflatex
+% !TEX root = ../Tesi.tex
+% !TEX spellcheck = it-IT
+% ------------------------------------------------------------------------ %
+%
+% ------------------------------------------------------------------------ %
+% 	BIBLIOGRAFIA
+% ------------------------------------------------------------------------ %
+%
+\cleardoublepage
+%
+% ------------------------------------------------------------------------ %
+%
+% Creo capitolo bibliografia
+%
+\phantomsection
+%
+\addcontentsline{toc}{chapter}{\bibname}
+%
+\chapter*{\bibname}
+%
+\markboth{\bibname}{\bibname}		% headings
+%
+% ------------------------------------------------------------------------ %
+%
+% Creo sezione riferimenti citati nel testo
+%
+\phantomsection
+%
+\addcontentsline{toc}{section}{\bibtitolocitati}
+%
+\section*{\bibtitolocitati}
+%
+% ------------------------------------------------------------------------ %
+%
+% Stampo riferimenti citati nel testo - CARTACEI
+%
+\phantomsection
+%
+\addcontentsline{toc}{subsection}{\bibtitolocitaticarta}
+%
+\printbibliography[category=citati,heading=citati-cartacei,nottype=online]
+%
+% ------------------------------------------------------------------------ %
+%
+% Stampo riferimenti citati nel testo - MATERIALE ONLINE
+%
+\phantomsection
+%
+\addcontentsline{toc}{subsection}{\bibtitolocitatiweb}
+%
+\printbibliography[category=citati,heading=citati-web,type=online]
+%
+% ------------------------------------------------------------------------ %
+%
+% Creo sezione riferimenti NON citati nel testo
+%
+\phantomsection
+%
+\addcontentsline{toc}{section}{\bibtitolononcitati}
+%
+\section*{\bibtitolononcitati}
+%
+% ------------------------------------------------------------------------ %
+%
+% Stampo riferimenti non citati nel testo - CARTACEI
+%
+\phantomsection
+%
+\addcontentsline{toc}{subsection}{\bibtitolononcitaticarta}
+%
+\printbibliography[notcategory=citati,heading=non-citati-cartacei,notkeyword=LaTeX,nottype=online]
+%
+% ------------------------------------------------------------------------ %
+%
+% Stampo riferimenti non citati nel testo - MATERIALE ONLINE
+%
+\phantomsection
+%
+\addcontentsline{toc}{subsection}{\bibtitolononcitatiweb}
+%
+\printbibliography[notcategory=citati,heading=non-citati-web,notkeyword=LaTeX,type=online]
+%
+% ------------------------------------------------------------------------ %
+%
+% Stampo riferimenti non citati nel testo - Documentazione LaTeX
+%
+\phantomsection
+%
+\addcontentsline{toc}{subsection}{\bibtitololatex}
+%
+\printbibliography[heading=latex,keyword=LaTeX]
+%
+% ------------------------------------------------------------------------ %
+%
+% SE SI VUOLE BIBLIOGRAFIA STANDARD
+% CANCELLARE TUTTO E LASCIARE SOLTANTO
+%
+%\cleardoublepage
+%\nocite{*}	% anche riferimenti non citati
+%\printbibliography
+%
+% (e fare modifiche indicate nel file ImpostazioniTesi.tex)
+%
+% ------------------------------------------------------------------------ %

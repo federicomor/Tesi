@@ -1942,7 +1942,7 @@ for (i in 1:105){
 
 ## covariate sorted
 ```{r,warning=F}
-save_plot = save_plots = T
+save_plot = save_plots = F
 
 ########################################## COVARIATES EFFECTS
 covariate_scelte = c(
@@ -2027,6 +2027,71 @@ if (save_plots==TRUE) { dev.off() }
 
 ```
 
+## FOCUS covariate sorted
+```{r,warning=F}
+save_plot = save_plots = F
+
+########################################## COVARIATES EFFECTS
+covariate_scelte = c(
+	"AQ_pm10",
+	# "Altitude"
+	# ,"WE_temp_2m"
+	"WE_wind_speed_10m_max"
+	# ,"WE_tot_precipitation"
+	# ,"WE_rh_mean"
+	# ,"WE_blh_layer_max"
+	# ,"EM_nh3_sum"
+	)
+
+for (target in covariate_scelte){
+	# dir.create(paste0(folder,target))
+##### otherwise
+if (save_plot==T) {
+	# pdf(paste0(folder,target,"/",name,"_t",time,".pdf"),width = 9.9, height = 5.4)
+	# pdf(paste0(folder,"/",target,"_sorted.pdf"),width = 9.9, height = 5.4)
+	# pdf(paste0(target,"_CDRPM_sorted_ZOOM.pdf"),width = 8, height = 4)
+	pdf(paste0(target,"_JDRPM_sorted_ZOOM.pdf"),width = 8, height = 4)
+}
+
+par(mar=c(2,2,2,1),mfrow=c(1,2),oma=c(0.2,0.1,1.5,0.1))
+for (time in c(9,12)){
+cova_of_interest = as.data.frame(df_wsc[df_wsc$Time == unique(df_wsc$Time)[time],target])[[1]]
+
+# plot(cova_of_interest[,1],
+# 	col=partition[[time]],
+# 	# col=partition[[time]],
+# 	pch=19,
+# 	cex=1.3,
+# 	# cex=pmax(y[, time]*4, rep(0.7, N)),
+# 	main=paste0("time ", time),
+# 				xlab="",ylab=""
+# 	)
+
+cls = partition[[time]]
+maxk = max(cls)
+idx_sorted = c()
+lens = rep(0,maxk)
+for (k in 1:maxk){
+	idx_sorted = c(idx_sorted,which(cls == k))
+	lens[k] = length(which(cls==k))
+}
+colors = c()
+for (k in 1:maxk){
+	colors = c(colors,rep(k,lens[k]))
+}
+plot(NA, xlim = c(1, 105), ylim = extrema(cova_of_interest), 
+     xlab = "", ylab ="", main = paste0("time ", time))
+for (i in 1:105){
+	points(i,cova_of_interest[idx_sorted[i]],col=colors[i],pch=19,cex=1.3)
+}
+
+
+}
+mtext(paste0(name," - ",target, " (sorted by cluster)"),side=3,line=0,outer=T,col="#2E1831")
+if (save_plots==TRUE) { dev.off() }
+}
+
+```
 
 
 ## covariate
@@ -2102,10 +2167,11 @@ if (save_plots==TRUE) { dev.off() }
 library(gridExtra)
 save_plot = T
 model_name = name
-limt = 12
+limt_start = 9
+limt = 10
 ##########################
 df_cluster = data.frame(Longitude=c(),Latitude=c(),values=c(),clusters=c(),Time=c())
-for(time in time_span[1:limt]){
+for(time in time_span[limt_start:limt]){
 
 	salso_out <- partition[[time]]
 	
@@ -2126,7 +2192,7 @@ for(time in time_span[1:limt]){
 }
 
 clusters_old = NULL
-for(time in time_span[1:limt]){
+for(time in time_span[limt_start:limt]){
 	cat(crayon::red("Time",time,"of",Tm,"\n"))
 	
 	df_cluster_cut = df_cluster[df_cluster$Time==time,]
@@ -2147,22 +2213,22 @@ plot1 <- get_graph_plot(df_cluster_cut,cols,titolo=paste0(model_name," - time ",
 
 covariata = "AQ_pm10"
 plot2 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
-covariata = covariata,annotate = F)
+covariata = covariata,annotate = F,global_ylim = F)
 
 # covariata = "Altitude"
 covariata = "WE_wind_speed_10m_max"
 plot3 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
-covariata = covariata,annotate = F)
+covariata = covariata,annotate = F,global_ylim = F)
 
 # covariata = "LA_lvi"
 covariata = "WE_tot_precipitation"
 plot4 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
-covariata = covariata,annotate = F)
+covariata = covariata,annotate = F,global_ylim = F)
 
 # covariata = "WE_tot_precipitation"
 covariata = "WE_blh_layer_max"
 plot5 = get_boxplot_covariate_plot(df_cluster_cut,cols,titolo=covariata,
-covariata = covariata,annotate = F)
+covariata = covariata,annotate = F,global_ylim = F)
 
 g <- arrangeGrob(
 	plot1, plot2, plot3, plot4, plot5,
@@ -2172,7 +2238,7 @@ g <- arrangeGrob(
 
 if (save_plot==TRUE){
 	dir.create(paste0(folder,"layout_small"))
-ggsave(file=paste0(folder,"layout_small/",model_name,"_t",cur_num,".pdf"),plot = g,
+ggsave(file=paste0(folder,"layout_small/",model_name,"_t",cur_num,"_YLIMS.pdf"),plot = g,
 	   # units="px",width=2500, height=1200, dpi=300)
 	   # units="px",width=4500, height=2000, dpi=300)
 	   units="px",width=3600, height=1500, dpi=300)
@@ -2267,6 +2333,47 @@ dev.off()
 }
 	clusters_old = clusters_now
 }
+```
+
+
+```{r}
+# Set seed for reproducibility
+s = round(runif(1,0,1000))
+s = 673
+set.seed(s)
+
+# Generate random data with smaller spread
+n_samples <- 150
+n_clusters <- 3
+cluster_spread <- 2  # Smaller spread for mixed clusters
+data <- data.frame(
+  x = rnorm(n_samples) / cluster_spread,
+  y = rnorm(n_samples) / cluster_spread
+)
+
+# Add cluster centers closer to each other
+centers <- matrix(runif(n_clusters * 2, min = -2, max = 2), ncol = 2)
+data$x <- data$x + rep(centers[,1], each = n_samples / n_clusters)
+data$y <- data$y + rep(centers[,2], each = n_samples / n_clusters)
+
+# Perform KMeans clustering
+clusters <- kmeans(data, centers = 3)$cluster
+
+pdf(file="example_clusters.pdf",width=9,height=4)
+
+# Plotting with base R
+par(mfrow = c(1, 2),mar=c(2,2,2,1)) # Set up side-by-side plots
+
+# Unclustered data
+plot(data$x, data$y, col = "gray", pch = 19, main = "random data",
+     xlab = "", ylab = "")
+
+# Clustered data
+plot(data$x, data$y, col = clusters, pch = 19, main = "clustered data",
+     xlab = "", ylab = "")
+
+dev.off()
+
 ```
 
 

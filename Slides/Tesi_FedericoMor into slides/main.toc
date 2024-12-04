@@ -1,0 +1,29 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {1}{Description of the problem}{4}{0}{1}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {1}{1}{What is the DRPM}{5}{0}{1}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {1}{2}{How did we improve it}{16}{0}{1}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {2}{Implementation and optimizations}{25}{0}{2}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {2}{1}{Language choice}{26}{0}{2}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {2}{2}{Optimizations}{29}{0}{2}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {3}{Analysis of the models}{39}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {3}{1}{Comparing the two algorithms}{40}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {3}{2}{Performance with missing values}{47}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {3}{3}{Effects of the covariates}{54}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {3}{4}{Scaling performances}{66}{0}{3}
+\defcounter {refsection}{0}\relax 
+\beamer@sectionintoc {4}{Conclusion}{73}{0}{4}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {4}{1}{Strengths}{74}{0}{4}
+\defcounter {refsection}{0}\relax 
+\beamer@subsectionintoc {4}{2}{Drawbacks}{75}{0}{4}

@@ -744,7 +744,7 @@ get_boxplot_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time"
 }
 
 cat(crayon::red("- get_boxplot_covariate_plot(df_cluster_cut)\n"))
-get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time",time),annotate=FALSE,covariata="AQ_pm10"){
+get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=paste("Time",time),annotate=FALSE,covariata="AQ_pm10",global_ylim=T){
 	clusters_now = df_cluster_cut$clusters # needs to be already mode corrected if wanted
 	# n_clusters = max(clusters_now)
 	n_clusters = unique(clusters_now)
@@ -760,6 +760,12 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 	clust_vals = clusters_now[1:105]
 	df_temp = data.frame(clusters=clust_vals,ycurrent=ycurrent)
 	# print(df_temp)
+	
+	if (global_ylim == T){
+	ylims = c(min(df_wsc[df_wsc$Time<=times[12],covariata]),max(df_wsc[df_wsc$Time<=times[12],covariata]))
+	} else {
+		ylims = c(min(ycurrent),max(ycurrent))
+	}
 	
 	pad = 2	
 	p = ggplot(df_temp, aes(as.factor(clusters),ycurrent[[1]],
@@ -780,7 +786,7 @@ get_boxplot_covariate_plot = function(df_cluster_cut,cols=cols_default,titolo=pa
 		# ylab("log(PM10) values")+
 		# ylab(covariata)+
 		ylab("")+
-		ylim(c(min(df_wsc[df_wsc$Time<=times[12],covariata]),max(df_wsc[df_wsc$Time<=times[12],covariata])))+
+		ylim(ylims)+
 		# xlim(extrema(ycurrent)+c(-pad,pad))+
 		# scale_fill_identity(guide="legend",labels=paste0("cl",1:max(clust_vals)),
 		# breaks=cols[1:max(clust_vals)])+

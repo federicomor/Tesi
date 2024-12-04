@@ -1,6 +1,6 @@
 using ProfileCanvas
 # using JET
-# using Cthulhu
+using Cthulhu
 
 begin
 using Random
@@ -95,11 +95,12 @@ niter = 10000. # real for these tests
 burnin = 5000.
 thin = 50.
 
-niter = 1000. # real for these tests
-burnin = 5.
+niter = 6. # real for these tests
+burnin = 2.
 thin = 1.
 
-@timev MCMC_fit(
+@descend MCMC_fit(
+# @timev MCMC_fit(
 # ProfileCanvas.@profview_allocs MCMC_fit(
 # ProfileCanvas.@profview MCMC_fit(
 # out = MCMC_fit(
@@ -144,8 +145,7 @@ thin = 1.
 	thin = thin * 1.0,                     
 	logging = false,
 	seed = seed
-);
-# )
+)
 
 
 #=

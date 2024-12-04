@@ -1,0 +1,100 @@
+
+\newcommand{\iter}{ \text{iter}}
+\newcommand{\fit}{ \text{fit}}
+\newcommand{\op}[1]{\operatorname{#1}}
+
+\renewcommand{\tt}{\texttt}
+\renewcommand{\sf}{\textsf}
+
+
+%%% Math stuff
+\usepackage{bm}
+\renewcommand{\vec}{\boldsymbol}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\var}{var}
+\newcommand{\simind}{\overset{\text{ind}}{\sim}}
+\newcommand{\simiid}{\overset{\text{iid}}{\sim}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\Ncan}{\mathcal{N}\text{Canon}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\invgamma}{\text{invGamma}}
+\newcommand{\Beta}{\text{Beta}}
+\newcommand{\Ber}{\text{Ber}}
+\newcommand{\csi}{\xi}
+
+\newcommand{\indicator}[1]{\mathbbm{1}_{[#1]}}
+% \newcommand{\indicator}[1]{\mathbbm{1}{#1}}
+
+\renewcommand{\L}{\mathcal{L}}
+\newcommand{\law}{\mathcal{L}}
+% \newcommand{\law}{\mathfrak{L}}
+\newcommand{\ari}{\operatorname{ARI}}
+\newcommand{\ARI}{\operatorname{ARI}}
+\renewcommand{\ln}{\operatorname{ln}}
+\newcommand{\post}{\text{(post)}}
+\newcommand{\postp}[1]{#1\text{(post)}}
+\newcommand{\expp}[1]{ \exp \left\{ #1 \right\} }
+
+
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\magenta}[1]{\textcolor{magenta}{#1}}
+\newcommand{\gray}[1]{\textcolor{gray}{#1}}
+\newcommand{\alert}[1]{\textcolor{RedViolet}{#1}}
+\newcommand{\alertg}[1]{\textcolor{Violet!65!Black}{#1}}
+\newcommand{\galert}[1]{\textcolor{Violet!65!Black}{#1}}
+
+\AtBeginSection[]
+{
+\setbeamercolor{section in toc}{fg=alerted text.fg}
+\setbeamercolor{section in toc shaded}{fg=black}
+\begin{frame}<beamer>
+  % \frametitle{Outline}
+\tableofcontents[currentsection,currentsubsection,subsectionstyle=show/shaded/hide, hideothersubsections]
+\end{frame}
+}
+
+
+% \AtBeginSubsection[]
+% {
+% \setbeamercolor{section in toc}{fg=alerted text.fg}
+% \setbeamercolor{section in toc shaded}{fg=black}
+% \begin{frame}<beamer>
+%   % \frametitle{Outline}
+% \tableofcontents[currentsection,currentsubsection,subsectionstyle=show/shaded/hide, hideothersubsections]
+% \end{frame}
+% }
+
+% \newcommand{\cmark}{\textcolor[RGB]{100, 200, 100}{\ding{51}}}%
+% \newcommand{\xmark}{\textcolor[RGB]{200, 100, 100}{\ding{55}}}%
+\newcommand{\cmark}{\textcolor[RGB]{58, 119, 186}{\ding{51}}}%
+\newcommand{\xmark}{\textcolor[RGB]{190, 206, 220}{\ding{55}}}%
+
+%%% Project stuff
+\newcommand{\pmten}{\ensuremath\text{PM}_{10}} 
+
+%%% Gif stuff not nec in the report
+% \usepackage{multimedia}
+% \usepackage{animate}
+% \usepackage{xmpmulti}
+\usepackage{multirow}
+\usepackage{todonotes}
+
+\newcommand{\mcal}[1]{\mathcal{#1}}
+
+% \newenvironment{captioning}[1][0]{\begin{minipage}{0.6/textwidth}}{\end{minipage}}
+\newenvironment{captioning}
+    {
+    \begin{minipage}{0.9\textwidth}
+    \centering
+    }
+    {
+    \end{minipage}
+    }
+
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\theta}{\vartheta}
+% \renewcommand{\rho}{\varrho}
+\renewcommand{\phi}{\varphi}

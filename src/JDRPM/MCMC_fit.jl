@@ -751,7 +751,9 @@ function MCMC_fit(;
 							if sPPM
 								copy!(s1n, @view sp1[aux_idxs])
 								copy!(s2n, @view sp2[aux_idxs])
+
 								spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,1,true,lPP)
+								# LPP += spatial_cohesion!(spatial_cohesion_idx, s1n, s2n, sp_params_struct, true, M_dp, S,1,true)
 							end
 							if cl_xPPM
 								for p in 1:p_cl
@@ -764,9 +766,9 @@ function MCMC_fit(;
 								end
 							end
 							lPP[1] += log_Mdp + lgamma(nh_tmp[kk])
-							# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						end
-
+						
+						# lpp += log(M_dp) + lgamma(length(indexes)) # same
 						### debug case
 						# ph[k] = 0.5
 						### real case
@@ -835,10 +837,10 @@ function MCMC_fit(;
 					# ph[k] = 0.5
 					### real case
 					if t==1
-						ph[k] = loglikelihood(Normal(
-							muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
-							sqrt(sig2h_draw)),
-							Y[j,t]) + lPP[1]
+				ph[k] = loglikelihood(Normal(
+					muh_draw + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),
+					sqrt(sig2h_draw)),
+					Y[j,t]) + lPP[1]
 					else
 						ph[k] = loglikelihood(Normal(
 							muh_draw + eta1_iter[j]*Y[j,t-1] + (lk_xPPM ? dot(view(Xlk_covariates,j,:,t), beta_iter[t]) : 0),

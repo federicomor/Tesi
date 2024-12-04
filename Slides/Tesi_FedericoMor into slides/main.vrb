@@ -1,0 +1,33 @@
+\frametitle{Optimizing covariates similarities}
+
+Problem: optimizing similarity $g_4$.
+
+Solution: employing some optimizing macros on the inner loop.
+
+    \begin{code}
+% \caption[Similarity 4 implementation with all optimizing annotations]{Similarity 4 function implementation, with all optimizing annotations. The performance analysis will just focus on that inside loop.}
+\label{list: sim4}
+\begin{minted}
+[breaklines,
+baselinestretch=1,
+autogobble,
+% breaksymbolsepleft=2,
+fontsize=\footnotesize,
+% linenos
+mathescape, escapeinside=||,
+tabsize=4,obeytabs
+]{julia}
+function similarity4(X_jt::AbstractVector{<:Real}, mu_c::Real, lambda_c::Real, a_c::Real, b_c::Real, lg::Bool)
+	n = length(X_jt); nm = n/2
+	xbar = mean(X_jt)
+	aux2 = 0.
+	|\fbox{@inbounds @simd}| for i in eachindex(X_jt)
+		aux2 += X_jt[i]^2
+	end
+	aux1 = b_c + 0.5 * (aux2 - (n*xbar + lambda_c*mu_c)^2/(n+lambda_c) + lambda_c*mu_c^2 )
+	out = -nm*log2pi + 0.5*log(lambda_c/(lambda_c+n)) + lgamma(a_c+nm) - lgamma(a_c) + a_c*log(b_c) + (-a_c-nm)*log(aux1)
+	return lg ? out : exp(out)
+end
+\end{minted}
+%	|\fbox{@inbounds @fastmath @simd}| for i in eachindex(X_jt)
+\end{code}
