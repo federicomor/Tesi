@@ -1,5 +1,7 @@
+- For further information you can contact me or also [Alessandro Carminati](https://github.com/AleCarminati).  
+- For the complete explanation of this work read the Thesis document, available in `Tesi/upload/Tesi_FedericoMor_da_stampare.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/Tesi_FedericoMor_da_stampare.pdf).
+
 # `JDRPM` setup guide
-0. For further information you can contact [Alessandro Carminati](https://github.com/AleCarminati).
 1. Be sure to have Julia installed. You can download it from [her official site](https://julialang.org/downloads/).
 
 2. Install on R the [`JuliaConnectoR`](https://github.com/stefan-m-lenz/JuliaConnectoR) library (see the installation section there on the github link for further instructions or if you have any problem). This is like installing any other library, so on R just do:
