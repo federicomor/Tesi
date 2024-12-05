@@ -5341,9 +5341,13 @@ for (i in 1:length(na_indices_j)){
 		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
 		
 		points(i+dx,yred[j,t],col="#348959",pch=18)
-		# METRIC = c(METRIC,(yred[j,t]- mean(sampled_values))^2)
+		
+		# METRIC_here = c(METRIC,(yred[j,t]- mean(sampled_values))^2)
+		# METRIC_here = abs(UPP-LOW)
+		METRIC_here = t
+		
 		METRIC = c(METRIC,
-				   abs(UPP-LOW)
+				   METRIC_here
 				   )
 		
 	# text(i,UPP+1.3,labels = paste0("i=",j,"\nt=",t),cex=0.9,col="gray50")
@@ -5355,7 +5359,7 @@ if (save_plots==TRUE) { dev.off() }
 # real plot
 ```{r}
 sorted_indexes <- order(METRIC)
-save_plots=T
+save_plots=F
 
 if (save_plots==TRUE) { 
 	pdf(file="NA_SORTED_space_pure_ETI.pdf",height = 4.5,width=9)
@@ -5377,16 +5381,18 @@ for (i in sorted_indexes){
 	t = na_indices_t[i]
 	sampled_values = rout$fitted[t,j,]
 	
-		# ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
-		ci_hdi <- ci(sampled_values, ci=0.95, method = "ETI")
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		# ci_hdi <- ci(sampled_values, ci=0.95, method = "ETI")
 		# ci_hdi <- ci(sampled_values, ci=0.95, method = "BCI")
+		# ci_hdi <- ci(sampled_values, ci=0.95, method = "SPI")
 		UPP = ci_hdi[[3]]
 		MID = mean(sampled_values)
 		LOW = ci_hdi[[2]]
 		
-		if (yred[j,t]<=UPP && yred[j,t]>=LOW){
+		if (yred[j,t]<=max(UPP,LOW) && yred[j,t]>=min(UPP,LOW)){
 		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=2)
-		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		lines(c(idx-dx/2,idx+dx/2),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=2)
+		# points(idx,MID,cex=1,col="#7D1D67",pch=15,lwd=2)
 		# lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=2)
 		# lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=2)
 		points(idx+dx*2.1,yred[j,t],col="#348959",pch=18,cex=0.6)
@@ -5410,7 +5416,8 @@ legend("topleft",legend=c("true value of the missing datum")
 	   ,pch=18,col="#348959",bty="n",cex=1)
 if (save_plots==TRUE) { dev.off() }
 
-cat(count)
+cat(count,"\n")
+cat((lenght(sorted_indexes)-count)/lenght(sorted_indexes)*100,"% of success\n")
 ```
 
 
