@@ -1,5 +1,6 @@
 - For further information you can contact me or also [Alessandro Carminati](https://github.com/AleCarminati).  
-- For the complete explanation of this work read the Thesis document, available in `Tesi/upload/Tesi_FedericoMor_da_stampare.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/Tesi_FedericoMor_da_stampare.pdf).
+- For the complete explanation of this work read the Thesis document, available in `Tesi/upload/2024_12_Mor_Thesis.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Thesis.pdf).
+- A short summary of this work is also available in the slides of the thesis, `Tesi/upload/2024_12_Mor_Slides.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Slides.pdf).
 
 # `JDRPM` setup guide
 1. Be sure to have Julia installed. You can download it from [her official site](https://julialang.org/downloads/).
