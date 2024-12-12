@@ -1233,9 +1233,11 @@ for (i in 2:3){
 	if (save_plot) {
 	# pdf(file="summary_performance.pdf",width = 8,height = 7)
 	# pdf(file=paste0("summary_performance_n",nunits_tests[i],"_legended_bottom.pdf"),
-	pdf(file=paste0("summary_performance_n",nunits_tests[i],"_legended_bigger.pdf"),
+	# pdf(file=paste0("summary_performance_n",nunits_tests[i],"_legended_bigger.pdf"),
+	# pdf(file=paste0("summary_performance_n",nunits_tests[i],"_response.pdf"),
+	pdf(file=paste0("summary_performance_n",nunits_tests[i],"_response_lines.pdf"),
 		# width = 6,height = 4)
-		width = 6,height = 4)
+		width = 6.5,height = 4)
 }
 
 # layout(matrix(data=c(1,1,2,2),nrow=2,byrow=T),heights=c(4,1))
@@ -1243,6 +1245,15 @@ par(mar=c(0.1,2,1,2),mai=c(.4,.3,.1,.2),oma=c(0.1,1,0.1,0.1))
 plot(1, type = "n", xlab = "", ylab = "",
 	 xlim = c(1-dx,4+dx), axes=F,
      ylim = c(0.1, 2.4), xaxt="n")
+
+########### NEW LINES ###########
+lines(x=timespan_plots + dxC,y = spCt[i,],   col=cols[1], lwd=1)
+lines(x=timespan_plots + dxC,y = spCts[i,],  col=cols[3], lwd=1)
+# lines(x=timespan_plots + dxJ,y = spJt[i,],   col=cols[2], lwd=1.7)
+# lines(x=timespan_plots + dxJ,y = spJts[i,],  col=cols[4], lwd=1.7)
+# lines(x=timespan_plots + dxJ,y = spJtsc[i,] ,col=cols[5], lwd=1.7)
+# lines(x=timespan_plots + dxJ,y = spJtscl[i,],col=cols[7], lwd=1.7)
+
 
 # Changing x axis
 xtick<-paste0("T=",as.character(timespan_tests))
@@ -1268,13 +1279,19 @@ points(x=timespan_plots + dxJ,y = spJts[i,],  pch=1, cex=cexs, col=cols[4], lwd=
 points(x=timespan_plots + dxJ,y = spJtsc[i,] ,pch=2, cex=cexs, col=cols[5], lwd=1.7)
 points(x=timespan_plots + dxJ,y = spJtscl[i,],pch=5, cex=cexs, col=cols[7], lwd=1.7)
 
+
 # plot.new()
 # par(mar=c(0,0,0,0),mai=c(0,0,0,0),oma=c(0,0,0,0))
 legend("bottom",
 	   bty="n",cex=0.8,
        # legend = c("Ct","Cts","Jt","Jts","Jtsc","Jtscl"),
 	   # pch=c(15,16,0,1,2,5),ncol=6,pt.cex = 1.6,
-       legend = c("C target","C target+space","J target","J target+space","J target+space+Xcl","J target+space+Xcl+Xlk"),
+       legend = c("C response",
+       		      "C response+space",
+       		      "J response",
+       		      "J response+space",
+       		      "J response+space+Xcl",
+       		      "J response+space+Xcl+Xlk"),
 	   pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 1.6,
 	   pt.lwd = c(1,1,rep(lwds,4)),
 	   # pch=c(15,16,0,1,2,5),ncol=3,pt.cex = 1.6,

@@ -1,7 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
-\PYG{n}{sbar}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{mean}\PYG{p}{(}\PYG{n}{s1}\PYG{p}{)}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{mean}\PYG{p}{(}\PYG{n}{s2}\PYG{p}{)}\PYG{p}{]}
-\PYG{n}{vtmp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sbar}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{mu\PYGZus{}0}
-\PYG{n}{Mtmp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{vtmp}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{vtmp}\PYG{o}{\PYGZsq{}}
-\PYG{n}{Psi\PYGZus{}n}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Psi}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{S}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{k0}\PYG{o}{*}\PYG{n}{sdim}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{k0}\PYG{o}{+}\PYG{n}{sdim}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{Mtmp}
-\PYG{esc}{$\vdots$}
-\end{Verbatim}

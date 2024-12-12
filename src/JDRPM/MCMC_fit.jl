@@ -36,16 +36,19 @@ function MCMC_fit(;
 	update_eta1::Bool,                    # Update the autoregressive part of eta1?
 	update_phi1::Bool,                    # Update the autoregressive part of phi1?
 
-	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma,b_sigma)
-	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b) so it's the scale parameter b
-										  # plus the std dev for the Metropolis update trough N(μ=eta1_old,σ=mhsig_eta1)
-	beta_priors = missing,                # Prior parameters for beta ∼ the mean vector and the s^2 param in fron of the Id matrix
-	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau, b_tau)
-	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(μ=m0,σ^2=s0^2)
+	sig2h_priors::Vector{Float64},        # Prior parameters for sig2h ∼ invGamma(a_sigma=...,b_sigma=...)
+	eta1_priors::Vector{Float64},         # Prior parameters for eta1 ∼ Laplace(0,b=...) so it's the scale parameter b
+										  # plus the std dev for the Metropolis update trough N(μ=eta1_old,σ=...)
+	beta_priors = missing,                # Prior parameters for beta ∼ the mean vector and the s^2 param in fron of the Id matrix,
+										  # more precisely, a vector v of length p+1, containing in indexes 1:p the mean vector μ,
+										  # while in last position the s^2 term, i.e. beta ∼ N(μ=v[1:p],Σ=v[end]*Id)
+	tau2_priors::Vector{Float64},         # Prior parameters for tau2 ∼ invGamma(a_tau=..., b_tau=...)
+	phi0_priors::Vector{Float64},         # Prior parameters for phi0 ∼ N(μ=...,σ^2=...) so mean and variance
+										  # beware of the differences between variance and std dev, here in these arguments
 	phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
-										  # so we just need the std dev of the Metropolis update trough N(μ=phi1_old,σ=mhsig_phi1)
-	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda, b_lambda)
-	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha, b_alpha)
+										  # so we just need the std dev of the Metropolis update trough N(μ=phi1_old,σ=...)
+	lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda=..., b_lambda=...)
+	alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha=..., b_alpha=...)
 										  # but possibly that pair for each unit j, that's why the abstract array
 	
 	spatial_cohesion_idx = missing,       # cohesion choice
@@ -54,16 +57,21 @@ function MCMC_fit(;
 	cv_params = missing,                  # Parameters for covariates similarity functions
 	cv_weight = 1.0,                      # factor to which scale the covariate similarity values
 
+	beta_update_threshold = 0,            # from which iterate start to update the beta regressor
+	# harmless insertion to maybe let the model focus first on the real relevant parameters, and then move to update beta
+	# otherwise I thought that early "bad" samples for beta could damage the more significant clusters' parameters
+
 	draws::Real,                          # Number of MCMC draws
 	burnin::Real,                         # Number of burn-in
 	thin::Real,                           # Thinning interval
+	# thse variabls are Reals and not Ints since integer values on R (like 1000) are automatically casted into floats (1000.0) unless
+	# we explicitly write as.int(value), on R, which is tedious, so I just left Real as type, should not be much performance-relevant
 
-	beta_update_threshold = 0,            # if to update beta regressor only after some iterates
 	logging = false,                      # Wheter to save execution infos to log file
 	seed::Real,                           # Random seed for reproducibility
 	simple_return = false,                # Return just the partition Si
 	verbose = false,                      # if to print additional info
-	perform_diagnostics = false,          # if to perform diagnostics on the fit
+	perform_diagnostics = false,          # if to compute convergence diagnostics (e.g. Rhat, ess) on the sampled parameters
 	skip_checks = false                   # if to skip initial checks
 	)
 	Random.seed!(round(Int64,seed))
@@ -253,7 +261,7 @@ function MCMC_fit(;
 			println("updating beta after iteration $beta_update_threshold")
 		end
 		println("tau2 ∼ InverseGamma($(tau2_priors[1]), $(tau2_priors[2]))")
-		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ=$(phi0_priors[2]))")
+		println("phi0 ∼ Normal(μ=$(phi0_priors[1]), σ²=$(phi0_priors[2]))")
 		println("lambda2 ∼ InverseGamma($(lambda2_priors[1]), $(lambda2_priors[2]))")
 		println("alpha ∼ Beta($(alpha_priors[1]), $(alpha_priors[2]))")
 		println()

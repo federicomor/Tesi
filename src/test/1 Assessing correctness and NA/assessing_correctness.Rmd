@@ -1657,7 +1657,8 @@ sorted_indexes <- order(METRIC)
 save_plots=T
 
 if (save_plots==TRUE) { 
-	pdf(file="NA_SORTED.pdf",height = 4.5,width=9)
+	# pdf(file="NA_SORTED.pdf",height = 4.5,width=9)
+	pdf(file="NA_SORTED_legend.pdf",height = 4.5,width=9)
 }
 par(mar=c(1,2,2,1))
 dx = 0.1
@@ -1679,10 +1680,10 @@ for (i in sorted_indexes){
 		UPP = ci_hdi[[3]]
 		MID = mean(sampled_values)
 		LOW = ci_hdi[[2]]
-		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=4)
-		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=4)
-		lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=4)
-		lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=4)
+		lines(c(idx,idx),c(LOW,UPP),col="#FFD99F",lwd=3)
+		lines(c(idx-dx,idx+dx),rep(MID,2),cex=1,col="#7D1D67",pch=15,lwd=3)
+		lines(c(idx-dx,idx+dx),rep(UPP,2),cex=1,col="#F65A6D",pch=19,lwd=3)
+		lines(c(idx-dx,idx+dx),rep(LOW,2),cex=1,col="#F65A6D",pch=19,lwd=3)
 		
 		# plotCI(x=t ,y=MID ,li=LOW ,ui=UPP)
 		
@@ -5359,10 +5360,10 @@ if (save_plots==TRUE) { dev.off() }
 # real plot
 ```{r}
 sorted_indexes <- order(METRIC)
-save_plots=F
+save_plots=T
 
 if (save_plots==TRUE) { 
-	pdf(file="NA_SORTED_space_pure_ETI.pdf",height = 4.5,width=9)
+	pdf(file="NA_SORTED_space_pure_ETI_timesorted.pdf",height = 4.5,width=9)
 	# pdf(file="NA_SORTED_space_xlk.pdf",height = 4.5,width=9)
 }
 par(mar=c(1,2,2,1))
@@ -5381,8 +5382,8 @@ for (i in sorted_indexes){
 	t = na_indices_t[i]
 	sampled_values = rout$fitted[t,j,]
 	
-		ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
-		# ci_hdi <- ci(sampled_values, ci=0.95, method = "ETI")
+		# ci_hdi <- ci(sampled_values, ci=0.95, method = "HDI")
+		ci_hdi <- ci(sampled_values, ci=0.95, method = "ETI")
 		# ci_hdi <- ci(sampled_values, ci=0.95, method = "BCI")
 		# ci_hdi <- ci(sampled_values, ci=0.95, method = "SPI")
 		UPP = ci_hdi[[3]]

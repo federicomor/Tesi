@@ -1,8 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
-\PYG{k}{using}\PYG{+w}{ }\PYG{n}{BenchmarkTools}
-\PYG{n}{nh\PYGZus{}tmp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{rand}\PYG{p}{(}\PYG{l+m+mi}{100}\PYG{p}{)}
-\PYG{n+nd}{@btime}\PYG{+w}{ }\PYG{n}{nclus\PYGZus{}temp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sum}\PYG{p}{(}\PYG{o}{\PYGZdl{}}\PYG{n}{nh\PYGZus{}tmp}\PYG{+w}{ }\PYG{o}{.\PYGZgt{}}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{)}
-\PYG{c}{\PYGZsh{} 168.956 ns (2 allocations: 112 bytes)}
-\PYG{n+nd}{@btime}\PYG{+w}{ }\PYG{n}{nclus\PYGZus{}temp}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{count}\PYG{p}{(}\PYG{n}{x}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{p}{(}\PYG{n}{x}\PYG{o}{\PYGZgt{}}\PYG{l+m+mi}{0}\PYG{p}{),}\PYG{+w}{ }\PYG{o}{\PYGZdl{}}\PYG{n}{nh\PYGZus{}tmp}\PYG{p}{)}
-\PYG{c}{\PYGZsh{} 11.612 ns (0 allocations: 0 bytes)}
-\end{Verbatim}
