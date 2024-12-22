@@ -27,8 +27,8 @@ function MCMC_fit(;
 	initial_partition = missing,          # Initial partition (if provided)
 
 	starting_alpha::Float64,              # Starting value for alpha
-	unit_specific_alpha::Bool,            # Unit-specific alpha values
-	time_specific_alpha::Bool,            # Time-specific alpha values
+	unit_specific_alpha::Bool,            # Employ a unit-specific alpha?
+	time_specific_alpha::Bool,            # Employ a time-specific alpha?
 	update_alpha::Bool,                   # Update alpha?
 	
 	include_eta1::Bool,                   # Include the autoregressive part of eta1?
@@ -64,7 +64,7 @@ function MCMC_fit(;
 	draws::Real,                          # Number of MCMC draws
 	burnin::Real,                         # Number of burn-in
 	thin::Real,                           # Thinning interval
-	# thse variabls are Reals and not Ints since integer values on R (like 1000) are automatically casted into floats (1000.0) unless
+	# these variables are Reals and not Ints since integer values on R (like 1000) are automatically casted into floats (1000.0) unless
 	# we explicitly write as.int(value), on R, which is tedious, so I just left Real as type, should not be much performance-relevant
 
 	logging = false,                      # Wheter to save execution infos to log file

@@ -1,6 +1,6 @@
 - For further information you can contact me or also [Alessandro Carminati](https://github.com/AleCarminati).  
 - For the complete explanation of this work read the Thesis document, available in `Tesi/upload/2024_12_Mor_Thesis.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Thesis.pdf).
-- A short summary of this work is also available in the slides of the thesis, `Tesi/upload/2024_12_Mor_Slides.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Slides.pdf).
+- For just a short summary of this work read the slides, available in `Tesi/upload/2024_12_Mor_Slides.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Slides.pdf).
 
 # `JDRPM` setup guide
 1. Be sure to have Julia installed. You can download it from [her official site](https://julialang.org/downloads/).
@@ -31,20 +31,7 @@ juliaEval("Pkg.instantiate()")
 # so it just depends on where it is the current R file you are working on
 
 juliaEval("Pkg.status()") # a check to have correctly loaded the package;
-# it should print something like this:
-# Project JDRPM v0.1.0
-# Status `C:\Users\feder\Desktop\Uni magistrale\Tesi\src\JDRPM\Project.toml`
-#   [6e4b80f9] BenchmarkTools v1.5.0
-# ⌃ [31c24e10] Distributions v0.25.108
-#   [efd6af41] ProfileCanvas v0.1.6
-#   [92933f4c] ProgressMeter v1.10.2
-#   [276daf66] SpecialFunctions v2.4.0
-#   [2913bbd2] StatsBase v0.34.3
-#   [a759f4b9] TimerOutputs v0.5.24
-#   [ade2ca70] Dates
-#   [37e2e46d] LinearAlgebra
-#   [10745b16] Statistics v1.10.0
-# Info Packages marked with ⌃ have new versions available and may be upgradable.
+# it should print the list of packages dependencies, like Distributions, LinearAlgebra, etc.
 
 module = normalizePath("<path/to/where/you/stored/JDRPM>/src/JDRPM.jl") # locate the "main" file
 module_JDRPM = juliaImport(juliaCall("include", module)) # load the "main" file
@@ -75,7 +62,7 @@ rout$phi1    = matrix(rout$phi1,    ncol = 1)
 rout$lambda2 = matrix(rout$lambda2, ncol = 1)
 ```
 
-5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list. Otherwise see [here](#tests-and-examples) for some examples, or scan trough the julia code itself, or read the modeling and implementation chapters of the Tesi.pdf document (when it will be finished).
+5. `JDRPM` is finally ready-to-use. The `MCMC_fit` has already some quite self explanatory argument names. However here there is a more detailed list. Otherwise see [here](#tests-and-examples) for some examples, or scan trough the julia code itself, or read the modeling and implementation chapters of the Tesi.pdf document.
 ```julia
 function MCMC_fit(;
   Y::Union{Matrix{Float64},Matrix{Union{Missing, Float64}}},   # n*T matrix, the observed values
@@ -88,8 +75,8 @@ function MCMC_fit(;
   initial_partition = missing,          # Initial partition (if provided)
 
   starting_alpha::Float64,              # Starting value for alpha
-  unit_specific_alpha::Bool,            # Unit-specific alpha values
-  time_specific_alpha::Bool,            # Time-specific alpha values
+  unit_specific_alpha::Bool,            # Employ a unit-specific alpha?
+  time_specific_alpha::Bool,            # Employ a time-specific alpha?
   update_alpha::Bool,                   # Update alpha?
   
   include_eta1::Bool,                   # Include the autoregressive part of eta1?
@@ -108,8 +95,8 @@ function MCMC_fit(;
                                         # beware of the differences between variance and std dev, here in these arguments
   phi1_priors::Float64,                 # Prior parameters for phi1 ∼ U(-1,1)
                                         # so we just need the std dev of the Metropolis update trough N(μ=phi1_old,σ=...)
-  lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda=..., b_lambda=...)
-  alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha=..., b_alpha=...)
+  lambda2_priors::Vector{Float64},      # Prior parameters for lambda2 ∼ invGamma(a_lambda=...,b_lambda=...)
+  alpha_priors::AbstractArray{Float64}, # Prior parameters for alpha ∼ Beta(a_alpha=...,b_alpha=...)
                                         # but possibly that pair for each unit j, that's why the abstract array
   
   spatial_cohesion_idx = missing,       # cohesion choice
@@ -125,7 +112,7 @@ function MCMC_fit(;
   draws::Real,                          # Number of MCMC draws
   burnin::Real,                         # Number of burn-in
   thin::Real,                           # Thinning interval
-  # thse variabls are Reals and not Ints since integer values on R (like 1000) are automatically casted into floats (1000.0) unless
+  # these variables are Reals and not Ints since integer values on R (like 1000) are automatically casted into floats (1000.0) unless
   # we explicitly write as.int(value), on R, which is tedious, so I just left Real as type, should not be much performance-relevant
 
   logging = false,                      # Wheter to save execution infos to log file
