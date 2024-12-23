@@ -1,6 +1,8 @@
 - For further information you can contact me or also [Alessandro Carminati](https://github.com/AleCarminati).  
 - For the complete explanation of this work read the Thesis document, available in `Tesi/upload/2024_12_Mor_Thesis.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Thesis.pdf).
 - For just a short summary of this work read the slides, available in `Tesi/upload/2024_12_Mor_Slides.pdf`, i.e. [here](https://github.com/federicomor/Tesi/blob/main/upload/2024_12_Mor_Slides.pdf).
+- Since Julia is compiled on the fly, note that the first run may be quite slow, since there is the compilation overhead. Then, all the subsequent runs will be much faster because the compiled code is invoked.
+
 
 # `JDRPM` setup guide
 1. Be sure to have Julia installed. You can download it from [her official site](https://julialang.org/downloads/).
@@ -152,6 +154,7 @@ sp_params = list(phi), # the phi parameter
 ```
 
 # Covariates similarities syntax
+A brief recap on how to call the fitting function with respect to the choice of the similarity function.
 
 ![sim g1](<for readme/g1.png>)
 ```

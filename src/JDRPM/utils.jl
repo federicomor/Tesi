@@ -851,6 +851,7 @@ function gower_d(x1::Real, x2::Real, R::Real) # numerical case
 	# println("numerical fun")
 	# x1==x2 && return 1
 	# @show x1 x2 R 1-abs(x1-x2)/R
+	R==0 && return abs(x1-x2)
 	return abs(x1-x2)/R
 	# 0 if equal, 1 if different
 end
@@ -896,6 +897,7 @@ function similarity2!(X_jt::Union{AbstractVector{<:Real}, AbstractVector{String}
 	end 
 	out = -alpha * H
 	out *= cv_weight
+	# println("out = $out")
 	if add
 		lS[case] += lg ? out : exp(out)
 	else
@@ -1030,7 +1032,7 @@ end
 
 # numerical covariates specialization
 function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, R::Real, lg::Bool, case::Int=1, add::Bool=false, lS=@MVector(zeros(2)), cv_weight::Real=1)
-	# println("calling this")
+	# println("calling this with R=$R")
 	# println("numerical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS,cv_weight); return; end
 	if idx==2 similarity2!(X_jt,cv_params[1],R,lg,case,add,lS,cv_weight); return; end

@@ -2005,7 +2005,8 @@ set.seed(seed)
 # niter=80000; nburn=60000; nthin=20
 niter=110000; nburn=90000; nthin=5
 # niter=100000; nburn=60000; nthin=40
-niter=100; nburn=0; nthin=1
+# niter=100; nburn=0; nthin=1
+niter=9; nburn=0; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -2441,8 +2442,9 @@ out = module_JDRPM$MCMC_fit(
 	# covariate_similarity_idx = 4,
 	# cv_params = list(0,1,2,2),
 	# Xcl_covariates = X_cl,
-	# covariate_similarity_idx = 3, cv_params = list(0.1),
-	# # cv_params = list(0,1,4.5,0.8),
+	# covariate_similarity_idx = 1, cv_params = list(1),
+	# covariate_similarity_idx = 2, cv_params = list(1),
+	# covariate_similarity_idx = 3, cv_params = list(1),
 	covariate_similarity_idx = 4,
 	cv_params = list(0,1,
 					 # 7.5,2,

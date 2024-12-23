@@ -599,6 +599,8 @@ function MCMC_fit(;
 						if cl_xPPM
 						# Xcl_covariates is a n*p*T matrix
 							for p in 1:p_cl
+								# if i==2 println(" (i=$i) p=$p, lS=$lS R=$(Rs[p,t])") end
+								# if i%(draws ÷ 3)==0 println(" (i=$i) p=$p, lS=$lS R=$(Rs[p,t])") end
 								if isa(first(Xcl_covariates[j,p,t]),Real) # numerical covariate
 									copy!(Xo, @view Xcl_covariates_red[aux_idxs,p])
 									copy!(Xn, Xo); push!(Xn,Xcl_covariates[j,p,t])
