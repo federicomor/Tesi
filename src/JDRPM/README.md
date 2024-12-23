@@ -127,34 +127,52 @@ function MCMC_fit(;
 # Spatial cohesions syntax
 A brief recap on how to call the fitting function with respect to the choice of the cohesion function.
 
-![](<for readme/c1.png>)
+![cohes c1](<for readme/c1.png>)
 ```
 spatial_cohesion_idx = 1, 
-sp_params = alpha, # the alpha parameter
+sp_params = list(alpha), # the alpha parameter
 ```
-![](<for readme/c2.png>)
+![cohes c2](<for readme/c2.png>)
 ```
 spatial_cohesion_idx = 2, 
-sp_params = a, # the a parameter
+sp_params = list(a), # the a parameter
 ```
-![](<for readme/c3.png>)
-![](<for readme/c4.png>)
+![cohes c3](<for readme/c3.png>)
+![cohes c4](<for readme/c4.png>)
 ```
-spatial_cohesion_idx = 4, # or 4
+spatial_cohesion_idx = 3, # or 4
 sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
-# the parameter set of mu0 (a vector), k0 and v0 (scalars), and the matrix L0
+# the parameters set of mu0 (vector), k0 and v0 (scalars), and L0 (matrix)
 ```
-![](<for readme/c5.png>)
-![](<for readme/c6.png>)
+![cohes c5](<for readme/c5.png>)
+![cohes c6](<for readme/c6.png>)
 ```
 spatial_cohesion_idx = 5, # or 6 
-sp_params = phi, # the phi parameter
+sp_params = list(phi), # the phi parameter
 ```
-
 
 # Covariates similarities syntax
 
-
+![sim g1](<for readme/g1.png>)
+```
+covariate_similarity = 1,
+cv_params = list(phi), # the phi parameter
+```
+![sim g2](<for readme/g2.png>)
+![sim g3](<for readme/g3.png>)
+```
+covariate_similarity = 2, # or 3
+sp_params = list(alpha), # the alpha parameter
+```
+![sim g4](<for readme/g4.png>)
+```
+covariate_similarity_idx = 4,
+cv_params = list(0, 1, # the parameters mu0 and lambda0 of the Normal part
+                7.5, 2, # the parameters alpha0 and beta0 of the InvGamma part,
+                7.5, 2, # one pair for each covariate included (e.g. 3 here)
+                7.5, 2
+                ),
+```
 
 
 # Tests and examples

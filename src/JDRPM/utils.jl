@@ -1015,8 +1015,8 @@ end
 function covariate_similarity(idx::Real, X_jt::AbstractVector{<:Real}, cv_params::Vector, R::Real, lg::Bool, cv_weight::Real=1)
 	# println("numerical")
 	idx==1 && return similarity1(X_jt,cv_params[1],lg,cv_weight) 
-	idx==2 && return similarity2(X_jt,cv_params[1],cv_params[2],lg,cv_weight) 
-	idx==3 && return similarity3(X_jt,cv_params[1],cv_params[2],lg,cv_weight) 
+	idx==2 && return similarity2(X_jt,cv_params[1],R,lg,cv_weight) 
+	idx==3 && return similarity3(X_jt,cv_params[1],R,lg,cv_weight) 
 	idx==4 && return similarity4(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg,cv_weight) 
 end
 # categorical covariates specialization
@@ -1033,8 +1033,8 @@ function covariate_similarity!(idx::Real, X_jt::AbstractVector{<:Real}, cv_param
 	# println("calling this")
 	# println("numerical")
 	if idx==1 similarity1!(X_jt,cv_params[1],lg,case,add,lS,cv_weight); return; end
-	if idx==2 similarity2!(X_jt,cv_params[1],cv_params[2],lg,case,add,lS,cv_weight); return; end
-	if idx==3 similarity3!(X_jt,cv_params[1],cv_params[2],lg,case,add,lS,cv_weight); return; end
+	if idx==2 similarity2!(X_jt,cv_params[1],R,lg,case,add,lS,cv_weight); return; end
+	if idx==3 similarity3!(X_jt,cv_params[1],R,lg,case,add,lS,cv_weight); return; end
 	if idx==4 similarity4!(X_jt,cv_params[1],cv_params[2],cv_params[3],cv_params[4],lg,case,add,lS,cv_weight); return; end
 end
 # categorical covariates specialization

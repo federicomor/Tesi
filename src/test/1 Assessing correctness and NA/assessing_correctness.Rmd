@@ -2005,7 +2005,7 @@ set.seed(seed)
 # niter=80000; nburn=60000; nthin=20
 niter=110000; nburn=90000; nthin=5
 # niter=100000; nburn=60000; nthin=40
-# niter=100; nburn=0; nthin=1
+niter=100; nburn=0; nthin=1
 nout <- (niter-nburn)/nthin
 cat(nout,"valid iterations\n")
 
@@ -2397,7 +2397,7 @@ a_tau    = 1.9; b_tau   = 0.4
 # a_lambda = 0.1; b_lambda = 0.1
 a_lambda = 1.9; b_lambda = 0.4
 
-# module_JDRPM <- juliaImport(juliaCall("include", module))
+module_JDRPM <- juliaImport(juliaCall("include", module))
 out = module_JDRPM$MCMC_fit(
 	Y=as.matrix(y),              
 	sp_coords = s_std,
@@ -2427,11 +2427,11 @@ out = module_JDRPM$MCMC_fit(
 	alpha_priors = c(a_alpha,b_alpha),  
 	
 	######## space
-	spatial_cohesion_idx = spatial_cohesion,
-	sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
-	# spatial_cohesion_idx = 1,
-	# sp_params = list(0.60),
-	
+	# spatial_cohesion_idx = spatial_cohesion,
+	# sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
+	# spatial_cohesion_idx = 1, sp_params = list(0.60),
+	spatial_cohesion_idx = 5, sp_params = list(0.60),
+
 	######## likelihood covariates
 	Xlk_covariates = X_lk, beta_priors = c(rep(0,p),1),
 	beta_update_threshold = nburn/3,
@@ -2441,8 +2441,9 @@ out = module_JDRPM$MCMC_fit(
 	# covariate_similarity_idx = 4,
 	# cv_params = list(0,1,2,2),
 	# Xcl_covariates = X_cl,
-	covariate_similarity_idx = 4,
+	# covariate_similarity_idx = 3, cv_params = list(0.1),
 	# # cv_params = list(0,1,4.5,0.8),
+	covariate_similarity_idx = 4,
 	cv_params = list(0,1,
 					 # 7.5,2,
 					 7.5,2,
