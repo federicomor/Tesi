@@ -130,25 +130,25 @@ function MCMC_fit(;
 A brief recap on how to call the fitting function with respect to the choice of the cohesion function.
 
 ![cohes c1](<for readme/c1.png>)
-```
+```julia
 spatial_cohesion_idx = 1, 
 sp_params = list(alpha), # the alpha parameter
 ```
 ![cohes c2](<for readme/c2.png>)
-```
+```julia
 spatial_cohesion_idx = 2, 
 sp_params = list(a), # the a parameter
 ```
 ![cohes c3](<for readme/c3.png>)
 ![cohes c4](<for readme/c4.png>)
-```
+```julia
 spatial_cohesion_idx = 3, # or 4
 sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 # the parameters set of mu0 (vector), k0 and v0 (scalars), and L0 (matrix)
 ```
 ![cohes c5](<for readme/c5.png>)
 ![cohes c6](<for readme/c6.png>)
-```
+```julia
 spatial_cohesion_idx = 5, # or 6 
 sp_params = list(phi), # the phi parameter
 ```
@@ -157,18 +157,18 @@ sp_params = list(phi), # the phi parameter
 A brief recap on how to call the fitting function with respect to the choice of the similarity function.
 
 ![sim g1](<for readme/g1.png>)
-```
+```julia
 covariate_similarity = 1,
 cv_params = list(phi), # the phi parameter
 ```
 ![sim g2](<for readme/g2.png>)
 ![sim g3](<for readme/g3.png>)
-```
+```julia
 covariate_similarity = 2, # or 3
 sp_params = list(alpha), # the alpha parameter
 ```
 ![sim g4](<for readme/g4.png>)
-```
+```julia
 covariate_similarity_idx = 4,
 cv_params = list(0, 1, # the parameters mu0 and lambda0 of the Normal part
                 7.5, 2, # the parameters alpha0 and beta0 of the InvGamma part,
