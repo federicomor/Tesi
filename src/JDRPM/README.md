@@ -127,38 +127,30 @@ function MCMC_fit(;
 # Spatial cohesions syntax
 A brief recap on how to call the fitting function with respect to the choice of the cohesion function.
 
-$$C_1(S_{h},\vec{s}_{h}^\star) = \begin{cases}
-    \dfrac{M \cdot \Gamma(|S_h|)}{\Gamma(\alpha \mathcal{D}_h) \indicator{\mathcal{D}_h\geq 1} + \mathcal{D}_h \indicator{\mathcal{D}_h<1}} & \text{if } |S_h| > 1\\ 
-   \hfil M & \text{if } |S_h| = 1
-\end{cases}$$
+![](<for readme/c1.png>)
 ```
 spatial_cohesion_idx = 1, 
 sp_params = alpha, # the alpha parameter
 ```
-
-$$ C_2(S_{h},\vec{s}_{h}^\star) = M \cdot \Gamma(|S_h|) \cdot \prod_{i,j \in S_h} \indicator{\| \vec{s}_i - \vec{s}_j \| \leq a} $$
+![](<for readme/c2.png>)
 ```
 spatial_cohesion_idx = 2, 
 sp_params = a, # the a parameter
 ```
-
-
-$$ C_3(S_{h},\vec{s}_{h}^\star) = M \cdot \Gamma(|S_h|) \cdot \int \prod_{i \in S_h} q(\vec{s}_i|\vec{\csi}_h) q(\vec{\csi}_h) \, d\vec{\csi}_h $$
-
-
-$$ C_4(S_{h},\vec{s}_{h}^\star) = M \cdot \Gamma(|S_h|) \cdot \int \prod_{i \in S_h} q(\vec{s}_i|\vec{\csi}_h) q(\vec{\csi}_h|\vec{s}_h^\star) \, d\vec{\csi}_h $$
+![](<for readme/c3.png>)
+![](<for readme/c4.png>)
 ```
 spatial_cohesion_idx = 4, # or 4
 sp_params = list(c(mu0,mu0),k0,v0,matrix(c(L0,0.0,0.0,L0),nrow=2)),
 # the parameter set of mu0 (a vector), k0 and v0 (scalars), and the matrix L0
 ```
-
-$$ C_5(S_{h},\vec{s}_{h}^\star) = M\cdot \Gamma(|S_h|)\cdot \expp{-\phi \sum_{i \in S_h} \| \vec{s}_i - \vec{\bar{s}}_h\| } $$
-$$ C_6(S_{h},\vec{s}_{h}^\star) = M\cdot \Gamma(|S_h|)\cdot \expp{-\phi \log( \sum_{i \in S_h} \| \vec{s}_i - \vec{\bar{s}}_h\| )} $$ 
+![](<for readme/c5.png>)
+![](<for readme/c6.png>)
 ```
 spatial_cohesion_idx = 5, # or 6 
 sp_params = phi, # the phi parameter
 ```
+
 
 # Covariates similarities syntax
 
